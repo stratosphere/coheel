@@ -15,28 +15,49 @@
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>eu.stratosphere</groupId>
+			<artifactId>stratosphere-java</artifactId>
+			<version>0.4</version>
+		</dependency>
+		<dependency>
+			<groupId>eu.stratosphere</groupId>
+			<artifactId>stratosphere-clients</artifactId>
+			<version>0.4</version>
+		</dependency>
 		 <dependency>
 			<groupId>junit</groupId>
 			 <artifactId>junit</artifactId>
 			<version>4.11</version>
 			<scope>test</scope>
-		  </dependency>
-			<dependency>
+		</dependency>
+		<dependency>
 			<groupId>org.dbpedia.extraction</groupId>
 			<artifactId>core</artifactId>
 			<version>3.9</version>
-			</dependency>
-	  </dependencies>
-	  <repositories>
-			<repository>
-				<id>maven.aksw.internal</id>
-				<name>University Leipzig, AKSW Maven2 Repository</name>
-				<url>http://maven.aksw.org/archiva/repository/internal</url>
-			</repository>
-			<repository>
-				<id>maven.aksw.snapshots</id>
-				<name>University Leipzig, AKSW Maven2 Repository</name>
-				<url>http://maven.aksw.org/archiva/repository/snapshots</url>
-			</repository>
-		</repositories>
+		</dependency>
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
+			<version>1.4.7</version>
+		</dependency>
+	</dependencies>
+	<repositories>
+		<repository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>central</id>
+			<name>Central Repository</name>
+			<url>http://repo.maven.apache.org/maven2</url>
+		</repository>
+		<repository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>maven.aksw.internal</id>
+			<name>University Leipzig, AKSW Maven2 Repository</name>
+			<url>http://maven.aksw.org/archiva/repository/internal</url>
+		</repository>
+	</repositories>
 </project>
