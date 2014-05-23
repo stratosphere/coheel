@@ -1,12 +1,14 @@
 package de.hpi.uni_potsdam.coheel_stratosphere
 
 import org.scalatest.FunSuite
-import scala.io.Source
 import scala.xml.{Elem, XML}
 import org.dbpedia.extraction.sources.WikiPage
 import org.dbpedia.extraction.wikiparser.WikiTitle
 import org.dbpedia.extraction.util.{WikiApi, Language}
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class LinkExtractorTest extends FunSuite {
 
 	lazy val source = getClass.getResource("/wikipedia_test_article.xml")
@@ -18,29 +20,15 @@ class LinkExtractorTest extends FunSuite {
 		// however, it also has Wiki-XML parsing built-in.
 		val api = new WikiApi(null, null)
 
-//		for(page <- xml \ "query" \ "pages" \ "page";
-//		    rev <- page \ "revisions" \ "rev" ) {
-//			System.out.println((page \ "@title").head.text)
-//			WikiTitle.parse((page \ "@title").head.text, Language.English)
-//		}
-
-		val wikiPage: WikiPage = toWikiPage(xml)
-//		api.processPages(xml, { page =>
-//			wikiPage = page
-//		})
-//		xml.child.foreach { node =>
-//			println(node.label)
-//		}
-
-		wikiPage
+		xmlToWikiPage(xml)
 	}
 
-	def toWikiPage(xml: Elem): WikiPage = {
+	def xmlToWikiPage(xml: Elem): WikiPage = {
 		for (page <- xml \ "query" \ "pages" \ "page";
 		    rev <- page \ "revisions" \ "rev") {
-			val _contributorID = (rev \ "@userid");
-			val _contributorName = (rev \ "@user");
-			val _format = (rev \ "@contentformat");
+			val contributorID = rev \ "@userid"
+			val contributorName = rev \ "@user"
+			val format = rev \ "@contentformat"
 
 			return new WikiPage(
 				title           = WikiTitle.parse((page \ "@title").head.text, Language.English),
@@ -48,10 +36,10 @@ class LinkExtractorTest extends FunSuite {
 				id              = (page \ "@pageid").head.text,
 				revision        = (rev \ "@revid").head.text,
 				timestamp       = (rev \ "@timestamp").head.text,
-				contributorID   = if (_contributorID == null || _contributorID.length != 1) "0" else _contributorID.head.text,
-				contributorName = if (_contributorName == null || _contributorName.length != 1) "" else _contributorName.head.text,
+				contributorID   = if (contributorID == null || contributorID.length != 1) "0" else contributorID.head.text,
+				contributorName = if (contributorName == null || contributorName.length != 1) "" else contributorName.head.text,
 				source          = rev.text,
-				format          = if (_format == null || _format.length != 1) "" else _format.head.text
+				format          = if (format == null || format.length != 1) "" else format.head.text
 			)
 		}
 		null
