@@ -8,8 +8,10 @@ import org.dbpedia.extraction.util.Language
 object Main extends App {
 	override def main(args: Array[String]): Unit = {
 		val page = getExampleWikiPage(11867); // Germany
-		val linkExtractor = new LinkExtractor();
-		linkExtractor.extractLinks(page);
+		val linkExtractor = new LinkExtractor()
+		linkExtractor.extractLinks(page).foreach { link =>
+			println(String.format("%80s||%s", link.text, link.destination))
+		}
 	}
 
 	private def getExampleWikiPage(pageId: Long): WikiPage = {
