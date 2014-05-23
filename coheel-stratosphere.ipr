@@ -14,7 +14,7 @@
       <profile default="true" name="Default" enabled="false">
         <processorPath useClasspath="true" />
       </profile>
-      <profile default="false" name="Maven default annotation processors profile" enabled="true">
+      <profile default="false" name="Maven default annotation processors profile" enabled="false">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -22,6 +22,9 @@
         <module name="coheel-stratosphere" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="coheel-stratosphere" target="1.7" />
+    </bytecodeTargetLevel>
   </component>
   <component name="CopyrightManager" default="">
     <module2copyright />
@@ -33,9 +36,10 @@
     <file url="file://$PROJECT_DIR$" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/pom.xml" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java/de/hpi/uni_potsdam/coheel_stratosphere/LinkExtractor.java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/src/main/java/de/hpi/uni_potsdam/coheel_stratosphere/Main.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/de/hpi/uni_potsdam/coheel_stratosphere/OldMain.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/scala/de/hpi/uni_potsdam/coheel_stratosphere/LinkExtractor.scala" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/scala/de/hpi/uni_potsdam/coheel_stratosphere/Main.scala" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/test/de/hpi/uni_potsdam/coheel_stratosphere/LinkTest.java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/src/main/test/de/hpi/uni_potsdam/coheel_stratosphere/LinkTestTest.java" charset="UTF-8" />
   </component>
   <component name="EntryPointsManager">
     <entry_points version="2.0" />
@@ -897,6 +901,15 @@
         <root url="jar://$MAVEN_REPOSITORY$/org/mortbay/jetty/servlet-api/3.0.20100224/servlet-api-3.0.20100224-sources.jar!/" />
       </SOURCES>
     </library>
+    <library name="Maven: org.scala-lang:scala-compiler-bundle:2.10.2">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/scala-lang/scala-compiler/2.10.2/scala-compiler-2.10.2.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/scala-lang/scala-library/2.10.2/scala-library-2.10.2.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/scala-lang/scala-reflect/2.10.2/scala-reflect-2.10.2.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
     <library name="Maven: org.scala-lang:scala-library:2.10.2">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/org/scala-lang/scala-library/2.10.2/scala-library-2.10.2.jar!/" />
@@ -961,6 +974,30 @@
       </JAVADOC>
       <SOURCES>
         <root url="jar://$MAVEN_REPOSITORY$/xmlenc/xmlenc/0.52/xmlenc-0.52-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="scala-compiler">
+      <CLASSES>
+        <root url="jar:///opt/scala-2.10.4/lib/scala-compiler.jar!/" />
+        <root url="jar:///opt/scala-2.10.4/lib/scala-library.jar!/" />
+        <root url="jar:///opt/scala-2.10.4/lib/scala-reflect.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="scala-library">
+      <CLASSES>
+        <root url="jar:///opt/scala-2.10.4/lib/scala-library.jar!/" />
+        <root url="jar:///opt/scala-2.10.4/lib/scala-swing.jar!/" />
+        <root url="jar:///opt/scala-2.10.4/lib/scala-actors.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="file:///opt/scala-2.10.4/doc/scala-devel-docs/api" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar:///opt/scala-2.10.4/src/scala-library-src.jar!/" />
+        <root url="jar:///opt/scala-2.10.4/src/scala-swing-src.jar!/" />
+        <root url="jar:///opt/scala-2.10.4/src/scala-actors-src.jar!/" />
       </SOURCES>
     </library>
   </component>
