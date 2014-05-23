@@ -7,6 +7,8 @@ import org.dbpedia.extraction.util.Language
 
 object Main extends App {
 	override def main(args: Array[String]): Unit = {
+		// Wikipedia-API-call:
+		// http://en.wikipedia.org/w/api.php?action=query&pageids=11867&prop=revisions&rvprop=content
 		val page = getExampleWikiPage(11867); // Germany
 		val linkExtractor = new LinkExtractor()
 		linkExtractor.extractLinks(page).foreach { link =>
