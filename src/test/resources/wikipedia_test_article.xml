@@ -5,6 +5,13 @@
 			<page pageid="16794" ns="0" title="Kilobyte">
 				<revisions>
 					<rev revid="608080565" parentid="608066648" user="Compvis" userid="10359871" timestamp="2014-05-11T17:21:41Z" contentformat="text/x-wiki" contentmodel="wikitext" xml:space="preserve">
+						Note: This file is based on the Kilobyte page, but contains some manually added hard cases for the parser.
+						Wrong Category type: leading colon
+						[[:Category:Information Units]]
+						Wrong external link, with two brackets
+						[[http://www.google.de]]
+						
+						
 						{{Quantities of bytes}}
 						The '''kilobyte''' is a multiple of the unit [[byte]] for [[Computer data storage|digital information]]. Although the [[International System of Units|SI prefix]] ''[[kilo-]]'' means 1000, the term ''kilobyte'' and symbol ''KB'' have historically been used to refer to either 1024 (2&lt;sup&gt;10&lt;/sup&gt;) bytes or 1000 (10&lt;sup&gt;3&lt;/sup&gt;) bytes, dependent upon context, in the fields of [[computer science]] and [[information technology]].&lt;ref&gt;[http://www.merriam-webster.com/dictionary/kilobyte Kilobyte – Definition and More from the Free Merriam-Webster Dictionary]. Merriam-webster.com (2010-08-13). Retrieved on 2011-01-07.&lt;/ref&gt;&lt;ref&gt;[http://dictionary.reference.com/browse/kilobyte Kilobyte | Define Kilobyte at Dictionary.com]. Dictionary.reference.com (1995-09-29). Retrieved on 2011-01-07.&lt;/ref&gt;&lt;ref&gt;[http://www.askoxford.com/concise_oed/kilobyte?view=uk definition of kilobyte from Oxford Dictionaries Online]. Askoxford.com. Retrieved on 2011-01-07.&lt;/ref&gt;
 

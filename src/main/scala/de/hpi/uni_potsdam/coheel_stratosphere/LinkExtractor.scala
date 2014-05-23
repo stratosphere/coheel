@@ -5,6 +5,7 @@ import org.dbpedia.extraction.wikiparser.InternalLinkNode
 import org.dbpedia.extraction.wikiparser.Node
 import org.dbpedia.extraction.wikiparser.impl.simple.SimpleWikiParser
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 
 case class Link(node: Node, var text: String, var destination: String) {
 	def this(node: Node) = this(node, null, null)
@@ -12,15 +13,15 @@ case class Link(node: Node, var text: String, var destination: String) {
 
 class LinkExtractor {
 
-	var links: List[Link] = List()
-	def extractLinks(wikiPage: WikiPage): List[Link] = {
+	var links: Seq[Link] = _
+	def extractLinks(wikiPage: WikiPage): Seq[Link] = {
 		val wikiParser = new SimpleWikiParser()
 		val ast = wikiParser.apply(wikiPage)
 		walkAST(ast)
 	}
 
-	private def walkAST(parentNode: Node): List[Link] =  {
-		links = List()
+	private def walkAST(parentNode: Node): Seq[Link] =  {
+		links = Vector()
 		val nodeQueue = mutable.Queue(parentNode)
 		while (!nodeQueue.isEmpty) {
 			val node = nodeQueue.dequeue()
@@ -34,21 +35,23 @@ class LinkExtractor {
 		val link: Option[Link] = Some(new Link(node))
 		link
 			.flatMap(filterNonLinks)
+//			.flatMap(debugPrintAllLinks)
 			.flatMap(filterImages)
 			.flatMap(filterFiles)
 			.flatMap(filterCategories)
-			.flatMap(removeInnerPageLinks)
+			.flatMap(removeAnchorLinks)
+			.flatMap(filterExternalLinks)
 			.foreach { link =>
-				links = link :: links
+				links = links :+ link
 			}
 	}
 
 	/**
-	 * Handles links like Germany#History (link to a specific point in
+	 * Handles anchor links like Germany#History (link to a specific point in
 	 * a page) and removes the part after '#'
 	 * @return The sanitized link.
 	 */
-	def removeInnerPageLinks(link: Link): Option[Link] = {
+	def removeAnchorLinks(link: Link): Option[Link] = {
 		if (link.text == "")
 			link.text = link.destination
 		val hashTagIndex = link.text.indexOf("#")
@@ -71,19 +74,36 @@ class LinkExtractor {
 			Some(link)
 		}
 	}
+	def debugPrintAllLinks(link: Link): Option[Link] = {
+		println(link.text + "#" + link.destination)
+		Some(link)
+	}
 
 	/**
 	 * Filters out a link, if it starts with a given string, e.g. 'Image:' or
 	 * 'Category'.
-	 * @param startString The string to check for.
+	 * @param startStrings The string to check for.
 	 * @return Some(link) if the link does not start with the given string,
 	 *         None otherwise.
 	 */
-	def filterStartsWith(link: Link, startString: String): Option[Link] = {
-		if (link.destination.startsWith(startString)) None
+	def filterStartsWith(link: Link, startStrings: String*): Option[Link] = {
+		if (startStrings.exists { s => link.destination.startsWith(s) }) None
 		else Some(link)
 	}
 	def filterImages(link: Link): Option[Link] = filterStartsWith(link, "Image:")
 	def filterFiles(link: Link): Option[Link] = filterStartsWith(link, "File:")
 	def filterCategories(link: Link): Option[Link] = filterStartsWith(link, "Category:")
+
+	/**
+	 * Filters external links that are not recognized by the parser, because the markup
+	 * had some errors, e.g. if the user used double brackets for external links like
+	 * [[http://www.google.de]].
+	 * @return None, if it is an external link, Some(link) otherwise.
+	 */
+	def filterExternalLinks(link: Link): Option[Link] = {
+		if (link.destination.toLowerCase.startsWith("http://"))
+			None
+		else Some(link)
+	}
+
 }

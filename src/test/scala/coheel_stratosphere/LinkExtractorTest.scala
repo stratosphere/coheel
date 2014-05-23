@@ -1,10 +1,7 @@
 package de.hpi.uni_potsdam.coheel_stratosphere
 
 import org.scalatest.FunSuite
-import scala.xml.{Elem, XML}
-import org.dbpedia.extraction.sources.WikiPage
-import org.dbpedia.extraction.wikiparser.WikiTitle
-import org.dbpedia.extraction.util.{WikiApi, Language}
+import scala.xml.XML
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
@@ -19,10 +16,50 @@ class LinkExtractorTest extends FunSuite {
 		WikiPageReader.xmlToWikiPage(xml)
 	}
 
-	test("Parsing a simple internal link works.") {
+	def links: Seq[Link] = {
 		val (extractor, wikiPage) = fixture
+		extractor.extractLinks(wikiPage)
+	}
 
-		val links = extractor.extractLinks(wikiPage)
+	test("parsing a simple internal link '[[byte]]'") {
 		assert(links.exists { _.text == "byte" })
 	}
+	test("parsing an internal link with different label '[[Computer data storage|digital information]]'") {
+		assert(links.exists { link =>
+			link.text == "digital information" && link.destination == "Computer data storage"
+		})
+	}
+	test("parsing an internal link with anchor '[[Hertz#Computing|CPU clock speeds]]'") {
+		assert(links.exists { link =>
+			link.text == "CPU clock speeds" && link.destination == "Hertz"
+		})
+	}
+	test("no categories, files or images are returned") {
+		assert(!links.exists { link =>
+			link.destination == ":Category:Information Units"
+		})
+		assert(links.forall { link =>
+			!link.destination.startsWith("Category:") &&
+				!link.destination.startsWith("Image:") &&
+				!link.destination.startsWith("File:")
+		})
+	}
+	test("no external link are returned") {
+		assert(links.forall { link =>
+			!link.destination.toLowerCase.startsWith("http://")
+		})
+	}
+
+	test("all links are found") {
+		// There are three links in footnotes, however, these are currently not found.
+		// So the correct number of links is 51.
+		assert(links.size === 48 /* hand-counted :) */)
+	}
+
+	test("just print links") {
+		links.foreach { link =>
+			println(String.format("%80s||%s", link.text, link.destination))
+		}
+	}
+
 }
