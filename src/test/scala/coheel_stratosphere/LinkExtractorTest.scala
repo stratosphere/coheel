@@ -51,9 +51,7 @@ class LinkExtractorTest extends FunSuite {
 	}
 
 	test("all links are found") {
-		// There are three links in footnotes, however, these are currently not found.
-		// So the correct number of links is 51.
-		assert(links.size === 48 /* hand-counted :) */)
+		assert(links.size === 51 /* hand-counted :) */)
 	}
 
 	test("just print links") {

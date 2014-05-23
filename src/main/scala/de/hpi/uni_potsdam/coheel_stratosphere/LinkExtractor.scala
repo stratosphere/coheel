@@ -3,9 +3,8 @@ package de.hpi.uni_potsdam.coheel_stratosphere
 import org.dbpedia.extraction.sources.WikiPage
 import org.dbpedia.extraction.wikiparser.InternalLinkNode
 import org.dbpedia.extraction.wikiparser.Node
-import org.dbpedia.extraction.wikiparser.impl.simple.SimpleWikiParser
 import scala.collection.mutable
-import scala.collection.mutable.ListBuffer
+import de.hpi.uni_potsdam.coheel_stratosphere.wikiparser.SimpleWikiParser
 
 case class Link(node: Node, var text: String, var destination: String) {
 	def this(node: Node) = this(node, null, null)
@@ -35,7 +34,7 @@ class LinkExtractor {
 		val link: Option[Link] = Some(new Link(node))
 		link
 			.flatMap(filterNonLinks)
-//			.flatMap(debugPrintAllLinks)
+			.flatMap(debugPrintAllLinks)
 			.flatMap(filterImages)
 			.flatMap(filterFiles)
 			.flatMap(filterCategories)
@@ -44,20 +43,6 @@ class LinkExtractor {
 			.foreach { link =>
 				links = links :+ link
 			}
-	}
-
-	/**
-	 * Handles anchor links like Germany#History (link to a specific point in
-	 * a page) and removes the part after '#'
-	 * @return The sanitized link.
-	 */
-	def removeAnchorLinks(link: Link): Option[Link] = {
-		if (link.text == "")
-			link.text = link.destination
-		val hashTagIndex = link.text.indexOf("#")
-		if (hashTagIndex != -1)
-			link.text = link.text.substring(0, hashTagIndex)
-		Some(link)
 	}
 
 	/**
@@ -82,7 +67,7 @@ class LinkExtractor {
 	/**
 	 * Filters out a link, if it starts with a given string, e.g. 'Image:' or
 	 * 'Category'.
-	 * @param startStrings The string to check for.
+	 * @param startStrings The strings to check for.
 	 * @return Some(link) if the link does not start with the given string,
 	 *         None otherwise.
 	 */
@@ -95,6 +80,20 @@ class LinkExtractor {
 	def filterCategories(link: Link): Option[Link] = filterStartsWith(link, "Category:")
 
 	/**
+	 * Handles anchor links like Germany#History (link to a specific point in
+	 * a page) and removes the part after '#'
+	 * @return The sanitized link.
+	 */
+	def removeAnchorLinks(link: Link): Option[Link] = {
+		if (link.text == "")
+			link.text = link.destination
+		val hashTagIndex = link.text.indexOf("#")
+		if (hashTagIndex != -1)
+			link.text = link.text.substring(0, hashTagIndex)
+		Some(link)
+	}
+
+	/**
 	 * Filters external links that are not recognized by the parser, because the markup
 	 * had some errors, e.g. if the user used double brackets for external links like
 	 * [[http://www.google.de]].
@@ -105,5 +104,4 @@ class LinkExtractor {
 			None
 		else Some(link)
 	}
-
 }

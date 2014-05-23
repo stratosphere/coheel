@@ -35,14 +35,15 @@
   <component name="Encoding" useUTFGuessing="true" native2AsciiForPropertiesFiles="false">
     <file url="file://$PROJECT_DIR$" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/pom.xml" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/src/main/java/de/hpi/uni_potsdam/coheel_stratosphere/LinkExtractor.java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/src/main/java/de/hpi/uni_potsdam/coheel_stratosphere/OldMain.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/scala/de/hpi/uni_potsdam/coheel_stratosphere/LinkExtractor.scala" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/scala/de/hpi/uni_potsdam/coheel_stratosphere/Main.scala" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/scala/de/hpi/uni_potsdam/coheel_stratosphere/WikiPageReader.scala" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/scala/de/hpi/uni_potsdam/coheel_stratosphere/wikiparser/ExtendedSimpleWikiParser.scala" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/scala/de/hpi/uni_potsdam/coheel_stratosphere/wikiparser/Matcher.scala" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/scala/de/hpi/uni_potsdam/coheel_stratosphere/wikiparser/Source.scala" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/scala/de/hpi/uni_potsdam/coheel_stratosphere/wikiparser/TooManyErrorsException.scala" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/test/resources/wikipedia_test_article.xml" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/test/scala/coheel_stratosphere/LinkExtractorTest.scala" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/src/test/scala/coheel_stratosphere/LinkTest.java" charset="UTF-8" />
   </component>
   <component name="EntryPointsManager">
     <entry_points version="2.0" />
