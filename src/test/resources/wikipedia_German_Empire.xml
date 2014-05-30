@@ -1,0 +1,616 @@
+<?xml version="1.0"?>
+<api>
+    <query>
+        <pages>
+            <page pageid="12674" ns="0" title="German Empire">
+                <revisions>
+                    <rev revid="610110862" parentid="610110850" user="ClueBot NG" userid="13286072" timestamp="2014-05-25T19:50:58Z" contentformat="text/x-wiki" contentmodel="wikitext" xml:space="preserve">{{About|the German nation-state existing from 1871 to 1918|other meanings|German Empire (disambiguation)}}
+                    {{Use dmy dates|date=May 2012}}
+                    {{Infobox former country
+                    |native_name = ''Deutsches Reich'' 
+                    |native_name = ''Deutsches Kaiserreich''
+                    |conventional_long_name = German Reich
+                    |common_name = Germany
+                    |continent   = Europe
+                    |region      =
+                    |country     = Germany
+                    |era         = [[New Imperialism]] / [[World War I|WWI]]
+                    |year_start  = 1871
+                    |year_end    = 1918
+                    |life_span   = 1871&#x2013;1918
+                    |event_start = [[Unification of Germany|Unification]]
+                    |date_start  = 18 January
+                    |event_end   = [[William II, German Emperor|William II]] [[Abdication|abdicates]]&lt;ref&gt;[https://en.wikisource.org/wiki/Statement_of_Abdication Statement of Abdication of William II]&lt;/ref&gt;
+                    |date_end    = 28 November
+                    |event1      = [[Constitution of the German Empire|Constitution adopted]]
+                    |date_event1 = 16 April 1871
+                    |event2      = [[World War I]]
+                    |date_event2 = 28 July 1914
+                    |event3      = [[German Revolution of 1918&#x2013;19|German Revolution]]
+                    |date_event3 = 3 November 1918
+                    |event4      = [[First Armistice at Compi&#xE8;gne|Armistice declared]]
+                    |date_event4 = 11 November 1918
+                    |event_pre   = 
+                    |date_pre    = 
+                    |event_post  = [[Treaty of Versailles]]
+                    |date_post   = 28 June 1919
+                    |p1 = Kingdom of Prussia
+                    |flag_p1 = Flag of Prussia 1892-1918.svg
+                    |p2 = North German Confederation
+                    |flag_p2 = Flag of the German Empire.svg
+                    |p3 = Kingdom of Bavaria
+                    |flag_p3 = Flag of Bavaria (striped).svg
+                    |p4 = Kingdom of W&#xFC;rttemberg
+                    |flag_p4 = Flagge K&#xF6;nigreich W&#xFC;rttemberg.svg
+                    |p5 = Grand Duchy of Baden
+                    |flag_p5 = Flagge Gro&#xDF;herzogtum Baden (1871-1891).svg
+                    |p6 = Grand Duchy of Hesse
+                    |flag_p6 = Flagge Gro&#xDF;herzogtum Hessen ohne Wappen.svg
+                    |p7 = Alsace-Lorraine
+                    |flag_p7 = Flag of France.svg
+                    |s1 = Weimar Republic
+                    |s2 = Republic of Alsace-Lorraine
+                    |s3 = Free City of Danzig
+                    |s4 = Second Polish Republic
+                    |s5 = Klaip&#x117;da Region
+                    |s6 = Saar (League of Nations)
+                    |s7 = Hlu&#x10D;&#xED;n Region
+                    |s8 = South Jutland County{{!}}Northern Schleswig
+                    |s9 = Eupen-Malmedy
+                    |flag_s1 = Flag of Germany (3-2 aspect ratio).svg
+                    |flag_s2 = Flag of the Republic of Alsace-Lorraine.svg
+                    |flag_s3 = Gdansk flag.svg
+                    |flag_s4 = Flag of Poland.svg
+                    |flag_s5 = Flag of Lithuania 1918-1940.svg
+                    |flag_s6 = Flag of Saar 1920-1935.svg
+                    |flag_s7 = Flag of Czechoslovakia.svg
+                    |flag_s8 = Flag of Denmark.svg
+                    |flag_s9 = Flag of Belgium.svg
+                    |image_flag = Flag of the German Empire.svg
+                    |flag_alt= Horizontal tricolor (black, white, red)
+                    |flag = Flag of Germany#North German Confederation and the German Empire
+                    |image_coat = Wappen Deutsches Reich - Reichsadler 1889.svg
+                    |symbol_type = Coat of arms
+                    |coat_alt = Shield containing a black, one-headed, rightward-looking eagle with red beak, tongue and claws. On its breast is a shield with another eagle. Over its head is an imperial crown with two crossing ribbons.
+                    |image_map = German Empire 1914.svg
+                    |image_map_alt = Located in north central Europe, containing modern Germany plus much of modern Poland
+                    |image_map_caption = Territory of the German Empire in 1914, before [[World War I]]
+                    |national_motto = ''[[Gott mit uns]]''&lt;br&gt;&lt;small&gt;"God with us"&lt;/small&gt;
+                    |national_anthem  = ''(none official)''&lt;br/&gt;"[[Heil dir im Siegerkranz]]" (imperial)&lt;br/&gt;"[[Das Lied der Deutschen]]" (popular)&lt;br/&gt;"[[Die Wacht am Rhein]]" (unofficial)
+                    |capital = Berlin
+                    |latd=52 |latm=31 |latNS=N |longd=13 |longm=24 |longEW=E
+                    |common_languages = Official language:&lt;br/&gt;[[German language|German]]&lt;br/&gt;Unofficial minority languages:&lt;br&gt;[[Danish language|Danish]], [[French language|French]], [[Yiddish]], [[Sorbian languages|Sorbian]], [[Low German]], [[Polish language|Polish]], [[East Frisian Low Saxon|Frisian]], [[Lithuanian language|Lithuanian]]&lt;br/&gt;Colonial languages:&lt;br/&gt; [[Bantu languages|Bantu]], [[Oshiwambo]], [[Afrikaans]], [[Swahili language|Swahili]] (East African colonies)&lt;br/&gt;[[Qingdao dialect|Tsingtao Chinese]] and [[Mandarin Chinese]] (Tsingtao and Kiautschou Bay)&lt;br/&gt;[[Papuan languages]] (German New Guinea)&lt;br/&gt;[[Samoan language|Samoan]] (German Samoa)
+                    |government_type = until October 1918 [[Federal monarchy]] 
+                    October 1918 to November 1918 [[Parliamentary system|Parliamentary]] [[constitutional monarchy]] 
+                    |title_leader = [[German Emperor|Emperor]]
+                    |leader1 = [[William I, German Emperor|Wilhelm I]]
+                    |year_leader1 = 1871&#x2013;1888
+                    |leader2 = [[Frederick III, German Emperor|Frederick III]]
+                    |year_leader2 = 1888
+                    |leader3 = [[Wilhelm II, German Emperor|Wilhelm II]]
+                    |year_leader3 = 1888&#x2013;1918
+                    |title_deputy = [[List of Chancellors of Germany|Chancellor]]
+                    |deputy1 = [[Otto von Bismarck]] &lt;small&gt;(first)&lt;/small&gt;
+                    |year_deputy1 = 1871&#x2013;1890
+                    |deputy2 = [[Friedrich Ebert]] &lt;small&gt;(last)&lt;/small&gt;
+                    |year_deputy2 = 1918
+                    |legislature = [[Reichstag (German Empire)|Reichstag]]
+                    |house1 = [[Bundesrat (Germany)|Bundesrat]]
+                    |type_house1 = Federal Council
+                    |stat_year1 = 1871
+                    |religion = [[Protestant Church|Protestant]] &#x2248; 63%&lt;br/&gt;[[Roman Catholic Church|Roman Catholic]] &#x2248; 35.8%&lt;br/&gt;[[Judaism|Jewish]] &#x2248; 1.2%&lt;ref&gt;{{cite book | last1 = Meyer| first1 = H.J. | author-link1 =  | date = 1894 | title = Meyers Konversations-Lexikon | language = German  | volume = Volume 4 | edition = 5th | publisher = Bibliographisches Institut | at = Deutschland }}&lt;/ref&gt;
+                    |stat_pop1 = 40050790
+                    |stat_year2 = 1890
+                    |stat_pop2 = 49428470
+                    |stat_year4 = 1910
+                    |stat_pop4 = 64925993
+                    |stat_area4 = 540857.54
+                    |currency = [[Vereinsthaler]],&lt;br/&gt;[[South German Gulden]], [[Bremen Thaler]],&lt;br/&gt;[[Hamburg Mark]],&lt;br/&gt;[[French Franc]],&lt;br/&gt;&lt;small&gt;(until 1873, together)&lt;/small&gt;&lt;br/&gt;[[German Goldmark]],&lt;br/&gt;&lt;small&gt;(1873&#x2013;1914)&lt;/small&gt;&lt;br/&gt;[[German Papiermark]]&lt;br/&gt;&lt;small&gt;(1914&#x2013;1918)&lt;/small&gt;
+                    |footnotes = Area and population not including colonial possessions &lt;br/&gt;Area source:&lt;ref name="gem1900"&gt;{{cite web|title=German Empire: administrative subdivision and municipalities, 1900 to 1910 |url=http://www.gemeindeverzeichnis.de/gem1900/gem1900.htm?gem1900_2.htm |language=German |accessdate=25 April 2007}}&lt;/ref&gt; Population source:&lt;ref name="pop1871"&gt;{{cite web|title=Population statistics of the German Empire, 1871 |url=http://www.deutsche-schutzgebiete.de/einwohner.htm |language=German |accessdate=25 April 2007}}&lt;/ref&gt;
+                    ----{{note|aaa}}a. The term "reich" does not literally connote an empire as has been commonly assumed by English-speaking people. The term "''Kaiserreich''" literally denotes an empire &#x2013; particularly a hereditary empire led by a literal emperor, though "''reich''" has been used in German to denote the [[Roman Empire]] because it has a weak hereditary tradition. In the case of the German Empire, the official name was ''Deutsches Reich'' that is properly translated as "German Realm" because the official position of head of state in the constitution of the German Empire was officially a "[[presidency]]" of a [[confederation]] of German states led by the [[King of Prussia]] who would assume "the title of German Emperor" as referring to the [[German people]] but was not emperor of Germany as in an emperor of a state.&lt;ref&gt;''Harper's magazine, Volume 63''. Pp. 593.&lt;/ref&gt;{{POV-statement|date=December 2012}}
+                    |today = {{flag|Germany}}&lt;br/&gt;{{flag|Poland}}&lt;br/&gt;{{flag|Russia}}
+                    |today = {{flag|Germany|state}}&lt;br/&gt;{{flag|Denmark}}&lt;br/&gt;{{flag|Russia}}&lt;br/&gt;{{flag|Czech Republic}}&lt;br/&gt;{{flag|Lithuania}}&lt;br/&gt;{{flag|Poland}}&lt;br&gt;{{flag|Belgium}}&lt;br&gt;{{flag|Netherlands}}&lt;br&gt;{{flag|France}}&lt;br/&gt;{{flag|Togo}}&lt;br/&gt;{{flag|Ghana}}&lt;br/&gt;{{flag|Chad}}&lt;br/&gt;{{flag|Gabon}}&lt;br/&gt;{{flag|Nigeria}}&lt;br/&gt;{{flag|Congo}}&lt;br/&gt;{{flag|Cameroon}}&lt;br/&gt;{{flag|Namibia}}&lt;br/&gt;{{flag|Burundi}}&lt;br/&gt;{{flag|Mozambique}}&lt;br/&gt;{{flag|Kenya}}&lt;br/&gt;{{flag|Tanzania}}&lt;br/&gt;{{flag|Rwanda}}&lt;br/&gt;{{flag|Central African Republic}}&lt;br/&gt;{{flag|Papua New Guinea}}&lt;br/&gt;{{flag|Nauru}}&lt;br/&gt;{{flag|Samoa}}&lt;br/&gt;{{flag|Micronesia}}&lt;br/&gt;{{flag|Marshall Islands}}&lt;br/&gt;{{flag|Solomon Islands}}&lt;br/&gt;{{flag|Palau}}&lt;br/&gt;{{flag|Northern Mariana Islands}}&lt;br/&gt;{{flag|China}}&lt;br/&gt;{{flag|United States}}
+                    }}
+                    
+                    The '''German Empire''' ({{lang-de|Deutsches Reich}} or ''Deutsches Kaiserreich'') was the historical German [[nation state]]{{sfn|Kitchen|2011|p=108}} that existed from the [[unification of Germany]] in 1871 to the defeat in World War 1 in 1918, when Germany became [[Weimar Republic|a federal republic]]. The state was the predecessor of today's [[Germany]]. The Empire is sometimes called the '''[[German Reich]]'''&lt;ref name="constitution"&gt;{{cite web|url=http://de.wikisource.org/wiki/Verfassung_des_Deutschen_Reiches_(1871) |title=German constitution of 1871 |language={{de icon}} |publisher=De.wikisource.org |date=16 March 2011 |accessdate=2 April 2011}}&lt;/ref&gt; (literally: "German Realm"&lt;ref&gt;''Harper's magazine, Volume 63''. Pp. 593. The term "reich" does not literally connote an empire as has been commonly assumed by English-speaking people, the term "''Kaiserreich''" literally denotes an empire &#x2013; particularly a hereditary empire led by a literal emperor, though "''reich''" has been used in German to denote the [[Roman Empire]] because it has a weak hereditary tradition. In the case of the German Empire, the official name was ''Deutsches Reich'' that is properly translated as "German Realm" because the official position of head of state in the constitution of the German Empire was officially a "[[presidency]]" of a [[confederation]] of German states led by the [[King of Prussia]] who would assume "the title of German Emperor" as referring to the [[German people]] but was not emperor of Germany as in an emperor of a state.&lt;/ref&gt;&lt;ref&gt;World Book, Inc. ''The World Book dictionary, Volume 1''. World Book, Inc., 2003. Pp. 572. States that Deutsches Reich translates as "German Realm" that was a former official name of the Germany.&lt;/ref&gt;&lt;ref&gt;Joseph Whitaker. ''Whitaker's almanack, 1991''. J Whitaker &amp; Sons, 1990. Pp. 765. Refers to the term Deutsches Reich being translated in English as "German Realm", up to and including the Nazi period.&lt;/ref&gt;).
+                    
+                    The German Empire consisted of 27 constituent territories (most of them ruled by [[royal family|royal families]]). While the [[Kingdom of Prussia]] contained most of the population and most of the territory of the Reich, the Prussian leadership became supplanted by German leaders and Prussia itself played a lesser role. As Dwyer (2005) points out, Prussia's "political and cultural influence had diminished considerably" by the 1890s.&lt;ref&gt;Philip G. Dwyer, ''Modern Prussian History, 1830&#x2013;1947'' (2005) p 2&lt;/ref&gt;  Its three largest neighbours were rivals [[Russian Empire|Imperial Russia]] to the east, [[French Third Republic|France]] to the west and ally [[Austria-Hungary]] to the south.
+                    
+                    Germany industrialized rapidly after 1850, with a foundation in coal, iron (and later steel), chemicals and railways. From a population of 41 million people in 1871, it grew to 68 million in 1913. From a heavily rural nation in 1815, it was now predominantly urban.&lt;ref&gt;J. H. Clapham, ''The Economic Development of France and Germany 1815&#x2013;1914'' (1936)&lt;/ref&gt;  During its 47 years of existence, the German Empire operated as an industrial, technological and scientific giant, receiving more [[Nobel Prize]]s in science than Britain, France, Russia and the United States combined.&lt;ref&gt;{{cite web|url=http://www.idsia.ch/~juergen/sci.html |title=Nobel Prizes by Country - Evolution of National Science Nobel Prize Shares in the 20th Century, by Citizenship (Juergen Schmidhuber, 2010) |publisher=Idsia.ch |date= |accessdate=2 December 2012}}&lt;/ref&gt;
+                    
+                    It became a [[great power]], boasting a rapidly growing rail network, the world's strongest army, and a fast-growing industrial base.&lt;ref&gt;Paul Kennedy, ''The Rise and Fall of the Great Powers: Economic Change and Military Conflict from 1500 to 2000'' (1987)&lt;/ref&gt;   Its [[Imperial German Navy|navy]] went from being negligible to second only behind the [[Royal Navy]] in less than a decade. After the removal of the powerful [[Chancellor of Germany|Chancellor]] [[Otto von Bismarck]] in 1890 following the death of [[William I, German Emperor|Emperor Wilhelm I]], the young [[Wilhelm II, German Emperor|Emperor Wilhelm II]] engaged in increasingly reckless foreign policies that left the Empire isolated. Its network of small [[German colonial empire|colonies]] in Africa and the Pacific paled in comparison to the British and French empires, and only a small number became profitable. When [[July Crisis|the great crisis of 1914]] arrived, it had [[Central Powers|only two weak allies]], the [[Austria-Hungary|Austro-Hungarian]] and [[Ottoman Empire]]s, later joined by [[Bulgaria]].
+                    
+                    In [[World War I]] German plans to quickly capture Paris in autumn 1914 failed and the [[Western Front (World War I)|Western Front]] (against Britain and France) became a stalemate. The Allied naval blockade made for increasing shortages of food, and Germany was repeatedly forced to send troops to bolster Austria and Turkey on other fronts. However, Germany had great success on the Eastern Front; as a result of the Communists' determination to end Russian involvement in [[World War I]], it carved out large Eastern territories following the [[Treaty of Brest-Litovsk]]. German declaration of unrestricted submarine warfare in early 1917 was designed to strangle the British; it failed because of the use of a trans-Atlantic convoy system. But the declaration - along with the [[Zimmermann Telegram]] - did bring the United States into the war, with its large reserves of money, food, armaments and soldiers. Meanwhile German civilians and soldiers had become radicalised by the [[Russian Revolution]]. The [[Oberste Heeresleitung|high command]] under [[Paul von Hindenburg]] and [[Erich Ludendorff]] increasingly controlled the Reich as they gambled on one last offensive in [[Spring Offensive|spring 1918]] (before the Americans could arrive in force) using large numbers of troops and guns withdrawn from the Eastern Front. It failed and by October the armies had been in retreat since August, the [[Austria-Hungary|Austro-Hungarian Empire]] and the [[Ottoman Empire]] had collapsed, and the German people had lost faith in the political system. The Empire collapsed overnight in the [[German Revolution of 1918&#x2013;1919|November 1918 Revolution]] as all the royals abdicated and a [[Weimar Republic|republic]] took over.
+                    
+                    == History ==
+                    
+                    === Background ===
+                    {{Main|Unification of Germany}}
+                    
+                    The [[German Confederation]] was created by an act of the [[Congress of Vienna]] on 8 June 1815 as a result of the [[Napoleonic Wars]], after being alluded to in [[:wikisource:Treaty of Paris (1814)#ART.VI|Article 6]] of the 1814 [[Treaty of Paris (1814)|Treaty of Paris]].&lt;ref&gt;{{Cite book|title=A Manual of the History of the Political System of Europe and its Colonies|last1=Heeren|first1=Arnold Hermann Ludwig|author-link1=Arnold Hermann Ludwig Heeren|editor-last=Talboys|editor-first=David Alphonso|editor-link=David Alphonso Talboys|year=1873|page=480|publisher=H. G. Bohn|location=London|url=http://books.google.com/books?id=Vc88AAAAIAAJ&amp;pg=PA480|ref=harv|postscript=&lt;!-- Bot inserted parameter. Either remove it; or change its value to "." for the cite to end in a ".", as necessary. --&gt;{{inconsistent citations}}}}&lt;/ref&gt;
+                    
+                    [[Germans|German]] nationalism rapidly shifted from its liberal and democratic character in 1848, called ''[[Pan-Germanism]]'', to [[Kingdom of Prussia|Prussian]] prime minister [[Otto von Bismarck]]'s pragmatic ''[[Realpolitik]]''. Bismarck sought to extend [[House of Hohenzollern|Hohenzollern]] hegemony throughout the German states; to do so meant unification of the German states and the elimination of [[Prussia]]'s rival, [[Austrian Empire|Austria]], from the subsequent empire. He envisioned a conservative, Prussian-dominated Germany. Three wars led to military successes and helped to persuade German people to do this: the [[Second war of Schleswig]] against [[Denmark]] in 1864, the [[Austro-Prussian War]] in 1866, and the [[Franco-Prussian War]] against [[Second French Empire|France]] in 1870&#x2013;71.
+                    
+                    The [[German Confederation]] ended as a result of the Austro-Prussian War of 1866 between the constituent Confederation entities of the [[Austrian Empire]] and its allies on one side and the [[Kingdom of Prussia]] and its allies on the other. The war resulted in the Confederation being partially replaced by a [[North German Confederation]] in 1867 which included Prussia but excluded Austria and the South German states. During November 1870 the four southern states joined the North German Confederation by treaty.&lt;ref&gt;{{cite book|title=European Constitutional History|last=Case|first=Nelson|year=1902|publisher=Jennings &amp; Pye|location=Cincinnati|page=139|oclc=608806061|url=http://books.google.com/books?id=G2t9AAAAMAAJ&amp;pg=PA139|ref= harv}}&lt;/ref&gt;
+                    
+                    === Foundation of the Empire ===
+                    On 10 December 1870 the [[North German Confederation]] Reichstag renamed the Confederation as the German Empire and gave the title of [[German Emperor]] to the [[King of Prussia]] as President of the Confederation.&lt;ref name="case139-140"&gt;{{harvnb|Case|1902|pp=139&#x2013;140}}&lt;/ref&gt; During the [[Siege of Paris (1870-1871)|Siege of Paris]] on 18 January 1871, King [[Wilhelm I of Germany|Wilhelm I of Prussia]] was proclaimed German Emperor in the [[Hall of Mirrors (Palace of Versailles)|Hall of Mirrors]] at the [[Palace of Versailles]].&lt;ref name="case140"&gt;{{harvnb|Case|1902|p=140}}&lt;/ref&gt;
+                    
+                    [[File:Wernerprokla.jpg|300px|thumb|left|''Die Proklamation des Deutschen Kaiserreiches'' by [[Anton von Werner]] (1877), depicting the proclamation of the foundation of the German Reich (18 January 1871, [[Palace of Versailles]]).&lt;br/&gt;Left, on the podium (in black): Crown Prince Frederick (later [[Frederick III, German Emperor|Frederick III]]), his father Emperor [[Wilhelm I, German Emperor|Wilhelm I]], and [[Frederick I, Grand Duke of Baden|Frederick I of Baden]], proposing a toast to the new emperor.&lt;br/&gt;Centre (in white): Otto von Bismarck, first Chancellor of Germany, [[Helmuth von Moltke the Elder]], Prussian Chief of Staff.]]
+                    
+                    The 1871 [[Constitution of the German Empire|German Constitution]] was adopted by the Reichstag on 14 April 1871 and proclaimed by the Emperor on 16 April,&lt;ref name="case140"/&gt; which was substantially based upon Bismarck's [[North German Constitution]].  The new empire had a parliament called the ''[[Reichstag (German Empire)|Reichstag]]'', which was elected by [[Universal suffrage|universal male suffrage]]. However, the original constituencies drawn in 1871 were never redrawn to reflect the growth of urban areas. As a result, by the time of the great expansion of German cities in the 1890s and first decade of the 20th century, rural areas were grossly [[Malapportionment|overrepresented]].
+                    
+                    Legislation also required the consent of the ''[[Bundesrat of Germany|Bundesrat]]'', the federal council of deputies from the 27 states. Executive power was vested in the emperor, or ''Kaiser'', who was assisted by a [[Chancellor of Germany (German Reich)|chancellor]] responsible only to him. The emperor was given extensive powers by the constitution. He alone appointed and dismissed the chancellor (which in practice was used by the emperor to rule the empire through him), was supreme commander-in-chief of the armed forces, final arbiter of all foreign affairs, and could also disband the Reichstag to call for new elections. Officially, the chancellor was a one-man cabinet and was responsible for the conduct of all state affairs; in practice, the [[State Secretary|State Secretaries]] (bureaucratic top officials in charge of such fields as finance, war, foreign affairs, etc.) acted as unofficial portfolio ministers. The ''Reichstag'' had the power to pass, amend or reject bills and to initiate legislation.  However, as mentioned above, in practice the real power was vested in the emperor, who exercised it through his chancellor.
+                    
+                    Although nominally a league of equals, in practice the empire was dominated by the largest and most powerful state, Prussia. It stretched across the northern two thirds of the new ''Reich'', and contained three fifths of its population. The imperial crown was hereditary in the [[House of Hohenzollern]], the ruling house of Prussia. With the exception of the years 1872&#x2013;1873 and 1892&#x2013;1894, the chancellor was always simultaneously the prime minister of Prussia. With 17 out of 58 votes in the ''Bundesrat'', Berlin needed only a few votes from the small states to exercise effective control.
+                    
+                    The other states retained their own governments, but had only limited aspects of sovereignty. For example, both postage stamps and currency were issued for the empire as a whole. Coins through one mark was also minted in the name of the empire, while higher valued pieces were issued by the states. But these larger gold and silver issues were virtually [[commemorative coins]] and had limited circulation.
+                    
+                    While the states issued their own [[military decoration|decoration]]s, and some had their own armies, the military forces of the smaller ones were put under Prussian control. Those of the larger states, such as the Kingdoms of Bavaria and Saxony, were coordinated along Prussian principles and would in wartime be controlled by the federal government.
+                    
+                    The evolution of the German Empire is somewhat in line with parallel developments in Italy which became a united nation state shortly before the German Empire. Some key elements of the German Empire's authoritarian political structure were also the basis for conservative modernization in [[Empire of Japan|Imperial Japan]] under [[Meiji Emperor|Meiji]] and the preservation of an authoritarian political structure under the [[Tsar]]s in the Russian Empire.
+                    
+                    One factor in the social anatomy of these governments had been the retention of a very substantial share in political power by the [[landed elite]], the [[Junker]]s, resulting from the absence of a revolutionary breakthrough by the peasants in combination with urban areas.
+                    
+                    Although authoritarian in many respects, the empire had some democratic features.  Besides universal suffrage, it permitted the development of political parties. Bismarck's intention was to create a constitutional fa&#xE7;ade which would mask the continuation of authoritarian policies. In the process, he created a system with a serious flaw. There was a significant disparity between the Prussian and German electoral systems. Prussia used a highly restrictive [[Prussian three-class franchise|three-class voting system]] in which the richest third of the population could choose 85% of the legislature, all but assuring a conservative majority. As mentioned above, the king and (with two exceptions) the prime minister of Prussia were also the emperor and chancellor of the empire &#x2013; meaning that the same rulers had to seek majorities from legislatures elected from completely different franchises.  As mentioned above, rural areas were grossly overrepresented from the 1890s onward.
+                    
+                    ===Industrial power===
+                    {{Main|Economic history of Germany}}
+                    
+                    For 30 years, Germany struggled against Britain to be Europe's leading industrial power, though both fell behind the United States. Representative of Germany's industry was the steel giant [[Krupp]], whose first factory was built in [[Essen]]. By 1902, the factory alone became "A great city with its own streets, its own police force, fire department and traffic laws. There are 150 kilometres of rail, 60 different factory buildings, 8,500 machine tools, seven electrical stations, 140 kilometres of underground cable and 46 overhead."&lt;ref&gt;Edmond Taylor, ''The fossil monarchies: the collapse of the old order, 1905&#x2013;1922 (1967) p 206&lt;/ref&gt;
+                    
+                    Under Bismarck, Germany was a world innovator in building the [[welfare state]]. German workers enjoyed health, accident and maternity benefits, canteens, changing rooms and a national pension scheme.&lt;ref name="P. Hennock, 2007"&gt;E. P.  Hennock, ''The Origin of the Welfare State in England and Germany, 1850&#x2013;1914: Social Policies Compared'' (2007)&lt;/ref&gt;
+                    
+                    ==Constituent states==
+                    [[File:Deutsches Reich1.svg|thumb|300px|Member states of the German Empire ([[Kingdom of Prussia|Prussia]] shown in blue).]]
+                    {{Main|States of the German Empire (1871)}}
+                    {{See also|Historic states of Germany}}
+                    
+                    Before unification, German territory was made up of 27 [[constituent state]]s. These states consisted of kingdoms, grand duchies, duchies, principalities, free [[Hanseaten (class)|Hanseatic]] cities and one imperial territory. The free cities had a [[republic]]an form of government on the state level, even though the Empire at large was constituted as a [[monarchy]], and so were most of the states. The [[Kingdom of Prussia]] was the largest of the constituent states, covering some 60% of the territory of the German Empire.
+                    
+                    Several of these states had gained sovereignty following the dissolution of the [[Holy Roman Empire]]. Others were created as sovereign states after the [[Congress of Vienna]] in 1815. Territories were not necessarily contiguous &#x2013; many existed in several parts, as a result of historical acquisition, or, in several cases, divisions of the ruling family trees. Some of the existing states, in particular Hanover, were abolished and annexed by Prussia as a result of the war of 1866.
+                    
+                    Each component of the German Empire sent representatives to the Federal Council (''Bundesrat'') and, via single member districts, the Imperial Diet (''Reichstag''). Relations between the Imperial centre and the Empire's components were somewhat fluid, and were developed on an ongoing basis. The extent to which the Emperor could, for example, intervene on occasions of disputed or unclear succession was much debated on occasion &#x2013; for example with the [[Principality of Lippe|Lippe-Detmold]] inheritance crisis.
+                    
+                    {{German Empire States}}
+                    {{Table of states in the German Empire}}
+                    
+                    &lt;gallery&gt;
+                    File:Map-DR-Prussia.svg|Kingdom of Prussia
+                    File:Map-DR-Bavaria.svg|Kingdom of Bavaria
+                    File:Map-DR-Saxony.svg|Kingdom of Saxony
+                    File:Map-DR-Wuerttemberg.svg|Kingdom of W&#xFC;rttemberg
+                    File:German colonial.PNG|[[German colonial empire|Colonies]] in 1914
+                    &lt;/gallery&gt;
+                    
+                    ==Linguistic minorities==
+                    [[File:Sprachen Deutsches Reich 1900.png|thumb|300px|Percentage of linguistic minorities of the German Empire in 1900 by [[Kreis in Prussia|Kreis]]]]
+                    
+                    About 92% of the population spoke German as their first language.  The only minority language with a significant number of speakers (5.4%) was [[Polish language|Polish]] (a figure that rises to over 6% when including the related [[Kashubian language|Kashubian]] and [[Masurian dialect|Masurian]] languages).
+                    
+                    The non-German [[Germanic languages]] language group (0.5%) like [[Danish language|Danish]], [[Dutch language|Dutch]] and [[North Frisian language|Frisian]] were located in the north and northwest of the empire, near the borders with [[Denmark]], the [[Netherlands]], [[Belgium]], and [[Luxembourg]]. [[Low German]] was spoken throughout northern Germany and, though linguistically as separate from High German (''Hochdeutsch'') as from Dutch and English, is considered "German", hence also its name. [[Danish language|Danish]] and [[North Frisian language|Frisian]] were spoken predominantly in the north of the [[Prussia]]n [[Provinces of Prussia|province]] of [[Province of Schleswig-Holstein|Schleswig-Holstein]] and [[Dutch language|Dutch]] in the western border areas of the Prussia&#x2014;that is,  [[Province of Hanover|Hanover]], [[Province of Westphalia|Westphalia]] and the [[Rhine Province]].
+                    
+                    Polish and other [[Slavic languages]] (6.28%) were spoken chiefly in the east.&lt;ref&gt;The Slavic speakers included [[Polish language|Polish]], [[Masurian dialect|Masurian]], [[Kashubian language|Kashubian]], [[Sorbian languages|Sorbian]] and [[Czech language|Czech]] were located in the east; [[Polish language|Polish]] mainly in the [[Prussia]]n [[Provinces of Prussia|provinces]] of [[Province of Posen|Posen]], [[Province of West Prussia|West Prussia]] and [[Province of Silesia|Silesia]] ([[Upper Silesia]]). Small islands also existed in [[Recklinghausen]] ([[Province of Westphalia|Westphalia]]) with 13.8% of the population and in the [[Kreis in Prussia|Kreis]] of [[Kalau]] ([[Province of Brandenburg|Brandenburg]]) (5.5%) and in parts of [[Province of East Prussia|East Prussia]] and [[Pomerania Province (1815-1945)|Pomerania]]. [[czech language|Czech]] was spoken predominantly in the south of the [[Province of Silesia|Silesia]], [[Masurian dialect|Masurian]] in the south of [[Province of East Prussia|East Prussia]], [[Kashubian language|Kashubian]] in the north of [[Province of West Prussia|West Prussia]] and [[Sorbian languages|Sorbian]] in the [[Lusatia]]n regions of [[Prussia]] ([[Province of Brandenburg|Brandenburg]] and [[Province of Silesia|Silesia]]) and the [[Kingdom of Saxony]].&lt;/ref&gt;
+                    
+                    A few (0.5%) spoke French, especially in the Reichsland [[Elsass-Lothringen]], where French-speakers formed 11.6% of the total population.
+                    
+                    {| class="wikitable sortable toptextcells" style="text-align:left;
+                    |+Native languages of the citizens of the German Empire&lt;br /&gt;(1 December 1900)&lt;ref&gt;{{cite web|title= Fremdsprachige Minderheiten im Deutschen Reich|url= http://www.verwaltungsgeschichte.de/fremdsprachen.html |language=German |accessdate=20 January 2010}}&lt;/ref&gt;
+                    ! style="background:#b3b7ff;"|Language
+                    ! style="background:#b3b7ff;"|Count
+                    ! style="background:#b3b7ff;"|Percentage
+                    |-
+                    |[[German language|German]]
+                    |style="text-align:right"|51,883,131
+                    |style="text-align:right"|92.05
+                    |-
+                    |German and a foreign language
+                    |style="text-align:right"|252,918
+                    |style="text-align:right"|0.45
+                    |-
+                    |[[polish language|Polish]]
+                    |style="text-align:right"|3,086,489
+                    |style="text-align:right"|5.48
+                    |-
+                    |[[French language|French]]
+                    |style="text-align:right"|211,679
+                    |style="text-align:right"|0.38
+                    |-
+                    |[[Masurian dialect|Masurian]]
+                    |style="text-align:right"|142,049
+                    |style="text-align:right"|0.25
+                    |-
+                    |[[Danish language|Danish]]
+                    |style="text-align:right"|141,061
+                    |style="text-align:right"|0.25
+                    |-
+                    |[[lithuanian language|Lithuanian]]
+                    |style="text-align:right"|106,305
+                    |style="text-align:right"|0.19
+                    |-
+                    |[[Kashubian language|Kashubian]]
+                    |style="text-align:right"|100,213
+                    |style="text-align:right"|0.18
+                    |-
+                    |[[Sorbian languages|Wendish (Sorbian)]]
+                    |style="text-align:right"|93,032
+                    |style="text-align:right"|0.16
+                    |-
+                    |[[Dutch language|Dutch]]
+                    |style="text-align:right"|80,361
+                    |style="text-align:right"|0.14
+                    |-
+                    |[[Italian language|Italian]]
+                    |style="text-align:right"|65,930
+                    |style="text-align:right"|0.12
+                    |-
+                    |[[Czech language|Moravian]]
+                    |style="text-align:right"|64,382
+                    |style="text-align:right"|0.11
+                    |-
+                    |[[Czech language|Czech]]
+                    |style="text-align:right"|43,016
+                    |style="text-align:right"|0.08
+                    |-
+                    |[[North Frisian language|Frisian]]
+                    |style="text-align:right"|20,677
+                    |style="text-align:right"|0.04
+                    |-
+                    |[[English language|English]]
+                    |style="text-align:right"|20,217
+                    |style="text-align:right"|0.04
+                    |-
+                    |[[Russian language|Russian]]
+                    |style="text-align:right"|9,617
+                    |style="text-align:right"|0.02
+                    |-
+                    |[[Swedish language|Swedish]]
+                    |style="text-align:right"|8,998
+                    |style="text-align:right"|0.02
+                    |-
+                    |[[Hungarian language|Hungarian]]
+                    |style="text-align:right"|8,158
+                    |style="text-align:right"|0.01
+                    |-
+                    |[[Spanish language|Spanish]]
+                    |style="text-align:right"|2,059
+                    |style="text-align:right"|0.00
+                    |-
+                    |[[Portuguese language|Portuguese]]
+                    |style="text-align:right"|479
+                    |style="text-align:right"|0.00
+                    |-
+                    | Other foreign languages
+                    |style="text-align:right"|14,535
+                    |style="text-align:right"|0.03
+                    |- style="background:#ffffec;"
+                    ||'''Imperial citizens on 1 December 1900'''
+                    |  style="text-align:right;"| '''56,367,187'''
+                    |  style="text-align:right;"| '''100'''
+                    |}
+                    &lt;gallery&gt;
+                    File:Sprachen_deutsches_reich_1900_d&#xE4;nisch.png|[[Danish language|Danish]]
+                    File:Sprachen_deutsches_reich_1900_niederl&#xE4;ndisch.png|[[Dutch language|Dutch]]
+                    File:Sprachen_deutsches_reich_1900_friesisch.png|[[North Frisian language|Frisian]]
+                    File:Sprachen_deutsches_reich_1900_polnisch.png|[[Polish language|Polish]]
+                    File:Sprachen_deutsches_reich_1900_tschechisch.png|[[Czech language|Czech]] (and [[Moravian language|Moravian]])
+                    File:Sprachen_deutsches_reich_1900_masurisch.png|[[Masurian language|Masurian]]
+                    File:Sprachen_deutsches_reich_1900_kaschubisch.png|[[Kashubian language|Kashubian]]
+                    File:Sprachen_deutsches_reich_1900_sorbisch.png|[[sorbian language|Sorbian]]
+                    File:Sprachen_deutsches_reich_1900_franz&#xF6;sisch.png|French
+                    File:Sprachen_deutsches_reich_1900_wallonisch.png|[[Walloon language|Walloon]]
+                    File:Sprachen_deutsches_reich_1900_italienisch.png|Italian
+                    File:Sprachen_deutsches_reich_1900_litauisch.png|[[Lithuanian language|Lithuanian]]
+                    File: Sprachen_deutsches_reich_1900_nichtdeutsch.png|non-German
+                    &lt;/gallery&gt;
+                    
+                    ==Bismarck era==
+                    {{History of Germany}}
+                    [[File:Otto von Bismarck.JPG|thumb|left|upright|[[Otto von Bismarck]]]]
+                    
+                    Bismarck's domestic policies played an important role in forging the authoritarian political culture of the ''Kaiserreich''. Less preoccupied by continental power politics following unification in 1871, Germany's semi-parliamentary government carried out a relatively smooth economic and political revolution from above that pushed them along the way towards becoming the world's leading industrial power of the time.
+                    
+                    ===Foreign policy===
+                    Bismarck's post-1871 foreign policy was conservative and sought to preserve the balance of power in Europe. His biggest concern was France, which was left defeated and resentful after the [[Franco-Prussian War]]. As the French lacked the strength to defeat Germany by themselves, they sought an alliance with Russia, which would trap Germany between the two in a war (as would ultimately happen in 1914). Bismarck wanted to prevent this at all costs and maintain friendly relations with the Russians, and thereby formed an alliance with them and Austria-Hungary (which by the 1880s was being slowly reduced to a German satellite), the ''Dreikaiserbund'' (League of Three Emperors). During this period, individuals within the German military were advocating a preemptive strike against Russia, but Bismarck knew that such ideas were foolhardy. He once wrote that "the most brilliant victories would not avail against the Russian nation, because of its climate, its desert, and its frugality, and having but one frontier to defend," and because it would leave Germany with another bitter, resentful neighbor. Bismarck once contrasted his nation's foreign policy difficulties with the easy situation of the U.S. (the only strong power in the Western Hemisphere), saying "The Americans are a very lucky people. They're bordered to the north and south by weak neighbors, and to the east and west by fish."{{Cite quote|date=March 2013}}
+                    
+                    Meanwhile, the chancellor remained wary of any foreign policy developments that looked even remotely warlike. In 1886, he moved to stop an attempted sale of horses to France on the grounds that they might be used for cavalry and also ordered an investigation into large Russian purchases of medicine from a German chemical works. Bismarck stubbornly refused to listen to Georg Herbert zu Munster (ambassador to France), who reported back that the French were not seeking a revanchist war, and in fact were desperate for peace at all costs.
+                    
+                    Bismarck and most of his contemporaries were conservative-minded and focused their foreign policy attention on Germany's neighboring states. In 1914, 60% of German foreign investment was in Europe, as opposed to just 5% of British investment. Most of the money went to developing nations such as Russia that lacked the capital or technical knowledge to industrialize on their own. The construction of the [[Baghdad Railway]], financed by German banks, was designed to eventually connect Germany with the Turkish Empire and the [[Persian Gulf]], but it also collided with British and Russian geopolitical interests.
+                    
+                    ====Colonies====
+                    {{Main|German colonial empire}}
+                    [[File:Karolinen-stamp.jpg|thumb|right|A postage stamp from the [[Caroline Islands|Carolines]]]]
+                    
+                    Bismarck secured a number of German colonial possessions during the 1880s in Africa and the Pacific, but he never considered an overseas colonial empire valuable; Germany's colonies remained badly undeveloped. However they excited the interest of the religious-minded, who supported an extensive network of missionaries.
+                    
+                    Germans had dreamed of colonial imperialism since 1848.&lt;ref&gt;{{cite journal |first=Matthew |last=Fitzpatrick |title=A Fall from Grace? National Unity and the Search for Naval Power and Colonial Possessions 1848&#x2013;1884 |journal=German History |year=2007 |volume=25 |issue=2 |pages=135&#x2013;161 |doi=10.1093/0266355406075719 |ref=harv }}&lt;/ref&gt; Bismarck began the process, and by 1884 had acquired [[German New Guinea]].&lt;ref&gt;{{cite journal |first=David |last=Ciarlo |title=Globalizing German Colonialism |journal=German History |year=2008 |volume=26 |issue=2 |pages=285&#x2013;298 |doi=10.1093/gerhis/ghn007 |ref=harv }}&lt;/ref&gt; By the 1890s, German colonial expansion in Asia and the Pacific ([[Jiaozhou Bay|Kiauchau]] in China, the [[Mariana Islands|Marianas]], the [[Caroline Islands]], Samoa) led to frictions with Britain, Russia, Japan and the U.S. The largest colonial enterprises were in Africa,&lt;ref&gt;L. Gann and Peter Duignan, ''The Rulers of German Africa, 1884&#x2013;1914'' (1977) focuses on political and economic history; Michael Perraudin and J&#xFC;rgen Zimmerer, eds. ''German Colonialism and National Identity'' (2010) focuses on cultural impact in Africa and Germany.&lt;/ref&gt; where the extermination of the Nama and Herero in what is now [[Namibia]] in 1906&#x2013;07 led to [[Herero and Namaqua Genocide]] &lt;ref&gt;{{cite journal |first=Tilman |last=Dedering |title=The German&#x2010;Herero war of 1904: Revisionism of Genocide or Imaginary Historiography? |journal=Journal of Southern African Studies |year=1993 |volume=19 |issue=1 |pages=80&#x2013;88 |doi=10.1080/03057079308708348 |ref=harv }}&lt;/ref&gt;
+                    
+                    ===Economy===
+                    
+                    ====Railways====
+                    Lacking a technological base at first, the Germans imported their engineering and hardware from Britain, but quickly learned the skills needed to operate and expand the railways. In many cities, the new railway shops were the centres of technological awareness and training, so that by 1850, Germany was self-sufficient in meeting the demands of railroad construction, and the railways were a major impetus for the growth of the new steel industry. However, German unification in 1870 stimulated consolidation, nationalisation into state-owned companies, and further rapid growth. Unlike the situation in France, the goal was support of industrialisation, and so heavy lines crisscrossed the [[Ruhr]] and other industrial districts, and provided good connections to the major ports of [[Hamburg]] and [[Bremen]]. By 1880, Germany had 9,400 locomotives pulling 43,000 passengers and 30,000 tons of freight, and forged ahead of France.&lt;ref&gt;Allan Mitchell, ''Great Train Race: Railways and the Franco-German Rivalry, 1815&#x2013;1914'' (2000)&lt;/ref&gt; The total length of German railroad tracks expanded from 21,000 kilometers in 1871 to 63,000 kilometres by 1913, establishing the largest rail network in the world after the United States, and effectively surpassing the 32,000 kilometers of rail that connected Britain in the same year.&lt;ref&gt;Edgar Feuchtwanger, ''Imperial Germany, 1850-1918'' (2006), Table 1&lt;/ref&gt;
+                    [[File:Essen a54 v Stadtpanorama-1890.jpg|thumb|left|[[Krupp]] Works in [[Essen]], 1890]]
+                    
+                    ====Industry====
+                    Industrialisation progressed dynamically in Germany and German manufacturers began to capture domestic markets from British imports, and also to compete with British industry abroad, particularly in the U.S. The German textiles and metal industries had by 1870 surpassed those of Britain in organisation and technical efficiency and superseded British manufacturers in the domestic market. Germany became the dominant economic power on the continent and was the second largest exporting nation after Britain.
+                    
+                    Technological progress during German industrialisation occurred in four waves: the railway wave (1877&#x2013;86), the dye wave (1887&#x2013;96), the chemical wave (1897&#x2013;1902), and the wave of electrical engineering (1903&#x2013;18).&lt;ref&gt;Jochen Streb, et al. "Technological and geographical knowledge spillover in the German empire 1877&#x2013;1918," ''Economic History Review,'' May 2006, Vol. 59 Issue 2, pp 347&#x2013;373&lt;/ref&gt; Since Germany industrialised later than Britain, it was able to model its factories after those of Britain, thus making more efficient use of its capital and avoiding legacy methods in its leap to the envelope of technology. Germany invested more heavily than the British in research, especially in chemistry, motors and electricity. Germany's dominance in physics and chemistry was such that one-third of all Nobel Prizes went to German inventors and researchers.
+                    
+                    The German [[cartel]] system (known as ''Konzerne''), being significantly concentrated, was able to make more efficient use of capital. Germany was not weighted down with an expensive worldwide empire that needed defense. Following Germany's annexation of [[Alsace-Lorraine]] in 1871, it absorbed parts of what had been France's industrial base.&lt;ref&gt;Stephen Broadberry, and Kevin H. O'Rourke. ''The Cambridge Economic History of Modern Europe'' (2 vol. 2010)&lt;/ref&gt;
+                    
+                    By 1900, the German chemical industry dominated the world market for [[Dye|synthetic dyes]].&lt;ref&gt;John J. Beer, ''The Emergence of the German Dye Industry'' (1959).&lt;/ref&gt; The three major firms [[BASF]],&lt;ref&gt;Werner Abelshauser, ''German History and Global Enterprise: BASF: The History of a Company'' (2004) covers 1865 to 2000;&lt;/ref&gt; [[Bayer]] and [[Hoechst AG|Hoechst]] produced several hundred different dyes, along with the five smaller firms. In 1913, these eight firms produced almost 90% of the world supply of dyestuffs and sold about 80% of their production abroad. The three major firms had also integrated upstream into the production of essential raw materials and they began to expand into other areas of chemistry such as [[Drug|pharmaceuticals]], [[photographic film]], [[Agrichemical|agricultural chemicals]] and [[Electrochemistry|electrochemicals]]. Top-level decision-making was in the hands of professional salaried managers; leading Chandler to call the German dye companies "the world's first truly managerial industrial enterprises".&lt;ref&gt;Chandler (1990) p 474&#x2013;5&lt;/ref&gt; There were many spinoffs from research&#x2014;such as the pharmaceutical industry, which emerged from chemical research.&lt;ref&gt;Carsten Burhop, "Pharmaceutical Research in Wilhelmine Germany: the Case of E. Merck," ''Business History Review''. Volume: 83. Issue: 3. 2009. pp 475+. in [[ProQuest]]&lt;/ref&gt;
+                    
+                    By the start of [[World War I]] (1914&#x2013;1918), German industry switched to war production. The heaviest demands were on coal and steel for artillery and shell production, and on chemicals for the synthesis of materials that were subject to import restrictions and for chemical weapons and war supplies.
+                    
+                    ===Consolidation===
+                    The creation of the Empire under Prussian leadership was a victory for the concept of ''[[Kleindeutschland and Gro&#xDF;deutschland|Kleindeutschland]]'' (Smaller Germany) over the ''Gro&#xDF;deutschland'' concept. This meant that Austria-Hungary, a multi-ethnic Empire with a considerable German-speaking population, would remain outside of the German nationstate. Bismarck's policy was to pursue a solution diplomatically. The effective alliance between Germany and Austria played a major role in Germany's decision to enter [[Causes of World War I|World War I]] in 1914.
+                    
+                    Bismarck announced there would be no more territorial additions to Germany in Europe, and his diplomacy after 1871 was focused on stabilizing the European system and preventing any wars.  He succeeded, and only after his ouster in 1890 did the diplomatic tensions start rising again.&lt;ref&gt;J.A.S. Grenville, ''Europe reshaped, 1848&#x2013;1878'' (2000) p 342&lt;/ref&gt;
+                    
+                    ===Social issues===
+                    After achieving formal unification in 1871, Bismarck devoted much of his attention to the cause of national unity under the ideology of [[Prussianism]]. He opposed conservative Catholic activism and emancipation, especially the powers of the [[Holy See|Vatican]] under [[Pope Pius IX]], and working class radicalism, represented by the emerging [[Social Democratic Party of Germany|Social Democratic Party]].
+                    
+                    ====Kulturkampf====
+                    {{main|Kulturkampf}}
+                    [[File:Kladderadatsch 1875 - Zwischen Berlin und Rom.png|thumb|right|300px|''Between Berlin and Rome'', [[Kladderadatsch]], 1875]]
+                    Prussia in 1871 included 16,000,000 Protestants, both Reformed and Lutheran, and 8,000,000 Catholics.  Most people were generally segregated into their own religious worlds, living in rural districts or city neighborhoods that were overwhelmingly of the same religion, and sending their children to separate public schools where their religion was taught.  There was little interaction or intermarriage.  On the whole, the Protestants had a higher social status, and the Catholics were more likely to be peasant farmers or unskilled or semiskilled industrial workers.  In 1870, the Catholics formed their own political party, the [[Centre Party (Germany)|Centre Party]], which generally supported unification and most of Bismarck's policies.  However, Bismarck distrusted parliamentary democracy in general and opposition parties in particular, especially when the Centre Party showed signs of gaining support among dissident elements such as the Polish Catholics in Silesia.  A powerful intellectual force of the time was anti-Catholicism, led by the liberal intellectuals who formed a vital part of Bismarck's coalition.  They saw the Catholic Church as a powerful force of reaction and anti-modernity, especially after the proclamation of papal infallibility in 1870, and the tightening control of the Vatican over the local bishops.&lt;ref&gt;Marjorie Lamberti,   "Religious conflicts and German national identity in Prussia, 1866&#x2013;1914," in Philip G. Dwyer, ed. ''Modern Prussian History: 1830&#x2013;1947'' (2001) pp. 169&#x2013;187&lt;/ref&gt;
+                    
+                    The Kulturkampf launched by Bismarck 1871&#x2013;1880 affected Prussia; although there were similar movements in Baden and Hesse, the rest of Germany was not affected.  According to the new imperial constitution, the states were in charge of religious and educational affairs; they funded the Protestant and Catholic schools. In July 1871 Bismarck abolished the Catholic section of the Prussian Ministry of ecclesiastical and educational affairs, depriving Catholics of their voice at the highest level. The system of strict government supervision of schools was applied only in Catholic areas; the Protestant schools were left alone.&lt;ref&gt;Lamberti, (2001) p 177&lt;/ref&gt;
+                    
+                    Much more serious were the May laws of 1873. One made the appointment of any priest dependent on his attendance at a German university, as opposed to the seminaries that the Catholics typically used.  Furthermore, all candidates for the ministry had to pass an examination in German culture before a state board which weeded out intransigent Catholics.  Another provision gave the government a veto power over most church activities.  A second law abolished the jurisdiction of the Vatican over the Catholic Church in Prussia; its authority was transferred to a government body controlled by Protestants.&lt;ref&gt;Ronald J. Ross, ''The failure of Bismarck's Kulturkampf: Catholicism and state power in imperial Germany, 1871&#x2013;1887'' (1998)&lt;/ref&gt;
+                    
+                    Nearly all German bishops, clergy, and laymen rejected the legality of the new laws, and were defiant in the face of heavier and heavier penalties and imprisonments imposed by Bismarck's government.  By 1876, all the Prussian bishops were imprisoned or in exile, and a third of the Catholic parishes were without a priest. In the face of systematic defiance, the Bismarck government increased the penalties and its attacks, and were challenged in 1875 when a papal encyclical declared the whole ecclesiastical legislation of Prussia was invalid, and threatened to excommunicate any Catholic who obeyed.  There was no violence, but the Catholics mobilized their support, set up numerous civic organizations, raised money to pay fines, and rallied behind their church and the Centre Party.  The government had set up an "Old-Catholic Church," which attracted only a few thousand members. Bismarck, a devout pietistic Protestant,  realized his Kulturkampf was backfiring when secular and socialist elements used the opportunity to attack all religion. In the long run, the most significant result was the mobilization of the Catholic voters, and their insistence on protecting their religious identity.  In the elections of 1874, the Centre party doubled its popular vote, and became the second-largest party in the national parliament&#x2014;and remained a powerful force for the next 60 years, so that after Bismarck it became difficult to form a government without their support.&lt;ref&gt;Hajo Holborn, ''A History of Modern Germany: 1840&#x2013;1945'' (1969), 258&#x2013;260&lt;/ref&gt;&lt;ref&gt;Christopher Clark, ''Iron Kingdom: The Rise and Downfall of Prussia, 1600&#x2013;1947'' (2006) pp 568&#x2013;576&lt;/ref&gt;
+                    
+                    ====Social reform====
+                    Bismarck built on a tradition of welfare programs in Prussia and Saxony that began as early as in the 1840s. In the 1880s he introduced old-age pensions, accident insurance, medical care and unemployment insurance that formed the basis of the modern [[European welfare state]]. He came to realize that this sort of policy was very appealing, since it bound workers to the state, and also fit in very well with his authoritarian nature. The social security systems installed by Bismarck (health care in 1883, accident insurance in 1884, invalidity and old-age insurance in 1889) at the time were the largest in the world and, to a degree, still exist in Germany today.
+                    
+                    Bismarck's paternalistic programs won the support of German industry because its goals were to win the support of the working classes for the Empire and reduce the outflow of immigrants to America, where wages were higher but welfare did not exist.&lt;ref name="P. Hennock, 2007"/&gt;&lt;ref&gt;Hermann Beck, ''Origins of the Authoritarian Welfare State in Prussia, 1815&#x2013;1870'' (1995)&lt;/ref&gt;  Bismarck further won the support of both industry and skilled workers by his high tariff policies, which protected profits and wages from American competition, although they alienated the liberal intellectuals who wanted free trade.&lt;ref&gt;Elaine Glovka Spencer, "Rules of the Ruhr: Leadership and Authority in German Big Business Before 1914," ''Business History Review,'' Spring 1979, Vol. 53 Issue 1, pp 40&#x2013;64; Ivo N. Lambi, "The Protectionist Interests of the German Iron and Steel Industry, 1873&#x2013;1879," ''Journal of Economic History,'' March 1962, Vol. 22 Issue 1, pp 59&#x2013;70&lt;/ref&gt;
+                    
+                    =====Germanisation=====
+                    One of the effects of the unification policies was the gradually increasing tendency to eliminate the use of non-German languages in public life, schools and academic settings with the intent of pressuring the non-German population to abandon their national identity in what was called "[[Germanisation]]". These policies had often the reverse effect of stimulating resistance, usually in the form of home schooling and tighter unity in the minority groups, especially the Poles.&lt;ref&gt;Timothy Baycroft and Mark Hewitson, ''What is a nation?: Europe 1789&#x2013;1914'' (2006) p 166&lt;/ref&gt;
+                    
+                    The Germanization policies were targeted particularly [[Germanisation of Poles during Partitions|against the significant Polish minority]] of the empire, gained by Prussia in the [[Partitions of Poland]]. Poles were treated as an [[ethnic minority]] even where they made up the majority, as in the [[Province of Posen]], where a series of anti-Polish measures was enforced.&lt;ref&gt;John J. Kulczycki, ''School Strikes in Prussian Poland, 1901&#x2013;1907: The Struggle over Bilingual Education'' (Columbia University Press, 1981)&lt;/ref&gt;  Numerous anti-Polish laws had no great effect especially in the [[province of Posen]] where the German-speaking population dropped from 42.8% in 1871 to 38.1% in 1905, despite all efforts.&lt;ref&gt;[[Martin Broszat]]: ''Zweihundert Jahre deutsche Polenpolitik''. suhrkamp 1978, p. 144; ISBN 3-518-36574-6&lt;/ref&gt;
+                    
+                    ====Antisemitism====
+                    [[Antisemitism]] was an endemic problem in Germany. Before Napoleon's decrees ended the ghettos in Germany, it had been religiously motivated, but by the 19th century, it was a factor in German nationalism. The last legal barriers on Jews in Prussia were lifted by the 1860s, and within 20 years, they were well represented in the white-collar professions and much of academia. Despite the often crude antisemitism of German elites, many of them utilized the services of Jews, such as Bismarck's banker [[Gerson Bleichroder]] (1822&#x2013;1893).&lt;ref&gt;Fritz Stern, ''Gold and iron: Bismarck, Bleichr&#xF6;der, and the building of the German empire'' (1977)&lt;/ref&gt; In the popular mind Jews became a symbol of capitalism and modernity, two things that were resented by the Prussian aristocracy, who were finding their power and prestige rapidly diminished in the new, unified Germany. On the other hand, the constitution and legal system protected the rights of Jews as German citizens.  Antisemitic parties were formed but soon collapsed.&lt;ref&gt;Richard S. Levy, ''The Downfall of the Anti-Semitic Political Parties in Imperial Germany'' (Yale University Press, 1975)&lt;/ref&gt;
+                    
+                    ===Law===
+                    Bismarck's efforts also initiated the levelling of the enormous differences between the German states, which had been independent in their evolution for centuries, especially with legislation. The completely different legal histories and judicial systems posed enormous complications, especially for national trade. While a common trade code had already been introduced by the [[German Confederation|Confederation]] in 1861 (which was adapted for the Empire and, with great modifications, is still in effect today), there was little similarity in laws otherwise.
+                    
+                    In 1871, a common Criminal Code (''Reichsstrafgesetzbuch'') was introduced; in 1877, common court procedures were established in the court system (''Gerichtsverfassungsgesetz''), civil procedures (''Zivilprozessordnung'') and criminal procedures (''Strafprozessordnung''). In 1873 the constitution was amended to allow the Empire to replace the various and greatly differing Civil Codes of the states (If they existed at all; for example, parts of Germany formerly occupied by Napoleon's France had adopted the French Civil Code, while in Prussia the ''Allgemeines Preu&#xDF;isches Landrecht'' of 1794 was still in effect). In 1881, a first commission was established to produce a common Civil Code for all of the Empire, an enormous effort that would produce the ''B&#xFC;rgerliches Gesetzbuch'' ([[B&#xFC;rgerliches Gesetzbuch|BGB]]), possibly one of the most impressive legal works of the world; it was eventually put into effect on 1 January 1900. It speaks volumes for the conceptual quality of these [[Codification (law)|codification]]s that they all, albeit with many amendments, are still in effect today.
+                    
+                    ===Constitution===
+                    {{main|Constitution of the German Empire}}
+                    The Empire's constitution was based on two houses of Parliament, the Bundesrat and the Reichstag. There was universal male suffrage for the Reichstag, however legislation would have to pass both houses. The Bundesrat contained representatives of the states, in which the voting system was based on classes and wealth. This meant that wealthier classes always had a veto over any legislation.
+                    
+                    ==Year of three emperors==
+                    [[File:FriedIII.jpg|thumb|upright|[[Frederick III, German Emperor|Frederick III]], emperor for only 99 days (9 March{{spaced ndash}}15 June 1888).]]
+                    {{Main|Year of Three Emperors}}
+                    
+                    On 9 March 1888, Wilhelm I died shortly before his 91st birthday, leaving his son [[Frederick III, German Emperor|Frederick III]] as the new emperor. Frederick was a liberal and an admirer of the British constitution,&lt;ref&gt;{{Cite book|title=Cambridge Illustrated History of Germany |first=Martin |last=Kitchen |year= 2000 |publisher=Cambridge University Press |isbn= 978-0-521-79432-9 |page=214}}&lt;/ref&gt; while his links to Britain strengthened further with his marriage to [[Victoria, Princess Royal|Princess Victoria]], eldest child of [[Victoria of the United Kingdom|Queen Victoria]]. With his ascent to the throne, many hoped that Frederick's reign would lead to a [[liberalisation]] of the Reich and an increase of parliament's influence on the political process. The dismissal of [[Robert von Puttkamer]], the highly-conservative [[Interior Minister of Prussia|Prussian interior minister]], on 8 June was a sign of the expected direction and a blow to Bismarck's administration.
+                    
+                    By the time of his accession, however, Frederick had developed incurable [[laryngeal cancer]], which had been diagnosed in 1887. He died on the 99th day of his rule, on 15 June 1888. His son [[Wilhelm II, German Emperor|Wilhelm II]] became emperor.
+                    
+                    ==Wilhelmine era==
+                    
+                    ===Reaffirmation of prerogative monarchy, and Bismarck's resignation===
+                    [[File:Kohner - Kaiser Wilhelm II.jpg|thumb|upright|[[Wilhelm II, German Emperor]].&lt;br/&gt;Oil painting by [[Max Koner]], 1890.]]
+                    
+                    [[Wilhelm II, German Emperor|Wilhelm II]] sought to reassert his ruling prerogatives at a time when other monarchs in Europe were being transformed into constitutional figureheads. This decision led the ambitious Kaiser into conflict with Bismarck. The old chancellor had hoped to guide Wilhelm as he had guided his grandfather, but the emperor wanted to be the master in his own house and had many sycophants telling him that Frederick the Great would not have been great with a Bismarck at his side.&lt;ref name="kurtz_p60"&gt;{{Cite book|last=Kurtz |first=Harold |year=1970 |title=The Second Reich: Kaiser Wilhelm II and his Germany |publisher=McGraw-Hill |isbn=978-0-07-035653-5 |page=60}}&lt;/ref&gt; A key difference between Wilhelm II and Bismarck was their approaches to handling political crises, especially in 1889, when German coal miners went on strike in [[Upper Silesia]]. Bismarck demanded that the [[German Army (German Empire)|German Army]] be sent in to crush the strike, but Wilhelm II rejected this authoritarian measure, responding "I do not wish to stain my reign with the blood of my subjects."&lt;ref name="sturmer_p63"&gt;{{Cite book|last=St&#xFC;rmer |first=Michael |authorlink=Michael St&#xFC;rmer |year=2000 |title=The German Empire: 1870&#x2013;1918 |publisher=[[Random House]] |location=New York |isbn=0-679-64090-8 |page=63}}&lt;/ref&gt; Instead of condoning repression, Wilhelm had the government negotiate with a delegation from the coal miners, which brought the strike to an end without violence.&lt;ref name="kurtz_p60"/&gt; The fractious relationship ended in March 1890, after Wilhelm II and Bismarck quarrelled, and the chancellor resigned days later.&lt;ref name="kurtz_p60"/&gt; Bismarck's last few years had seen power slip from his hands as he grew older, more irritable, more authoritarian, and less focused. German politics had become progressively more chaotic, and the chancellor understood this better than anyone. But unlike Wilhelm II and his generation, Bismarck knew well that an ungovernable country with an adventurous foreign policy was a recipe for disaster.
+                    
+                    With Bismarck's departure, Wilhelm II became the dominant ruler of Germany. Unlike his grandfather, Wilhelm I, who had been largely content to leave government affairs to the chancellor, Wilhelm II wanted to be fully informed and actively involved in running Germany, not an ornamental figurehead, although most Germans found his claims of divine right to rule amusing.&lt;ref name="kurtz_p63"&gt;Kurtz, Harold (1970) 63&lt;/ref&gt; Wilhelm allowed politician [[Walther Rathenau]] to tutor him in European economics and industrial and financial realities in Europe.&lt;ref name="kurtz_p63"/&gt;
+                    
+                    As [[Isabel Virginia Hull|Hull]] (2004) notes, Bismarckian foreign policy "was too sedate for the reckless Kaiser."&lt;ref&gt;[[Isabel V. Hull]], ''The Entourage of Kaiser Wilhelm II, 1888&#x2013;1918'' (2004) p. 85&lt;/ref&gt;  Wilhelm became internationally notorious for his aggressive stance on foreign policy and his strategic blunders (such as the [[First Moroccan Crisis|Tangier Crisis]]), which pushed the German Empire into growing political isolation and eventually helped to cause [[World War I]].
+                    
+                    ===Domestic affairs===
+                    [[File:Reichstagsgebaeude.jpg|thumb|The ''[[Reichstag building|Reichstag]]'' in the 1890s{{\}}early 1900s.]]
+                    
+                    Under Wilhelm II, Germany no longer had long-ruling strong chancellors like Bismarck. The new chancellors had difficulty in performing their roles, especially the additional role as [[Prime Minister of Prussia]] assigned to them in the German Constitution. The reforms of Chancellor [[Leo von Caprivi]], which liberalized trade and so reduced unemployment, were supported by the Kaiser and most Germans except for Prussian landowners, who feared loss of land and power and launched several campaigns against the reforms.&lt;ref name="kurtz_p67"&gt;Kurtz, Harold (1970) 67&lt;/ref&gt;
+                    
+                    While Prussian aristocrats challenged the demands of a united German state, in the 1890s several organizations were set up to challenge the authoritarian conservative Prussian militarism which was being imposed on the country. Educators opposed to the German state-run schools, which emphasized military education, set up their own independent liberal schools, which encouraged individuality and freedom.&lt;ref name="kurtz_p72"&gt;Kurtz, Harold (1970) 72&lt;/ref&gt; However nearly all the schools in Imperial Germany had a very high standard and kept abreast with modern developments in knowledge.&lt;ref&gt;Geoffrey Cocks and Konrad H. Jarausch, eds. ''German Professions, 1800&#x2013;1950'' (1990)&lt;/ref&gt;
+                    
+                    Artists began experimental art in opposition to Kaiser Wilhelm's support for traditional art, to which Wilhelm responded "art which transgresses the laws and limits laid down by me can no longer be called art [...]."&lt;ref name="kurtz_p76"&gt;Kurtz, Harold (1970) 76&lt;/ref&gt; It was largely thanks to Wilhelm's influence that most printed material in Germany used [[blackletter]] instead of the Roman type used in the rest of Western Europe. At the same time, a new generation of cultural creators emerged.&lt;ref&gt;Matthew Jefferies, ''Imperial Culture in Germany, 1871&#x2013;1918'' (2003).&lt;/ref&gt;
+                    
+                    From the 1890s onwards, the most effective opposition to the monarchy came from the newly formed [[Social Democratic Party of Germany]] (SPD), which advocated [[Marxism]]. The threat of the SPD to the German monarchy and industrialists caused the state both to crack down on the party's supporters and to implement its own programme of social reform to soothe discontent. Germany's large industries provided significant social welfare programmes and good care to their employees, as long as they were not identified as socialists or trade-union members. The larger industrial firms provided pensions, sickness benefits and even housing to their employees.&lt;ref name="kurtz_p72"/&gt;
+                    
+                    Having learned from the failure of Bismarck's [[Kulturkampf]], Wilhelm II maintained good relations with the Roman Catholic Church and concentrated on opposing socialism.&lt;ref name="kurtz_p56"&gt;Kurtz, Harold (1970) 56&lt;/ref&gt; This policy failed when the Social Democrats won &#x2153; of the votes in the 1912 elections to the ''Reichstag'', and became the largest political party in Germany. The government remained in the hands of a succession of conservative coalitions supported by right-wing liberals or Catholic clerics and heavily dependent on the Kaiser's favour. The rising militarism under Wilhelm II caused many Germans to emigrate to the U.S. and the British colonies to escape mandatory military service.
+                    
+                    During World War I, the Kaiser increasingly devolved his powers to the leaders of the German High Command, particularly future [[President of Germany]], Field Marshal [[Paul von Hindenburg]] and ''Generalquartiermeister'' [[Erich Ludendorff]]. Hindenburg took over the role of commander&#x2013;in&#x2013;chief from the Kaiser, while Ludendorff became de facto general chief of staff. By 1916, Germany was effectively a military dictatorship run by Hindenburg and Ludendorff, with the Kaiser reduced to a mere figurehead.&lt;ref&gt;Lamar Cecil, ''Wilhelm II: Emperor and Exile, 1900&#x2013;1941'' (1996) ch 9&#x2013;13&lt;/ref&gt;
+                    
+                    ===Foreign affairs===
+                    {{Main|German colonial empire}}
+                    [[File:Kongokonferenz.jpg|thumb|right|[[Otto von Bismarck|Bismarck]] at the [[Berlin Conference (1884)|Berlin Conference, 1884]]]]
+                    Wilhelm II wanted Germany to have her "[[place in the sun]]," like Britain, which he constantly wished to emulate or rival.&lt;ref&gt;{{cite web|title=Wilhelm II (1859 - 1941)|url=http://www.bbc.co.uk/history/historic_figures/wilhelm_kaiser_ii.shtml|publisher=BBC|accessdate=19 April 2014}}&lt;/ref&gt; With German traders and merchants already active worldwide, he encouraged colonial efforts in Africa and the Pacific ("[[new imperialism]]"), causing the German Empire to vie with other European powers for remaining "unclaimed" territories. With the encouragement or at least the acquiescence of Britain, which at this stage saw Germany as a counterweight to her old rival France, Germany acquired [[German South-West Africa|German Southwest Africa]] (today [[Namibia]]), [[Kamerun|German Kamerun]] ([[Cameroon]]), [[Togoland]] and [[German East Africa]] (the mainland part of current [[Tanzania]]). Islands were gained in the Pacific through purchase and treaties and also a 99-year lease for the territory of [[Kiautschou]] in northeast China. But of these German colonies only Togoland and [[German Samoa]] (after 1908) became self-sufficient and profitable; all the others required subsidies from the Berlin treasury for building infrastructure, school systems, hospitals and other institutions.
+                    
+                    Bismarck had originally dismissed the agitation for colonies with contempt; he favoured a Eurocentric foreign policy, as the treaty arrangements made during his tenure in office show. As a latecomer to colonization, Germany repeatedly came into conflict with the established colonial powers and also with the United States, which opposed German attempts at colonial expansion in both the Caribbean and the Pacific. Native insurrections in German territories received prominent coverage in other countries, especially in Britain; the established powers had dealt with such uprisings decades earlier, often brutally, and had secured firm control of their colonies by then. The [[Boxer Rebellion|Boxer Rising]] in China, which the Chinese government eventually sponsored, began in the Shandong province, in part because Germany, as colonizer at [[Kiautschou]], was an untested power and had only been active there for two years. Eight western nations, including the United States, mounted a joint relief force to rescue westerners caught up in the rebellion; and during the departure ceremonies for the German contingent, Wilhelm II urged them to behave like the [[Hun]] invaders of continental Europe &#x2013; an unfortunate remark that would later be resurrected by British propagandists to paint Germans as barbarians during [[World War I]] and [[World War II]]. On two occasions, a French-German conflict over the fate of Morocco seemed inevitable.
+                    
+                    [[Image:Hissen der kaiserlichen Flagge auf Mioko.jpg|thumb|Hoisting the German flag at Mioko, [[Duke of York Islands]] in 1884]]
+                    Upon acquiring Southwest Africa, German settlers were encouraged to cultivate land held by the [[Herero people|Herero]] and [[Nama people|Nama]]. Herero and Nama tribal lands were used for a variety of exploitive goals (much as the British did before in [[Rhodesia]]), including farming, ranching, and mining for minerals and [[diamonds]]. In 1904, the Herero and the Nama revolted against the colonists in Southwest Africa, killing farm families, their laborers and servants. In response to the attacks, troops were dispatched to quell the uprising which then resulted in the [[Herero and Namaqua Genocide]]. In total, some 65,000 Herero (80% of the total Herero population), and 10,000 Nama (50% of the total Nama population) perished. The commander of the punitive expedition, General [[Lothar von Trotha]], was eventually relieved and reprimanded for his usurpation of orders and the cruelties he inflicted. These occurrences were sometimes referred to as "the first genocide of the 20th century" and officially condemned by the United Nations in 1985. In 2004 a formal apology by a government minister of the Federal Republic of Germany followed.
+                    
+                    ===Middle East===
+                    Bismarck and [[Wilhelm II, German Emperor|Wilhelm II]]  after him sought closer economic ties with the [[Ottoman Empire]]. Under [[Wilhelm II, German Emperor|Wilhelm II]], with the financial backing of the [[Deutsche Bank]], the [[Baghdad Railway]] was begun in 1900, although by 1914 it was still {{convert|500|km|mi|abbr=on}} short of its destination in Baghdad.&lt;ref name="sturmer_p91"&gt;St&#xFC;rmer, Michael (2000) 91&lt;/ref&gt; In an interview with Wilhelm in 1899, [[Cecil Rhodes]] had tried "to convince the Kaiser that the future of the German empire abroad lay in the Middle East" and not in Africa; with a grand Middle-Eastern empire, Germany could afford to allow Britain the unhindered completion of the Cape-to-Cairo railway that Rhodes favoured.&lt;ref&gt;Louis, ''Ruanda-Urundi 1884&#x2013;1919'', p. 163&lt;/ref&gt; Britain initially supported the [[Baghdad Railway]]; but by 1911 [[British statesmen]] came to fear it might be extended to [[Basra]] on the [[Persian Gulf]], threatening Britain's naval supremacy in the Indian Ocean. Accordingly they asked to have construction halted, to which Germany and the Ottoman Empire acquiesced.
+                    
+                    ===Europe===
+                    Wilhelm II and his advisers committed a fatal diplomatic error when they allowed the "[[Reinsurance Treaty]]" that Bismarck had negotiated with Tsarist Russia to lapse. Germany was left with no firm ally but [[Austria-Hungary]], and her support for action in annexing [[Bosnia and Herzegovina]] in 1908 further soured relations with Russia.&lt;ref&gt;Austria's Werner Abelshauser, ''German History and Global Enterprise: BASF: The History of a Company'' (2004) covers 1865 to 2000;&lt;/ref&gt; Wilhelm missed the opportunity to secure an alliance with Britain in the 1890s when it was involved in colonial rivalries with France, and he alienated British statesmen further by openly supporting the Boers in the [[South African War]] and building a navy to rival Britain's. By 1911 Wilhelm had completely picked apart the careful power balance established by Bismarck and Britain turned to France in the [[Entente Cordiale]]. Germany's only other ally besides Austria was the [[Kingdom of Italy (1861&#x2013;1946)|Kingdom of Italy]], but it remained an ally only ''pro forma''. When war came, Italy saw more benefit in an alliance with Britain, France, and Russia, which, in the secret [[Treaty of London (1915)|Treaty of London]] in 1915 promised it the frontier districts of Austria where Italians formed the majority of the population and also colonial concessions. Germany did acquire a second ally that same year when the Ottoman Empire entered the war on its side, but in the long run supporting the Ottoman war effort only drained away German resources from the main fronts.
+                    
+                    ==World War I==
+                    {{See also|History of Germany during World War I}}
+                    [[File:WWI-re.png|thumb|right|600px|Map of the World showing the [[participants in World War I]]. Those fighting on the [[Triple Entente|Entente]]'s side (at one point or another) are depicted in green, the [[Central Powers]] in orange, and neutral countries in grey.]]
+                    
+                    ===Origins===
+                    Following the assassination of the Austro-Hungarian Archduke of [[Austria-Este]], [[Archduke Franz Ferdinand of Austria|Franz Ferdinand]] by Bosnian Serbs, the Kaiser offered Emperor [[Franz Joseph I of Austria|Franz Joseph]] full support for Austro-Hungarian plans to invade the [[Kingdom of Serbia]], which Austria-Hungary blamed for the assassination. This unconditional support for Austria-Hungary was called a '''blank cheque''' by historians, including German [[Fritz Fischer]].&lt;ref&gt;{{cite web|url=http://wiki.answers.com/Q/What_evidence_did_Fritz_Fischer_produce_for_his_claim_that_Germany_caused_World_War_1/ |title=The 'Fischer Hypothesis' and the start of World War I, Answers.com |publisher=Wiki.answers.com |date=26 July 1997 |accessdate=2 April 2011}}&lt;/ref&gt;  Subsequent interpretation &#x2013; for example at the [[Versailles Peace Conference]] &#x2013; was that this "blank cheque" licensed Austro-Hungarian aggression regardless of the diplomatic consequences, and thus [[War Guilt Clause|Germany bore responsibility for starting the war]], or at least provoking a wider conflict.
+                    
+                    Germany began the war by targeting its chief rival, France. Germany saw France as its principal danger on the European continent as it could mobilize much faster than [[Russia]] and bordered Germany's industrial core in the [[Rhineland]]. Unlike Britain and Russia, the French entered the war mainly for revenge against Germany, in particular for France's [[Franco-Prussian War|loss]] of [[Alsace-Lorraine]] to Germany in 1871. The German high command knew that France would muster its forces to go into Alsace-Lorraine.{{clear}} In the East the German Empire planned to annex up to 35,000 square kilometers of pre-war Congress Poland and ethnically cleanse between 2 to 3 million Poles and Jews out of these territories to make room for German settlers.&lt;ref&gt;''Truth or conjecture?: German civilian war losses in the East'', page 366, Stanis&#x142;aw Schimitzek Zachodnia Agencia Prasowa, 1966&lt;/ref&gt;&lt;ref&gt;To the Threshold of Power, 1922/33: Origins and Dynamics of the Fascist and Nationalist Socialist Dictatorships, page 151-152&lt;/ref&gt;&lt;ref&gt;Shatterzone of Empires: Coexistence and Violence in the German, Habsburg, Russian, and Ottoman Borderlands by Omer Bartov and Eric D. Weitz page 55 Indiana University Press 2013&lt;/ref&gt;&lt;ref name="ReferenceA"&gt;Immanuel Geiss "Tzw. polski pas graniczny 1914-1918". Warszawa 1964&lt;/ref&gt;&lt;ref&gt;''The Red Prince: The Secret Lives of a Habsburg Archduke'', Timothy Snyder; "On the annexations and ethnic cleansing, see Geiss, Der Polnische Grenzstreifen"&lt;/ref&gt;&lt;ref&gt;''Absolute Destruction: Military Culture And The Practices Of War In Imperial Germany'', Isabel V. Hull, page 233, Cornell University Press, 2005&lt;/ref&gt;
+                    
+                    ===Western Front===
+                    [[File:Bundesarchiv Bild 183-R19231, Berlin, Mobilmachung.jpg|thumb|left|The mobilization in 1914]]
+                    Germany did not want to risk lengthy battles along the Franco-German border and instead adopted the [[Schlieffen Plan]], a military strategy designed to cripple France by [[Rape of Belgium|invading Belgium]] and [[Luxembourg]], sweeping down towards Paris and encircling and crushing the French forces along the Franco-German border in a quick victory. After defeating France, Germany would turn to attack Russia. The plan required the violation of Belgium's and Luxembourg's official neutrality, which [[British Empire|Britain]] had guaranteed by treaty. However, the Germans had calculated that Britain would enter the war regardless of whether they had formal justification to do so. At first the attack was successful: the [[German Army]] swept down from Belgium and Luxembourg and was nearly at Paris, at the nearby [[River Marne]]. However the [[French Army]] and the [[British Army]] put up a strong resistance to defend Paris at the [[First Battle of the Marne]] resulting in the German Army retreating.
+                    
+                    The aftermath of the [[First Battle of the Marne]] was a long-held stalemate between the German Army and the Allies in dug-in [[trench warfare]]. Further German attempts to break through deeper into France failed at the two battles of [[Ypres]] ([[First Battle of Ypres|1st]]/[[Second Battle of Ypres|2nd]]) with huge casualties. German [[Chief of Staff]] [[Erich von Falkenhayn]] decided to break away from the Schlieffen Plan and instead focus on a [[war of attrition]] against France. Falkenhayn targeted the ancient city of [[Verdun]] because it had been one of the last cities to hold out against the German Army in 1870, and Falkenhayn knew that as a matter of national pride the French would do anything to ensure that it was not taken. He expected that with proper tactics, French losses would be greater than those of the Germans and that continued French commitment of troops to Verdun would "bleed the French Army white" and then allow the German army to take France easily. In 1916, the [[Battle of Verdun]] began, with the French positions under constant shelling and poison gas attack and taking large casualties under the assault of overwhelmingly large German forces. However, Falkenhayn's prediction of a greater ratio of French killed proved to be wrong. Falkenhayn was replaced by [[Erich Ludendorff]], and with no success in sight, the German Army pulled out of Verdun in December 1916 and the battle ended.
+                    
+                    ===Eastern Front===
+                    [[File:Carte des cons&#xE9;quences du Trait&#xE9; de Brest-Litovsk de.svg|thumb|right|300px|Front line at the time of cease-fire and at the time of the [[Treaty of Brest-Litovsk]].]]
+                    While the [[Western Front (World War I)|Western Front]] was a stalemate for the German Army, the [[Eastern Front (World War I)|Eastern Front]] eventually proved to be a great success. Despite initial setbacks due to the unexpectedly rapid mobilisation of the Russian army, which resulted in a Russian invasion of East Prussia and Austrian [[Galicia (Eastern Europe)|Galicia]], the badly organised and supplied [[Imperial Russian Army|Russian Army]] [[Battle of Tannenberg (1914)|faltered]] and the German and Austro-Hungarian armies thereafter steadily advanced eastward. The Germans benefited from political instability in [[Russia]] and its population's desire to end the war. In 1917 the German government allowed Russia's communist [[Bolshevik]] leader [[Vladimir Lenin]] to travel through Germany from [[Switzerland]] into Russia. Germany believed that if Lenin could create further political unrest, Russia would no longer be able to continue its war with Germany, allowing the German Army to focus on the Western Front.
+                    
+                    In March 1917, the [[Tsar]] was ousted from the Russian throne, and in November a [[Bolshevik]] government came to power under the leadership of Lenin. Facing political opposition to the Bolsheviks, he decided to end Russia's campaign against Germany, [[Austria-Hungary]], the [[Ottoman Empire]] and [[Bulgaria]] in order to redirect Bolshevik energy to eliminating internal dissent. In 1918, by the [[Treaty of Brest-Litovsk]], the Bolshevik government gave Germany and the Ottoman Empire enormous territorial and economic concessions in exchange for an end to war on the Eastern Front. All of the modern-day [[Baltic states]] ([[Estonia]], Latvia and [[Lithuania]]) were given over to the German occupation authority ''[[Ober Ost]]'', along with [[Belarus]] and [[Ukraine]]. Thus Germany had at last achieved its long-wanted dominance of "Mitteleuropa" (Central Europe) and could now focus fully on defeating the Allies on the Western Front. In practice, however, the forces needed to garrison and secure the new territories were a drain on the German war effort.
+                    
+                    ===Colonies===
+                    Germany quickly lost almost all its colonies. However, in [[German East Africa]], an impressive guerrilla campaign was waged by the colonial army leader there, General [[Paul von Lettow-Vorbeck|Paul Emil von Lettow-Vorbeck]]. Using Germans and native [[Askari]]s, Lettow-Vorbeck launched multiple guerrilla raids against British forces in [[Kenya]] and [[Rhodesia]]. He also invaded [[Portugal|Portuguese]] [[Mozambique]] to gain his forces supplies and to pick up more Askari recruits. His force was still active at war's end.&lt;ref&gt;Edwin Hoyt, ''Colonel von Lettow-Vorbeck and Germany's East African Empire'' (1981)&lt;/ref&gt;
+                    
+                    ===1918===
+                    Defeating Russia in 1917 enabled Germany to transfer hundreds of thousands of combat troops from the east to the Western Front, giving it a numerical advantage over the [[Allies (World War I)|Allies]]. By retraining the soldiers in new [[stormtrooper]] tactics, the Germans expected to unfreeze the battlefield and win a decisive victory before the army of the [[United States]], which had now entered the war on the side of Britain and France, arrived in strength.&lt;ref&gt;Holger H. Herwig, ''The First World War: Germany and Austria&#x2013;Hungary 1914&#x2013;1918'' (1996)&lt;/ref&gt;  However, the repeated German offensives in the autumn of 1917 and the spring of 1918 all failed, as the Allies fell back and regrouped and the Germans lacked the [[military reserve|reserves]] needed to consolidate their gains. Meanwhile soldiers had become radicalised by the [[Russian Revolution]] and were less willing to continue fighting. The war effort sparked civil unrest in Germany, while the troops, who had been constantly in the field without relief, grew exhausted and lost all hope of victory. In the summer of 1918, with the Americans arriving at the rate of 10,000 a day and the German reserves spent, it was only a matter of time before multiple Allied offensives destroyed the German army.&lt;ref&gt;Rod Paschall, ''The defeat of imperial Germany, 1917&#x2013;1918'' (1994)&lt;/ref&gt;
+                    
+                    ===Home front===
+                    The concept of "[[total war]]", meant that supplies had to be redirected towards the armed forces and, with German commerce being stopped by the Allied [[naval blockade]], German civilians were forced to live in increasingly meagre conditions. First food prices were controlled, then rationing was introduced. During the war about 750,000 German civilians died from malnutrition.&lt;ref&gt;{{cite web|url=http://www.dhm.de/lemo/html/wk1/wirtschaft/versorgung/index.html |title=1914&#x2013;18: Lebensmittelversorgung |author=[[German Historical Museum]] |language=German}}&lt;/ref&gt;
+                    
+                    [[File:Gedenkstein An der Wuhlheide 131a (Oschw) Opfer des 1 Weltkrieges3.jpg|thumb|A memorial to soldiers killed in World War I.]]
+                    Towards the end of the war conditions deteriorated rapidly on the home front, with severe food shortages reported in all urban areas. The causes included the transfer of many farmers and food workers into the military, combined with the overburdened railway system, shortages of coal, and the British blockade. The winter of 1916&#x2013;1917 was known as the "turnip winter", because the people had to survive on a vegetable more commonly reserved for livestock, as a substitute for potatoes and meat, which were increasingly scarce. Thousands of soup kitchens were opened to feed the hungry, who grumbled that the farmers were keeping the food for themselves. Even the army had to cut the soldiers' rations.&lt;ref&gt;Roger Chickering, ''Imperial Germany and the Great War, 1914&#x2013;1918'' (2004) p. 141&#x2013;42&lt;/ref&gt; The morale of both civilians and soldiers continued to sink.
+                    
+                    ===Revolt===
+                    Many Germans wanted an end to the war and increasing numbers began to associate with the political left, such as the Social Democratic Party and the more radical Independent Social Democratic Party, which demanded an end to the war. The [[American entry into World War I|entry of the U.S.]] into the war in April 1917 changed the long-run [[balance of power (international relations)|balance of power]] in favour of the Allies.
+                    
+                    The end of October 1918, in [[Kiel]], in northern Germany, saw the beginning of the [[German Revolution of 1918&#x2013;1919]]. Units of the German Navy refused to set sail for a last, large-scale operation in a war which they saw as good as lost, initiating the uprising. On 3 November, the revolt spread to other cities and states of the country, in many of which workers' and soldiers' councils were established. Meanwhile, Hindenburg and the senior generals lost confidence in the Kaiser and his government.
+                    
+                    [[Kingdom of Bulgaria|Bulgaria]] signed the [[Armistice of Solun]] on 29 September 1918. The [[Ottoman Empire]] signed the [[Armistice of Mudros]] on 30 October 1918. Between 24 October and 3 November 1918, [[Italy]] defeated [[Austria-Hungary]] in the [[battle of Vittorio Veneto]], which forced Austria-Hungary to sign the [[Armistice of Villa Giusti]] on 3 November 1918. So, in November 1918, with internal revolution, the Allies [[Hundred Days Offensive|advancing toward Germany on the Western Front]], Austria-Hungary falling apart from multiple ethnic tensions, its other allies out of the war and pressure from the German high command, the Kaiser and all German ruling princes abdicated. On 9 November, the Social Democrat [[Philipp Scheidemann]] proclaimed a republic. The new government led by the [[Social Democratic Party of Germany|German Social Democrats]] called for and received an [[Armistice with Germany (Compi&#xE8;gne)|armistice]] on 11 November. The war was over; the history books closed on the German Empire. It was succeeded by the democratic, yet flawed, [[Weimar Republic]].&lt;ref&gt;A. J. Ryder, ''The German Revolution of 1918: A Study of German Socialism in War and Revolt'' (2008)&lt;/ref&gt; Those opposed, including disaffected veterans, joined a diverse set of paramilitary and underground political groups like the [[Freikorps]], the [[Organisation Consul]], and the Communists, and Germany headed towards troubled times.&lt;ref&gt;Robert GL Waite, Vanguard of Nazism, WW Norton publisher&lt;/ref&gt;
+                    
+                    ==Legacy==
+                    The defeat and [[aftermath of World War I]] and the penalties imposed by the [[Treaty of Versailles]] shaped the positive memory of the Empire, especially among Germans who distrusted and despised the Weimar Republic. Conservatives, liberals, socialists, nationalists, Catholics, and Protestants all had their own interpretations, which led to a fractious political and social climate in Germany in the aftermath of the empire's collapse.
+                    
+                    Under Bismarck, a united German state had finally been achieved, but it remained a Prussian-dominated state and did not include German Austria as [[Pan-German]] nationalists had desired. The influence of Prussian [[militarism]], the Empire&#x2019;s colonial efforts and its vigorous, competitive industrial prowess all gained it the dislike and envy of other nations. The German Empire enacted a number of progressive reforms, such as Europe's first social welfare system (still in place today) and freedom of press. There was also a modern system for electing the federal parliament, the Reichstag, in which every adult man had one vote. This enabled the Socialists and the Catholic Centre Party to play considerable roles in the empire's political life despite the continued hostility of Prussian aristocrats.
+                    
+                    The era of the German Empire is well remembered in Germany as one of great cultural and intellectual vigour. [[Thomas Mann]] published his novel ''[[Buddenbrooks]]'' in 1901. [[Theodor Mommsen]] received the [[Nobel prize for literature]] a year later for his Roman history. Painters like the groups [[Der Blaue Reiter]] and [[Die Br&#xFC;cke]] made a significant contribution to modern art. The [[AEG]] [http://www.courses.psu.edu/nuc_e/nuc_e405_g9c/berlin/bauten/turbinenhalle.jpg turbine building] in Berlin by [[Peter Behrens]] from 1909 can be regarded as a milestone in classic modern architecture and an outstanding example of emerging functionalism. The social, economic, and scientific successes of this ''[[Gr&#xFC;nderzeit]]'', or founding epoch, have sometimes led the Wilhelmine era to be regarded as a [[golden age]].
+                    
+                    In the field of economics, the "''Kaiserzeit''" laid the foundation of Germany's status as one of the world's leading economic powers. The iron and coal industries of the [[Ruhr]], the [[Saarland|Saar]] and [[Upper Silesia]] especially contributed to that process. The first motorcar was built by [[Karl Benz]] in 1886. The enormous growth of industrial production and industrial potential also led to a rapid urbanisation of Germany, which turned the Germans into a nation of city dwellers. More than 5 million people left Germany for the [[German American|United States]] during the 19th century.&lt;ref&gt;"[http://www.loc.gov/teachers/classroommaterials/presentationsandactivities/presentations/immigration/german4.html A New Surge of Growth]". [[Library of Congress]].&lt;/ref&gt;
+                    
+                    ===Sonderweg===
+                    {{main|Sonderweg}}
+                    
+                    Many historians have emphasized the central importance of a German ''[[Sonderweg]]'' or "special path" (or "exceptionalism") as the root of Nazism and the German catastrophe in the 20th century.  According to the historiography by Kocka (1988), the process of nation-building from above had very grievous long-term implications. In terms of parliamentary democracy, Parliament was kept weak, the parties were fragmented, and there was a high level of mutual distrust. The Nazis built on the illiberal, anti-pluralist elements of Weimar's political culture. The Junker elites (the large landowners in the east) and senior civil servants used their great power and influence well into the twentieth century to frustrate any movement toward democracy. They played an especially negative role in the crisis of 1930&#x2013;1933. Bismarck's emphasis on military force amplified the voice of the officer corps, which combined advanced modernization of military technology with reactionary politics. The rising upper-middle-class elites, in the business, financial, and professional worlds, tended to accept the values of the old traditional elites. The German Empire was for Hans-Ulrich Wehler a strange mixture of highly successful capitalist industrialization and socio-economic modernization on the one hand, and of surviving pre-industrial institutions, power relations and traditional cultures on the other. Wehler argues that it produced a high degree of internal tension, which led on the one hand to the suppression of socialists, Catholics, and reformers, and on the other hand to a highly aggressive foreign policy. For these reasons [[Fritz Fischer]] and his students emphasized Germany&#x2019;s primary guilt for causing World War I.&lt;ref&gt;J&#xFC;rgen Kocka, "German History before Hitler: The Debate about the German 'Sonderweg.'" ''Journal of Contemporary History,'' Jan 1988, Vol. 23#1, pp 3&#x2013;16 [http://www.jstor.org/pss/260865 in JSTOR]&lt;/ref&gt;
+                    
+                    [[Hans-Ulrich Wehler]], a leader of the [[Bielefeld School]] of social history, places the origins of Germany's path to disaster in the 1860s&#x2013;1870s, when economic modernization took place, but political modernization did not happen and the old Prussian rural elite remained in firm control of the army, diplomacy and the civil service. Traditional, aristocratic, premodern society battled an emerging capitalist, bourgeois, modernizing society. Recognizing the importance of modernizing forces in industry and the economy and in the cultural realm, Wehler argues that reactionary traditionalism dominated the political hierarchy of power in Germany, as well as social mentalities and in class relations (''Klassenhabitus''). The catastrophic German politics between 1914 and 1945 are interpreted in terms of a delayed modernization of its political structures. At the core of Wehler's interpretation is his treatment of "the middle class" and "revolution," each of which was instrumental in shaping the 20th century. Wehler's examination of Nazi rule is shaped by his concept of "charismatic domination," which focuses heavily on [[Adolf Hitler]].&lt;ref&gt;Wehler, ''Deutsche Gesellschaftsgeschichte: Vom Beginn des Ersten Weltkrieges bis zur Gr&#xFC;ndung der Beiden Deutschen Staaten 1914&#x2013;1949'' (2003) is the fourth volume of his monumental history of German society. None of the series has yet been translated into English. A partial summary appears in Hans-Ulrich Wehler, ''The German Empire, 1871&#x2013;1918'' (1997)&lt;/ref&gt;
+                    
+                    The historiographical concept of a German Sonderweg has had a turbulent history. Nineteenth century scholars who emphasized a separate German path to modernity saw it as a positive factor that differentiated Germany from the "western path" typified by Great Britain. They stressed the strong bureaucratic state, reforms initiated by Bismarck and other strong leaders, the Prussian service ethos, the high culture of philosophy and music, and Germany's pioneering of a social welfare state. In the 1950s, historians in West Germany argued that the Sonderweg lead Germany to the disaster of 1933&#x2013;1945. The special circumstances of German historical structures and experiences, were interpreted as preconditions that, while not directly causing National Socialism, did hamper the development of a liberal democracy and facilitate the rise of fascism. The Sonderweg paradigm has provided the impetus for at least three strands of research in German historiography: the "long nineteenth century", the history of the bourgeoisie, and comparisons with the West. After 1990, increased attention to cultural dimensions and to comparative and relational history moved German historiography to different topics, with much less attention paid to the Sonderweg. While some historians have abandoned the Sonderweg thesis, they have not provided a generally accepted alternative interpretation.&lt;ref&gt;Helmut Walser Smith, "When the Sonderweg Debate Left Us," ''German Studies Review,'' May 2008, Vol. 31#2 pp 225&#x2013;240&lt;/ref&gt;
+                    
+                    ==Territorial legacy==
+                    In addition to present-day Germany, large parts of what comprised the German Empire now belong to several other modern European countries:
+                    
+                    {|class="wikitable"
+                    |-
+                    ! German name || Country || Region
+                    |-
+                    | [[Alsace-Lorraine|Elsass-Lothringen]] || France || The German-speaking d&#xE9;partements of [[Bas-Rhin]] and [[Haut-Rhin]] ([[Alsace]] region) and [[Moselle]] (northeastern part of the [[Lorraine (r&#xE9;gion)|Lorraine]] region)
+                    |-
+                    | The [[Eupen]] und [[Malmedy|Malm&#xE9;dy]] area &lt;br/&gt;&lt;small&gt;(intentionally spelled with &#xE9; only then)&lt;/small&gt;|| Belgium || [[Eupen]] and [[Malmedy]], two towns, and the [[municipalities of Belgium|municipalities]] of [[Amel]], [[B&#xFC;llingen]], [[Burg-Reuland]], [[B&#xFC;tgenbach]], [[Kelmis]], [[Lontzen]], [[Raeren]], [[Waimes]] and [[St. Vith]], part of the [[Li&#xE8;ge (province)|province of Li&#xE8;ge]], on the German border
+                    |-
+                    | [[South Jutland County|Nordschleswig]] || Denmark || [[South Jutland County]] (excluding towns of [[Taps]], [[Hejle]] and [[Vejstrup]]), and the towns of [[Hviding]], [[Roager]] and [[Spandet]] 
+                    |-
+                    | [[Hlu&#x10D;&#xED;n Region|Hultschiner L&#xE4;ndchen]] || Czech Republic || [[Hlu&#x10D;&#xED;n Region]], on the border to Poland in Silesia, from which most of Germans were [[Flight and expulsion of Germans (1944&#x2013;50)|deported following WWII]].
+                    |-
+                    | Central and eastern [[Pomerania Province (1815&#x2013;1945)|Pommern]], [[Province of Silesia|Schlesien]], [[Neumark (region)|Ostbrandenburg]], [[Warmia|Ermland]], [[Masuria|Masuren]], [[West Prussia|Westpreu&#xDF;en]], Southern [[East Prussia|Ostpreu&#xDF;en]]&lt;br/&gt;Also [[Province of Posen|Posen (Wartheland)]].|| Poland || the northern and western parts of the country, including [[Pomerania]], [[Silesia]], [[Lubusz Land]], [[Warmian-Masurian Voivodeship|Warmia and Masuria]], from all of which Germans were [[Flight and expulsion of Germans (1944&#x2013;50)|deported following WWII]].
+                    |-
+                    | Northern [[East Prussia|Ostpreu&#xDF;en]] with [[K&#xF6;nigsberg]] || Russia|| [[Kaliningrad Oblast]] exclave on the Baltic, from which Germans were [[Flight and expulsion of Germans (1944&#x2013;50)|deported following WWII]].
+                    |-
+                    | [[Klaip&#x117;da Region|Memelland]] with [[Klaip&#x117;da|Memel (city)]] || [[Lithuania]] || [[Klaip&#x117;da Region]], including the Baltic coastal city of [[Klaip&#x117;da]], from which Germans were [[Flight and expulsion of Germans (1944&#x2013;50)|deported following WWII]].
+                    |-
+                    |[[:de:Wylerberg|Wylerberg]] || [[Netherlands]] || [[:nl:Duivelsberg (heuvel)|Duivelsberg]], an uninhabited hill (as well as some nearby slivers of land) annexed by the Netherlands after WWII.
+                    |}
+                    
+                    ==See also==
+                    {{Portal|Germany}}
+                    *[[List of German monarchs]]
+                    *[[Kingdom of Germany]]
+                    *[[German colonization of the Americas]]
+                    *[[German East Africa Company]]
+                    *[[German New Guinea Company]]
+                    *[[List of former German colonies]]
+                    *[[Reichskolonialbund]]
+                    *[[Wilhelminism]]
+                    *[[German Army (German Empire)]]
+                    *[[Luftstreitkr&#xE4;fte]]
+                    *[[Imperial German Navy]]
+                    *[[German General Staff]]
+                    *[[House of Hohenzollern]]
+                    
+                    ==References==
+                    {{Reflist|colwidth=30em}}
+                    
+                    ==Further reading==
+                    &lt;!---If these books are cited in this article, they should be turned into citations within the article text:---&gt;
+                    {{refbegin}}
+                    *Berghahn, Volker Rolf. ''Modern Germany: society, economy, and politics in the twentieth century'' (1987) [http://hdl.handle.net/2027/heb.01673 ACLS E-book]
+                    *Berghahn, Volker Rolf. ''Imperial Germany, 1871&#x2013;1914: Economy, Society, Culture, and Politics'' (2nd ed. 2005)
+                    *Blackbourn, David. ''The Long Nineteenth Century: A History of Germany, 1780&#x2013;1918'' (1998) [http://www.amazon.com/History-Germany-1780-1918-Nineteenth-Blackwell/dp/063123196X/  excerpt and text search]
+                    *Blackbourn, David, and Geoff Eley. ''The Peculiarities of German History: Bourgeois Society and Politics in Nineteenth-Century Germany'' (1984) [http://www.questia.com/read/27706474 online edition] ISBN 0-19-873058-6
+                    * Blanke, Richard. ''Prussian Poland in the German Empire'' (1981)
+                    * [[Erich Brandenburg|Brandenburg, Erich]]. ''Die Reichsgr&#xFC;ndung'' (2 vols, 1923, online: [https://archive.org/details/diereichsbegrn01branuoft vol. 1] [https://archive.org/details/diereichsbegrn02branuoft vol. 2])
+                    * Cecil, Lamar. ''Wilhelm II: Prince and Emperor, 1859&#x2013;1900'' (1989) [http://www.questia.com/PM.qst?a=o&amp;d=23057779 online edition]; vol2: ''Wilhelm II: Emperor and Exile, 1900&#x2013;1941'' (1996) [http://www.questia.com/PM.qst?a=o&amp;d=105767371 online edition]
+                    * Chickering, Roger. ''Imperial Germany and the Great War, 1914-1918'' (2nd ed. 2004) [http://www.amazon.com/Imperial-Germany-1914-1918-Approaches-European/dp/0521839084/ excerpt and text search]
+                    * Clark, Christopher. '' Iron Kingdom: The Rise and Downfall of Prussia, 1600&#x2013;1947'' (2006), the standard scholarly survey
+                    * Dawson, William Harbutt. ''The Evolution of Modern Germany'' (1908), 503pp covers 1871-1906 with focus on social and economic history &amp; colonies  [http://books.google.com/books?id=neRCAAAAIAAJ online free]
+                    * Dawson, William Harbutt. ''Germany at Home'' (1908) 275 pp; popular description of social life in villages and cities [http://books.google.com/books?id=F23iAAAAMAAJ online]
+                    * Dawson, William Harbutt. ''Bismarck and state socialism; an exposition of the social and economic legislation of Germany since 1870 '' (1890) 175 pp [http://archive.org/details/bismarckstatesoc00daws online]
+                    * Dawson, William Harbutt. ''Municipal life and government in Germany'' (1914); 507pp describes the workings of local government and the famous bureaucracy [http://books.google.com/books?id=SwKkAAAAMAAJ  online]* Dawson, William Harbutt. ''Germany and the Germans''  (1894) 387pp;  politics and parties, [http://books.google.com/books?id=wUEBAAAAYAAJ  Volume 2 online]
+                    * {{cite book|last=Feuchtwanger|first=Ed|title=Imperial Germany 1850-1918|publisher=Routledge|year=2002|isbn=1-13462-072-1|ref=harv}}
+                    *[[Fritz Fischer|Fischer, Fritz]]. ''From Kaiserreich to Third Reich: Elements of Continuity in German History, 1871&#x2013;1945''. (1986). ISBN 0-04-943043-2.
+                    * Holborn, Hajo. ''A History of Modern Germany: 1840&#x2013;1945'' (1969), pp 173&#x2013;532
+                    * Jefferies, Mattew. ''Imperial Culture in Germany, 1871&#x2013;1918''. (Palgrave, 2003) ISBN 1-4039-0421-9.
+                    * Kennedy, Paul. ''The Rise of the Anglo-German Antagonism, 1860&#x2013;1914'' (2nd ed. 1988) ISBN 1-57392-301-X
+                    * {{cite book|last=Kitchen|first=Martin|title=A History of Modern Germany: 1800 to the Present|publisher=John Wiley &amp; Sons|year=2011|isbn=1-44439-689-7|ref=harv}}
+                    * Koch, Hannsjoachim W. ''A constitutional history of Germany in the nineteenth and twentieth centuries'' (1984).
+                    *Kurlander, Eric. ''The Price of Exclusion: Ethnicity, National Identity, and the Decline of German Liberalism, 1898&#x2013;1933'' (2007).
+                    *[[Wolfgang Mommsen|Mommsen, Wolfgang]]. ''Imperial Germany 1867&#x2013;1918: Politics, Culture, and Society in an Authoritarian State''. (1995). ISBN 0-340-64534-2.
+                    * Nipperdey, Thomas. ''Germany from Napoleon to Bismarck'' (1996) dense coverage of chief topics
+                    *Reagin, Nancy. "The Imagined Hausfrau: National Identity, Domesticity, and Colonialism in Imperial Germany," ''Journal of Modern History'' (2001) 72#1 pp.&amp;nbsp;54&#x2013;86 [http://www.jstor.org/stable/10.1086/319879 in JSTOR]
+                    *Retallack, James. ''Germany In The Age of Kaiser Wilhelm II'', (1996) ISBN 0-312-16031-3.
+                    *Retallack, James. ''Imperial Germany 1871-1918'' (2008)
+                    *[[Gerhard Ritter|Ritter, Gerhard]]. ''The Sword and the Scepter; the Problem of Militarism in Germany''. (4 vol University of Miami Press 1969&#x2013;73)
+                    * Richie, Alexandra. ''Faust's Metropolis: A History of Berlin'' (1998), 1139pp by scholar; pp 188&#x2013;233
+                    *Scheck, Raffael. "Lecture Notes, Germany and Europe, 1871&#x2013;1945" (2008) [http://www.colby.edu/personal/r/rmscheck/Contents.html full text online], a brief textbook by a leading scholar
+                    *Schollgen, Gregor. ''Escape into War? The Foreign Policy of Imperial Germany''. (Berg, 1990) ISBN 0-85496-275-1.
+                    *Smith, Woodruff D. ''The German Colonial Empire'' (1978)
+                    *[[Michael St&#xFC;rmer|St&#xFC;rmer, Michael]]. ''The German Empire, 1870&#x2013;1918''. (Random House, 2000). ISBN 0-679-64090-8.
+                    * Stern, Fritz. ''Gold and Iron: Bismark, Bleichroder, and the Building of the German Empire'' (1979) Bismark worked closely with this leading banker and financier [http://www.amazon.com/Gold-Iron-Bismark-Bleichroder-Building/dp/0394740343/ excerpt and text search]
+                    * Steinberg, Jonathan. ''Bismarck: A Life''  (2011), a recent scholarly biography; emphasis on Bismarck's personality
+                    *Taylor, A.J.P. ''Bismarck: The Man and the Statesman'' (1967) [http://www.questia.com/PM.qst?a=o&amp;d=14683010 online edition]
+                    *[[Hans-Ulrich Wehler|Wehler, Hans-Ulrich]]. ''The German Empire, 1871&#x2013;1918''. (Berg, 1985). ISBN 0-907582-22-2
+                    * Wildenthal, Lora. ''German Women for Empire, 1884&#x2013;1945'' (2001)
+                    {{refend}}
+                    
+                    ===Historiography===
+                    *Berghahn, Volker Rolf. "Structure and Agency in Wilhelmine Germany: The history of the German Empire, Past, present and Future," in Annika Mombauer and Wilhelm Deist, eds. ''The Kaiser: New Research on Wilhelm II's Role in Imperial Germany'' (2003) pp 281&#x2013;93, historiography
+                    *Chickering, Roger, ed. ''Imperial Germany: A Historiographical Companion'' (1996), 552pp; 18 essays by specialists
+                    *Dickinson, Edward Ross. "The German Empire: an Empire?" ''History Workshop Journal'' Issue 66, Autumn 2008 [http://muse.jhu.edu/journals/history_workshop_journal/v066/66.dickinson.html online in [[Project MUSE]]], with guide to recent scholarship
+                    *Jefferies, Matthew. ''Contesting the German Empire 1871 - 1918'' (2008) [http://www.amazon.com/Contesting-German-Empire-1871-1918/dp/1405129972/ excerpt and text search]
+                    *M&#xFC;ller, Sven Oliver, and Cornelius Torp, ed. ''Imperial Germany Revisited: Continuing Debates and New Perspectives'' (2011)
+                    *Reagin, Nancy R. "Recent Work on German National Identity: Regional? Imperial? Gendered? Imaginary?" ''Central European History'' 2004 37, pp 273&#x2013;289 {{doi|10.1163/156916104323121483}}
+                    
+                    ===Primary sources===
+                    * Vizetelly, Henry. ''Berlin Under the New Empire: Its Institutions, Inhabitants, Industry, Monuments, Museums, Social Life, Manners, and Amusements '' (2 vol. London, 1879) [http://books.google.com/books?id=Yn4gAAAAMAAJ online volume 2]
+                    
+                    ==External links==
+                    {{Wiktionary|German Empire}}
+                    {{Commons}}
+                    *[http://www.library.wisc.edu/etext/ravenstein/ Ravenstein's Atlas of the German Empire], Library.wis.edu
+                    *[http://www.gemeindeverzeichnis.de/gem1900/gem1900.htm?gem1900_2.htm Administrative subdivision and census results (1900/1910)], Gemeindeverzeichnis.de {{de icon}}
+                    * Brandenburg Historica (2005). "[http://stores.militaryhistoryshop.com/gott-kaiser-vaterland-military-and-patriotic-music-of-imperial-germany-1903-1915/  ''Gott, Kaiser, Vaterland: Military and Patriotic Music of Imperial Germany, 1903-1915'']". Updated January 27, 2008.
+                    
+                    {{States of the German Empire}}
+                    {{German Reich}}
+                    {{Germany topics}}
+                    {{Empires}}
+                    
+                    [[Category:German Empire| 01]]
+                    [[Category:Former empires]]
+                    [[Category:States and territories established in 1871]]
+                    [[Category:1918 disestablishments]]
+                    
+                    {{Link FA|de}}
+                    {{Link FA|hr}}
+                    {{Link FA|ka}}
+                    {{Link FA|eo}}</rev>
+                </revisions>
+            </page>
+        </pages>
+    </query>
+</api>
+

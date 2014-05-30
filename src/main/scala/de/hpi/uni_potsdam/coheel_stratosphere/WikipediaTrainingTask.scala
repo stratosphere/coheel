@@ -14,7 +14,7 @@ class WikipediaTrainingTask extends Program with ProgramDescription {
 		val currentPath = System.getProperty("user.dir")
 		val input = TextFile(s"file://$currentPath/src/test/resources/wikipedia_files.txt")
 		val words = input.map { file =>
-			Source.fromFile(file).mkString
+			Source.fromFile(s"src/test/resources/$file").mkString
 		}.flatMap { text =>
 			val extractor = new LinkExtractor()
 			val links = extractor.extractLinks(WikiPageReader.xmlToWikiPage(XML.loadString(text)))

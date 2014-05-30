@@ -1,1 +1,6 @@
-src/test/resources/wikipedia_test_article.xml
+wikipedia_Angela_Merkel.xml
+wikipedia_Federal_Chancellor_of_the_Federal_Republic_of_Germany.xml
+wikipedia_German_Empire.xml
+wikipedia_Germany_national_football_team.xml
+wikipedia_Germany.xml
+wikipedia_test_article.xml
