@@ -6,11 +6,14 @@ import java.net.URL
 import org.dbpedia.extraction.util.Language
 import de.hpi.uni_potsdam.coheel_stratosphere.wiki.LinkExtractor
 import eu.stratosphere.client.LocalExecutor
+import org.slf4s.Logging
 
-object Main extends App {
+object Main extends App with Logging {
 	override def main(args: Array[String]): Unit = {
 //		runExtraction()
+		log.error("THIS IS A TEST")
 		val task = new WikipediaTrainingTask()
+		LocalExecutor.setOverwriteFilesByDefault(true)
 		LocalExecutor.execute(task)
 	}
 

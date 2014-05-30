@@ -35,6 +35,7 @@
   <component name="Encoding" useUTFGuessing="true" native2AsciiForPropertiesFiles="false">
     <file url="file://$PROJECT_DIR$" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/pom.xml" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/logback.xml" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/scala/de/hpi/uni_potsdam/coheel_stratosphere/Main.scala" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/scala/de/hpi/uni_potsdam/coheel_stratosphere/WikipediaTrainingTask.scala" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/scala/de/hpi/uni_potsdam/coheel_stratosphere/wiki/LinkExtractor.scala" charset="UTF-8" />
@@ -261,6 +262,28 @@
       </JAVADOC>
       <SOURCES>
         <root url="jar://$MAVEN_REPOSITORY$/ant/ant/1.6.5/ant-1.6.5-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: ch.qos.logback:logback-classic:1.1.1">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/ch/qos/logback/logback-classic/1.1.1/logback-classic-1.1.1.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/ch/qos/logback/logback-classic/1.1.1/logback-classic-1.1.1-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/ch/qos/logback/logback-classic/1.1.1/logback-classic-1.1.1-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: ch.qos.logback:logback-core:1.1.1">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/ch/qos/logback/logback-core/1.1.1/logback-core-1.1.1.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/ch/qos/logback/logback-core/1.1.1/logback-core-1.1.1-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/ch/qos/logback/logback-core/1.1.1/logback-core-1.1.1-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: com.amazonaws:aws-java-sdk:1.2.1">
@@ -1066,15 +1089,26 @@
         <root url="jar://$MAVEN_REPOSITORY$/org/scalatest/scalatest_2.10/2.1.6/scalatest_2.10-2.1.6-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.slf4j:slf4j-api:1.6.4">
+    <library name="Maven: org.slf4j:slf4j-api:1.7.6">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/1.6.4/slf4j-api-1.6.4.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/1.7.6/slf4j-api-1.7.6.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/1.6.4/slf4j-api-1.6.4-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/1.7.6/slf4j-api-1.7.6-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/1.6.4/slf4j-api-1.6.4-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/1.7.6/slf4j-api-1.7.6-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: org.slf4s:slf4s-api_2.10:1.7.6">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/slf4s/slf4s-api_2.10/1.7.6/slf4s-api_2.10-1.7.6.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/org/slf4s/slf4s-api_2.10/1.7.6/slf4s-api_2.10-1.7.6-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/slf4s/slf4s-api_2.10/1.7.6/slf4s-api_2.10-1.7.6-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: org.xerial.snappy:snappy-java:1.0.5">

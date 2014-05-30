@@ -1,11 +1,8 @@
 package de.hpi.uni_potsdam.coheel_stratosphere
 
-import eu.stratosphere.client.LocalExecutor
-
 import eu.stratosphere.api.scala._
 import eu.stratosphere.api.scala.operators._
 import eu.stratosphere.api.common.{Program, ProgramDescription, Plan}
-import eu.stratosphere.api.common.operators.base.GenericDataSinkBase
 
 
 class WikipediaTrainingTask extends Program with ProgramDescription {

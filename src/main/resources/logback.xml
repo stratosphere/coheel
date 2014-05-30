@@ -1,0 +1,13 @@
+<configuration>
+	<appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>[%-5level] %logger{36} - %d{HH:mm} - %msg%n</pattern>
+		</encoder>
+	</appender>
+	<logger level="ERROR" name="eu.stratosphere">
+        <appender-ref ref="Console" />
+	</logger>
+	<root level="ERROR">
+		<appender-ref ref="Console" />
+	</root>
+</configuration>
