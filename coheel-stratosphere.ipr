@@ -1027,6 +1027,14 @@
         <root url="jar://$MAVEN_REPOSITORY$/org/ow2/asm/asm/4.0/asm-4.0-sources.jar!/" />
       </SOURCES>
     </library>
+    <library name="Maven: org.scala-lang:scala-compiler-bundle:2.1">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/scala-lang/scala-compiler/2.1/scala-compiler-2.1.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/scala-lang/scala-library/2.1/scala-library-2.1.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
     <library name="Maven: org.scala-lang:scala-compiler-bundle:2.10.2">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/org/scala-lang/scala-compiler/2.10.2/scala-compiler-2.10.2.jar!/" />
@@ -1041,6 +1049,15 @@
         <root url="jar://$MAVEN_REPOSITORY$/org/scala-lang/scala-compiler/2.10.3/scala-compiler-2.10.3.jar!/" />
         <root url="jar://$MAVEN_REPOSITORY$/org/scala-lang/scala-library/2.10.3/scala-library-2.10.3.jar!/" />
         <root url="jar://$MAVEN_REPOSITORY$/org/scala-lang/scala-reflect/2.10.3/scala-reflect-2.10.3.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="Maven: org.scala-lang:scala-compiler-bundle:2.10.4">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/scala-lang/scala-compiler/2.10.4/scala-compiler-2.10.4.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/scala-lang/scala-library/2.10.4/scala-library-2.10.4.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/scala-lang/scala-reflect/2.10.4/scala-reflect-2.10.4.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
