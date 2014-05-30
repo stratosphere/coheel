@@ -24,6 +24,10 @@ object Main extends App with Logging {
 		linkExtractor.extractLinks(page).foreach { link =>
 			println(String.format("%80s||%s", link.text, link.destination))
 		}
+
+		// TODO:
+		// Lucene Stemming/Tokenization
+		//
 	}
 
 	private def getExampleWikiPage(pageId: Long): WikiPage = {

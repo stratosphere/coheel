@@ -13,7 +13,7 @@ import de.hpi.uni_potsdam.coheel_stratosphere.wiki.wikiparser.SimpleWikiParser
  */
 // Note: In contrast to InternalLink, this class does not contain a Node, because
 // that should not be part of the interface of this class.
-case class Link(text: String, destination: String)
+case class Link(title: String, text: String, destination: String)
 
 class LinkExtractor {
 
@@ -28,7 +28,9 @@ class LinkExtractor {
 	}
 
 	var links: Seq[Link] = _
+	var currentWikiTitle: String = _
 	def extractLinks(wikiPage: WikiPage): Seq[Link] = {
+		currentWikiTitle = wikiPage.title.decodedWithNamespace
 		val wikiParser = new SimpleWikiParser()
 		val ast = wikiParser.apply(wikiPage)
 		walkAST(ast)
@@ -131,6 +133,6 @@ class LinkExtractor {
 	 * Translates an internal link to an link, that can be exposed to the user.
 	 */
 	def toLink(link: InternalLink): Option[Link] = {
-		Some(Link(link.text, link.destination))
+		Some(Link(currentWikiTitle, link.text, link.destination))
 	}
 }
