@@ -1,10 +1,10 @@
-package de.hpi.uni_potsdam.coheel_stratosphere
+package de.hpi.uni_potsdam.coheel_stratosphere.wiki
 
 import org.dbpedia.extraction.sources.WikiPage
 import org.dbpedia.extraction.wikiparser.InternalLinkNode
 import org.dbpedia.extraction.wikiparser.Node
 import scala.collection.mutable
-import de.hpi.uni_potsdam.coheel_stratosphere.wikiparser.SimpleWikiParser
+import de.hpi.uni_potsdam.coheel_stratosphere.wiki.wikiparser.SimpleWikiParser
 
 case class Link(node: Node, var text: String, var destination: String) {
 	def this(node: Node) = this(node, null, null)

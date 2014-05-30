@@ -1,4 +1,4 @@
-package de.hpi.uni_potsdam.coheel_stratosphere
+package de.hpi.uni_potsdam.coheel_stratosphere.wiki
 
 import scala.xml.Elem
 import org.dbpedia.extraction.sources.WikiPage
