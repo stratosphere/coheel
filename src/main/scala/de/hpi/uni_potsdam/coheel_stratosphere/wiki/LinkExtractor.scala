@@ -8,14 +8,12 @@ import de.hpi.uni_potsdam.coheel_stratosphere.wiki.wikiparser.SimpleWikiParser
 
 /**
  * Represents a link in a Wikipedia article.
- * @param text The link's text.
- * @param destination The link's destination.
+ * @param text The link's text, e.g. 'Merkel'
+ * @param destination The link's destination, e.g. 'Angela Merkel'
  */
 // Note: In contrast to InternalLink, this class does not contain a Node, because
 // that should not be part of the interface of this class.
-case class Link(var text: String, var destination: String) {
-	def this() = this(null, null)
-}
+case class Link(text: String, destination: String)
 
 class LinkExtractor {
 
@@ -77,6 +75,12 @@ class LinkExtractor {
 			Some(link)
 		}
 	}
+
+	/**
+	 * Prints all links at the current stage.
+	 * This can be used for debugging.
+	 * @return The unaltered link.
+	 */
 	def debugPrintAllLinks(link: InternalLink): Option[InternalLink] = {
 		println(link.text + "#" + link.destination)
 		Some(link)
@@ -123,6 +127,9 @@ class LinkExtractor {
 		else Some(link)
 	}
 
+	/**
+	 * Translates an internal link to an link, that can be exposed to the user.
+	 */
 	def toLink(link: InternalLink): Option[Link] = {
 		Some(Link(link.text, link.destination))
 	}

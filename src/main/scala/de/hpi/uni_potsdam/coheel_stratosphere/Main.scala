@@ -18,7 +18,7 @@ object Main extends App with Logging {
 
 	private def runExtraction(): Unit = {
 		// Wikipedia-API-call:
-		// http://en.wikipedia.org/w/api.php?action=query&pageids=11867&prop=revisions&rvprop=content
+		// http://en.wikipedia.org/w/api.php?action=query&pageids=11867&prop=revisions&rvprop=content&format=xml
 		val page = getExampleWikiPage(11867); // Germany
 		val linkExtractor = new LinkExtractor()
 		linkExtractor.extractLinks(page).foreach { link =>
