@@ -7,11 +7,11 @@ import org.dbpedia.extraction.util.Language
 import de.hpi.uni_potsdam.coheel_stratosphere.wiki.wikiparser.SimpleWikiParser
 
 object WikiPageReader {
-	def xmlToPlainText(elem: Elem): String = {
+	def xmlToPlainText(elem: Elem): (String, String) = {
 		val wikiPage = xmlToWikiPage(elem)
 		val wikiParser = new SimpleWikiParser()
 		val ast = wikiParser.apply(wikiPage)
-		ast.toPlainText.replace("<ref></ref>", "")
+		(wikiPage.title.decodedWithNamespace, ast.toPlainText.replace("<ref></ref>", ""))
 	}
 
 
