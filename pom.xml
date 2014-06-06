@@ -4,7 +4,7 @@
 
 	<groupId>de.hpi.uni_potsdam</groupId>
 	<artifactId>coheel_stratosphere</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>coheel_stratosphere</name>
@@ -25,12 +25,7 @@
 			<artifactId>stratosphere-clients</artifactId>
 			<version>0.5</version>
 		</dependency>
-		 <dependency>
-			<groupId>junit</groupId>
-			 <artifactId>junit</artifactId>
-			<version>4.11</version>
-			<scope>test</scope>
-		</dependency>
+		<!-- DBpedia extraction framework for parsing the wikipages -->
 		<dependency>
 			<groupId>org.dbpedia.extraction</groupId>
 			<artifactId>core</artifactId>
@@ -46,21 +41,36 @@
 			<artifactId>slf4s-api_2.10</artifactId>
 			<version>1.7.6</version>
 		</dependency>
+		<!-- for tokenization, stemming, stopping -->
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-core</artifactId>
 			<version>4.8.1</version>
 		</dependency>
-		<!-- commmon analyzers, e.g. for English -->
+		<!-- commmon analyzers, e.g. for English, PorterStemmer -->
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-analyzers-common</artifactId>
 			<version>4.8.1</version>
 		</dependency>
+		<!-- for the trie data structure -->
+		<dependency>
+			<groupId>com.googlecode.concurrent-trees</groupId>
+			<artifactId>concurrent-trees</artifactId>
+			<version>2.4.0</version>
+		</dependency>
+		<!-- logging framework logback -->
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>1.1.1</version>
+		</dependency>
+		<!-- tests -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.scalatest</groupId>
