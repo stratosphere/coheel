@@ -19,14 +19,14 @@ class WikipediaTrainingTask extends Program with ProgramDescription {
 			pageSource
 		}
 
-		val linkCountPlan = buildLinkCountPlan(pageSource)
-		val wordCountPlan = buildWordCountPlan(pageSource)
-		val plan = new ScalaPlan(Seq(linkCountPlan, wordCountPlan))
+		val (linkCountPlan, linkContextCountPlan)   = buildLinkCountPlan(pageSource)
+		val wordCountPlan   = buildWordCountPlan(pageSource)
+		val plan = new ScalaPlan(Seq(linkCountPlan, wordCountPlan, linkContextCountPlan))
 
 		plan
 	}
 
-	def buildLinkCountPlan(pageSource: DataSet[String]): ScalaSink[(String, String, Int)] = {
+	def buildLinkCountPlan(pageSource: DataSet[String]): (ScalaSink[(String, String, Int)], ScalaSink[(String, String, Int)]) = {
 		val links = pageSource.flatMap { pageSource =>
 			val extractor = new LinkExtractor()
 			val wikiPage = WikiPageReader.xmlToWikiPage(XML.loadString(pageSource))
@@ -37,10 +37,15 @@ class WikipediaTrainingTask extends Program with ProgramDescription {
 		}
 		val linkCounts = links.groupBy { case (link, _) => link }
 			.reduce { (l1, l2) => (l1._1, l1._2 + l2._2) }
-			.map { case (link, count) => (link.text, link.destination, count) }
+			.map { case (link, count) => (link.text, link.destinationPage, count) }
+
+		val contextLinkCounts = links.groupBy( { case (link, _) => (link.sourcePage, link.destinationPage) })
+			.reduce { (l1, l2) => (l1._1, l1._2 + l2._2) }
+			.map { case (link, count) => (link.sourcePage, link.destinationPage, count) }
 
 		val countsOutput = linkCounts.write(s"file://$currentPath/testoutput/link-counts", CsvOutputFormat())
-		countsOutput
+		val contextLinkOutput = contextLinkCounts.write(s"file://$currentPath/testoutput/context-link-counts", CsvOutputFormat())
+		(countsOutput, contextLinkOutput)
 	}
 
 	def buildWordCountPlan(pageSource: DataSet[String]): ScalaSink[(String, String, Int)] = {

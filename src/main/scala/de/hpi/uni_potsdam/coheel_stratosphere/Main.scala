@@ -22,12 +22,8 @@ object Main extends App with Logging {
 		val page = getExampleWikiPage(11867); // Germany
 		val linkExtractor = new LinkExtractor()
 		linkExtractor.extractLinks(page).foreach { link =>
-			println(String.format("%80s||%s", link.text, link.destination))
+			println(String.format("%80s||%s", link.text, link.destinationPage))
 		}
-
-		// TODO:
-		// Lucene Stemming/Tokenization
-		//
 	}
 
 	private def getExampleWikiPage(pageId: Long): WikiPage = {

@@ -8,12 +8,13 @@ import de.hpi.uni_potsdam.coheel_stratosphere.wiki.wikiparser.SimpleWikiParser
 
 /**
  * Represents a link in a Wikipedia article.
+ * @param sourcePage The page the link is on, e.g. 'Germany'
  * @param text The link's text, e.g. 'Merkel'
- * @param destination The link's destination, e.g. 'Angela Merkel'
+ * @param destinationPage The link's destination, e.g. 'Angela Merkel'
  */
 // Note: In contrast to InternalLink, this class does not contain a Node, because
 // that should not be part of the interface of this class.
-case class Link(val title: String, val text: String, val destination: String)
+case class Link(sourcePage: String, text: String, destinationPage: String)
 
 class LinkExtractor {
 
