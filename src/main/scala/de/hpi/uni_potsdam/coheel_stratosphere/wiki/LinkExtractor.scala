@@ -13,7 +13,7 @@ import de.hpi.uni_potsdam.coheel_stratosphere.wiki.wikiparser.SimpleWikiParser
  */
 // Note: In contrast to InternalLink, this class does not contain a Node, because
 // that should not be part of the interface of this class.
-case class Link(title: String, text: String, destination: String)
+case class Link(val title: String, val text: String, val destination: String)
 
 class LinkExtractor {
 
