@@ -7,6 +7,10 @@ import org.dbpedia.extraction.util.Language
 import de.hpi.uni_potsdam.coheel_stratosphere.wiki.wikiparser.SimpleWikiParser
 
 object WikiPageReader {
+	/**
+	 * @param elem The xml root element.
+	 * @return A tuple of the pages title and the page's plain text content.
+	 */
 	def xmlToPlainText(elem: Elem): (String, String) = {
 		val wikiPage = xmlToWikiPage(elem)
 		val wikiParser = new SimpleWikiParser()

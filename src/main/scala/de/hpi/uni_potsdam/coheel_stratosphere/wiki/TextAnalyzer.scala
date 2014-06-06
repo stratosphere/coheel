@@ -8,11 +8,15 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute
 
 class TextAnalyzer {
 
-	def analyze(text: String): List[String] = {
+	def tokenize(text: String, stemming: Boolean = true): List[String] = {
 		// implemented following this guide:
 		// http://stackoverflow.com/questions/6334692/how-to-use-a-lucene-analyzer-to-tokenize-a-string
 		val analyzer = new EnglishAnalyzer(Version.LUCENE_48)
-		val tokenStream = new PorterStemFilter(analyzer.tokenStream(null, new StringReader(text)))
+		val tokenStream = if (stemming)
+			new PorterStemFilter(analyzer.tokenStream(null, new StringReader(text)))
+		else
+			analyzer.tokenStream(null, new StringReader(text))
+
 		tokenStream.reset()
 		val tokens = ListBuffer[String]()
 		while (tokenStream.incrementToken()) {

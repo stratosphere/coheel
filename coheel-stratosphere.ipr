@@ -47,6 +47,7 @@
     <file url="file://$PROJECT_DIR$/src/main/scala/de/hpi/uni_potsdam/coheel_stratosphere/wiki/wikiparser/TooManyErrorsException.scala" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/test/resources/wikipedia_test_article.xml" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/test/scala/coheel_stratosphere/LinkExtractorTest.scala" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/test/scala/coheel_stratosphere/NerTest.scala" charset="UTF-8" />
   </component>
   <component name="EntryPointsManager">
     <entry_points version="2.0" />
@@ -322,6 +323,17 @@
       </JAVADOC>
       <SOURCES>
         <root url="jar://$MAVEN_REPOSITORY$/com/esotericsoftware/minlog/minlog/1.2/minlog-1.2-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: com.github.tototoshi:scala-csv_2.10:1.0.0">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/com/github/tototoshi/scala-csv_2.10/1.0.0/scala-csv_2.10-1.0.0.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/com/github/tototoshi/scala-csv_2.10/1.0.0/scala-csv_2.10-1.0.0-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/com/github/tototoshi/scala-csv_2.10/1.0.0/scala-csv_2.10-1.0.0-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: com.google.guava:guava:14.0.1">
