@@ -6,12 +6,14 @@ import eu.stratosphere.api.common.{Program, ProgramDescription, Plan}
 import de.hpi.uni_potsdam.coheel_stratosphere.wiki.{Link, TextAnalyzer, WikiPageReader, LinkExtractor}
 import scala.xml.XML
 import scala.io.Source
+import eu.stratosphere.api.java.ExecutionEnvironment
 
 
 class WikipediaTrainingTask extends Program with ProgramDescription {
 
 	override def getDescription = "Training the model parameters for CohEEL."
 
+	val outputFormat = CsvOutputFormat[(String, String, Int)]("\n", "\t")
 	lazy val currentPath = System.getProperty("user.dir")
 	// input files, file with the names of the test wikipedia articles
 	lazy val wikipediaFilesPath = s"file://$currentPath/src/test/resources/wikipedia_files.txt"
@@ -30,6 +32,14 @@ class WikipediaTrainingTask extends Program with ProgramDescription {
 	 */
 	override def getPlan(args: String*): Plan = {
 		val input = TextFile(wikipediaFilesPath)
+//		val input = ExecutionEnvironment.createLocalEnvironment().fromElements(
+//			"wikipedia_Angela_Merkel.xml",
+//			"wikipedia_Federal_Chancellor_of_the_Federal_Republic_of_Germany.xml",
+//			"wikipedia_German_Empire.xml",
+//			"wikipedia_Germany_national_football_team.xml",
+//			"wikipedia_Germany.xml",
+//			"wikipedia_test_article.xml"
+//		)
 		val pageSource = input.map { file =>
 			val pageSource = Source.fromFile(s"src/test/resources/$file").mkString
 			pageSource
@@ -70,8 +80,8 @@ class WikipediaTrainingTask extends Program with ProgramDescription {
 			.reduce(count)
 			.map { case (link, count) => (link.sourcePage, link.destinationPage, count) }
 
-		val countsOutput = surfaceCounts.write(surfaceCountsPath, CsvOutputFormat())
-		val contextLinkOutput = contextLinkCounts.write(contextLinkCountsPath, CsvOutputFormat())
+		val countsOutput = surfaceCounts.write(surfaceCountsPath, outputFormat)
+		val contextLinkOutput = contextLinkCounts.write(contextLinkCountsPath, outputFormat)
 		(countsOutput, contextLinkOutput)
 	}
 
@@ -81,7 +91,6 @@ class WikipediaTrainingTask extends Program with ProgramDescription {
 	def buildWordCountPlan(pageSource: DataSet[String]): ScalaSink[(String, String, Int)] = {
 		val wordCount = pageSource.flatMap { pageSource =>
 			val (title, text) = WikiPageReader.xmlToPlainText(XML.loadString(pageSource))
-			println(text)
 			val analyzer = new TextAnalyzer
 			val tokens = analyzer.analyze(text).map { token => (title, token) }
 			tokens
@@ -91,7 +100,7 @@ class WikipediaTrainingTask extends Program with ProgramDescription {
 		val languageModel = wordCount.groupBy { case (title, token, _) => (title, token) }
 			.reduce { (t1, t2) => (t1._1, t1._2, t1._3 + t2._3) }
 
-		val tokensOutput = languageModel.write(languageModelsPath, CsvOutputFormat())
+		val tokensOutput = languageModel.write(languageModelsPath, outputFormat)
 		tokensOutput
 	}
 

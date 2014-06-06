@@ -7,6 +7,9 @@ import org.dbpedia.extraction.util.Language
 import de.hpi.uni_potsdam.coheel_stratosphere.wiki.LinkExtractor
 import eu.stratosphere.client.LocalExecutor
 import org.slf4s.Logging
+import eu.stratosphere.api.java.ExecutionEnvironment
+import com.googlecode.concurrenttrees.radix.ConcurrentRadixTree
+import com.googlecode.concurrenttrees.radix.node.concrete.DefaultCharArrayNodeFactory
 
 object Main extends App with Logging {
 
@@ -19,11 +22,17 @@ object Main extends App with Logging {
 	 */
 	override def main(args: Array[String]): Unit = {
 //		runExtraction()
+		testTrie()
 		val task = new WikipediaTrainingTask()
+		val local = ExecutionEnvironment.createLocalEnvironment()
 		LocalExecutor.setOverwriteFilesByDefault(true)
 		LocalExecutor.execute(task)
 	}
 
+	private def testTrie(): Unit = {
+		val tree = new ConcurrentRadixTree[Boolean](new DefaultCharArrayNodeFactory)
+		tree.put("test", true)
+	}
 	private def runExtraction(): Unit = {
 		// Wikipedia-API-call:
 		// http://en.wikipedia.org/w/api.php?action=query&pageids=11867&prop=revisions&rvprop=ids|content|timestamp|user|userid&format=xml
