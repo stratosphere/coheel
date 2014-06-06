@@ -27,7 +27,8 @@ class WikipediaTrainingTask extends Program with ProgramDescription {
 			(_, 1)
 		}
 
-		val wordCount = texts.flatMap { text =>
+		val wordCount = texts.flatMap { pageSource =>
+			val text = WikiPageReader.xmlToPlainText(XML.loadString(pageSource))
 			val analyzer = new TextAnalyzer
 			val tokens = analyzer.analyze(text)
 			tokens

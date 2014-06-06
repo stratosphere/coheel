@@ -4,8 +4,16 @@ import scala.xml.Elem
 import org.dbpedia.extraction.sources.WikiPage
 import org.dbpedia.extraction.wikiparser.WikiTitle
 import org.dbpedia.extraction.util.Language
+import de.hpi.uni_potsdam.coheel_stratosphere.wiki.wikiparser.SimpleWikiParser
 
 object WikiPageReader {
+	def xmlToPlainText(elem: Elem): String = {
+		val wikiPage = xmlToWikiPage(elem)
+		val wikiParser = new SimpleWikiParser()
+		val ast = wikiParser.apply(wikiPage)
+		ast.toPlainText.replace("<ref></ref>", "")
+	}
+
 
 	def xmlToWikiPage(xml: Elem): WikiPage = {
 		for (page <- xml \ "query" \ "pages" \ "page";
