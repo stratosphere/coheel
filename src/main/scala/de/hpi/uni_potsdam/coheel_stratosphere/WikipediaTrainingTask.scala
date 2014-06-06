@@ -14,26 +14,31 @@ class WikipediaTrainingTask extends Program with ProgramDescription {
 		val currentPath = System.getProperty("user.dir")
 		val input = TextFile(s"file://$currentPath/src/test/resources/wikipedia_files.txt")
 		val texts = input.map { file =>
-			Source.fromFile(s"src/test/resources/$file").mkString
+			val pageSource = Source.fromFile(s"src/test/resources/$file").mkString
+			pageSource
 		}
 
-		val links = texts.flatMap { text =>
+		val links = texts.flatMap { pageSource =>
 			val extractor = new LinkExtractor()
-			val wikiPage = WikiPageReader.xmlToWikiPage(XML.loadString(text))
+			val wikiPage = WikiPageReader.xmlToWikiPage(XML.loadString(pageSource))
 			val links = extractor.extractLinks(wikiPage)
 			links
 		} map {
 			(_, 1)
 		}
 
-		val languageModel = texts.flatMap { text =>
+		val wordCount = texts.flatMap { text =>
 			val analyzer = new TextAnalyzer
 			val tokens = analyzer.analyze(text)
 			tokens
+		} map {
+			(_, 1)
 		}
+		val languageModel = wordCount.groupBy { case (token, _) => token }
+						.reduce { (t1, t2) => (t1._1, t1._2 + t2._2) }
 
 		val linkCounts = links.groupBy { case (link, _) => link }
-					.reduce { (w1, w2) => (w1._1, w1._2 + w2._2) }
+					.reduce { (l1, l2) => (l1._1, l1._2 + l2._2) }
 					.map { case (link, count) => (link.text, link.destination, count) }
 
 		val countsOutput = linkCounts.write(s"file://$currentPath/testoutput/link-counts", CsvOutputFormat())

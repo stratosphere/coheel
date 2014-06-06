@@ -33,6 +33,7 @@ class LinkExtractor {
 		currentWikiTitle = wikiPage.title.decodedWithNamespace
 		val wikiParser = new SimpleWikiParser()
 		val ast = wikiParser.apply(wikiPage)
+		println(ast.toPlainText)
 		walkAST(ast)
 	}
 

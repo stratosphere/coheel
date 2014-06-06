@@ -8,7 +8,6 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute
 
 class TextAnalyzer {
 
-
 	def analyze(text: String): List[String] = {
 		// implemented following this guide:
 		// http://stackoverflow.com/questions/6334692/how-to-use-a-lucene-analyzer-to-tokenize-a-string
