@@ -9,6 +9,14 @@ import eu.stratosphere.client.LocalExecutor
 import org.slf4s.Logging
 
 object Main extends App with Logging {
+
+	/**
+	 * Open tasks:
+	 * <ul>
+	 *   <li> Use a trie for NER
+	 *   <li> Wikipedia, handle disambiguation sites, handle list sites
+	 *   <li> Compact language model
+	 */
 	override def main(args: Array[String]): Unit = {
 //		runExtraction()
 		val task = new WikipediaTrainingTask()

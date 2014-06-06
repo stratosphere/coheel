@@ -11,7 +11,7 @@ object WikiPageReader {
 		val wikiPage = xmlToWikiPage(elem)
 		val wikiParser = new SimpleWikiParser()
 		val ast = wikiParser.apply(wikiPage)
-		(wikiPage.title.decodedWithNamespace, ast.toPlainText.replace("<ref></ref>", ""))
+		(wikiPage.title.decodedWithNamespace, ast.toPlainText)
 	}
 
 
