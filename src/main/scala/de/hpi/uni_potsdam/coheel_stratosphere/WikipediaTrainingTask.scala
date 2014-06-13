@@ -9,14 +9,14 @@ import scala.io.Source
 import eu.stratosphere.api.java.ExecutionEnvironment
 
 
-class WikipediaTrainingTask extends Program with ProgramDescription {
+class WikipediaTrainingTask(path: String = null) extends Program with ProgramDescription {
 
 	override def getDescription = "Training the model parameters for CohEEL."
 
 	val outputFormat = CsvOutputFormat[(String, String, Int)]("\n", "\t")
 	lazy val currentPath = System.getProperty("user.dir")
 	// input files, file with the names of the test wikipedia articles
-	lazy val wikipediaFilesPath = s"file://$currentPath/src/test/resources/wikipedia_files.txt"
+	lazy val wikipediaFilesPath = if (path == null) s"file://$currentPath/src/test/resources/wikipedia_files.txt" else path
 	// outputs files
 	lazy val surfaceCountsPath     = s"file://$currentPath/testoutput/surface-counts"
 	lazy val contextLinkCountsPath = s"file://$currentPath/testoutput/context-link-counts"
