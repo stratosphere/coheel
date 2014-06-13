@@ -2,9 +2,17 @@
 <api>
     <query>
         <pages>
-            <page pageid="11867" ns="0" title="Germany">
-                <revisions>
-                    <rev revid="610656630" parentid="610649581" user="No such user" userid="5490874" timestamp="2014-05-29T15:32:56Z" contentformat="text/x-wiki" contentmodel="wikitext" xml:space="preserve">{{About|the country|other uses of terms redirecting here|Germany (disambiguation)|and|Deutschland (disambiguation)}}
+            <page ns="0">
+            	<title>Germany</title>
+            	<id>11867</id>
+                <revision>
+                	<id>610656630</id>
+                	<timestamp>2014-05-29T15:32:56Z</timestamp>
+                	<contributor>
+                		<username>No such user</username>
+                		<id>5490874</id>
+                	</contributor>
+                    <text xml:space="preserve">{{About|the country|other uses of terms redirecting here|Germany (disambiguation)|and|Deutschland (disambiguation)}}
                     {{Use British English|date=August 2013}}
                     {{Use dmy dates|date=August 2013}}
                     {{pp-semi-protected|small=yes}}
@@ -760,8 +768,8 @@
                     {{Link FA|pt}}
                     {{Link FA|sq}}
                     {{Link FA|tr}}
-                    {{Link FA|yi}}</rev>
-                </revisions>
+                    {{Link FA|yi}}</text>
+                </revision>
             </page>
         </pages>
     </query>

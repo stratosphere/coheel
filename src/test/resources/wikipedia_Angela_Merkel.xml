@@ -1,10 +1,18 @@
 <?xml version="1.0"?>
-<api>
+<mediawiki>
     <query>
         <pages>
-            <page pageid="72671" ns="0" title="Angela Merkel">
-                <revisions>
-                    <rev revid="610806479" parentid="610740328" user="Staberinde" userid="1454067" timestamp="2014-05-30T16:06:55Z" contentformat="text/x-wiki" contentmodel="wikitext" xml:space="preserve">{{redirect|Merkel}}
+            <page>
+            	<title>Angela Merkel</title>
+            	<id>72671</id>
+                <revision>
+                	<id>610806479</id>
+                	<timestamp>2014-05-30T16:06:55Z</timestamp>
+                	<contributor>
+                		<username>Staberinde</username>
+                		<id>1454067</id>
+                	</contributor>
+                    <text xml:space="preserve">{{redirect|Merkel}}
                     {{use dmy dates|date=January 2013}}
                     {{Infobox officeholder
                     |name          = Angela Merkel
@@ -450,10 +458,10 @@
                     [[Category:Women chemists]]
                     
                     {{Link GA|de}}
-                    {{Link GA|no}}</rev>
-                </revisions>
+                    {{Link GA|no}}</text>
+                </revision>
             </page>
         </pages>
     </query>
-</api>
+</mediawiki>
 

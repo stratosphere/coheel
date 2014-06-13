@@ -2,9 +2,17 @@
 <api>
 	<query>
 		<pages>
-			<page pageid="16794" ns="0" title="Kilobyte">
-				<revisions>
-					<rev revid="608080565" parentid="608066648" user="Compvis" userid="10359871" timestamp="2014-05-11T17:21:41Z" contentformat="text/x-wiki" contentmodel="wikitext" xml:space="preserve">
+			<page ns="0">
+				<title>Kilobyte</title>
+            	<id>16794</id>
+                <revision>
+                	<id>608080565</id>
+                	<timestamp>2014-05-11T17:21:41Z</timestamp>
+                	<contributor>
+                		<username>Compvis</username>
+                		<id>10359871</id>
+                	</contributor>
+					<text xml:space="preserve">
 						Note: This file is based on the Kilobyte page, but contains some manually added hard cases for the parser.
 						Wrong Category type: leading colon
 						[[:Category:Information Units]]
@@ -63,8 +71,8 @@
 						{{Computer Storage Volumes}}
 
 						[[Category:Units of information]]
-					</rev>
-				</revisions>
+					</text>
+				</revision>
 			</page>
 		</pages>
 	</query>

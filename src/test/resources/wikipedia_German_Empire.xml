@@ -2,9 +2,17 @@
 <api>
     <query>
         <pages>
-            <page pageid="12674" ns="0" title="German Empire">
-                <revisions>
-                    <rev revid="610110862" parentid="610110850" user="ClueBot NG" userid="13286072" timestamp="2014-05-25T19:50:58Z" contentformat="text/x-wiki" contentmodel="wikitext" xml:space="preserve">{{About|the German nation-state existing from 1871 to 1918|other meanings|German Empire (disambiguation)}}
+            <page>
+            	<title>German Empire</title>
+            	<id>12674</id>
+                <revision>
+                	<id>610110862</id>
+                	<timestamp>2014-05-25T19:50:58Z</timestamp>
+                	<contributor>
+                		<username>ClueBot NG</username>
+                		<id>13286072</id>
+                	</contributor>
+                    <text xml:space="preserve">{{About|the German nation-state existing from 1871 to 1918|other meanings|German Empire (disambiguation)}}
                     {{Use dmy dates|date=May 2012}}
                     {{Infobox former country
                     |native_name = ''Deutsches Reich'' 
@@ -607,8 +615,8 @@
                     {{Link FA|de}}
                     {{Link FA|hr}}
                     {{Link FA|ka}}
-                    {{Link FA|eo}}</rev>
-                </revisions>
+                    {{Link FA|eo}}</text>
+                </revision>
             </page>
         </pages>
     </query>

@@ -2,9 +2,17 @@
 <api>
     <query>
         <pages>
-            <page pageid="60563" ns="0" title="Federal Chancellor of the Federal Republic of Germany">
-                <revisions>
-                    <rev revid="596164937" parentid="590105249" user="RicJac" userid="181304" timestamp="2014-02-19T10:55:02Z" contentformat="text/x-wiki" contentmodel="wikitext" xml:space="preserve">{{Infobox official post
+        	<page>
+		        <title>Federal Chancellor of the Federal Republic of Germany</title>
+		        <id>60563</id>
+				<revision>
+		           	<id>596164937</id>
+		           	<timestamp>2014-02-19T10:55:02Z</timestamp>
+		           	<contributor>
+		           		<username>RicJac</username>
+		           		<id>181304</id>
+		           	</contributor>
+		            <text xml:space="preserve">{{Infobox official post
                     |post                     = Chancellor
                     |body                     = the Federal Republic of Germany
                     |nativename               = ''Bundeskanzler(in)''
@@ -140,8 +148,8 @@
                     [[zh:&#x5FB7;&#x570B;&#x7E3D;&#x7406;]]
                     [[bn:&#x99C;&#x9BE;&#x9B0;&#x9CD;&#x9AE;&#x9BE;&#x9A8;&#x9BF;&#x9B0; &#x99A;&#x9CD;&#x9AF;&#x9BE;&#x9A8;&#x9CD;&#x9B8;&#x9C7;&#x9B2;&#x9B0;]]
                     {{Link FA|de}}
-                    {{&#x99C;&#x9BE;&#x9B0;&#x9CD;&#x9AE;&#x9BE;&#x9A8;&#x9BF;&#x9B0; &#x99A;&#x9CD;&#x9AF;&#x9BE;&#x9A8;&#x9CD;&#x9B8;&#x9C7;&#x9B2;&#x9B0;|bn}}</rev>
-                </revisions>
+                    {{&#x99C;&#x9BE;&#x9B0;&#x9CD;&#x9AE;&#x9BE;&#x9A8;&#x9BF;&#x9B0; &#x99A;&#x9CD;&#x9AF;&#x9BE;&#x9A8;&#x9CD;&#x9B8;&#x9C7;&#x9B2;&#x9B0;|bn}}</text>
+                </revision>
             </page>
         </pages>
     </query>

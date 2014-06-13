@@ -2,9 +2,17 @@
 <api>
     <query>
         <pages>
-            <page pageid="250204" ns="0" title="Germany national football team">
-                <revisions>
-                    <rev revid="610751653" parentid="610648153" user="Intruder007" userid="8038092" timestamp="2014-05-30T06:23:30Z" contentformat="text/x-wiki" contentmodel="wikitext" xml:space="preserve">{{About|the men's team|the women's team|Germany women's national football team}}
+            <page ns="0">
+            	<title>Germany national football team</title>
+            	<id>250204</id>
+                <revision>
+                	<id>610751653</id>
+                	<timestamp>2014-05-30T06:23:30Z</timestamp>
+                	<contributor>
+                		<username>Intruder007</username>
+                		<id>8038092</id>
+                	</contributor>
+                    <text xml:space="preserve">{{About|the men's team|the women's team|Germany women's national football team}}
                     {{Use dmy dates|date=August 2012}}
                     {{Infobox national football team
                     |Name           = Germany
@@ -2869,8 +2877,8 @@
                     {{Link GA|de}}
                     {{Link FA|hu}}
                     {{Link FA|sv}}
-                    {{Link FA|no}}</rev>
-                </revisions>
+                    {{Link FA|no}}</text>
+                </revision>
             </page>
         </pages>
     </query>
