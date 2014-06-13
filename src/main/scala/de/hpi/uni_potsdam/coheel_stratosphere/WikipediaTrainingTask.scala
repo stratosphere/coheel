@@ -37,7 +37,7 @@ class WikipediaTrainingTask(path: String = null) extends Program with ProgramDes
 			pageSource
 		}
 
-		val (linkCountPlan, linkContextCountPlan) = buildLinkCountPlan(pageSource)
+		val (linkCountPlan, linkContextCountPlan) = buildLinkPlans(pageSource)
 		val wordCountPlan = buildWordCountPlan(pageSource)
 		val plan = new ScalaPlan(Seq(linkCountPlan, wordCountPlan, linkContextCountPlan))
 
@@ -50,7 +50,7 @@ class WikipediaTrainingTask(path: String = null) extends Program with ProgramDes
 	 *   <li> the plan who counts how often one document links to another
 	 *   <li> the plan who counts how often a link occurs under a certain surface
 	 */
-	def buildLinkCountPlan(pageSource: DataSet[String]):
+	def buildLinkPlans(pageSource: DataSet[String]):
 		(ScalaSink[(String, String, Int)], ScalaSink[(String, String, Int)]) = {
 		val links = pageSource.flatMap { pageSource =>
 			// extract all links

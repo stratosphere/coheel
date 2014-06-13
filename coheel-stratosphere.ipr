@@ -46,6 +46,7 @@
     <file url="file://$PROJECT_DIR$/src/main/scala/de/hpi/uni_potsdam/coheel_stratosphere/wiki/wikiparser/Source.scala" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/scala/de/hpi/uni_potsdam/coheel_stratosphere/wiki/wikiparser/TooManyErrorsException.scala" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/test/resources/wikipedia_test_article.xml" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/test/scala/coheel_stratosphere/DisambiguationTest.scala" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/test/scala/coheel_stratosphere/LinkExtractorTest.scala" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/test/scala/coheel_stratosphere/NerTest.scala" charset="UTF-8" />
   </component>

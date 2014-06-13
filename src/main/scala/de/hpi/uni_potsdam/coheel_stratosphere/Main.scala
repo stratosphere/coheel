@@ -19,33 +19,11 @@ object Main extends App with Logging {
 	 *   <li> Compact language model
 	 */
 	override def main(args: Array[String]): Unit = {
-//		runExtraction()
-		val elem = XML.loadFile("src/test/resources/enwiki-latest-pages-articles1.xml-p000000010p000010000")
-		println(WikiPageReader.xmlToWikiPages(elem).next())
+//		val elem = XML.loadFile("src/test/resources/enwiki-latest-pages-articles1.xml-p000000010p000010000")
+//		println(WikiPageReader.xmlToWikiPages(elem).next())
 
-
-
-//		val task = new WikipediaTrainingTask()
-//		LocalExecutor.setOverwriteFilesByDefault(true)
-//		LocalExecutor.execute(task)
-	}
-
-	private def runExtraction(): Unit = {
-		// Wikipedia-API-call:
-		// http://en.wikipedia.org/w/api.php?action=query&pageids=11867&prop=revisions&rvprop=ids|content|timestamp|user|userid&format=xml
-		val page = getExampleWikiPage(11867); // Germany
-		val linkExtractor = new LinkExtractor()
-		linkExtractor.extractLinks(page).foreach { link =>
-			println(String.format("%80s||%s", link.text, link.destinationPage))
-		}
-	}
-
-	private def getExampleWikiPage(pageId: Long): WikiPage = {
-		val wikiApi = new WikiApi(
-			new URL("http://en.wikipedia.org/w/api.php"),
-			Language.English)
-		val pageIds = List(pageId)
-		val wikiPage = wikiApi.retrievePagesByPageID(pageIds).toList.head
-		wikiPage
+		val task = new WikipediaTrainingTask()
+		LocalExecutor.setOverwriteFilesByDefault(true)
+		LocalExecutor.execute(task)
 	}
 }

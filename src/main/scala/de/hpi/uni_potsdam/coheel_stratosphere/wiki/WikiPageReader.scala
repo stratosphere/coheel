@@ -49,4 +49,5 @@ object WikiPageReader {
 			}
 		}
 	}
+
 }

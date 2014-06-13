@@ -12,7 +12,7 @@ class LinkExtractorTest extends FunSuite {
 	def fixture = (new LinkExtractor(), wikiPage)
 
 	lazy val wikiPage = {
-		val source = getClass.getResource("/wikipedia_test_article.xml")
+		val source = getClass.getResource("/wikipedia_Kilobyte.xml")
 		val xml = XML.load(source)
 		WikiPageReader.xmlToWikiPages(xml).next()
 	}
@@ -57,7 +57,7 @@ class LinkExtractorTest extends FunSuite {
 
 	test("just print links") {
 		links.foreach { link =>
-			println(String.format("%80s||%s", link.text, link.destinationPage))
+//			println(String.format("%80s||%s", link.text, link.destinationPage))
 		}
 	}
 
