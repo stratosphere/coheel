@@ -14,7 +14,7 @@ class LinkExtractorTest extends FunSuite {
 	lazy val wikiPage = {
 		val source = getClass.getResource("/wikipedia_test_article.xml")
 		val xml = XML.load(source)
-		WikiPageReader.xmlToWikiPage(xml)
+		WikiPageReader.xmlToWikiPages(xml).next()
 	}
 
 	def links: Seq[Link] = {

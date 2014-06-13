@@ -32,21 +32,13 @@ class WikipediaTrainingTask(path: String = null) extends Program with ProgramDes
 	 */
 	override def getPlan(args: String*): Plan = {
 		val input = TextFile(wikipediaFilesPath)
-//		val input = ExecutionEnvironment.createLocalEnvironment().fromElements(
-//			"wikipedia_Angela_Merkel.xml",
-//			"wikipedia_Federal_Chancellor_of_the_Federal_Republic_of_Germany.xml",
-//			"wikipedia_German_Empire.xml",
-//			"wikipedia_Germany_national_football_team.xml",
-//			"wikipedia_Germany.xml",
-//			"wikipedia_test_article.xml"
-//		)
 		val pageSource = input.map { file =>
 			val pageSource = Source.fromFile(s"src/test/resources/$file").mkString
 			pageSource
 		}
 
-		val (linkCountPlan, linkContextCountPlan)   = buildLinkCountPlan(pageSource)
-		val wordCountPlan   = buildWordCountPlan(pageSource)
+		val (linkCountPlan, linkContextCountPlan) = buildLinkCountPlan(pageSource)
+		val wordCountPlan = buildWordCountPlan(pageSource)
 		val plan = new ScalaPlan(Seq(linkCountPlan, wordCountPlan, linkContextCountPlan))
 
 		plan
@@ -63,7 +55,7 @@ class WikipediaTrainingTask(path: String = null) extends Program with ProgramDes
 		val links = pageSource.flatMap { pageSource =>
 			// extract all links
 			val extractor = new LinkExtractor()
-			val wikiPage = WikiPageReader.xmlToWikiPage(XML.loadString(pageSource))
+			val wikiPage = WikiPageReader.xmlToWikiPages(XML.loadString(pageSource)).next()
 			val links = extractor.extractLinks(wikiPage)
 			links
 		} map {

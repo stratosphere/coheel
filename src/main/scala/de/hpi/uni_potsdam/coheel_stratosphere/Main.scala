@@ -4,9 +4,10 @@ import org.dbpedia.extraction.sources.WikiPage
 import org.dbpedia.extraction.util.WikiApi
 import java.net.URL
 import org.dbpedia.extraction.util.Language
-import de.hpi.uni_potsdam.coheel_stratosphere.wiki.LinkExtractor
+import de.hpi.uni_potsdam.coheel_stratosphere.wiki.{WikiPageReader, LinkExtractor}
 import org.slf4s.Logging
 import eu.stratosphere.client.LocalExecutor
+import scala.xml.XML
 
 object Main extends App with Logging {
 
@@ -19,9 +20,14 @@ object Main extends App with Logging {
 	 */
 	override def main(args: Array[String]): Unit = {
 //		runExtraction()
-		val task = new WikipediaTrainingTask()
-		LocalExecutor.setOverwriteFilesByDefault(true)
-		LocalExecutor.execute(task)
+		val elem = XML.loadFile("src/test/resources/enwiki-latest-pages-articles1.xml-p000000010p000010000")
+		println(WikiPageReader.xmlToWikiPages(elem).next())
+
+
+
+//		val task = new WikipediaTrainingTask()
+//		LocalExecutor.setOverwriteFilesByDefault(true)
+//		LocalExecutor.execute(task)
 	}
 
 	private def runExtraction(): Unit = {
