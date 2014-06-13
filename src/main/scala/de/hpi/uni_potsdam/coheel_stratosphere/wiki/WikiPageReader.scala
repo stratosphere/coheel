@@ -6,6 +6,29 @@ import org.dbpedia.extraction.wikiparser.WikiTitle
 import org.dbpedia.extraction.util.Language
 import de.hpi.uni_potsdam.coheel_stratosphere.wiki.wikiparser.SimpleWikiParser
 
+
+/**
+ * Captures the important aspects of a WikiPage for our use case, while still
+ * maintaning connection (via inheritance) to the DBpedia extraction framework.
+ * @param title
+ * @param text
+ */
+class CoheelWikiPage(title: String, redirectTitle: String, text: String) extends WikiPage(
+	title           = WikiTitle.parse(title, Language.English),
+	redirect        = if (redirectTitle == "") null else WikiTitle.parse(redirectTitle, Language.English),
+	id              = 0,
+	revision        = 0,
+	timestamp       = 0,
+	contributorID   = 0,
+	contributorName = "",
+	source          = text,
+	format          = "text/x-wiki"
+) {
+
+	def isRedirect: Boolean = this.redirect != null
+	def isDisambiguation: Boolean = false
+}
+
 object WikiPageReader {
 	/**
 	 * @param elem The xml root element.
@@ -18,33 +41,23 @@ object WikiPageReader {
 		(wikiPage.title.decodedWithNamespace, ast.toPlainText)
 	}
 
-
-	def xmlToWikiPages(xml: Elem): Iterator[WikiPage] = {
+	var i = 0
+	def xmlToWikiPages(xml: Elem): Iterator[CoheelWikiPage] = {
 		val pages = (xml \\ "page").iterator
 
 		if (pages.isEmpty)
 			throw new RuntimeException("No wikipage found!")
-		new Iterator[WikiPage] {
+		new Iterator[CoheelWikiPage] {
 			def hasNext = pages.hasNext
-			def next(): WikiPage = {
+			def next(): CoheelWikiPage = {
 				val page = pages.next()
 				val rev = page \  "revision"
+				val redirect = page \ "redirect" \ "@title"
 
-				val contributorID = rev \ "contributor" \ "id"
-				val contributorName = rev \ "contributor" \ "username"
-
-				new WikiPage(
-					title           = WikiTitle.parse((page \ "title").head.text, Language.English),
-					redirect        = null,
-					id              = (page \ "id").head.text,
-					revision        = (rev \ "id").head.text,
-					timestamp       = (rev \ "timestamp").head.text,
-					contributorID   = if (contributorID == null || contributorID.length != 1)
-						"0" else contributorID.head.text,
-					contributorName = if (contributorName == null || contributorName.length != 1)
-						"" else contributorName.head.text,
-					source          = (rev \ "text").text,
-					format          = "text/x-wiki"
+				new CoheelWikiPage(
+					title = (page \ "title").head.text,
+					redirectTitle = redirect.toString(),
+					text  = (rev \ "text").text
 				)
 			}
 		}

@@ -9,14 +9,14 @@ import scala.io.Source
 import eu.stratosphere.api.java.ExecutionEnvironment
 
 
-class WikipediaTrainingTask(path: String = null) extends Program with ProgramDescription {
+class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.txt") extends Program with ProgramDescription {
 
 	override def getDescription = "Training the model parameters for CohEEL."
 
 	val outputFormat = CsvOutputFormat[(String, String, Int)]("\n", "\t")
 	lazy val currentPath = System.getProperty("user.dir")
 	// input files, file with the names of the test wikipedia articles
-	lazy val wikipediaFilesPath = if (path == null) s"file://$currentPath/src/test/resources/wikipedia_files.txt" else path
+	lazy val wikipediaFilesPath = s"file://$currentPath/$path"
 	// outputs files
 	lazy val surfaceCountsPath     = s"file://$currentPath/testoutput/surface-counts"
 	lazy val contextLinkCountsPath = s"file://$currentPath/testoutput/context-link-counts"
@@ -55,9 +55,10 @@ class WikipediaTrainingTask(path: String = null) extends Program with ProgramDes
 		val links = pageSource.flatMap { pageSource =>
 			// extract all links
 			val extractor = new LinkExtractor()
-			val wikiPage = WikiPageReader.xmlToWikiPages(XML.loadString(pageSource)).next()
-			val links = extractor.extractLinks(wikiPage)
-			links
+			val wikiPages = WikiPageReader.xmlToWikiPages(XML.loadString(pageSource))
+			wikiPages.flatMap { wikiPage =>
+				extractor.extractLinks(wikiPage)
+			}
 		} map {
 			// count each link with one
 			(_, 1)
@@ -68,7 +69,8 @@ class WikipediaTrainingTask(path: String = null) extends Program with ProgramDes
 			.reduce(count)
 			.map { case (link, count) => (link.text, link.destinationPage, count) }
 
-		val contextLinkCounts = links.groupBy( { case (link, _) => (link.sourcePage, link.destinationPage) })
+		val contextLinkCounts = links
+			.groupBy { case (link, _) => (link.sourcePage, link.destinationPage) }
 			.reduce(count)
 			.map { case (link, count) => (link.sourcePage, link.destinationPage, count) }
 

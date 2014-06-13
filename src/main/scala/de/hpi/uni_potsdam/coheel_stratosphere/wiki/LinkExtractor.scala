@@ -34,7 +34,9 @@ class LinkExtractor {
 		currentWikiTitle = wikiPage.title.decodedWithNamespace
 		val wikiParser = new SimpleWikiParser()
 		val ast = wikiParser.apply(wikiPage)
-		walkAST(ast)
+		val links = walkAST(ast)
+		links
+
 	}
 
 	private def walkAST(parentNode: Node): Seq[Link] =  {
