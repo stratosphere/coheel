@@ -3,10 +3,11 @@ package de.hpi.uni_potsdam.coheel_stratosphere
 import eu.stratosphere.api.scala._
 import eu.stratosphere.api.scala.operators._
 import eu.stratosphere.api.common.{Program, ProgramDescription, Plan}
-import de.hpi.uni_potsdam.coheel_stratosphere.wiki.{Link, TextAnalyzer, WikiPageReader, LinkExtractor}
+import de.hpi.uni_potsdam.coheel_stratosphere.wiki._
 import scala.xml.XML
 import scala.io.Source
 import eu.stratosphere.api.java.ExecutionEnvironment
+import de.hpi.uni_potsdam.coheel_stratosphere.wiki.Link
 
 
 class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.txt") extends Program with ProgramDescription {
@@ -35,6 +36,11 @@ class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.t
 		val pageSource = input.map { file =>
 			val pageSource = Source.fromFile(s"src/test/resources/$file").mkString
 			pageSource
+		}.flatMap { pageSource =>
+			// extract all links
+			val extractor = new LinkExtractor()
+			val wikiPages = WikiPageReader.xmlToWikiPages(XML.loadString(pageSource))
+			wikiPages.toList
 		}
 
 		val (linkCountPlan, linkContextCountPlan) = buildLinkPlans(pageSource)
@@ -50,15 +56,12 @@ class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.t
 	 *   <li> the plan who counts how often one document links to another
 	 *   <li> the plan who counts how often a link occurs under a certain surface
 	 */
-	def buildLinkPlans(pageSource: DataSet[String]):
+	def buildLinkPlans(wikiPages: DataSet[CoheelWikiPage]):
 		(ScalaSink[(String, String, Int)], ScalaSink[(String, String, Int)]) = {
-		val links = pageSource.flatMap { pageSource =>
+		val links = wikiPages.flatMap { wikiPage =>
 			// extract all links
 			val extractor = new LinkExtractor()
-			val wikiPages = WikiPageReader.xmlToWikiPages(XML.loadString(pageSource))
-			wikiPages.flatMap { wikiPage =>
-				extractor.extractLinks(wikiPage)
-			}
+			extractor.extractLinks(wikiPage)
 		} map {
 			// count each link with one
 			(_, 1)
@@ -82,9 +85,9 @@ class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.t
 	/**
 	 * Builds the plan who creates the language model for a given entity.
 	 */
-	def buildWordCountPlan(pageSource: DataSet[String]): ScalaSink[(String, String, Int)] = {
-		val wordCount = pageSource.flatMap { pageSource =>
-			val (title, text) = WikiPageReader.xmlToPlainText(XML.loadString(pageSource))
+	def buildWordCountPlan(wikiPages: DataSet[CoheelWikiPage]): ScalaSink[(String, String, Int)] = {
+		val wordCount = wikiPages.flatMap { wikiPage =>
+			val (title, text) = WikiPageReader.wikiPageToText(wikiPage)
 			val analyzer = new TextAnalyzer
 			val tokens = analyzer.tokenize(text).map { token => (title, token) }
 			tokens

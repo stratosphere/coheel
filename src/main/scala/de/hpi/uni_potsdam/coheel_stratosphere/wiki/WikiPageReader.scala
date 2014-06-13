@@ -10,11 +10,11 @@ import de.hpi.uni_potsdam.coheel_stratosphere.wiki.wikiparser.SimpleWikiParser
 /**
  * Captures the important aspects of a WikiPage for our use case, while still
  * maintaning connection (via inheritance) to the DBpedia extraction framework.
- * @param title
+ * @param pageTitle
  * @param text
  */
-class CoheelWikiPage(title: String, redirectTitle: String, text: String) extends WikiPage(
-	title           = WikiTitle.parse(title, Language.English),
+case class CoheelWikiPage(pageTitle: String, redirectTitle: String, text: String) extends WikiPage(
+	title           = WikiTitle.parse(pageTitle, Language.English),
 	redirect        = if (redirectTitle == "") null else WikiTitle.parse(redirectTitle, Language.English),
 	id              = 0,
 	revision        = 0,
@@ -30,15 +30,15 @@ class CoheelWikiPage(title: String, redirectTitle: String, text: String) extends
 }
 
 object WikiPageReader {
+
 	/**
-	 * @param elem The xml root element.
+	 * @param wikiPage
 	 * @return A tuple of the pages title and the page's plain text content.
 	 */
-	def xmlToPlainText(elem: Elem): (String, String) = {
-		val wikiPage = xmlToWikiPages(elem).next()
+	def wikiPageToText(wikiPage: CoheelWikiPage): (String, String) = {
 		val wikiParser = new SimpleWikiParser()
 		val ast = wikiParser.apply(wikiPage)
-		(wikiPage.title.decodedWithNamespace, ast.toPlainText)
+		(wikiPage.pageTitle, ast.toPlainText)
 	}
 
 	var i = 0
@@ -55,7 +55,7 @@ object WikiPageReader {
 				val redirect = page \ "redirect" \ "@title"
 
 				new CoheelWikiPage(
-					title = (page \ "title").head.text,
+					pageTitle = (page \ "title").head.text,
 					redirectTitle = redirect.toString(),
 					text  = (rev \ "text").text
 				)
