@@ -10,6 +10,8 @@ object Main {
 	/**
 	 * Open tasks:
 	 * <ul>
+	 *   <li> Correctly detect disambiguation pages
+	 *
 	 *   <li> Use a trie for NER
 	 *   <li> Wikipedia, handle disambiguation sites, handle list sites
 	 *   <li> Compact language model

@@ -58,21 +58,18 @@ class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.t
 	 */
 	def buildLinkPlans(wikiPages: DataSet[CoheelWikiPage]):
 		(ScalaSink[(String, String, Int)], ScalaSink[(String, String, Int)]) = {
-		val links = wikiPages.flatMap { wikiPage =>
-			// extract all links
-			val extractor = new LinkExtractor()
-			extractor.extractLinks(wikiPage)
-		} map {
-			// count each link with one
-			(_, 1)
-		}
+		val disambiguationPages = wikiPages.filter { _.isDisambiguation }
+		val normalPages = wikiPages.filter { !_.isDisambiguation }
 
-		val surfaceCounts = links
+		val disambiguationPageLinks = linksFrom(disambiguationPages)
+		val normalPageLinks         = linksFrom(normalPages)
+
+		val surfaceCounts = disambiguationPageLinks.union(normalPageLinks)
 			.groupBy { case (link, _) => (link.text, link.destinationPage) }
 			.reduce(count)
 			.map { case (link, count) => (link.text, link.destinationPage, count) }
 
-		val contextLinkCounts = links
+		val contextLinkCounts = normalPageLinks
 			.groupBy { case (link, _) => (link.sourcePage, link.destinationPage) }
 			.reduce(count)
 			.map { case (link, count) => (link.sourcePage, link.destinationPage, count) }
@@ -82,11 +79,24 @@ class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.t
 		(countsOutput, contextLinkOutput)
 	}
 
+	def linksFrom(pages: DataSet[CoheelWikiPage]): DataSet[(Link, Int)] = {
+		pages.flatMap { wikiPage =>
+			// extract all links
+			val extractor = new LinkExtractor()
+			extractor.extractLinks(wikiPage)
+		} map {
+			// count each link with one
+			(_, 1)
+		}
+	}
+
 	/**
 	 * Builds the plan who creates the language model for a given entity.
 	 */
 	def buildWordCountPlan(wikiPages: DataSet[CoheelWikiPage]): ScalaSink[(String, String, Int)] = {
-		val wordCount = wikiPages.flatMap { wikiPage =>
+		val wordCount = wikiPages.filter { wikiPage =>
+			!wikiPage.isDisambiguation && !wikiPage.isRedirect
+		} flatMap { wikiPage =>
 			val (title, text) = WikiPageReader.wikiPageToText(wikiPage)
 			val analyzer = new TextAnalyzer
 			val tokens = analyzer.tokenize(text).map { token => (title, token) }
