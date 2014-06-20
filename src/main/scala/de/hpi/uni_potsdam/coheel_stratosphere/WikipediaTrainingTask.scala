@@ -15,6 +15,7 @@ class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.t
 	override def getDescription = "Training the model parameters for CohEEL."
 
 	val outputFormat     = CsvOutputFormat[(String, String, Int)]("\n", "\t")
+	val redirectFormat   = CsvOutputFormat[(String, String)]("\n", "\t")
 	val probOutputFormat = CsvOutputFormat[(String, String, Double)]("\n", "\t")
 
 	lazy val currentPath = System.getProperty("user.dir")
@@ -24,6 +25,7 @@ class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.t
 	lazy val surfaceProbsPath      = s"file://$currentPath/testoutput/surface-probs"
 	lazy val contextLinkProbsPath  = s"file://$currentPath/testoutput/context-link-probs"
 	lazy val languageModelsPath    = s"file://$currentPath/testoutput/language-models"
+	lazy val redirectPath          = s"file://$currentPath/testoutput/redirects"
 
 	/**
 	 * Builds a plan to create the three main data structures CohEEL needs.
@@ -43,9 +45,11 @@ class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.t
 			wikiPages.toList
 		}
 
-		val (linkCountPlan, linkContextCountPlan) = buildLinkPlans(pageSource)
-		val wordCountPlan = buildWordCountPlan(pageSource)
-		val plan = new ScalaPlan(Seq(linkCountPlan, wordCountPlan, linkContextCountPlan))
+		val plans = buildLinkPlans(pageSource)
+		val languageModelPlan = buildLanguageModelPlan(pageSource)
+
+		val plan = new ScalaPlan(
+			languageModelPlan :: plans)
 
 		plan
 	}
@@ -57,7 +61,7 @@ class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.t
 	 *   <li> the plan who counts how often a link occurs under a certain surface
 	 */
 	def buildLinkPlans(wikiPages: DataSet[CoheelWikiPage]):
-		(ScalaSink[(String, String, Double)], ScalaSink[(String, String, Double)]) = {
+		List[ScalaSink[_]] = {
 		val disambiguationPages = wikiPages.filter { _.isDisambiguation }
 		val normalPages = wikiPages.filter { !_.isDisambiguation }
 
@@ -102,10 +106,16 @@ class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.t
 				(link.source, link.destination, surfaceLinkCount._2.toDouble / linkCount._2.toDouble)
 			}
 
+		// save redirects (to - from)
+		val redirects = wikiPages
+			.filter { wikiPage => wikiPage.isRedirect }
+			.map { wikiPage => (wikiPage.pageTitle, wikiPage.redirectTitle) }
+
 
 		val surfaceProbOutput = surfaceProbabilities.write(surfaceProbsPath, probOutputFormat)
 		val contextLinkOutput = contextLinkProbabilities.write(contextLinkProbsPath, probOutputFormat)
-		(surfaceProbOutput, contextLinkOutput)
+		val redirectOutput    = redirects.write(redirectPath, redirectFormat)
+		List(surfaceProbOutput, contextLinkOutput, redirectOutput)
 	}
 
 	def linksFrom(pages: DataSet[CoheelWikiPage]): DataSet[Link] = {
@@ -119,7 +129,7 @@ class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.t
 	/**
 	 * Builds the plan who creates the language model for a given entity.
 	 */
-	def buildWordCountPlan(wikiPages: DataSet[CoheelWikiPage]): ScalaSink[(String, String, Double)] = {
+	def buildLanguageModelPlan(wikiPages: DataSet[CoheelWikiPage]): ScalaSink[_] = {
 		// Helper case class to avoid passing tuples around
 		case class Word(document: String, word: String)
 		val words = wikiPages.filter { wikiPage =>

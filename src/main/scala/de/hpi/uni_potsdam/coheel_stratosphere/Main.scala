@@ -24,7 +24,7 @@ object Main {
 			LocalExecutor.setOverwriteFilesByDefault(true)
 			LocalExecutor.execute(task)
 		} * 10.2 * 1024 /* full data dump size*/ / 42.7 /* test dump size */ / 60 /* in minutes */ / 60 /* in hours */
-		println(s"Approximately $processingTime hours on the full dump, one machine.")
+		println(f"Approximately $processingTime%.2f hours on the full dump, one machine.")
 
 	}
 
