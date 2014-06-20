@@ -17,27 +17,24 @@ object Main {
 	 */
 	def main(args: Array[String]): Unit = {
 		turnOffLogging()
-
-//		val elem = XML.loadFile("src/test/resources/enwiki-latest-pages-articles1.xml-p000000010p000010000")
-//		println(WikiPageReader.xmlToWikiPages(elem).next())
-
-		// http://dumps.wikimedia.org/enwiki/latest/
-
 		println("Parsing wikipedia.")
-		time {
+		val processingTime = time {
+			// Dump downloaded from http://dumps.wikimedia.org/enwiki/latest/
 			val task = new WikipediaTrainingTask("src/test/resources/chunk_dump.txt")
 			LocalExecutor.setOverwriteFilesByDefault(true)
 			LocalExecutor.execute(task)
-		}
+		} * 10.2 * 1024 /* full data dump size*/ / 42.7 /* test dump size */ / 60 /* in minutes */ / 60 /* in hours */
+		println(s"Approximately $processingTime hours on the full dump, one machine.")
+
 	}
 
-	def time[R](block: => R): R = {
+	def time[R](block: => R): Double = {
 		val start = System.nanoTime()
 		val result = block
 		val end = System.nanoTime()
 		val time = (end - start) / 1000 / 1000 / 1000
 		println("Took " + time + " s.")
-		result
+		time
 	}
 
 	def turnOffLogging(): Unit = {
