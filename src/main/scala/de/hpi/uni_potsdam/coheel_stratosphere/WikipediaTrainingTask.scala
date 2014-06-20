@@ -14,8 +14,9 @@ class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.t
 
 	override def getDescription = "Training the model parameters for CohEEL."
 
-	val outputFormat = CsvOutputFormat[(String, String, Int)]("\n", "\t")
+	val outputFormat     = CsvOutputFormat[(String, String, Int)]("\n", "\t")
 	val probOutputFormat = CsvOutputFormat[(String, String, Double)]("\n", "\t")
+
 	lazy val currentPath = System.getProperty("user.dir")
 	// input files, file with the names of the test wikipedia articles
 	lazy val wikipediaFilesPath = s"file://$currentPath/$path"
@@ -38,8 +39,6 @@ class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.t
 			val pageSource = Source.fromFile(s"src/test/resources/$file").mkString
 			pageSource
 		}.flatMap { pageSource =>
-			// extract all links
-			val extractor = new LinkExtractor()
 			val wikiPages = WikiPageReader.xmlToWikiPages(XML.loadString(pageSource))
 			wikiPages.toList
 		}
@@ -120,21 +119,33 @@ class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.t
 	/**
 	 * Builds the plan who creates the language model for a given entity.
 	 */
-	def buildWordCountPlan(wikiPages: DataSet[CoheelWikiPage]): ScalaSink[(String, String, Int)] = {
-		val wordCount = wikiPages.filter { wikiPage =>
+	def buildWordCountPlan(wikiPages: DataSet[CoheelWikiPage]): ScalaSink[(String, String, Double)] = {
+		// Helper case class to avoid passing tuples around
+		case class Word(document: String, word: String)
+		val words = wikiPages.filter { wikiPage =>
 			!wikiPage.isDisambiguation && !wikiPage.isRedirect && !wikiPage.isList
 		} flatMap { wikiPage =>
 			val (title, text) = WikiPageReader.wikiPageToText(wikiPage)
 			val analyzer = new TextAnalyzer
-			val tokens = analyzer.tokenize(text).map { token => (title, token) }
+			val tokens = analyzer.tokenize(text).map { token => Word(title, token) }
 			tokens
-		} map { case (title, token) =>
-			(title, token, 1)
 		}
-		val languageModel = wordCount.groupBy { case (title, token, _) => (title, token) }
-			.reduce { (t1, t2) => (t1._1, t1._2, t1._3 + t2._3) }
 
-		val tokensOutput = languageModel.write(languageModelsPath, outputFormat)
+		val documentCounts = words
+			.groupBy { word => word.document }
+			.count()
+		val wordCounts = words
+			.groupBy { word => word }
+			.count()
+		val languageModel = documentCounts.join(wordCounts)
+			.where { case (word, _) => word.document }
+			.isEqualTo { case (word, _) => word.document }
+			.map { case (documentCount, wordCount) =>
+				val word = wordCount._1
+				(word.document, word.word, wordCount._2.toDouble / documentCount._2.toDouble)
+			}
+
+		val tokensOutput = languageModel.write(languageModelsPath, probOutputFormat)
 		tokensOutput
 	}
 }
