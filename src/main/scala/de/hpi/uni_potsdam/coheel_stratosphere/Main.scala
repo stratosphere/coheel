@@ -11,6 +11,8 @@ object Main {
 	 * Open tasks:
 	 * <ul>
 	 *   <li> Correctly detect disambiguation pages
+	 *   <li> Maybe: Explicitly state assumptions (what is a redirect, what is a disambiguation etc.)?
+	 *        grep -A 5 -i "{{disambiguation" --color=always enwiki-latest-pages-articles1.xml-p000000010p000010000 | less -R
 	 *
 	 *   <li> Use a trie for NER
 	 *   <li> Wikipedia, handle disambiguation sites, handle list sites
