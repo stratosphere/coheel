@@ -58,7 +58,7 @@ class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.t
 	 *   <li> the plan who counts how often a link occurs under a certain surface
 	 */
 	def buildLinkPlans(wikiPages: DataSet[CoheelWikiPage]):
-		(ScalaSink[(String, String, Double)], ScalaSink[(String, String, Int)]) = {
+		(ScalaSink[(String, String, Double)], ScalaSink[(String, String, Double)]) = {
 		val disambiguationPages = wikiPages.filter { _.isDisambiguation }
 		val normalPages = wikiPages.filter { !_.isDisambiguation }
 
@@ -79,7 +79,6 @@ class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.t
 		val surfaceLinkCounts = allPages2
 			.groupBy { link => (link.text, link.destination) }
 			.count()
-
 		// join them together and calculate the probabilities
 		val surfaceProbabilities = surfaceCounts.join(surfaceLinkCounts)
 			.where     { case (link, _) => link.text }
@@ -90,13 +89,23 @@ class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.t
 			}
 
 		// calculate context link counts only for non-disambiguation pages
+		val linkCounts = normalPageLinks
+			.groupBy { link => link.source }
+			.count()
 		val contextLinkCounts = normalPageLinks
 			.groupBy { link => (link.source, link.destination) }
 			.count()
-			.map { case (link, count) => (link.source, link.destination, count) }
+		val contextLinkProbabilities = linkCounts.join(contextLinkCounts)
+			.where     { case (link, _) => link.source }
+			.isEqualTo { case (link, _) => link.source }
+			.map { case (linkCount, surfaceLinkCount) =>
+				val link = surfaceLinkCount._1
+				(link.source, link.destination, surfaceLinkCount._2.toDouble / linkCount._2.toDouble)
+			}
+
 
 		val surfaceProbOutput = surfaceProbabilities.write(surfaceProbsPath, probOutputFormat)
-		val contextLinkOutput = contextLinkCounts.write(contextLinkProbsPath, outputFormat)
+		val contextLinkOutput = contextLinkProbabilities.write(contextLinkProbsPath, probOutputFormat)
 		(surfaceProbOutput, contextLinkOutput)
 	}
 
