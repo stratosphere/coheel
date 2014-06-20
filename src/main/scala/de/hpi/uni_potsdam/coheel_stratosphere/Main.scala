@@ -23,9 +23,21 @@ object Main {
 
 		// http://dumps.wikimedia.org/enwiki/latest/
 
-		val task = new WikipediaTrainingTask("src/test/resources/chunk_dump.txt")
-		LocalExecutor.setOverwriteFilesByDefault(true)
-		LocalExecutor.execute(task)
+		println("Parsing wikipedia.")
+		time {
+			val task = new WikipediaTrainingTask("src/test/resources/chunk_dump.txt")
+			LocalExecutor.setOverwriteFilesByDefault(true)
+			LocalExecutor.execute(task)
+		}
+	}
+
+	def time[R](block: => R): R = {
+		val start = System.nanoTime()
+		val result = block
+		val end = System.nanoTime()
+		val time = (end - start) / 1000 / 1000 / 1000
+		println("Took " + time + " s.")
+		result
 	}
 
 	def turnOffLogging(): Unit = {
