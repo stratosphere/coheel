@@ -33,27 +33,27 @@ class LinkExtractorTest extends FunSuite {
 	}
 	test("parsing an internal link with different label '[[Computer data storage|digital information]]'") {
 		assert(links.exists { link =>
-			link.text == "digital information" && link.destinationPage == "Computer data storage"
+			link.text == "digital information" && link.destination == "Computer data storage"
 		})
 	}
 	test("parsing an internal link with anchor '[[Hertz#Computing|CPU clock speeds]]'") {
 		assert(links.exists { link =>
-			link.text == "CPU clock speeds" && link.destinationPage == "Hertz"
+			link.text == "CPU clock speeds" && link.destination == "Hertz"
 		})
 	}
 	test("no categories, files or images are returned") {
 		assert(!links.exists { link =>
-			link.destinationPage == ":Category:Information Units"
+			link.destination == ":Category:Information Units"
 		})
 		assert(links.forall { link =>
-			!link.destinationPage.startsWith("Category:") &&
-				!link.destinationPage.startsWith("Image:") &&
-				!link.destinationPage.startsWith("File:")
+			!link.destination.startsWith("Category:") &&
+				!link.destination.startsWith("Image:") &&
+				!link.destination.startsWith("File:")
 		})
 	}
 	test("no external link are returned") {
 		assert(links.forall { link =>
-			!link.destinationPage.toLowerCase.startsWith("http://")
+			!link.destination.toLowerCase.startsWith("http://")
 		})
 	}
 

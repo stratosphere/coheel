@@ -21,7 +21,7 @@ class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.t
 	lazy val wikipediaFilesPath = s"file://$currentPath/$path"
 	// outputs files
 	lazy val surfaceProbsPath      = s"file://$currentPath/testoutput/surface-probs"
-	lazy val contextLinkCountsPath = s"file://$currentPath/testoutput/context-link-counts"
+	lazy val contextLinkProbsPath  = s"file://$currentPath/testoutput/context-link-probs"
 	lazy val languageModelsPath    = s"file://$currentPath/testoutput/language-models"
 
 	/**
@@ -77,7 +77,7 @@ class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.t
 			.count()
 		// count how often a surface occurs with a certain destination
 		val surfaceLinkCounts = allPages2
-			.groupBy { link => (link.text, link.destinationPage) }
+			.groupBy { link => (link.text, link.destination) }
 			.count()
 
 		// join them together and calculate the probabilities
@@ -86,17 +86,17 @@ class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.t
 			.isEqualTo { case (link, _) => link.text }
 			.map { case (surfaceCount, surfaceLinkCount) =>
 				val link = surfaceLinkCount._1
-				(link.text, link.destinationPage, surfaceLinkCount._2.toDouble / surfaceCount._2.toDouble)
+				(link.text, link.destination, surfaceLinkCount._2.toDouble / surfaceCount._2.toDouble)
 			}
 
 		// calculate context link counts only for non-disambiguation pages
 		val contextLinkCounts = normalPageLinks
-			.groupBy { link => (link.sourcePage, link.destinationPage) }
+			.groupBy { link => (link.source, link.destination) }
 			.count()
-			.map { case (link, count) => (link.sourcePage, link.destinationPage, count) }
+			.map { case (link, count) => (link.source, link.destination, count) }
 
 		val surfaceProbOutput = surfaceProbabilities.write(surfaceProbsPath, probOutputFormat)
-		val contextLinkOutput = contextLinkCounts.write(contextLinkCountsPath, outputFormat)
+		val contextLinkOutput = contextLinkCounts.write(contextLinkProbsPath, outputFormat)
 		(surfaceProbOutput, contextLinkOutput)
 	}
 
