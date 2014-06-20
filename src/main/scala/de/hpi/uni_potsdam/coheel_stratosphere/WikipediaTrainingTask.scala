@@ -64,11 +64,13 @@ class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.t
 		val disambiguationPageLinks = linksFrom(disambiguationPages)
 		val normalPageLinks         = linksFrom(normalPages)
 
+		// calculate surface counts for all types of pages
 		val surfaceCounts = disambiguationPageLinks.union(normalPageLinks)
 			.groupBy { case (link, _) => (link.text, link.destinationPage) }
 			.reduce(count)
 			.map { case (link, count) => (link.text, link.destinationPage, count) }
 
+		// calculate context link counts only for non-disambiguation pages
 		val contextLinkCounts = normalPageLinks
 			.groupBy { case (link, _) => (link.sourcePage, link.destinationPage) }
 			.reduce(count)

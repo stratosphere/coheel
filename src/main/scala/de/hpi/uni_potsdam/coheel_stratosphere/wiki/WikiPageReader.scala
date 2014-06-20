@@ -10,8 +10,20 @@ import de.hpi.uni_potsdam.coheel_stratosphere.wiki.wikiparser.SimpleWikiParser
 /**
  * Captures the important aspects of a WikiPage for our use case, while still
  * maintaning connection (via inheritance) to the DBpedia extraction framework.
- * @param pageTitle
- * @param text
+ * <br />
+ * <strong>Definition redirect</strong>:<br />
+ * A page is seen as a redirect, if it contains the &lt;redirect&gt; tag inside the &lt;page&gt; tag in the wiki
+ * dump.
+ * <br />
+ * <strong>Definition disambiguation</strong>:<br />
+ * A page is seen as a disambiguation if one of the following conditions is true:
+ * <ul>
+ *     <li> The title contains "(disambiguation)"
+ *     <li> The text contains a disambiguation template (not all disambiguation pages contain "(disambiguation)" in the
+ *          title, e.g. http://en.wikipedia.org/wiki/Alien
+ * @param pageTitle The title of the page as a string.
+ * @param redirectTitle The title of the page this page is redirecting to or "", if it is not a redirect.
+ * @param text This page's content.
  */
 case class CoheelWikiPage(pageTitle: String, redirectTitle: String, text: String) extends WikiPage(
 	title           = WikiTitle.parse(pageTitle, Language.English),
@@ -26,7 +38,26 @@ case class CoheelWikiPage(pageTitle: String, redirectTitle: String, text: String
 ) {
 
 	def isRedirect: Boolean = this.redirect != null
-	def isDisambiguation: Boolean = false
+	def isDisambiguation: Boolean = {
+		val isDisambiguationFromTitle = pageTitle.contains("(disambiguation)")
+		if (isDisambiguationFromTitle)
+			return true
+
+		val disambiguationRegex = """(?ui)\{\{disambiguation.*?\}\}""".r
+		val matches = disambiguationRegex.findAllIn(text)
+			// check whether the regex sometimes accidentially matches to much text
+			.map { s =>
+				if (s.length > 60)
+					throw new RuntimeException(s"Disambiguation regex went wrong on $s.")
+				s
+			}
+			.map(_.toLowerCase)
+			.filter { s =>
+				!s.contains("disambiguation needed")
+			}
+
+		matches.nonEmpty
+	}
 }
 
 object WikiPageReader {
