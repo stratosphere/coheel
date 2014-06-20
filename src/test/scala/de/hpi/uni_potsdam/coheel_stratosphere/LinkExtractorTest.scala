@@ -28,6 +28,9 @@ class LinkExtractorTest extends FunSuite {
 	test("parsing a link whose text starts with an hash") {
 		assert(links.exists { _.text == "#4 TOLL" })
 	}
+	test("parsing a link with template inside and starting with a blank") {
+		assert(links.exists { _.text == "mortar" })
+	}
 	test("parsing an internal link with different label '[[Computer data storage|digital information]]'") {
 		assert(links.exists { link =>
 			link.text == "digital information" && link.destinationPage == "Computer data storage"
@@ -55,7 +58,7 @@ class LinkExtractorTest extends FunSuite {
 	}
 
 	test("all links are found") {
-		assert(links.size === 53 /* hand-counted :) */)
+		assert(links.size === 54 /* hand-counted :) */)
 	}
 
 	test("just print links") {
