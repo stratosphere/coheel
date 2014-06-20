@@ -97,7 +97,7 @@ class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.t
 	 */
 	def buildWordCountPlan(wikiPages: DataSet[CoheelWikiPage]): ScalaSink[(String, String, Int)] = {
 		val wordCount = wikiPages.filter { wikiPage =>
-			!wikiPage.isDisambiguation && !wikiPage.isRedirect
+			!wikiPage.isDisambiguation && !wikiPage.isRedirect && !wikiPage.isList
 		} flatMap { wikiPage =>
 			val (title, text) = WikiPageReader.wikiPageToText(wikiPage)
 			val analyzer = new TextAnalyzer

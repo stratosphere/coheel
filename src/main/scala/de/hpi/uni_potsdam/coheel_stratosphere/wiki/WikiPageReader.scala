@@ -21,6 +21,8 @@ import de.hpi.uni_potsdam.coheel_stratosphere.wiki.wikiparser.SimpleWikiParser
  *     <li> The title contains "(disambiguation)"
  *     <li> The text contains a disambiguation template (not all disambiguation pages contain "(disambiguation)" in the
  *          title, e.g. http://en.wikipedia.org/wiki/Alien
+ * <strong>Definition list</strong>:<br />
+ * A page is seen as a list if it belongs to a category which starts with List.
  * @param pageTitle The title of the page as a string.
  * @param redirectTitle The title of the page this page is redirecting to or "", if it is not a redirect.
  * @param text This page's content.
@@ -55,8 +57,11 @@ case class CoheelWikiPage(pageTitle: String, redirectTitle: String, text: String
 			.filter { s =>
 				!s.contains("disambiguation needed")
 			}
-
 		matches.nonEmpty
+	}
+
+	def isList: Boolean = {
+		text.contains("[[Category:List")
 	}
 }
 

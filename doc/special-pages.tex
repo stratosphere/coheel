@@ -3,6 +3,8 @@
 \usepackage[landscape]{geometry}
 \usepackage{booktabs}
 \usepackage{longtable}
+\usepackage{amssymb}
+\usepackage{pifont}
 
 \begin{document}
 
@@ -12,17 +14,17 @@
 
 	\midrule
 	\textbf{Disambiguation}
-		& \emph{Ignore.} Disambiguation sites are no entities, i.e. we never want to link to them so a language model is not necessary.
-		& TODO
-		& \emph{Parse.} Could contain useful mentions, especially because usually a different link text is used for each entity.  \\
+		& \emph{\checkmark Ignore.} Disambiguation sites are no entities, i.e.\ we never want to link to them so a language model is not necessary.
+		& \emph{\checkmark Ignore.} If two things are named similar, they do not necessarily a semantic connection, e.g.\ "Angela Merkel" vs. "Merkel, Texas". \emph{Idea:} Redirect links to disambiguation pages to the disambiguated pages.
+		& \emph{\checkmark Extract.} Could contain useful mentions, especially because usually a different link text is used for each entity.  \\
 	\textbf{Redirects}
-		& \emph{Ignore.} Makes no sense to create a language model for a redirect (text is empty except \mbox{\#REDIRECT} call). \emph{Idea:} Create same language model as for the redirected entity.
-		& \emph{Parse.} To take care of pages wrongly linking to the redirecting page.
-		& \emph{Parse.} Usually contain no useful mentions, but parse nevertheless. \\
+		& \emph{\checkmark Ignore.} Makes no sense to create a language model for a redirect (text is empty except \mbox{\#REDIRECT} call). \emph{Idea:} Create same language model as for the redirected entity.
+		& \emph{\checkmark Extract.} To take care of pages wrongly linking to the redirecting page.
+		& \emph{\checkmark Extract.} Usually contain no useful mentions, but parse nevertheless. \\
 	\textbf{Lists}
-		& TODO
-		& TODO
-		& TODO
+		& \emph{\checkmark Ignore.} Lists are no entities (or are they?).
+		& \emph{\checkmark Extract.} Is this useful?
+		& \emph{\checkmark Extract.} Can contain useful mentions.
 
 	\\\bottomrule
 \end{longtable}
