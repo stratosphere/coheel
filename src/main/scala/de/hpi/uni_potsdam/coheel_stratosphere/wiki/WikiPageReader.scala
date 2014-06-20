@@ -45,6 +45,9 @@ case class CoheelWikiPage(pageTitle: String, redirectTitle: String, text: String
 		if (isDisambiguationFromTitle)
 			return true
 
+		// in case of performance problems:
+		// disambiguation links are always (as seen so far) at the end of the text
+		// maybe this could be used to not scan the whole text
 		val disambiguationRegex = """(?ui)\{\{disambiguation.*?\}\}""".r
 		val matches = disambiguationRegex.findAllIn(text)
 			// check whether the regex sometimes accidentially matches to much text

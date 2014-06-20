@@ -115,7 +115,8 @@ class LinkExtractor {
 		if (link.text == "")
 			link.text = link.destination
 		val hashTagIndex = link.text.indexOf("#")
-		if (hashTagIndex != -1)
+		// if a hashtag was found, but not on the first position
+		if (hashTagIndex != -1 && hashTagIndex != 0)
 			link.text = link.text.substring(0, hashTagIndex)
 		Some(link)
 	}

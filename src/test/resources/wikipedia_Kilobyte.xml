@@ -4,20 +4,26 @@
 		<pages>
 			<page ns="0">
 				<title>Kilobyte</title>
-            	<id>16794</id>
-                <revision>
-                	<id>608080565</id>
-                	<timestamp>2014-05-11T17:21:41Z</timestamp>
-                	<contributor>
-                		<username>Compvis</username>
-                		<id>10359871</id>
-                	</contributor>
+				<id>16794</id>
+				<revision>
+					<id>608080565</id>
+					<timestamp>2014-05-11T17:21:41Z</timestamp>
+					<contributor>
+						<username>Compvis</username>
+						<id>10359871</id>
+					</contributor>
 					<text xml:space="preserve">
 						Note: This file is based on the Kilobyte page, but contains some manually added hard cases for the parser.
+						Regression suite
+
 						Wrong Category type: leading colon
 						[[:Category:Information Units]]
+
 						Wrong external link, with two brackets
 						[[http://www.google.de]]
+
+						Link text starting with a #
+						... systems; [[1ESS switch|1A]]/[[4ESS switch|#4 TOLL]] Electronic Switching Systems (ESS) ...
 
 
 						{{Quantities of bytes}}
