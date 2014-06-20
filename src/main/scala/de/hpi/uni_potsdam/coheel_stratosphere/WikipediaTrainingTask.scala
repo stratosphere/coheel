@@ -15,11 +15,12 @@ class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.t
 	override def getDescription = "Training the model parameters for CohEEL."
 
 	val outputFormat = CsvOutputFormat[(String, String, Int)]("\n", "\t")
+	val probOutputFormat = CsvOutputFormat[(String, String, Double)]("\n", "\t")
 	lazy val currentPath = System.getProperty("user.dir")
 	// input files, file with the names of the test wikipedia articles
 	lazy val wikipediaFilesPath = s"file://$currentPath/$path"
 	// outputs files
-	lazy val surfaceCountsPath     = s"file://$currentPath/testoutput/surface-counts"
+	lazy val surfaceProbsPath      = s"file://$currentPath/testoutput/surface-probs"
 	lazy val contextLinkCountsPath = s"file://$currentPath/testoutput/context-link-counts"
 	lazy val languageModelsPath    = s"file://$currentPath/testoutput/language-models"
 
@@ -57,28 +58,46 @@ class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.t
 	 *   <li> the plan who counts how often a link occurs under a certain surface
 	 */
 	def buildLinkPlans(wikiPages: DataSet[CoheelWikiPage]):
-		(ScalaSink[(String, String, Int)], ScalaSink[(String, String, Int)]) = {
+		(ScalaSink[(String, String, Double)], ScalaSink[(String, String, Int)]) = {
 		val disambiguationPages = wikiPages.filter { _.isDisambiguation }
 		val normalPages = wikiPages.filter { !_.isDisambiguation }
 
 		val disambiguationPageLinks = linksFrom(disambiguationPages)
 		val normalPageLinks         = linksFrom(normalPages)
+		// Note:
+		// It seems to be a bug in Stratosphere, that you cannot use the same union
+		// twice for a upcoming join
+		// so we create two unions here as a workaround, until this is fixed
+		val allPages1 = disambiguationPageLinks.union(normalPageLinks)
+		val allPages2 = disambiguationPageLinks.union(normalPageLinks)
 
-		// calculate surface counts for all types of pages
-		val surfaceCounts = disambiguationPageLinks.union(normalPageLinks)
-			.groupBy { case link => (link.text, link.destinationPage) }
+		// count how often a surface occurs
+		val surfaceCounts = allPages1
+			.groupBy { link => link.text }
 			.count()
-			.map { case (link, count) => (link.text, link.destinationPage, count) }
+		// count how often a surface occurs with a certain destination
+		val surfaceLinkCounts = allPages2
+			.groupBy { link => (link.text, link.destinationPage) }
+			.count()
+
+		// join them together and calculate the probabilities
+		val surfaceProbabilities = surfaceCounts.join(surfaceLinkCounts)
+			.where     { case (link, _) => link.text }
+			.isEqualTo { case (link, _) => link.text }
+			.map { case (surfaceCount, surfaceLinkCount) =>
+				val link = surfaceLinkCount._1
+				(link.text, link.destinationPage, surfaceLinkCount._2.toDouble / surfaceCount._2.toDouble)
+			}
 
 		// calculate context link counts only for non-disambiguation pages
 		val contextLinkCounts = normalPageLinks
-			.groupBy { case link => (link.sourcePage, link.destinationPage) }
+			.groupBy { link => (link.sourcePage, link.destinationPage) }
 			.count()
 			.map { case (link, count) => (link.sourcePage, link.destinationPage, count) }
 
-		val countsOutput = surfaceCounts.write(surfaceCountsPath, outputFormat)
+		val surfaceProbOutput = surfaceProbabilities.write(surfaceProbsPath, probOutputFormat)
 		val contextLinkOutput = contextLinkCounts.write(contextLinkCountsPath, outputFormat)
-		(countsOutput, contextLinkOutput)
+		(surfaceProbOutput, contextLinkOutput)
 	}
 
 	def linksFrom(pages: DataSet[CoheelWikiPage]): DataSet[Link] = {
