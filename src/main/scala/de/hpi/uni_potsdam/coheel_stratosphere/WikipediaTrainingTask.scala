@@ -66,14 +66,14 @@ class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.t
 
 		// calculate surface counts for all types of pages
 		val surfaceCounts = disambiguationPageLinks.union(normalPageLinks)
-			.groupBy { case (link, _) => (link.text, link.destinationPage) }
-			.reduce(count)
+			.groupBy { case link => (link.text, link.destinationPage) }
+			.count()
 			.map { case (link, count) => (link.text, link.destinationPage, count) }
 
 		// calculate context link counts only for non-disambiguation pages
 		val contextLinkCounts = normalPageLinks
-			.groupBy { case (link, _) => (link.sourcePage, link.destinationPage) }
-			.reduce(count)
+			.groupBy { case link => (link.sourcePage, link.destinationPage) }
+			.count()
 			.map { case (link, count) => (link.sourcePage, link.destinationPage, count) }
 
 		val countsOutput = surfaceCounts.write(surfaceCountsPath, outputFormat)
@@ -81,14 +81,11 @@ class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.t
 		(countsOutput, contextLinkOutput)
 	}
 
-	def linksFrom(pages: DataSet[CoheelWikiPage]): DataSet[(Link, Int)] = {
+	def linksFrom(pages: DataSet[CoheelWikiPage]): DataSet[Link] = {
 		pages.flatMap { wikiPage =>
 			// extract all links
 			val extractor = new LinkExtractor()
 			extractor.extractLinks(wikiPage)
-		} map {
-			// count each link with one
-			(_, 1)
 		}
 	}
 
@@ -111,12 +108,5 @@ class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.t
 
 		val tokensOutput = languageModel.write(languageModelsPath, outputFormat)
 		tokensOutput
-	}
-
-	/**
-	 * Helper function to accumulate the counts of a group by result.
-	 */
-	private def count(l1: (Link, Int), l2: (Link, Int)): (Link, Int) = {
-		(l1._1, l1._2 + l2._2)
 	}
 }
