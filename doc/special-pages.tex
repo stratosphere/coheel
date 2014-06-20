@@ -1,0 +1,16 @@
+\documentclass{article}
+
+\usepackage{booktabs}
+\usepackage{longtable}
+
+\begin{document}
+
+\begin{tabular}{@{} *5l @{}}    \toprule
+\emph{} & \emph{Language Models} & \emph{Link counts} & \emph{Surface Counts} &  \\\midrule
+\emph{Disambiguation} & Ignore. Disambiguation sites are no entities. & TODO  & Parse. Could contain useful mentions.  \\
+\emph{Redirects} & Ignore. Makes no sense to create a LM for a redirect (text is empty except \#REDIRECT call) & Parse. To take care of pages wrongly linking to the redirecting page. & Parse. Usually contain no useful mentions, but parse nevertheless. \\
+\emph{Lists} & TODO & TODO & TODO \\\bottomrule
+\hline
+\end{tabular}
+
+\end{document}
