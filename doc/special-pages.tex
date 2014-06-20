@@ -1,16 +1,30 @@
-\documentclass{article}
+\documentclass[a4paper, landscape]{article}
 
+\usepackage[landscape]{geometry}
 \usepackage{booktabs}
 \usepackage{longtable}
 
 \begin{document}
 
-\begin{tabular}{@{} *5l @{}}    \toprule
-\emph{} & \emph{Language Models} & \emph{Link counts} & \emph{Surface Counts} &  \\\midrule
-\emph{Disambiguation} & Ignore. Disambiguation sites are no entities. & TODO  & Parse. Could contain useful mentions.  \\
-\emph{Redirects} & Ignore. Makes no sense to create a LM for a redirect (text is empty except \#REDIRECT call) & Parse. To take care of pages wrongly linking to the redirecting page. & Parse. Usually contain no useful mentions, but parse nevertheless. \\
-\emph{Lists} & TODO & TODO & TODO \\\bottomrule
-\hline
-\end{tabular}
+\begin{longtable}{p{3cm}p{5cm}p{5cm}p{5cm}}
+	\toprule
+	& \textbf{Language Models} & \textbf{Link Counts} & \textbf{Surface Counts} \\
+
+	\midrule
+	\textbf{Disambiguation}
+		& \emph{Ignore.} Disambiguation sites are no entities, i.e. we never want to link to them so a language model is not necessary.
+		& TODO
+		& \emph{Parse.} Could contain useful mentions, especially because usually a different link text is used for each entity.  \\
+	\textbf{Redirects}
+		& \emph{Ignore.} Makes no sense to create a language model for a redirect (text is empty except \mbox{\#REDIRECT} call). \emph{Idea:} Create same language model as for the redirected entity.
+		& \emph{Parse.} To take care of pages wrongly linking to the redirecting page.
+		& \emph{Parse.} Usually contain no useful mentions, but parse nevertheless. \\
+	\textbf{Lists}
+		& TODO
+		& TODO
+		& TODO
+
+	\\\bottomrule
+\end{longtable}
 
 \end{document}
