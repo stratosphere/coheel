@@ -71,7 +71,6 @@ case class CoheelWikiPage(pageTitle: String, redirectTitle: String, text: String
 object WikiPageReader {
 
 	/**
-	 * @param wikiPage
 	 * @return A tuple of the pages title and the page's plain text content.
 	 */
 	def wikiPageToText(wikiPage: CoheelWikiPage): (String, String) = {

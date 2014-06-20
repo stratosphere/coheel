@@ -21,11 +21,11 @@ class NerTest extends FunSuite with BeforeAndAfterEach {
 	def fixture = "fixture"
 
 	override def beforeEach(): Unit = {
-		val currentPath = System.getProperty("user.dir")
-		val path = s"file://$currentPath/src/test/resources/wikipedia_files.txt"
-		val task = new WikipediaTrainingTask(path)
-		LocalExecutor.setOverwriteFilesByDefault(true)
-		LocalExecutor.execute(task)
+//		val currentPath = System.getProperty("user.dir")
+//		val path = s"file://$currentPath/src/test/resources/wikipedia_files.txt"
+//		val task = new WikipediaTrainingTask(path)
+//		LocalExecutor.setOverwriteFilesByDefault(true)
+//		LocalExecutor.execute(task)
 	}
 
 	test("ner'") {

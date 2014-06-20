@@ -1,22 +1,19 @@
 package de.hpi.uni_potsdam.coheel_stratosphere
 
 import de.hpi.uni_potsdam.coheel_stratosphere.wiki.{WikiPageReader, LinkExtractor}
-import org.slf4s.Logging
 import eu.stratosphere.client.LocalExecutor
 import org.apache.log4j.{Level, Logger}
 
 object Main {
 
 	/**
+	 * Helpful commands:
+	 * grep -A 5 -i "{{disambiguation" --color=always enwiki-latest-pages-articles1.xml-p000000010p000010000 | less -R
 	 * Open tasks:
 	 * <ul>
-	 *   <li> Correctly detect disambiguation pages
-	 *   <li> Maybe: Explicitly state assumptions (what is a redirect, what is a disambiguation etc.)?
-	 *        grep -A 5 -i "{{disambiguation" --color=always enwiki-latest-pages-articles1.xml-p000000010p000010000 | less -R
-	 *
-	 *   <li> Use a trie for NER
-	 *   <li> Wikipedia, handle disambiguation sites, handle list sites
-	 *   <li> Compact language model
+	 *   <li> Display plan using stratosphere's builtin visualizer
+	 *   <li> Remove wiktionary links?
+	 *   <li> Compact language model (use trie?)
 	 */
 	def main(args: Array[String]): Unit = {
 		turnOffLogging()
