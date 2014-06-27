@@ -10,7 +10,7 @@ Repeat.
 Determine the following counts for NER:
 For each surface:
 a) # of documents, in which the mention occurs as a link
-b) # of documents, in which the mentions does not occur as a link
+b) # of documents, in which the mention does not occur as a link
 --> get percentage to use for NER later
 
 Problem is to determine b).
@@ -20,9 +20,11 @@ For each word in mention:
  - join with language model to find out documents
  - intersection
 
-
-
 Introduce fake bigrams for the unigram links?
 --------------------------------
 Plan visualization:
 There is some stratosphere tool to visualize plans. Not sure, whether this is still supported though.
+--------------------------------
+Intersection
+--------------------------------
+Bug-Report to Stratosphere about using the same union twice (see WikipediaTrainingTask)

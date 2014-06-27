@@ -60,8 +60,7 @@ class WikipediaTrainingTask(path: String = "src/test/resources/test.wikirun") ex
 	 *   <li> the plan who counts how often one document links to another
 	 *   <li> the plan who counts how often a link occurs under a certain surface
 	 */
-	def buildLinkPlans(wikiPages: DataSet[CoheelWikiPage]):
-		List[ScalaSink[_]] = {
+	def buildLinkPlans(wikiPages: DataSet[CoheelWikiPage]): List[ScalaSink[_]] = {
 		val disambiguationPages = wikiPages.filter { _.isDisambiguation }
 		val normalPages = wikiPages.filter { !_.isDisambiguation }
 
@@ -69,7 +68,7 @@ class WikipediaTrainingTask(path: String = "src/test/resources/test.wikirun") ex
 		val normalPageLinks         = linksFrom(normalPages)
 		// Note:
 		// It seems to be a bug in Stratosphere, that you cannot use the same union
-		// twice for a upcoming join
+		// twice for an upcoming join
 		// so we create two unions here as a workaround, until this is fixed
 		val allPages1 = disambiguationPageLinks.union(normalPageLinks)
 		val allPages2 = disambiguationPageLinks.union(normalPageLinks)
