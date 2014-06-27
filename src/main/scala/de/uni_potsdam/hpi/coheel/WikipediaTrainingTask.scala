@@ -77,15 +77,18 @@ class WikipediaTrainingTask(path: String = "src/test/resources/test.wikirun") ex
 		val allPages3 = disambiguationPageLinks.union(normalPageLinks)
 
 		// counts in how many documents a surface occurs
-		val surfaceDocumentCounts = allPages3.groupBy { link => link.text }
+		val surfaceDocumentCounts = allPages3
+			.groupBy { link => link.text }
 			.reduceGroup { linksWithSameText =>
-				linksWithSameText.toList
+				val asList = linksWithSameText.toList
+				val text = asList(0).text
+
+				// Note: these are scala functions, no Stratosphere functions
+				val count = asList
 					.groupBy { link => link.source  }
-					.map { groupEntry =>
-						val linksFromSameSource = groupEntry._2
-						(linksFromSameSource(0).text, linksFromSameSource.size)
-					}.toList
-			}.flatMap { l => l }
+					.size
+				(text, count)
+			}
 
 
 		// count how often a surface occurs

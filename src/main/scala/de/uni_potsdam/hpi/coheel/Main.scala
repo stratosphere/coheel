@@ -8,13 +8,13 @@ object Main {
 	val PRODUCTION = false
 	val taskFile = if (PRODUCTION)  "src/test/resources/full_dump.wikirun" else "src/test/resources/chunk_dump.wikirun"
 	/**
-	 * HELPFUL COMMANDS:
-	 * GREP -A 5 -I "{{DISAMBIGUATION" --COLOR=ALWAYS ENWIKI-LATEST-PAGES-ARTICLES1.XML-P000000010P000010000 | LESS -R
-	 * OPEN TASKS:
-	 * <UL>
-	 *   <LI> DISPLAY PLAN USING STRATOSPHERE'S BUILTIN VISUALIZER
-	 *   <LI> REMOVE WIKTIONARY LINKS?
-	 *   <LI> COMPACT LANGUAGE MODEL (USE TRIE?)
+	 * Helpful commands:
+	 * grep -A 5 -i "{{disambiguation" --color=always enwiki-latest-pages-articles1.xml-p000000010p000010000 | less -R
+	 * Open tasks:
+	 * <ul>
+	 *   <li> Display plan using stratosphere's builtin visualizer
+	 *   <li> Remove wiktionary links?
+	 *   <li> Compact language model (use trie?)
 	 */
 	def main(args: Array[String]): Unit = {
 		turnOffLogging()
