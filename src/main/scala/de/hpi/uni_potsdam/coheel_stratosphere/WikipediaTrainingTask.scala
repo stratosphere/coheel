@@ -10,7 +10,7 @@ import eu.stratosphere.api.java.ExecutionEnvironment
 import de.hpi.uni_potsdam.coheel_stratosphere.wiki.Link
 
 
-class WikipediaTrainingTask(path: String = "src/test/resources/wikipedia_files.txt") extends Program with ProgramDescription {
+class WikipediaTrainingTask(path: String = "src/test/resources/test.wikirun") extends Program with ProgramDescription {
 
 	override def getDescription = "Training the model parameters for CohEEL."
 
