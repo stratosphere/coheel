@@ -123,6 +123,21 @@
 				<groupId>net.alchim31.maven</groupId>
 				<artifactId>scala-maven-plugin</artifactId>
 				<version>3.1.4</version>
+				<configuration>
+					<launchers>
+						<launcher>
+							<id>Wikipedia Training Task</id>
+							<mainClass>de.uni_potsdam.hpi.coheel.Main</mainClass>
+							<args>
+								<arg>arg1</arg>
+							</args>
+							<jvmArgs>
+								<jvmArg>-Xms3g</jvmArg>
+								<jvmArg>-Xmx7g</jvmArg>
+							</jvmArgs>
+						</launcher>
+					</launchers>
+				</configuration>
 				<executions>
 					<execution>
 						<goals>
