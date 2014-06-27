@@ -10,9 +10,11 @@ object OutputFiles {
 	lazy val languageModelsPath    = s"file://$currentPath/testoutput/language-models"
 	lazy val redirectPath          = s"file://$currentPath/testoutput/redirects"
 	lazy val surfaceDocumentPath   = s"file://$currentPath/testoutput/surface-document-counts"
+	lazy val linkOccurenceCounts   = s"file://$currentPath/testoutput/link-occurrence-counts"
 
 	val outputFormat          = CsvOutputFormat[(String, String, Int)]("\n", "\t")
 	val redirectFormat        = CsvOutputFormat[(String, String)]("\n", "\t")
 	val surfaceDocumentFormat = CsvOutputFormat[(String, Int)]("\n", "\t")
 	val probOutputFormat      = CsvOutputFormat[(String, String, Double)]("\n", "\t")
+	val linkOccurrenceFormat  = CsvOutputFormat[(String, Int, Int)]("\n", "\t")
 }

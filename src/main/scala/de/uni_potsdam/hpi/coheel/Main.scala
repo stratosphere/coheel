@@ -19,9 +19,11 @@ object Main {
 	 *   <li> Compact language model (use trie?)
 	 */
 	turnOffLogging()
+	LocalExecutor.setOverwriteFilesByDefault(true)
 
 	def main(args: Array[String]): Unit = {
 //		runWikipediaTrainingPlan()
+		runSurfaceNotALinkCountPlan()
 	}
 
 	def runWikipediaTrainingPlan(): Unit = {
@@ -29,7 +31,6 @@ object Main {
 		val processingTime = time {
 			// Dump downloaded from http://dumps.wikimedia.org/enwiki/latest/
 			val plan = new WikipediaTrainingPlan(taskFile)
-			LocalExecutor.setOverwriteFilesByDefault(true)
 			LocalExecutor.execute(plan)
 		} * 10.2 * 1024 /* full data dump size*/ / 42.7 /* test dump size */ / 60 /* in minutes */ / 60 /* in hours */
 		if (!PRODUCTION)
@@ -38,7 +39,6 @@ object Main {
 
 	def runSurfaceNotALinkCountPlan(): Unit = {
 		val plan = new SurfaceNotALinkCountPlan
-		LocalExecutor.setOverwriteFilesByDefault(true)
 		LocalExecutor.execute(plan)
 	}
 

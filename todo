@@ -30,3 +30,5 @@ Intersection
 Bug-Report to Stratosphere about using the same union twice (see WikipediaTrainingTask)
 --------------------------------
 Write tests
+--------------------------------
+RUN ON SERVER, DISTRIBUTED

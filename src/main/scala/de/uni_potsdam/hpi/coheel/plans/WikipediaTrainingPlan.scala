@@ -143,6 +143,7 @@ class WikipediaTrainingPlan(path: String = "src/test/resources/test.wikirun") ex
 			!wikiPage.isDisambiguation && !wikiPage.isRedirect && !wikiPage.isList
 		} flatMap { wikiPage =>
 			val (title, text) = WikiPageReader.wikiPageToText(wikiPage)
+			// TODO: Refactor this to outer method and see if it still works
 			val analyzer = new TextAnalyzer
 			val tokens = analyzer.tokenize(text).map { token => Word(title, token) }
 			tokens
