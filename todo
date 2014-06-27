@@ -1,0 +1,28 @@
+Stem mentions:
+To handle plural etc.
+---------------------------------
+Redirect resolving:
+One pass to determine context links and redirects
+Join context links with redirects (context link.destination and redirect.source)
+Write new context links.
+Repeat.
+---------------------------------
+Determine the following counts for NER:
+For each surface:
+a) # of documents, in which the mention occurs as a link
+b) # of documents, in which the mentions does not occur as a link
+--> get percentage to use for NER later
+
+Problem is to determine b).
+Idea:
+For each word in mention:
+ - stem
+ - join with language model to find out documents
+ - intersection
+
+
+
+Introduce fake bigrams for the unigram links?
+--------------------------------
+Plan visualization:
+There is some stratosphere tool to visualize plans. Not sure, whether this is still supported though.
