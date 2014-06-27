@@ -1,15 +1,10 @@
-package de.hpi.uni_potsdam.coheel_stratosphere
+package de.uni_potsdam.hpi.coheel
 
 import org.scalatest.{BeforeAndAfterEach, FunSuite}
-import scala.xml.XML
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import de.hpi.uni_potsdam.coheel_stratosphere.wiki.{TextAnalyzer, Link, LinkExtractor, WikiPageReader}
-import com.googlecode.concurrenttrees.radix.ConcurrentRadixTree
-import com.github.tototoshi.csv.{TSVFormat, CSVReader}
-import com.googlecode.concurrenttrees.radix.node.concrete.DefaultCharArrayNodeFactory
-import scala.collection.JavaConversions._
-import eu.stratosphere.client.LocalExecutor
+import de.uni_potsdam.hpi.coheel.wiki.LinkExtractor
+import com.github.tototoshi.csv.CSVReader
 
 /**
  * Testing the Named Entity Recognition by using a trie datastructure, and using

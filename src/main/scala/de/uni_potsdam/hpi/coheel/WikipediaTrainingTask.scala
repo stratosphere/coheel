@@ -1,13 +1,13 @@
-package de.hpi.uni_potsdam.coheel_stratosphere
+package de.uni_potsdam.hpi.coheel
 
 import eu.stratosphere.api.scala._
 import eu.stratosphere.api.scala.operators._
 import eu.stratosphere.api.common.{Program, ProgramDescription, Plan}
-import de.hpi.uni_potsdam.coheel_stratosphere.wiki._
+import de.uni_potsdam.hpi.coheel.wiki._
 import scala.xml.XML
 import scala.io.Source
 import eu.stratosphere.api.java.ExecutionEnvironment
-import de.hpi.uni_potsdam.coheel_stratosphere.wiki.Link
+import de.uni_potsdam.hpi.coheel.wiki.Link
 
 
 class WikipediaTrainingTask(path: String = "src/test/resources/test.wikirun") extends Program with ProgramDescription {

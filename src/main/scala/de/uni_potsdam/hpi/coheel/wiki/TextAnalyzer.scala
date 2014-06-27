@@ -1,4 +1,4 @@
-package de.hpi.uni_potsdam.coheel_stratosphere.wiki
+package de.uni_potsdam.hpi.coheel.wiki
 
 import org.apache.lucene.analysis.en.{PorterStemFilter, EnglishAnalyzer}
 import org.apache.lucene.util.Version

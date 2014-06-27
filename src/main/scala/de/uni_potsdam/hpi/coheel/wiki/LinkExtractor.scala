@@ -1,10 +1,10 @@
-package de.hpi.uni_potsdam.coheel_stratosphere.wiki
+package de.uni_potsdam.hpi.coheel.wiki
 
 import org.dbpedia.extraction.sources.WikiPage
 import org.dbpedia.extraction.wikiparser.InternalLinkNode
 import org.dbpedia.extraction.wikiparser.Node
 import scala.collection.mutable
-import de.hpi.uni_potsdam.coheel_stratosphere.wiki.wikiparser.SimpleWikiParser
+import de.uni_potsdam.hpi.coheel.wiki.wikiparser.SimpleWikiParser
 
 /**
  * Represents a link in a Wikipedia article.

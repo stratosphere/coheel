@@ -1,4 +1,4 @@
-package de.hpi.uni_potsdam.coheel_stratosphere.wiki.wikiparser
+package de.uni_potsdam.hpi.coheel.wiki.wikiparser
 
 import org.dbpedia.extraction.util.Language
 import org.dbpedia.extraction.wikiparser.WikiParserException

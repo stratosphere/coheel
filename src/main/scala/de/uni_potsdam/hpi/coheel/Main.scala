@@ -1,6 +1,5 @@
-package de.hpi.uni_potsdam.coheel_stratosphere
+package de.uni_potsdam.hpi.coheel
 
-import de.hpi.uni_potsdam.coheel_stratosphere.wiki.{WikiPageReader, LinkExtractor}
 import eu.stratosphere.client.LocalExecutor
 import org.apache.log4j.{Level, Logger}
 

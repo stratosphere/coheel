@@ -1,4 +1,4 @@
-package de.hpi.uni_potsdam.coheel_stratosphere.wiki.wikiparser
+package de.uni_potsdam.hpi.coheel.wiki.wikiparser
 
 private final class Matcher(val userTags : List[String], matchStdTags : Boolean = false)
 {

@@ -1,10 +1,10 @@
-package de.hpi.uni_potsdam.coheel_stratosphere
+package de.uni_potsdam.hpi.coheel
 
 import org.scalatest.FunSuite
 import scala.xml.XML
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import de.hpi.uni_potsdam.coheel_stratosphere.wiki.{Link, LinkExtractor, WikiPageReader}
+import de.uni_potsdam.hpi.coheel.wiki.{Link, LinkExtractor, WikiPageReader}
 
 @RunWith(classOf[JUnitRunner])
 class LinkExtractorTest extends FunSuite {
