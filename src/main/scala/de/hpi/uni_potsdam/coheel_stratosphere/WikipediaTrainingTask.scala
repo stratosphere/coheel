@@ -16,6 +16,7 @@ class WikipediaTrainingTask(path: String = "src/test/resources/test.wikirun") ex
 
 	val outputFormat     = CsvOutputFormat[(String, String, Int)]("\n", "\t")
 	val redirectFormat   = CsvOutputFormat[(String, String)]("\n", "\t")
+	val surfaceDocumentFormat = CsvOutputFormat[(String, Int)]("\n", "\t")
 	val probOutputFormat = CsvOutputFormat[(String, String, Double)]("\n", "\t")
 
 	lazy val currentPath = System.getProperty("user.dir")
@@ -26,6 +27,7 @@ class WikipediaTrainingTask(path: String = "src/test/resources/test.wikirun") ex
 	lazy val contextLinkProbsPath  = s"file://$currentPath/testoutput/context-link-probs"
 	lazy val languageModelsPath    = s"file://$currentPath/testoutput/language-models"
 	lazy val redirectPath          = s"file://$currentPath/testoutput/redirects"
+	lazy val surfaceDocumentPath   = s"file://$currentPath/testoutput/surface-document-counts"
 
 	/**
 	 * Builds a plan to create the three main data structures CohEEL needs.
@@ -72,6 +74,19 @@ class WikipediaTrainingTask(path: String = "src/test/resources/test.wikirun") ex
 		// so we create two unions here as a workaround, until this is fixed
 		val allPages1 = disambiguationPageLinks.union(normalPageLinks)
 		val allPages2 = disambiguationPageLinks.union(normalPageLinks)
+		val allPages3 = disambiguationPageLinks.union(normalPageLinks)
+
+		// counts in how many documents a surface occurs
+		val surfaceDocumentCounts = allPages3.groupBy { link => link.text }
+			.reduceGroup { linksWithSameText =>
+				linksWithSameText.toList
+					.groupBy { link => link.source  }
+					.map { groupEntry =>
+						val linksFromSameSource = groupEntry._2
+						(linksFromSameSource(0).text, linksFromSameSource.size)
+					}.toList
+			}.flatMap { l => l }
+
 
 		// count how often a surface occurs
 		val surfaceCounts = allPages1
@@ -114,7 +129,8 @@ class WikipediaTrainingTask(path: String = "src/test/resources/test.wikirun") ex
 		val surfaceProbOutput = surfaceProbabilities.write(surfaceProbsPath, probOutputFormat)
 		val contextLinkOutput = contextLinkProbabilities.write(contextLinkProbsPath, probOutputFormat)
 		val redirectOutput    = redirects.write(redirectPath, redirectFormat)
-		List(surfaceProbOutput, contextLinkOutput, redirectOutput)
+		val surfaceDocumentsOutput = surfaceDocumentCounts.write(surfaceDocumentPath, surfaceDocumentFormat)
+		List(surfaceProbOutput, contextLinkOutput, redirectOutput, surfaceDocumentsOutput)
 	}
 
 	def linksFrom(pages: DataSet[CoheelWikiPage]): DataSet[Link] = {
