@@ -37,7 +37,10 @@
     <file url="file://$PROJECT_DIR$/pom.xml" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources/logback.xml" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/scala/de/uni_potsdam/hpi/coheel/Main.scala" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/src/main/scala/de/uni_potsdam/hpi/coheel/WikipediaTrainingTask.scala" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/scala/de/uni_potsdam/hpi/coheel/plans/OutputFiles.scala" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/scala/de/uni_potsdam/hpi/coheel/plans/SurfaceNotALinkCountPlan.scala" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/scala/de/uni_potsdam/hpi/coheel/plans/WikipediaTrainingPlan.scala" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/scala/de/uni_potsdam/hpi/coheel/wiki/TextAnalyzer.scala" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/test/resources/wikipedia_Kilobyte.xml" charset="UTF-8" />
   </component>
   <component name="EntryPointsManager">

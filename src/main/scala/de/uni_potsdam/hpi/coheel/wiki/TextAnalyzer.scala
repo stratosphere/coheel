@@ -6,6 +6,9 @@ import java.io.StringReader
 import scala.collection.mutable.ListBuffer
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute
 
+/**
+ * Small wrapper around Lucene's tokenizing and stemming.
+ */
 class TextAnalyzer {
 
 	def tokenize(text: String, stemming: Boolean = true): List[String] = {

@@ -1,4 +1,4 @@
-package de.uni_potsdam.hpi.coheel
+package de.uni_potsdam.hpi.coheel.plans
 
 import eu.stratosphere.api.scala._
 import eu.stratosphere.api.scala.operators._
@@ -6,28 +6,17 @@ import eu.stratosphere.api.common.{Program, ProgramDescription, Plan}
 import de.uni_potsdam.hpi.coheel.wiki._
 import scala.xml.XML
 import scala.io.Source
-import eu.stratosphere.api.java.ExecutionEnvironment
 import de.uni_potsdam.hpi.coheel.wiki.Link
 
+import OutputFiles._
 
-class WikipediaTrainingTask(path: String = "src/test/resources/test.wikirun") extends Program with ProgramDescription {
+
+class WikipediaTrainingPlan(path: String = "src/test/resources/test.wikirun") extends Program with ProgramDescription {
 
 	override def getDescription = "Training the model parameters for CohEEL."
 
-	val outputFormat     = CsvOutputFormat[(String, String, Int)]("\n", "\t")
-	val redirectFormat   = CsvOutputFormat[(String, String)]("\n", "\t")
-	val surfaceDocumentFormat = CsvOutputFormat[(String, Int)]("\n", "\t")
-	val probOutputFormat = CsvOutputFormat[(String, String, Double)]("\n", "\t")
-
-	lazy val currentPath = System.getProperty("user.dir")
 	// input files, file with the names of the test wikipedia articles
 	lazy val wikipediaFilesPath = s"file://$currentPath/$path"
-	// outputs files
-	lazy val surfaceProbsPath      = s"file://$currentPath/testoutput/surface-probs"
-	lazy val contextLinkProbsPath  = s"file://$currentPath/testoutput/context-link-probs"
-	lazy val languageModelsPath    = s"file://$currentPath/testoutput/language-models"
-	lazy val redirectPath          = s"file://$currentPath/testoutput/redirects"
-	lazy val surfaceDocumentPath   = s"file://$currentPath/testoutput/surface-document-counts"
 
 	/**
 	 * Builds a plan to create the three main data structures CohEEL needs.

@@ -28,3 +28,5 @@ There is some stratosphere tool to visualize plans. Not sure, whether this is st
 Intersection
 --------------------------------
 Bug-Report to Stratosphere about using the same union twice (see WikipediaTrainingTask)
+--------------------------------
+Write tests
