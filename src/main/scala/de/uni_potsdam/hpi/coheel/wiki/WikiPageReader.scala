@@ -1,10 +1,11 @@
 package de.uni_potsdam.hpi.coheel.wiki
 
-import scala.xml.Elem
 import org.dbpedia.extraction.sources.WikiPage
 import org.dbpedia.extraction.wikiparser.WikiTitle
 import org.dbpedia.extraction.util.Language
 import de.uni_potsdam.hpi.coheel.wiki.wikiparser.SimpleWikiParser
+import java.io.{StringReader, BufferedReader}
+import javax.xml.stream.{XMLStreamConstants, XMLStreamReader, XMLInputFactory}
 
 
 /**
@@ -79,25 +80,52 @@ object WikiPageReader {
 		(wikiPage.pageTitle, ast.toPlainText)
 	}
 
+	lazy val factory = XMLInputFactory.newInstance()
 	var i = 0
-	def xmlToWikiPages(xml: Elem): Iterator[CoheelWikiPage] = {
-		val pages = (xml \\ "page").iterator
-
-		if (pages.isEmpty)
-			throw new RuntimeException("No wikipage found!")
+	def xmlToWikiPages(xml: String): Iterator[CoheelWikiPage] = {
 		new Iterator[CoheelWikiPage] {
-			def hasNext = pages.hasNext
-			def next(): CoheelWikiPage = {
-				val page = pages.next()
-				val rev = page \  "revision"
-				val redirect = page \ "redirect" \ "@title"
+			var hasMorePages = true
 
+			// XML related
+			val reader = new BufferedReader(new StringReader(xml))
+			val streamReader = factory.createXMLStreamReader(reader)
+
+			// Values for the current page
+			var pageTitle: String = _
+			var redirectTitle: String = _
+			var text: String = _
+
+			readNextPage()
+
+			def readNextPage(): Unit = {
+				var foundNextPage = false
+
+				while (!foundNextPage && streamReader.hasNext) {
+					streamReader.next
+					if (streamReader.getEventType == XMLStreamConstants.START_ELEMENT) {
+						streamReader.getLocalName match {
+							case "text" => text = streamReader.getElementText
+							case "title" => pageTitle = streamReader.getElementText
+							case "redirect" => redirectTitle = streamReader.getAttributeValue(null, "title")
+							case "page" => foundNextPage = true
+							case _ =>
+						}
+					}
+				}
+				hasMorePages = streamReader.hasNext
+			}
+
+
+			def hasNext = hasMorePages
+			def next(): CoheelWikiPage = {
+				readNextPage()
 				new CoheelWikiPage(
-					pageTitle = (page \ "title").head.text,
-					redirectTitle = redirect.toString(),
-					text  = (rev \ "text").text
+					pageTitle = pageTitle,
+					redirectTitle = redirectTitle,
+					text  = text
 				)
 			}
+
 		}
 	}
 

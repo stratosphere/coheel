@@ -5,6 +5,7 @@ import scala.xml.XML
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import de.uni_potsdam.hpi.coheel.wiki.{Link, LinkExtractor, WikiPageReader}
+import scala.io.Source
 
 @RunWith(classOf[JUnitRunner])
 class LinkExtractorTest extends FunSuite {
@@ -13,7 +14,7 @@ class LinkExtractorTest extends FunSuite {
 
 	lazy val wikiPage = {
 		val source = getClass.getResource("/wikipedia_Kilobyte.xml")
-		val xml = XML.load(source)
+		val xml = Source.fromFile(source.toURI, "UTF-8").mkString
 		WikiPageReader.xmlToWikiPages(xml).next()
 	}
 

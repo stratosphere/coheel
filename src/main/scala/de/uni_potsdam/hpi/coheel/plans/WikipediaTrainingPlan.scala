@@ -40,7 +40,7 @@ class WikipediaTrainingPlan(path: String = "src/test/resources/test.wikirun")
 			if (pageSource.startsWith("#")) {
 				List()
 			} else {
-				val wikiPages = WikiPageReader.xmlToWikiPages(XML.loadString(pageSource))
+				val wikiPages = WikiPageReader.xmlToWikiPages(pageSource)
 				print(s"Wikifying $i ... ")
 				val r = wikiPages.toList
 				println("Done.")
