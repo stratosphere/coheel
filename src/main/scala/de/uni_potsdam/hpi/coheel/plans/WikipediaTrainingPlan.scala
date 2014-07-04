@@ -38,10 +38,11 @@ class WikipediaTrainingPlan(path: String = "src/test/resources/test.wikirun")
 			pageSource
 		}.flatMap { pageSource =>
 			val wikiPages = WikiPageReader.xmlToWikiPages(XML.loadString(pageSource))
-			println(s"Wikified $i.")
-			wikiPages.toList
+			print(s"Wikifying $i ... ")
+			val r = wikiPages.toList
+			println("Done.")
+			r
 		}
-
 		val plans = buildLinkPlans(pageSource)
 		val languageModelPlan = buildLanguageModelPlan(pageSource)
 
