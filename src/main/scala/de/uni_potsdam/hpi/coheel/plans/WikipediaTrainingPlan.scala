@@ -20,6 +20,8 @@ class WikipediaTrainingPlan(path: String = "src/test/resources/test.wikirun")
 	// input files, file with the names of the test wikipedia articles
 	lazy val wikipediaFilesPath = s"file://$currentPath/$path"
 
+	lazy val PRINT_EVERY = 100000
+
 	/**
 	 * Builds a plan to create the three main data structures CohEEL needs.
 	 * <ul>
@@ -36,7 +38,7 @@ class WikipediaTrainingPlan(path: String = "src/test/resources/test.wikirun")
 			pageSource
 		}.flatMap { pageSource =>
 			val wikiPages = WikiPageReader.xmlToWikiPages(XML.loadString(pageSource))
-			log.info(s"Wikified $i.")
+			println(s"Wikified $i.")
 			wikiPages.toList
 		}
 
@@ -82,8 +84,8 @@ class WikipediaTrainingPlan(path: String = "src/test/resources/test.wikirun")
 					.groupBy { link => link.source  }
 					.size
 
-				if (i % 1000 == 0)
-					log.info("Surface document counts: $i ")
+				if (i % PRINT_EVERY == 0)
+					println(s"Surface document counts: $i ")
 				i += 1
 				(text, count)
 			}
@@ -104,8 +106,8 @@ class WikipediaTrainingPlan(path: String = "src/test/resources/test.wikirun")
 			.isEqualTo { case (link, _) => link.text }
 			.map { case (surfaceCount, surfaceLinkCount) =>
 				val link = surfaceLinkCount._1
-				if (j % 1000 == 0)
-					log.info("Surface probabilities: $j ")
+				if (j % PRINT_EVERY == 0)
+					println(s"Surface probabilities: $j ")
 				j += 1
 				(link.text, link.destination, surfaceLinkCount._2.toDouble / surfaceCount._2.toDouble)
 			}
@@ -123,8 +125,8 @@ class WikipediaTrainingPlan(path: String = "src/test/resources/test.wikirun")
 			.isEqualTo { case (link, _) => link.source }
 			.map { case (linkCount, surfaceLinkCount) =>
 				val link = surfaceLinkCount._1
-				if (k % 1000 == 0)
-					log.info("Context link probabilities: $k ")
+				if (k % PRINT_EVERY == 0)
+					println(s"Context link probabilities: $k ")
 				k += 1
 				(link.source, link.destination, surfaceLinkCount._2.toDouble / linkCount._2.toDouble)
 			}
@@ -178,8 +180,8 @@ class WikipediaTrainingPlan(path: String = "src/test/resources/test.wikirun")
 			.isEqualTo { case (word, _) => word.document }
 			.map { case (documentCount, wordCount) =>
 				val word = wordCount._1
-				if (i % 1000 == 0)
-					log.info("Language Models: $i ")
+				if (i % PRINT_EVERY == 0)
+					println(s"Language Models: $i ")
 				i += 1
 				(word.document, word.word, wordCount._2.toDouble / documentCount._2.toDouble)
 			}
