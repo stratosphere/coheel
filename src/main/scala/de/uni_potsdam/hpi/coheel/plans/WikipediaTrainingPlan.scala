@@ -9,9 +9,11 @@ import scala.io.Source
 import de.uni_potsdam.hpi.coheel.wiki.Link
 
 import OutputFiles._
+import org.slf4s.Logging
 
 
-class WikipediaTrainingPlan(path: String = "src/test/resources/test.wikirun") extends Program with ProgramDescription {
+class WikipediaTrainingPlan(path: String = "src/test/resources/test.wikirun")
+	extends Program with ProgramDescription with Logging {
 
 	override def getDescription = "Training the model parameters for CohEEL."
 
@@ -28,11 +30,13 @@ class WikipediaTrainingPlan(path: String = "src/test/resources/test.wikirun") ex
 	 */
 	override def getPlan(args: String*): Plan = {
 		val input = TextFile(wikipediaFilesPath)
+		var i = 0
 		val pageSource = input.map { file =>
 			val pageSource = Source.fromFile(s"src/test/resources/$file").mkString
 			pageSource
 		}.flatMap { pageSource =>
 			val wikiPages = WikiPageReader.xmlToWikiPages(XML.loadString(pageSource))
+			log.info(s"Wikified $i.")
 			wikiPages.toList
 		}
 
@@ -65,6 +69,7 @@ class WikipediaTrainingPlan(path: String = "src/test/resources/test.wikirun") ex
 		val allPages2 = disambiguationPageLinks.union(normalPageLinks)
 		val allPages3 = disambiguationPageLinks.union(normalPageLinks)
 
+		var i = 0
 		// counts in how many documents a surface occurs
 		val surfaceDocumentCounts = allPages3
 			.groupBy { link => link.text }
@@ -76,10 +81,15 @@ class WikipediaTrainingPlan(path: String = "src/test/resources/test.wikirun") ex
 				val count = asList
 					.groupBy { link => link.source  }
 					.size
+
+				if (i % 1000 == 0)
+					log.info("Surface document counts: $i ")
+				i += 1
 				(text, count)
 			}
 
 
+		var j = 0
 		// count how often a surface occurs
 		val surfaceCounts = allPages1
 			.groupBy { link => link.text }
@@ -94,9 +104,13 @@ class WikipediaTrainingPlan(path: String = "src/test/resources/test.wikirun") ex
 			.isEqualTo { case (link, _) => link.text }
 			.map { case (surfaceCount, surfaceLinkCount) =>
 				val link = surfaceLinkCount._1
+				if (j % 1000 == 0)
+					log.info("Surface probabilities: $j ")
+				j += 1
 				(link.text, link.destination, surfaceLinkCount._2.toDouble / surfaceCount._2.toDouble)
 			}
 
+		var k = 0
 		// calculate context link counts only for non-disambiguation pages
 		val linkCounts = normalPageLinks
 			.groupBy { link => link.source }
@@ -109,6 +123,9 @@ class WikipediaTrainingPlan(path: String = "src/test/resources/test.wikirun") ex
 			.isEqualTo { case (link, _) => link.source }
 			.map { case (linkCount, surfaceLinkCount) =>
 				val link = surfaceLinkCount._1
+				if (k % 1000 == 0)
+					log.info("Context link probabilities: $k ")
+				k += 1
 				(link.source, link.destination, surfaceLinkCount._2.toDouble / linkCount._2.toDouble)
 			}
 
@@ -149,6 +166,7 @@ class WikipediaTrainingPlan(path: String = "src/test/resources/test.wikirun") ex
 			tokens
 		}
 
+		var i = 0
 		val documentCounts = words
 			.groupBy { word => word.document }
 			.count()
@@ -160,6 +178,9 @@ class WikipediaTrainingPlan(path: String = "src/test/resources/test.wikirun") ex
 			.isEqualTo { case (word, _) => word.document }
 			.map { case (documentCount, wordCount) =>
 				val word = wordCount._1
+				if (i % 1000 == 0)
+					log.info("Language Models: $i ")
+				i += 1
 				(word.document, word.word, wordCount._2.toDouble / documentCount._2.toDouble)
 			}
 

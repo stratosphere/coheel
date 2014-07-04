@@ -7,7 +7,7 @@
 	<logger level="ERROR" name="eu.stratosphere">
         <appender-ref ref="Console" />
 	</logger>
-	<root level="ERROR">
+	<root level="INFO">
 		<appender-ref ref="Console" />
 	</root>
 </configuration>

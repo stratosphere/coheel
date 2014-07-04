@@ -22,8 +22,8 @@ object Main {
 	LocalExecutor.setOverwriteFilesByDefault(true)
 
 	def main(args: Array[String]): Unit = {
-//		runWikipediaTrainingPlan()
-		runSurfaceNotALinkCountPlan()
+		runWikipediaTrainingPlan()
+//		runSurfaceNotALinkCountPlan()
 	}
 
 	def runWikipediaTrainingPlan(): Unit = {

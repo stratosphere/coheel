@@ -59,8 +59,8 @@
     <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-security:8.0.0.M1" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-servlet:8.0.0.M1" level="project" />
     <orderEntry type="library" name="Maven: com.amazonaws:aws-java-sdk:1.2.1" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpclient:4.3.4" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpcore:4.3.2" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpclient:4.4-alpha1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpcore:4.4-alpha1" level="project" />
     <orderEntry type="library" name="Maven: javax.mail:mail:1.4.7" level="project" />
     <orderEntry type="library" name="Maven: javax.activation:activation:1.1" level="project" />
     <orderEntry type="library" name="Maven: stax:stax-api:1.0.1" level="project" />
