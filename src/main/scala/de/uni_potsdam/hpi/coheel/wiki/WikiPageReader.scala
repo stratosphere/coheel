@@ -6,6 +6,7 @@ import org.dbpedia.extraction.util.Language
 import de.uni_potsdam.hpi.coheel.wiki.wikiparser.SimpleWikiParser
 import java.io.{StringReader, BufferedReader}
 import javax.xml.stream.{XMLStreamConstants, XMLStreamReader, XMLInputFactory}
+import org.apache.commons.lang3.StringEscapeUtils
 
 
 /**
@@ -98,6 +99,7 @@ object WikiPageReader {
 			readNextPage()
 
 			def readNextPage(): Unit = {
+				redirectTitle = ""
 				var foundNextPage = false
 
 				while (!foundNextPage && streamReader.hasNext) {
@@ -105,8 +107,8 @@ object WikiPageReader {
 					if (streamReader.getEventType == XMLStreamConstants.START_ELEMENT) {
 						streamReader.getLocalName match {
 							case "text" => text = streamReader.getElementText
-							case "title" => pageTitle = streamReader.getElementText
-							case "redirect" => redirectTitle = streamReader.getAttributeValue(null, "title")
+							case "title" => pageTitle = StringEscapeUtils.unescapeXml(streamReader.getElementText)
+							case "redirect" => redirectTitle = StringEscapeUtils.unescapeXml(streamReader.getAttributeValue(null, "title"))
 							case "page" => foundNextPage = true
 							case _ =>
 						}
