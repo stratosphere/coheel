@@ -37,11 +37,16 @@ class WikipediaTrainingPlan(path: String = "src/test/resources/test.wikirun")
 			val pageSource = Source.fromFile(s"src/test/resources/$file").mkString
 			pageSource
 		}.flatMap { pageSource =>
-			val wikiPages = WikiPageReader.xmlToWikiPages(XML.loadString(pageSource))
-			print(s"Wikifying $i ... ")
-			val r = wikiPages.toList
-			println("Done.")
-			r
+			if (pageSource.startsWith("#")) {
+				List()
+			} else {
+				val wikiPages = WikiPageReader.xmlToWikiPages(XML.loadString(pageSource))
+				print(s"Wikifying $i ... ")
+				val r = wikiPages.toList
+				println("Done.")
+				i += 1
+				r
+			}
 		}
 		val plans = buildLinkPlans(pageSource)
 		val languageModelPlan = buildLanguageModelPlan(pageSource)

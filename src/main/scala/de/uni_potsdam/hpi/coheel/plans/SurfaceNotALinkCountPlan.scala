@@ -10,16 +10,26 @@ class SurfaceNotALinkCountPlan extends Program with ProgramDescription {
 
 	override def getDescription = "Training the model parameters for CohEEL."
 
-
+//	case class LinkCount(linkParts: List[String], )
 	override def getPlan(args: String*): Plan = {
 		val textAnalyzer = new TextAnalyzer
 
-		val surfaces       = TextFile(surfaceDocumentPath)
-		val languageModels = TextFile(languageModelsPath)
-
-		val linkOccurrenceCounts = surfaces.map { s =>
-			("mention", 4, 10)
+		val surfaces       = DataSource(surfaceDocumentPath, surfaceDocumentInput)
+		val linkTextAsParts = DataSource(languageModelsPath, inputFormat).map { case (document, linkText, prob) =>
+			textAnalyzer.tokenize(linkText)
 		}
+
+
+
+//		val documentOccurrenceCounts = languageModels.join(surfaces)
+//			.where { case (document, word, prob) => word }
+//			.isEqualTo { case (word, prob) => word }
+//			.map { case (languageModel, surface) =>
+//				// word, document
+//				(languageModel._2, languageModel._1)
+//			}.groupBy { case (word, document) =>
+//				word
+//			}.count()
 
 		// TODO:
 		// Join surfaces with language models
@@ -29,8 +39,9 @@ class SurfaceNotALinkCountPlan extends Program with ProgramDescription {
 		//      --> TODO: ask Toni, how to do this (reread original file? save positions?)
 
 
-		val surfaceLinkOccurrenceOutput = linkOccurrenceCounts.write(linkOccurenceCounts, linkOccurrenceFormat)
-		val plan = new ScalaPlan(Seq(surfaceLinkOccurrenceOutput))
-		plan
+//		val surfaceLinkOccurrenceOutput = documentOccurrenceCounts.write(linkOccurenceCounts, linkOccurrenceFormat)
+//		val plan = new ScalaPlan(Seq(surfaceLinkOccurrenceOutput))
+//		plan
+		null
 	}
 }
