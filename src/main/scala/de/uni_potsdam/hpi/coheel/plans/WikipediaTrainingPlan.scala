@@ -70,14 +70,19 @@ class WikipediaTrainingPlan(path: String = "src/test/resources/test.wikirun")
 		val allPageLinks    = linksFrom(wikiPages)
 
 		var i = 0
-		// counts in how many documents a surface occurs
-		val surfaceDocumentCounts = allPageLinks
+		val groupedByLinkText = allPageLinks
 			.groupBy { link => link.text }
+		// counts in how many documents a surface occurs
+		val surfaceDocumentCounts = groupedByLinkText
 			.reduceGroup { linksWithSameText =>
 				val asList = linksWithSameText.toList
 				val text = asList(0).text
 
-				// Note: these are scala functions, no Stratosphere functions
+				// Count each link on one source page only once, i. e. if a surface occurs twice on a page
+				// it is only counted once.
+				// Note: These are scala functions, no Flink functions.
+				//       Hoping that the list of links with a certain surface is small enough to be handled on
+				//       one machine.
 				val count = asList
 					.groupBy { link => link.source  }
 					.size
@@ -91,8 +96,7 @@ class WikipediaTrainingPlan(path: String = "src/test/resources/test.wikirun")
 
 		var j = 0
 		// count how often a surface occurs
-		val surfaceCounts = allPageLinks
-			.groupBy { link => link.text }
+		val surfaceCounts = groupedByLinkText
 			.count()
 		// count how often a surface occurs with a certain destination
 		val surfaceLinkCounts = allPageLinks
@@ -167,6 +171,7 @@ class WikipediaTrainingPlan(path: String = "src/test/resources/test.wikirun")
 		}
 
 		var i = 0
+		// count the words in a document
 		val documentCounts = words
 			.groupBy { word => word.document }
 			.count()
