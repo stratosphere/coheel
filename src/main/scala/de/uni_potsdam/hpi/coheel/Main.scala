@@ -4,6 +4,8 @@ import eu.stratosphere.client.LocalExecutor
 import org.apache.log4j.{Level, Logger}
 import de.uni_potsdam.hpi.coheel.wiki.TextAnalyzer
 import de.uni_potsdam.hpi.coheel.plans.{SurfaceNotALinkCountPlan, WikipediaTrainingPlan}
+import org.apache.commons.io.FileUtils
+import java.io.File
 
 object Main {
 
@@ -30,8 +32,12 @@ object Main {
 		println("Parsing wikipedia.")
 		val processingTime = time {
 			// Dump downloaded from http://dumps.wikimedia.org/enwiki/latest/
-			val plan = new WikipediaTrainingPlan(taskFile)
-			LocalExecutor.execute(plan)
+			val program = new WikipediaTrainingPlan(taskFile)
+
+			val json = LocalExecutor.optimizerPlanAsJSON(program.getPlan())
+			FileUtils.writeStringToFile(new File("plan.json"), json, "UTF-8")
+
+			LocalExecutor.execute(program)
 		} * 10.2 * 1024 /* full data dump size*/ / 42.7 /* test dump size */ / 60 /* in minutes */ / 60 /* in hours */
 		if (!PRODUCTION)
 			println(f"Approximately $processingTime%.2f hours on the full dump, one machine.")
