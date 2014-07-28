@@ -47,6 +47,8 @@ class WikipediaTrainingPlan(path: String = "src/test/resources/test.wikirun")
 				i += 1
 				r
 			}
+		}.filter { page =>
+			page.ns == 0
 		}
 		val plans = buildLinkPlans(pageSource)
 		val languageModelPlan = buildLanguageModelPlan(pageSource)

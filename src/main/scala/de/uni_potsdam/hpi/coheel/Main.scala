@@ -16,14 +16,13 @@ object Main {
 	 * grep -A 5 -i "{{disambiguation" --color=always enwiki-latest-pages-articles1.xml-p000000010p000010000 | less -R
 	 * Open tasks:
 	 * <ul>
-	 *   <li> Display plan using stratosphere's builtin visualizer
 	 *   <li> Remove wiktionary links?
-	 *   <li> Compact language model (use trie?)
 	 */
 	turnOffLogging()
 	LocalExecutor.setOverwriteFilesByDefault(true)
 
 	def main(args: Array[String]): Unit = {
+		// -Xms3g -Xmx7g
 		runWikipediaTrainingPlan()
 //		runSurfaceNotALinkCountPlan()
 	}

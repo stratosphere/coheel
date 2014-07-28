@@ -26,10 +26,11 @@ import org.apache.commons.lang3.StringEscapeUtils
  * <strong>Definition list</strong>:<br />
  * A page is seen as a list if it belongs to a category which starts with List.
  * @param pageTitle The title of the page as a string.
+ * @param ns The namespace of the wiki page.
  * @param redirectTitle The title of the page this page is redirecting to or "", if it is not a redirect.
  * @param text This page's content.
  */
-case class CoheelWikiPage(pageTitle: String, redirectTitle: String, text: String) extends WikiPage(
+case class CoheelWikiPage(pageTitle: String, ns: Int, redirectTitle: String, text: String) extends WikiPage(
 	title           = WikiTitle.parse(pageTitle, Language.English),
 	redirect        = if (redirectTitle == "") null else WikiTitle.parse(redirectTitle, Language.English),
 	id              = 0,
@@ -93,6 +94,7 @@ object WikiPageReader {
 
 			// Values for the current page
 			var pageTitle: String = _
+			var ns: Int = _
 			var redirectTitle: String = _
 			var text: String = _
 
@@ -107,6 +109,7 @@ object WikiPageReader {
 					if (streamReader.getEventType == XMLStreamConstants.START_ELEMENT) {
 						streamReader.getLocalName match {
 							case "text" => text = streamReader.getElementText
+							case "ns" => ns = streamReader.getElementText.toInt
 							case "title" => pageTitle = StringEscapeUtils.unescapeXml(streamReader.getElementText)
 							case "redirect" => redirectTitle = StringEscapeUtils.unescapeXml(streamReader.getAttributeValue(null, "title"))
 							case "page" => foundNextPage = true
@@ -123,6 +126,7 @@ object WikiPageReader {
 				readNextPage()
 				new CoheelWikiPage(
 					pageTitle = pageTitle,
+					ns = ns,
 					redirectTitle = redirectTitle,
 					text  = text
 				)
