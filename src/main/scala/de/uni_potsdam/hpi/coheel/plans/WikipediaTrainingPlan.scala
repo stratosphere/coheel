@@ -64,22 +64,14 @@ class WikipediaTrainingPlan(path: String = "src/test/resources/test.wikirun")
 	 *   <li> the plan who counts how often a link occurs under a certain surface
 	 */
 	def buildLinkPlans(wikiPages: DataSet[CoheelWikiPage]): List[ScalaSink[_]] = {
-		val disambiguationPages = wikiPages.filter { _.isDisambiguation }
 		val normalPages = wikiPages.filter { !_.isDisambiguation }
 
-		val disambiguationPageLinks = linksFrom(disambiguationPages)
-		val normalPageLinks         = linksFrom(normalPages)
-		// Note:
-		// It seems to be a bug in Stratosphere, that you cannot use the same union
-		// twice for an upcoming join
-		// so we create two unions here as a workaround, until this is fixed
-		val allPages1 = disambiguationPageLinks.union(normalPageLinks)
-		val allPages2 = disambiguationPageLinks.union(normalPageLinks)
-		val allPages3 = disambiguationPageLinks.union(normalPageLinks)
+		val normalPageLinks = linksFrom(normalPages)
+		val allPageLinks    = linksFrom(wikiPages)
 
 		var i = 0
 		// counts in how many documents a surface occurs
-		val surfaceDocumentCounts = allPages3
+		val surfaceDocumentCounts = allPageLinks
 			.groupBy { link => link.text }
 			.reduceGroup { linksWithSameText =>
 				val asList = linksWithSameText.toList
@@ -99,11 +91,11 @@ class WikipediaTrainingPlan(path: String = "src/test/resources/test.wikirun")
 
 		var j = 0
 		// count how often a surface occurs
-		val surfaceCounts = allPages1
+		val surfaceCounts = allPageLinks
 			.groupBy { link => link.text }
 			.count()
 		// count how often a surface occurs with a certain destination
-		val surfaceLinkCounts = allPages2
+		val surfaceLinkCounts = allPageLinks
 			.groupBy { link => (link.text, link.destination) }
 			.count()
 		// join them together and calculate the probabilities
