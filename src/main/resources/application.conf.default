@@ -1,4 +1,5 @@
 {
+	name: "Some name that is displayed",
 	base_path: "Path to the wiki dumps. Can be absolute or relative.",
 	dump_file: "Path to the file containing the concrete files for the run",
 	// whether to print the runtime estimation

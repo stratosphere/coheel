@@ -30,7 +30,7 @@ object Main {
 	}
 
 	def runWikipediaTrainingPlan(): Unit = {
-		println("Parsing wikipedia.")
+		println("Parsing wikipedia. Dataset: " + config.getString("name"))
 		val processingTime = time {
 			// Dump downloaded from http://dumps.wikimedia.org/enwiki/latest/
 			val program = new WikipediaTrainingPlan(taskFile)
