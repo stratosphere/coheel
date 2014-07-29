@@ -23,6 +23,7 @@ object Main {
 
 	def main(args: Array[String]): Unit = {
 		// -Xms3g -Xmx7g
+		// -verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails
 		runWikipediaTrainingPlan()
 //		runSurfaceNotALinkCountPlan()
 	}
