@@ -53,9 +53,9 @@ case class CoheelWikiPage(pageTitle: String, ns: Int, redirectTitle: String, tex
 		// maybe this could be used to not scan the whole text
 		val disambiguationRegex = """(?ui)\{\{disambiguation.*?\}\}""".r
 		val matches = disambiguationRegex.findAllIn(text)
-			// check whether the regex sometimes accidentially matches to much text
+			// check whether the regex sometimes accidentially matches too much text
 			.map { s =>
-				if (s.length > 60)
+				if (s.length > 200)
 					throw new RuntimeException(s"Disambiguation regex went wrong on $s.")
 				s
 			}
