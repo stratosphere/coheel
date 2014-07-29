@@ -33,8 +33,8 @@ class WikipediaTrainingPlan(dumpFile: File = new File("src/test/resources/test.w
 	 */
 	override def getPlan(args: String*): Plan = {
 		val input = TextFile(wikipediaFilesPath)
-		var i = 0
 		val pageSource = input.map { file =>
+			println(file)
 			val pageSource = Source.fromFile(s"${dumpFile.getAbsoluteFile.getParent}/$file").mkString
 			pageSource
 		}.flatMap { pageSource =>
@@ -42,14 +42,11 @@ class WikipediaTrainingPlan(dumpFile: File = new File("src/test/resources/test.w
 				List()
 			} else {
 				val wikiPages = WikiPageReader.xmlToWikiPages(pageSource)
-				print(s"Wikifying $i ... ")
+//				print(s"Wikifying $i ... ")
 				val r = wikiPages.toList
-				println("Done.")
-				i += 1
-				r
+//				println("Done.")
+				r.filter { page => page.ns == 0 }
 			}
-		}.filter { page =>
-			page.ns == 0
 		}
 		val plans = buildLinkPlans(pageSource)
 		val languageModelPlan = buildLanguageModelPlan(pageSource)
