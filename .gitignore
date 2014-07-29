@@ -6,3 +6,4 @@ testoutput/
 *.aux
 *.log
 *.pdf
+src/test/resources/
