@@ -11,7 +11,7 @@ import java.io.File
 object Main {
 
 	val config   = ConfigFactory.load()
-	val taskFile = config.getString("base_path") + config.getString("dump_file")
+	val taskFile = new File(config.getString("base_path") + config.getString("dump_file"))
 	/**
 	 * Helpful commands:
 	 * grep -A 5 -i "{{disambiguation" --color=always enwiki-latest-pages-articles1.xml-p000000010p000010000 | less -R

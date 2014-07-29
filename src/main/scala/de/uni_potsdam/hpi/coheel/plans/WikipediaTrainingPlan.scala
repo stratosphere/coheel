@@ -10,15 +10,16 @@ import de.uni_potsdam.hpi.coheel.wiki.Link
 
 import OutputFiles._
 import org.slf4s.Logging
+import java.io.File
 
 
-class WikipediaTrainingPlan(path: String = "src/test/resources/test.wikirun")
+class WikipediaTrainingPlan(dumpFile: File = new File("src/test/resources/test.wikirun"))
 	extends Program with ProgramDescription with Logging {
 
 	override def getDescription = "Training the model parameters for CohEEL."
 
 	// input files, file with the names of the test wikipedia articles
-	lazy val wikipediaFilesPath = s"file://$currentPath/$path"
+	lazy val wikipediaFilesPath = s"file://${dumpFile.getAbsolutePath}"
 
 	lazy val PRINT_EVERY = 100000
 
