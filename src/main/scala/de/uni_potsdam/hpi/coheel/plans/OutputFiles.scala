@@ -5,15 +5,12 @@ import eu.stratosphere.api.scala.operators.{CsvInputFormat, CsvOutputFormat}
 object OutputFiles {
 	lazy val currentPath = System.getProperty("user.dir")
 
-	lazy val surfaceProbsPath      = s"file://$currentPath/testoutput/surface-probs.wiki"
-	lazy val contextLinkProbsPath  = s"file://$currentPath/testoutput/context-link-probs.wiki"
-	lazy val languageModelsPath    = s"file://$currentPath/testoutput/language-models.wiki"
-	lazy val redirectPath          = s"file://$currentPath/testoutput/redirects.wiki"
-	lazy val surfaceDocumentPath   = s"file://$currentPath/testoutput/surface-document-counts.wiki"
-	lazy val linkOccurenceCounts   = s"file://$currentPath/testoutput/link-occurrence-counts.wiki"
-
-	val outputFormat          = CsvOutputFormat[(String, String, Int)]("\n", "\t")
-	val inputFormat           = CsvInputFormat[(String, String, Int)]("\n", '\t')
+	lazy val surfaceProbsPath           = s"file://$currentPath/testoutput/surface-probs.wiki"
+	lazy val contextLinkProbsPath       = s"file://$currentPath/testoutput/context-link-probs.wiki"
+	lazy val languageModelsPath         = s"file://$currentPath/testoutput/language-models.wiki"
+	lazy val redirectPath               = s"file://$currentPath/testoutput/redirects.wiki"
+	lazy val surfaceDocumentPath        = s"file://$currentPath/testoutput/surface-document-counts.wiki"
+	lazy val surfaceOccurrenceCountPath = s"file://$currentPath/testoutput/link-occurrence-counts.wiki"
 
 	val redirectFormat        = CsvOutputFormat[(String, String)]("\n", "\t")
 
@@ -21,5 +18,7 @@ object OutputFiles {
 	val surfaceDocumentInput  = CsvInputFormat[(String, Int)]("\n", '\t')
 
 	val probOutputFormat      = CsvOutputFormat[(String, String, Double)]("\n", "\t")
+	val probInputFormat       = CsvInputFormat[(String, String, Double)]("\n", '\t')
+
 	val linkOccurrenceFormat  = CsvOutputFormat[(String, Int, Int)]("\n", "\t")
 }

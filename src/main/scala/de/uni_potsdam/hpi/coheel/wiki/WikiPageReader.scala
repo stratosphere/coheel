@@ -99,16 +99,12 @@ object WikiPageReader {
 			var text: String = _
 
 			readNextPage()
-			var i = 0
 
 			def readNextPage(): Unit = {
 				redirectTitle = ""
 				var foundNextPage = false
 
 				while (!foundNextPage && streamReader.hasNext) {
-					if (i % 10000 == 0)
-						println(i)
-					i += 1
 					streamReader.next
 					if (streamReader.getEventType == XMLStreamConstants.START_ELEMENT) {
 						streamReader.getLocalName match {

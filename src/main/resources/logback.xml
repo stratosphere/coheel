@@ -1,7 +1,7 @@
 <configuration>
 	<appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
-			<pattern>[%-5level] %logger{36} - %d{HH:mm} - %msg%n</pattern>
+			<pattern>[%-5level] - %d{HH:mm} - %msg%n</pattern>
 		</encoder>
 	</appender>
 	<logger level="ERROR" name="eu.stratosphere">

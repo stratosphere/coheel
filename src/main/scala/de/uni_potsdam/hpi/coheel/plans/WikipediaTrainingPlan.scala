@@ -4,7 +4,6 @@ import eu.stratosphere.api.scala._
 import eu.stratosphere.api.scala.operators._
 import eu.stratosphere.api.common.{Program, ProgramDescription, Plan}
 import de.uni_potsdam.hpi.coheel.wiki._
-import scala.xml.XML
 import scala.io.Source
 import de.uni_potsdam.hpi.coheel.wiki.Link
 
@@ -21,8 +20,6 @@ class WikipediaTrainingPlan(dumpFile: File = new File("src/test/resources/test.w
 	// input files, file with the names of the test wikipedia articles
 	lazy val wikipediaFilesPath = s"file://${dumpFile.getAbsolutePath}"
 
-	lazy val PRINT_EVERY = 100000
-
 	/**
 	 * Builds a plan to create the three main data structures CohEEL needs.
 	 * <ul>
@@ -34,7 +31,7 @@ class WikipediaTrainingPlan(dumpFile: File = new File("src/test/resources/test.w
 	override def getPlan(args: String*): Plan = {
 		val input = TextFile(wikipediaFilesPath)
 		val pageSource = input.map { file =>
-			println(file)
+			log.info(file)
 			val pageSource = Source.fromFile(s"${dumpFile.getAbsoluteFile.getParent}/$file").mkString
 			pageSource
 		}.flatMap { pageSource =>
@@ -42,9 +39,7 @@ class WikipediaTrainingPlan(dumpFile: File = new File("src/test/resources/test.w
 				List()
 			} else {
 				val wikiPages = WikiPageReader.xmlToWikiPages(pageSource)
-//				print(s"Wikifying $i ... ")
 				val r = wikiPages.toList
-//				println("Done.")
 				r.filter { page => page.ns == 0 }
 			}
 		}
@@ -87,8 +82,8 @@ class WikipediaTrainingPlan(dumpFile: File = new File("src/test/resources/test.w
 					.groupBy { link => link.source  }
 					.size
 
-				if (i % PRINT_EVERY == 0)
-					println(s"Surface document counts: $i ")
+				if (i % 1000000 == 0)
+					log.info(s"Surface document counts: $i ")
 				i += 1
 				(text, count)
 			}
@@ -108,8 +103,8 @@ class WikipediaTrainingPlan(dumpFile: File = new File("src/test/resources/test.w
 			.isEqualTo { case (link, _) => link.text }
 			.map { case (surfaceCount, surfaceLinkCount) =>
 				val link = surfaceLinkCount._1
-				if (j % PRINT_EVERY == 0)
-					println(s"Surface probabilities: $j ")
+				if (j % 1000000 == 0)
+					log.info(s"Surface probabilities: $j ")
 				j += 1
 				(link.text, link.destination, surfaceLinkCount._2.toDouble / surfaceCount._2.toDouble)
 			}
@@ -127,8 +122,8 @@ class WikipediaTrainingPlan(dumpFile: File = new File("src/test/resources/test.w
 			.isEqualTo { case (link, _) => link.source }
 			.map { case (linkCount, surfaceLinkCount) =>
 				val link = surfaceLinkCount._1
-				if (k % PRINT_EVERY == 0)
-					println(s"Context link probabilities: $k ")
+				if (k % 1000000 == 0)
+					log.info(s"Context link probabilities: $k ")
 				k += 1
 				(link.source, link.destination, surfaceLinkCount._2.toDouble / linkCount._2.toDouble)
 			}
@@ -182,8 +177,8 @@ class WikipediaTrainingPlan(dumpFile: File = new File("src/test/resources/test.w
 			.isEqualTo { case (word, _) => word.document }
 			.map { case (documentCount, wordCount) =>
 				val word = wordCount._1
-				if (i % PRINT_EVERY == 0)
-					println(s"Language Models: $i ")
+				if (i % 10000000 == 0)
+					log.info(s"Language Models: $i ")
 				i += 1
 				(word.document, word.word, wordCount._2.toDouble / documentCount._2.toDouble)
 			}

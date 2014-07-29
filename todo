@@ -1,5 +1,7 @@
 Stem mentions:
 To handle plural etc.
+Remove tokens (What-if token is the only thing)?
+---------------------------------
 ---------------------------------
 Redirect resolving:
 One pass to determine context links and redirects
@@ -21,8 +23,6 @@ For each word in mention:
  - intersection
 
 Introduce fake bigrams for the unigram links?
---------------------------------
-Intersection
 --------------------------------
 Write tests
 --------------------------------
