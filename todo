@@ -22,12 +22,7 @@ For each word in mention:
 
 Introduce fake bigrams for the unigram links?
 --------------------------------
-Plan visualization:
-There is some stratosphere tool to visualize plans. Not sure, whether this is still supported though.
---------------------------------
 Intersection
---------------------------------
-Bug-Report to Stratosphere about using the same union twice (see WikipediaTrainingTask)
 --------------------------------
 Write tests
 --------------------------------
