@@ -35,7 +35,7 @@ class WikipediaTrainingPlan(dumpFile: File = new File("src/test/resources/test.w
 		val input = TextFile(wikipediaFilesPath)
 		var i = 0
 		val pageSource = input.map { file =>
-			val pageSource = Source.fromFile(s"src/test/resources/$file").mkString
+			val pageSource = Source.fromFile(s"${dumpFile.getAbsoluteFile.getParent}/$file").mkString
 			pageSource
 		}.flatMap { pageSource =>
 			if (pageSource.startsWith("#")) {
