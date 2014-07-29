@@ -12,11 +12,10 @@ class SurfaceNotALinkCountPlan extends Program with ProgramDescription {
 
 //	case class LinkCount(linkParts: List[String], )
 	override def getPlan(args: String*): Plan = {
-		val textAnalyzer = new TextAnalyzer
 
 		val surfaces       = DataSource(surfaceDocumentPath, surfaceDocumentInput)
 		val linkTextAsParts = DataSource(languageModelsPath, inputFormat).map { case (document, linkText, prob) =>
-			textAnalyzer.tokenize(linkText)
+			TextAnalyzer.tokenize(linkText)
 		}
 
 

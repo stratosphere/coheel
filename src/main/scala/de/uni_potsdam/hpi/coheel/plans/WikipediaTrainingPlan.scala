@@ -168,8 +168,7 @@ class WikipediaTrainingPlan(dumpFile: File = new File("src/test/resources/test.w
 		} flatMap { wikiPage =>
 			val (title, text) = WikiPageReader.wikiPageToText(wikiPage)
 			// TODO: Refactor this to outer method and see if it still works
-			val analyzer = new TextAnalyzer
-			val tokens = analyzer.tokenize(text).map { token => Word(title, token) }
+			val tokens = TextAnalyzer.tokenize(text).map { token => Word(title, token) }
 			tokens
 		}
 
