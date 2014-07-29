@@ -2,15 +2,16 @@ package de.uni_potsdam.hpi.coheel
 
 import eu.stratosphere.client.LocalExecutor
 import org.apache.log4j.{Level, Logger}
-import de.uni_potsdam.hpi.coheel.wiki.TextAnalyzer
+import com.typesafe.config.ConfigFactory
 import de.uni_potsdam.hpi.coheel.plans.{SurfaceNotALinkCountPlan, WikipediaTrainingPlan}
 import org.apache.commons.io.FileUtils
+import scala.collection.JavaConversions._
 import java.io.File
 
 object Main {
 
-	val PRODUCTION = false
-	val taskFile = if (PRODUCTION)  "src/test/resources/full_dump.wikirun" else "src/test/resources/chunk_dump.wikirun"
+	val config   = ConfigFactory.load()
+	val taskFile = config.getString("base_path") + config.getString("dump_file")
 	/**
 	 * Helpful commands:
 	 * grep -A 5 -i "{{disambiguation" --color=always enwiki-latest-pages-articles1.xml-p000000010p000010000 | less -R
@@ -39,7 +40,7 @@ object Main {
 
 			LocalExecutor.execute(program)
 		} * 10.2 * 1024 /* full data dump size*/ / 42.7 /* test dump size */ / 60 /* in minutes */ / 60 /* in hours */
-		if (!PRODUCTION)
+		if (config.getBoolean("print_approximation"))
 			println(f"Approximately $processingTime%.2f hours on the full dump, one machine.")
 	}
 

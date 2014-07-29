@@ -343,17 +343,6 @@
         <root url="jar://$MAVEN_REPOSITORY$/com/google/guava/guava/14.0.1/guava-14.0.1-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: com.googlecode.concurrent-trees:concurrent-trees:2.4.0">
-      <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/googlecode/concurrent-trees/concurrent-trees/2.4.0/concurrent-trees-2.4.0.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/com/googlecode/concurrent-trees/concurrent-trees/2.4.0/concurrent-trees-2.4.0-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/googlecode/concurrent-trees/concurrent-trees/2.4.0/concurrent-trees-2.4.0-sources.jar!/" />
-      </SOURCES>
-    </library>
     <library name="Maven: com.sun.jersey:jersey-core:1.8">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/com/sun/jersey/jersey-core/1.8/jersey-core-1.8.jar!/" />
@@ -407,6 +396,17 @@
       </JAVADOC>
       <SOURCES>
         <root url="jar://$MAVEN_REPOSITORY$/com/thoughtworks/paranamer/paranamer/2.3/paranamer-2.3-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: com.typesafe:config:1.2.1">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/com/typesafe/config/1.2.1/config-1.2.1.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/com/typesafe/config/1.2.1/config-1.2.1-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/com/typesafe/config/1.2.1/config-1.2.1-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: commons-beanutils:commons-beanutils-core:1.8.0">
