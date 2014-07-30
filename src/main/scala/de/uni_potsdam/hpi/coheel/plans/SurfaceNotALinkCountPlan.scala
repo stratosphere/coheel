@@ -21,7 +21,12 @@ class SurfaceNotALinkCountPlan extends Program with ProgramDescription {
 		val surfaces = TextFile(surfaceProbsPath).map { line =>
 			val split = line.split('\t')
 			split(0)
-		}.map { surface =>
+		}
+		// NOTE: This could be done more performant I guess, if we do not group here, but rather
+		// preprocess the data to have each surface occur only once
+		.groupBy { surface => surface }
+		.reduceGroup { surfaceIt => surfaceIt.next() }
+		.map { surface =>
 			val tokens = TextAnalyzer.tokenize(surface)
 				if (tokens.isEmpty)
 					// TODO: Print these, and look, why they are not tokenizable
@@ -29,8 +34,6 @@ class SurfaceNotALinkCountPlan extends Program with ProgramDescription {
 				else
 					Surface(surface, tokens.head)
 		}
-
-
 
 		val documentOccurrences = languageModels.cogroup(surfaces)
 			.where { case LanguageModelEntry(_, word) => word }
@@ -50,12 +53,6 @@ class SurfaceNotALinkCountPlan extends Program with ProgramDescription {
 				} else
 					List()
 			}
-
-//		val output = documentOccurrences.groupBy { case (_, surface) => surface }
-//			.reduceGroup { l =>
-//				println(l.next._2)
-//				("abc", 1)
-//			}
 
 		val surfaceLinkOccurrenceOutput = documentOccurrences.write(surfaceOccurrenceCountPath,
 			CsvOutputFormat[(String, Int)]("\n", "\t"))
