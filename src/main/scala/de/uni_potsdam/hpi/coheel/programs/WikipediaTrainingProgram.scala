@@ -1,4 +1,4 @@
-package de.uni_potsdam.hpi.coheel.plans
+package de.uni_potsdam.hpi.coheel.programs
 
 import eu.stratosphere.api.scala._
 import eu.stratosphere.api.scala.operators._
@@ -12,7 +12,7 @@ import org.slf4s.Logging
 import java.io.File
 
 
-class WikipediaTrainingPlan(dumpFile: File = new File("src/test/resources/test.wikirun"))
+class WikipediaTrainingProgram(dumpFile: File = new File("src/test/resources/test.wikirun"))
 	extends Program with ProgramDescription with Logging {
 
 	override def getDescription = "Training the model parameters for CohEEL."

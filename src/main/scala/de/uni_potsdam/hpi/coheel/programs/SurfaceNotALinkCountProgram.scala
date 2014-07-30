@@ -1,4 +1,4 @@
-package de.uni_potsdam.hpi.coheel.plans
+package de.uni_potsdam.hpi.coheel.programs
 
 import eu.stratosphere.api.common.{Program, ProgramDescription, Plan}
 import eu.stratosphere.api.scala._
@@ -9,7 +9,7 @@ import de.uni_potsdam.hpi.coheel.wiki.TextAnalyzer
 case class Surface(surfaceText: String, firstWord: String)
 case class LanguageModelEntry(doc: String, word: String)
 
-class SurfaceNotALinkCountPlan extends Program with ProgramDescription {
+class SurfaceNotALinkCountProgram extends Program with ProgramDescription {
 
 	override def getDescription = "Training the model parameters for CohEEL."
 

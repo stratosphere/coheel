@@ -1,4 +1,4 @@
-package de.uni_potsdam.hpi.coheel.plans
+package de.uni_potsdam.hpi.coheel.programs
 
 import eu.stratosphere.api.scala.operators.{CsvInputFormat, CsvOutputFormat}
 

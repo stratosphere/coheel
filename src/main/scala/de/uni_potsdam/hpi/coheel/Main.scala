@@ -3,7 +3,7 @@ package de.uni_potsdam.hpi.coheel
 import eu.stratosphere.client.LocalExecutor
 import org.apache.log4j.{Level, Logger}
 import com.typesafe.config.ConfigFactory
-import de.uni_potsdam.hpi.coheel.plans.{SurfaceNotALinkCountPlan, WikipediaTrainingPlan}
+import de.uni_potsdam.hpi.coheel.programs.{SurfaceNotALinkCountProgram, WikipediaTrainingProgram}
 import org.apache.commons.io.FileUtils
 import scala.collection.JavaConversions._
 import java.io.File
@@ -28,7 +28,7 @@ object Main {
 		// -verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails
 
 //		val program = new WikipediaTrainingPlan(taskFile)
-		val program = new SurfaceNotALinkCountPlan
+		val program = new SurfaceNotALinkCountProgram
 		runProgram(program)
 	}
 
