@@ -32,16 +32,17 @@ class SurfaceNotALinkCountPlan extends Program with ProgramDescription {
 
 
 
-		val documentOccurrences = languageModels.join(surfaces)
+		val documentOccurrences = languageModels.cogroup(surfaces)
 			.where { case LanguageModelEntry(_, word) => word }
 			.isEqualTo { case Surface(_, firstWord) => firstWord }
-			.map { case (lmEntry, surface) =>
+			.flatMap { case (lmEntries, surfaceIt) =>
 //				println(surface.surfaceText)
-				(surface.surfaceText, lmEntry.doc)
-			}.groupBy { case (surfaceText, _) =>
-				surfaceText
-			}.reduceGroup { it =>
-				(it.next._1, 1)
+//				(surface.surfaceText, lmEntry.doc)
+//				val docs = lmEntries.map { entry => entry.doc }
+				val count = lmEntries.size
+				surfaceIt.map { surface =>
+					(surface.surfaceText, count)
+				}
 			}
 
 //		val output = documentOccurrences.groupBy { case (_, surface) => surface }
