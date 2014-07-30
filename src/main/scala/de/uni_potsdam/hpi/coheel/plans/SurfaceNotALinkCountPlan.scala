@@ -39,10 +39,16 @@ class SurfaceNotALinkCountPlan extends Program with ProgramDescription {
 //				println(surface.surfaceText)
 //				(surface.surfaceText, lmEntry.doc)
 //				val docs = lmEntries.map { entry => entry.doc }
-				val count = lmEntries.size
-				surfaceIt.map { surface =>
-					(surface.surfaceText, count)
-				}
+				val list = lmEntries.toList.map { lmEntry => lmEntry.doc}
+				if (list.nonEmpty) {
+					surfaceIt.map { surface =>
+						(surface.surfaceText, list.size)
+					}
+//						.flatMap { case (surfaceText, list) =>
+//						list.map { doc => (surfaceText, doc)}
+//					}
+				} else
+					List()
 			}
 
 //		val output = documentOccurrences.groupBy { case (_, surface) => surface }
@@ -50,13 +56,6 @@ class SurfaceNotALinkCountPlan extends Program with ProgramDescription {
 //				println(l.next._2)
 //				("abc", 1)
 //			}
-
-		// TODO:
-		// Join surfaces with language models
-		// Find out documents, where the words occur
-		// Intersection of those documents
-		// Check whether the mention really occurs in the text
-
 
 		val surfaceLinkOccurrenceOutput = documentOccurrences.write(surfaceOccurrenceCountPath,
 			CsvOutputFormat[(String, Int)]("\n", "\t"))
