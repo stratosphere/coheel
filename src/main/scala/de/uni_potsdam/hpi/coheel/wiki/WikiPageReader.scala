@@ -3,7 +3,7 @@ package de.uni_potsdam.hpi.coheel.wiki
 import org.dbpedia.extraction.sources.WikiPage
 import org.dbpedia.extraction.wikiparser.WikiTitle
 import org.dbpedia.extraction.util.Language
-import de.uni_potsdam.hpi.coheel.wiki.wikiparser.SimpleWikiParser
+import de.uni_potsdam.hpi.coheel.wiki.wikiparser.ExtendedSimpleWikiParser
 import java.io.{StringReader, BufferedReader}
 import javax.xml.stream.{XMLStreamConstants, XMLStreamReader, XMLInputFactory}
 import org.apache.commons.lang3.StringEscapeUtils
@@ -77,7 +77,7 @@ object WikiPageReader {
 	 * @return A tuple of the pages title and the page's plain text content.
 	 */
 	def wikiPageToText(wikiPage: CoheelWikiPage): (String, String) = {
-		val wikiParser = new SimpleWikiParser()
+		val wikiParser = new ExtendedSimpleWikiParser()
 		val ast = wikiParser.apply(wikiPage)
 		(wikiPage.pageTitle, ast.toPlainText)
 	}

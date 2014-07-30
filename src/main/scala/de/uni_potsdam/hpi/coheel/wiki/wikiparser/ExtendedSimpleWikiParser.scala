@@ -9,14 +9,14 @@ import java.net.URI
 import java.util.logging.{Level, Logger}
 import java.lang.IllegalArgumentException
 
-import SimpleWikiParser._
+import ExtendedSimpleWikiParser._
 
 /**
  *
  */
-object SimpleWikiParser
+object ExtendedSimpleWikiParser
 {
-	private val logger = Logger.getLogger(classOf[SimpleWikiParser].getName)
+	private val logger = Logger.getLogger(classOf[ExtendedSimpleWikiParser].getName)
 
 	private val MaxNestingLevel = 10
 	private val MaxErrors = Int.MaxValue
@@ -58,7 +58,7 @@ object SimpleWikiParser
  * Port of the DBpedia WikiParser for PHP.
  */
 //TODO section names should only contain the contents of the TextNodes
-final class SimpleWikiParser extends WikiParser
+final class ExtendedSimpleWikiParser extends WikiParser
 {
 	/**
 	 * Parses WikiText source and builds an Abstract Syntax Tree.

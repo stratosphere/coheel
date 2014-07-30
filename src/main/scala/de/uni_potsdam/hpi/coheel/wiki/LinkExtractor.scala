@@ -4,7 +4,7 @@ import org.dbpedia.extraction.sources.WikiPage
 import org.dbpedia.extraction.wikiparser.InternalLinkNode
 import org.dbpedia.extraction.wikiparser.Node
 import scala.collection.mutable
-import de.uni_potsdam.hpi.coheel.wiki.wikiparser.SimpleWikiParser
+import de.uni_potsdam.hpi.coheel.wiki.wikiparser.ExtendedSimpleWikiParser
 
 /**
  * Represents a link in a Wikipedia article.
@@ -32,7 +32,7 @@ class LinkExtractor {
 	var currentWikiTitle: String = _
 	def extractLinks(wikiPage: WikiPage): Seq[Link] = {
 		currentWikiTitle = wikiPage.title.decodedWithNamespace
-		val wikiParser = new SimpleWikiParser()
+		val wikiParser = new ExtendedSimpleWikiParser()
 		val ast = wikiParser.apply(wikiPage)
 		val links = walkAST(ast)
 		links
