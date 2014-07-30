@@ -30,7 +30,7 @@ class WikipediaTrainingPlan(dumpFile: File = new File("src/test/resources/test.w
 	 */
 	override def getPlan(args: String*): Plan = {
 		val input = TextFile(wikipediaFilesPath)
-		val pageSource = input.map { file =>
+		val wikiPages = input.map { file =>
 			log.info(file)
 			val pageSource = Source.fromFile(s"${dumpFile.getAbsoluteFile.getParent}/$file").mkString
 			pageSource
@@ -39,15 +39,19 @@ class WikipediaTrainingPlan(dumpFile: File = new File("src/test/resources/test.w
 				List()
 			} else {
 				val wikiPages = WikiPageReader.xmlToWikiPages(pageSource)
-				val r = wikiPages.toList
-				r.filter { page => page.ns == 0 }
+
+				wikiPages.filter { page => page.ns == 0 }
 			}
 		}
-		val plans = buildLinkPlans(pageSource)
-		val languageModelPlan = buildLanguageModelPlan(pageSource)
+		val plans = buildLinkPlans(wikiPages)
+		val languageModelPlan = buildLanguageModelPlan(wikiPages)
+
+		val textDumps = wikiPages.map { wikiPage =>
+			(wikiPage.pageTitle, wikiPage.text)
+		}.write(textDumpsPath, textFormat)
 
 		val plan = new ScalaPlan(
-			languageModelPlan :: plans)
+			languageModelPlan :: textDumps :: plans)
 
 		plan
 	}
@@ -136,7 +140,7 @@ class WikipediaTrainingPlan(dumpFile: File = new File("src/test/resources/test.w
 
 		val surfaceProbOutput = surfaceProbabilities.write(surfaceProbsPath, probOutputFormat)
 		val contextLinkOutput = contextLinkProbabilities.write(contextLinkProbsPath, probOutputFormat)
-		val redirectOutput    = redirects.write(redirectPath, redirectFormat)
+		val redirectOutput    = redirects.write(redirectPath, textFormat)
 		val surfaceDocumentsOutput = surfaceDocumentCounts.write(surfaceDocumentPath, surfaceDocumentFormat)
 		List(surfaceProbOutput, contextLinkOutput, redirectOutput, surfaceDocumentsOutput)
 	}
