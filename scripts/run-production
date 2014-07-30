@@ -1,3 +1,4 @@
 #!/usr/bin/env /bin/sh
+rm output
 cp src/main/resources/{production,application}.conf
 mvn scala:run | tee output
