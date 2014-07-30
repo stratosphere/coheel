@@ -19,7 +19,7 @@ object SimpleWikiParser
 	private val logger = Logger.getLogger(classOf[SimpleWikiParser].getName)
 
 	private val MaxNestingLevel = 10
-	private val MaxErrors = 10000
+	private val MaxErrors = Int.MaxValue
 
 	private val commentEnd = new Matcher(List("-->"))
 
