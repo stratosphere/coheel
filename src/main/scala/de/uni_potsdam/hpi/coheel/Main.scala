@@ -7,6 +7,7 @@ import de.uni_potsdam.hpi.coheel.plans.{SurfaceNotALinkCountPlan, WikipediaTrain
 import org.apache.commons.io.FileUtils
 import scala.collection.JavaConversions._
 import java.io.File
+import eu.stratosphere.api.common.Program
 
 object Main {
 
@@ -25,15 +26,16 @@ object Main {
 	def main(args: Array[String]): Unit = {
 		// -Xms3g -Xmx7g
 		// -verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails
-		runWikipediaTrainingPlan()
-//		runSurfaceNotALinkCountPlan()
+
+//		val program = new WikipediaTrainingPlan(taskFile)
+		val program = new SurfaceNotALinkCountPlan
+		runProgram(program)
 	}
 
-	def runWikipediaTrainingPlan(): Unit = {
+	def runProgram(program: Program): Unit = {
 		println("Parsing wikipedia. Dataset: " + config.getString("name"))
 		val processingTime = time {
 			// Dump downloaded from http://dumps.wikimedia.org/enwiki/latest/
-			val program = new WikipediaTrainingPlan(taskFile)
 
 			val json = LocalExecutor.optimizerPlanAsJSON(program.getPlan())
 			FileUtils.writeStringToFile(new File("plan.json"), json, "UTF-8")
@@ -42,11 +44,6 @@ object Main {
 		} * 10.2 * 1024 /* full data dump size*/ / 42.7 /* test dump size */ / 60 /* in minutes */ / 60 /* in hours */
 		if (config.getBoolean("print_approximation"))
 			println(f"Approximately $processingTime%.2f hours on the full dump, one machine.")
-	}
-
-	def runSurfaceNotALinkCountPlan(): Unit = {
-		val plan = new SurfaceNotALinkCountPlan
-		LocalExecutor.execute(plan)
 	}
 
 	def time[R](block: => R): Double = {
