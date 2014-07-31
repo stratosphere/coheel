@@ -11,7 +11,7 @@ case class LanguageModelEntry(doc: String, word: String)
 
 class SurfaceNotALinkCountProgram extends Program with ProgramDescription {
 
-	override def getDescription = "Training the model parameters for CohEEL."
+	override def getDescription = "Counting how often a surface occurs, but not as a link."
 
 	override def getPlan(args: String*): Plan = {
 

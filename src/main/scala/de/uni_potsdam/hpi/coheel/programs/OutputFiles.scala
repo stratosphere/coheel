@@ -12,6 +12,7 @@ object OutputFiles {
 	lazy val surfaceDocumentPath        = s"file://$currentPath/testoutput/surface-document-counts.wiki"
 	lazy val textDumpsPath              = s"file://$currentPath/testoutput/text-dumps.wiki"
 	lazy val surfaceOccurrenceCountPath = s"file://$currentPath/testoutput/surface-occurence-counts.wiki"
+	lazy val redirectResolvPath         = s"file://$currentPath/testoutput/resolved-redirects.wiki"
 
 	val textFormat            = CsvOutputFormat[(String, String)]("\n", "\t")
 	val textInput             = CsvInputFormat[(String, String)]("\n", '\t')

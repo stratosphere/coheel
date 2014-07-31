@@ -3,7 +3,7 @@ package de.uni_potsdam.hpi.coheel
 import eu.stratosphere.client.LocalExecutor
 import org.apache.log4j.{Level, Logger}
 import com.typesafe.config.ConfigFactory
-import de.uni_potsdam.hpi.coheel.programs.{SurfaceNotALinkCountProgram, WikipediaTrainingProgram}
+import de.uni_potsdam.hpi.coheel.programs.{RedirectResolvingProgram, SurfaceNotALinkCountProgram, WikipediaTrainingProgram}
 import org.apache.commons.io.FileUtils
 import scala.collection.JavaConversions._
 import java.io.File
@@ -26,9 +26,14 @@ object Main {
 	def main(args: Array[String]): Unit = {
 		// -Xms3g -Xmx7g
 		// -verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails
+		// 6295 pages in the first chunk dump
 
-//		val program = new WikipediaTrainingPlan(taskFile)
-		val program = new SurfaceNotALinkCountProgram
+		val program = if (config.getBoolean("is_production"))
+			new WikipediaTrainingProgram(taskFile)
+		else
+//			new WikipediaTrainingProgram(taskFile)
+//			new SurfaceNotALinkCountProgram
+		    new RedirectResolvingProgram
 		runProgram(program)
 	}
 
