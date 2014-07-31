@@ -6,10 +6,10 @@ object OutputFiles {
 	lazy val currentPath = System.getProperty("user.dir")
 
 	lazy val surfaceProbsPath           = s"file://$currentPath/testoutput/surface-probs.wiki"
-	lazy val contextLinkProbsPath       = s"file://$currentPath/testoutput/context-link-probs.wiki"
+	lazy val contextLinkProbsPath       = s"file://$currentPath/testoutput/context-link-probs-test.wiki"
 	lazy val languageModelsPath         = s"file://$currentPath/testoutput/language-models.wiki"
 	lazy val documentFrequencyPath      = s"file://$currentPath/testoutput/document-frequency-counts.wiki"
-	lazy val redirectPath               = s"file://$currentPath/testoutput/redirects.wiki"
+	lazy val redirectPath               = s"file://$currentPath/testoutput/redirects-test.wiki"
 	lazy val surfaceDocumentPath        = s"file://$currentPath/testoutput/surface-document-counts.wiki"
 	lazy val textDumpsPath              = s"file://$currentPath/testoutput/text-dumps.wiki"
 	lazy val surfaceOccurrenceCountPath = s"file://$currentPath/testoutput/surface-occurence-counts.wiki"
