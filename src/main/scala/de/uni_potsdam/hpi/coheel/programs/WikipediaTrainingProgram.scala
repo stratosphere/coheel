@@ -44,14 +44,14 @@ class WikipediaTrainingProgram(dumpFile: File = new File("src/test/resources/tes
 			}
 		}
 		val plans = buildLinkPlans(wikiPages)
-		val languageModelPlan = buildLanguageModelPlan(wikiPages)
+		val languageModelPlans = buildLanguageModelPlan(wikiPages)
 
 		val textDumps = wikiPages.map { wikiPage =>
 			(wikiPage.pageTitle, wikiPage.text)
 		}.write(textDumpsPath, textFormat)
 
 		val plan = new ScalaPlan(
-			languageModelPlan :: textDumps :: plans)
+			 textDumps :: languageModelPlans ::: plans)
 
 		plan
 	}
@@ -156,19 +156,20 @@ class WikipediaTrainingProgram(dumpFile: File = new File("src/test/resources/tes
 	/**
 	 * Builds the plan who creates the language model for a given entity.
 	 */
-	def buildLanguageModelPlan(wikiPages: DataSet[CoheelWikiPage]): ScalaSink[_] = {
+	def buildLanguageModelPlan(wikiPages: DataSet[CoheelWikiPage]): List[ScalaSink[_]] = {
 		// Helper case class to avoid passing tuples around
 		case class Word(document: String, word: String)
 		val words = wikiPages.filter { wikiPage =>
 			!wikiPage.isDisambiguation && !wikiPage.isRedirect && !wikiPage.isList
 		} flatMap { wikiPage =>
-			val (title, text) = WikiPageReader.wikiPageToText(wikiPage)
+			val (doc, text) = WikiPageReader.wikiPageToText(wikiPage)
 			// TODO: Refactor this to outer method and see if it still works
-			val tokens = TextAnalyzer.tokenize(text).map { token => Word(title, token) }
+			val tokens = TextAnalyzer.tokenize(text).map { token => Word(doc, token) }
 			tokens
 		}
 
 		var i = 0
+
 		// count the words in a document
 		val documentCounts = words
 			.groupBy { word => word.document }
@@ -187,7 +188,15 @@ class WikipediaTrainingProgram(dumpFile: File = new File("src/test/resources/tes
 				(word.document, word.word, wordCount._2.toDouble / documentCount._2.toDouble)
 			}
 
+		// count document frequencies
+		val documentFrequencies = words
+			.groupBy { word => word.word }
+			.reduceGroup { it =>
+			val docList = it.toList
+			(docList(0).word, docList.groupBy { word => word.document }.size)
+		}
 		val tokensOutput = languageModel.write(languageModelsPath, probOutputFormat)
-		tokensOutput
+		val documentFrequencyOutput = documentFrequencies.write(documentFrequencyPath, surfaceDocumentFormat)
+		List(tokensOutput, documentFrequencyOutput)
 	}
 }
