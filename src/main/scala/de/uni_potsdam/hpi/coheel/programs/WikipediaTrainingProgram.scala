@@ -6,6 +6,7 @@ import eu.stratosphere.api.common.{Program, ProgramDescription, Plan}
 import de.uni_potsdam.hpi.coheel.wiki._
 import scala.io.Source
 import de.uni_potsdam.hpi.coheel.wiki.Link
+import DataSetNaming.toDataSetWithName
 
 import OutputFiles._
 import org.slf4s.Logging
@@ -101,6 +102,7 @@ class WikipediaTrainingProgram(dumpFile: File = new File("src/test/resources/tes
 		val surfaceLinkCounts = allPageLinks
 			.groupBy { link => (link.text, link.destination) }
 			.count()
+			.name("Surface-LinkTo-Counts")
 		// join them together and calculate the probabilities
 		val surfaceProbabilities = surfaceCounts.join(surfaceLinkCounts)
 			.where     { case (link, _) => link.text }
@@ -163,7 +165,6 @@ class WikipediaTrainingProgram(dumpFile: File = new File("src/test/resources/tes
 			!wikiPage.isDisambiguation && !wikiPage.isRedirect && !wikiPage.isList
 		} flatMap { wikiPage =>
 			val (doc, text) = WikiPageReader.wikiPageToText(wikiPage)
-			// TODO: Refactor this to outer method and see if it still works
 			val tokens = TextAnalyzer.tokenize(text).map { token => Word(doc, token) }
 			tokens
 		}
@@ -186,7 +187,7 @@ class WikipediaTrainingProgram(dumpFile: File = new File("src/test/resources/tes
 					log.info(s"Language Models: $i ")
 				i += 1
 				(word.document, word.word, wordCount._2.toDouble / documentCount._2.toDouble)
-			}
+			}.name("Language Model: Document-Word-Prob")
 
 		// count document frequencies
 		val documentFrequencies = words
@@ -194,7 +195,7 @@ class WikipediaTrainingProgram(dumpFile: File = new File("src/test/resources/tes
 			.reduceGroup { it =>
 			val docList = it.toList
 			(docList(0).word, docList.groupBy { word => word.document }.size)
-		}
+		}.name("Document Frequencies: Word-DocFrequency")
 		val tokensOutput = languageModel.write(languageModelsPath, probOutputFormat)
 		val documentFrequencyOutput = documentFrequencies.write(documentFrequencyPath, surfaceDocumentFormat)
 		List(tokensOutput, documentFrequencyOutput)
