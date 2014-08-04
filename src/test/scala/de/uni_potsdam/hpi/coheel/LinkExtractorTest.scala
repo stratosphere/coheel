@@ -13,7 +13,7 @@ class LinkExtractorTest extends FunSuite {
 	def fixture = (new LinkExtractor(), wikiPage)
 
 	lazy val wikiPage = {
-		val source = getClass.getResource("/wikipedia_Kilobyte.xml")
+		val source = getClass.getResource("/manual_test_files/wikipedia_Kilobyte.xml")
 		val xml = Source.fromFile(source.toURI, "UTF-8").mkString
 		WikiPageReader.xmlToWikiPages(xml).next()
 	}
