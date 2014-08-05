@@ -60,8 +60,6 @@ private final class Source(source : String, val language : Language)
 
 	/**
 	 * Advances the current position to the next match of a given matcher.
-	 *
-	 * @param $matcher The matcher
 	 */
 	def find(matcher : Matcher, throwIfNoMatch : Boolean = true) : MatchResult =
 	{
