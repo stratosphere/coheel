@@ -101,7 +101,7 @@ final class ExtendedSimpleWikiParser extends WikiParser
 		case _ => node.children.exists(node => findTemplate(node, names, language))
 	}
 
-	private def  parseUntil(matcher : Matcher, source : Source, level : Int) : List[Node] =
+	private def  parseUntil(matcher: Matcher, source : Source, level : Int) : List[Node] =
 	{
 		val line = source.line
 
@@ -214,7 +214,7 @@ final class ExtendedSimpleWikiParser extends WikiParser
 							case ex : TooManyErrorsException => throw ex
 							case ex : WikiParserException =>
 							{
-								logger.log(Level.FINE, "Error parsing node. "+ex.getMessage, ex)
+								logger.log(Level.FINE, "Error parsing node. " + ex.getMessage, ex)
 
 								source.pos = startPos
 								source.line = startLine
@@ -277,8 +277,9 @@ final class ExtendedSimpleWikiParser extends WikiParser
 		{
 			parseSection(source)
 		}
-		else
+		else {
 			throw new WikiParserException("Unknown element type", source.line, source.findLine(source.line))
+		}
 	}
 
 	private def parseLink(source : Source, level : Int) : LinkNode =

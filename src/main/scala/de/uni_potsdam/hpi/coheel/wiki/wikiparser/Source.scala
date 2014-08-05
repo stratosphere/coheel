@@ -7,15 +7,13 @@ import org.dbpedia.extraction.wikiparser.WikiParserException
  * Internal class which is used by the WikiParser to represent the source and keep track of the current position of the parser.
  *
  * @param source The source the page
- * @parm language The language of the source
+ * @param language The language of the source
  */
-private final class Source(source : String, val language : Language)
+private final class Source(source: String, val language: Language)
 {
-	//TODO create new class Position
 	var pos = 0
 	var line = 1
 
-	/** Error counter */
 	var errors = 0
 
 	def length = source.length
