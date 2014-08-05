@@ -11,6 +11,8 @@ case class LanguageModelEntry(doc: String, word: String)
 
 class SurfaceNotALinkCountProgram extends Program with ProgramDescription {
 
+	val DOC_NUMBER = 6295
+
 	override def getDescription = "Counting how often a surface occurs, but not as a link."
 
 	override def getPlan(args: String*): Plan = {
@@ -39,23 +41,28 @@ class SurfaceNotALinkCountProgram extends Program with ProgramDescription {
 			.where { case LanguageModelEntry(_, word) => word }
 			.isEqualTo { case Surface(_, firstWord) => firstWord }
 			.flatMap { case (lmEntries, surfaceIt) =>
-//				println(surface.surfaceText)
-//				(surface.surfaceText, lmEntry.doc)
-//				val docs = lmEntries.map { entry => entry.doc }
-				val list = lmEntries.toList.map { lmEntry => lmEntry.doc}
-				if (list.nonEmpty) {
+				val docs = lmEntries.toList.map { lmEntry => lmEntry.doc}
+				if (docs.nonEmpty) {
 					surfaceIt.map { surface =>
-						(surface.surfaceText, list.size)
+						(surface.surfaceText, docs.size)
 					}
-//						.flatMap { case (surfaceText, list) =>
-//						list.map { doc => (surfaceText, doc)}
-//					}
 				} else
 					List()
 			}
+		val thresholdEvaluation = documentOccurrences.flatMap { case (_, count) =>
+				(0.5 to 100.0 by 0.5).map { thresholdPercent =>
+					val threshold = thresholdPercent * DOC_NUMBER.toDouble / 100.0
+					val missedMentions = if (count > threshold) count else 0
+					(thresholdPercent, missedMentions)
+				}
+			}.groupBy { case (threshold, _) =>
+				threshold
+			}.reduce { case ((t1, c1), (t2, c2)) => (t1, c1 + c2) }
 
 		val surfaceLinkOccurrenceOutput = documentOccurrences.write(surfaceOccurrenceCountPath,
 			CsvOutputFormat[(String, Int)]("\n", "\t"))
+		val thresholdEvaluationOutput = thresholdEvaluation.write(thresholdEvaluationPath,
+			CsvOutputFormat[(Double, Int)]("\n", "\t"))
 		val plan = new ScalaPlan(Seq(surfaceLinkOccurrenceOutput))
 		plan
 	}
