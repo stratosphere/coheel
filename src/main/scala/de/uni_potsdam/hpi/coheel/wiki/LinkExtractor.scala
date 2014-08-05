@@ -36,6 +36,7 @@ class LinkExtractor {
 	var links: Seq[Link] = _
 	var currentWikiTitle: String = _
 	def extractLinks(wikiPage: WikiPage): Seq[Link] = {
+		currentWikiTitle = wikiPage.title.decodedWithNamespace
 		val config = new SimpleWikiConfiguration(
 			"classpath:/org/sweble/wikitext/engine/SimpleWikiConfiguration.xml")
 		val compiler = new Compiler(config)
@@ -54,8 +55,10 @@ class LinkExtractor {
 		val nodeQueue = mutable.Queue[AstNode](parentNode)
 		while (!nodeQueue.isEmpty) {
 			val node = nodeQueue.dequeue()
-			handleNode(node)
-			nodeQueue.enqueue(node.iterator().toList: _*)
+			if (node != null) {
+				handleNode(node)
+				nodeQueue.enqueue(node.iterator().toList: _*)
+			}
 		}
 		links
 	}
