@@ -1,8 +1,6 @@
 ---------------------------------
 Isfet out-of-space-problem
 ---------------------------------
-Build simplified case that shows the "hanging"-bug
----------------------------------
 Stem mentions:
 To handle plural etc.
 Remove tokens (What if token is the only thing)?
