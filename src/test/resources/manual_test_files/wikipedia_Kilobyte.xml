@@ -19,6 +19,10 @@
 						Wrong Category type: leading colon
 						[[:Category:Information Units]]
 
+						Handle links with wiki markup
+						[[Information theory|'''Information''' theory]]
+						[[wikt:antwort|&quot;'''A'''nt'''w'''ort&quot;]]
+
 						Wrong external link, with two brackets
 						[[http://www.google.de]]
 

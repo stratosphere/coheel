@@ -38,6 +38,14 @@ class LinkExtractorTest extends FunSuite {
 				link.destination == "Bilateral relations of Bosnia and Herzegovina"
 		})
 	}
+	test("parsing links with wiki markup") {
+		assert(links.exists { link =>
+			link.text == "Information theory" && link.destination == "Information theory"
+		})
+		assert(links.exists { link =>
+			link.text == "\"Antwort\"" && link.destination == "wikt:antwort"
+		})
+	}
 	test("parsing an internal link with different label '[[Computer data storage|digital information]]'") {
 		assert(links.exists { link =>
 			link.text == "digital information" && link.destination == "Computer data storage"
@@ -65,12 +73,12 @@ class LinkExtractorTest extends FunSuite {
 	}
 
 	test("all links are found (currently, we cannot find links in refs)") {
-		assert(links.size === 52 /* hand-counted :) */)
+		assert(links.size === 54 /* hand-counted :) */)
 	}
 
 	test("just print links") {
 		links.foreach { link =>
-//			println(String.format("%80s||%s", link.text, link.destinationPage))
+			println(String.format("%80s||%s", link.text, link.destination))
 		}
 	}
 

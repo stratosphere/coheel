@@ -8,7 +8,7 @@ import org.sweble.wikitext.engine.{PageId, PageTitle, Compiler}
 import de.uni_potsdam.hpi.coheel.wiki.wikiparser.ExtendedSimpleWikiParser
 import scala.collection.JavaConversions._
 import org.sweble.wikitext.engine.utils.SimpleWikiConfiguration
-import de.fau.cs.osr.ptk.common.ast.{Text, AstNode, NodeList}
+import de.fau.cs.osr.ptk.common.ast.{ContentNode, Text, AstNode, NodeList}
 import org.sweble.wikitext.`lazy`.parser.{LinkTitle, InternalLink}
 
 /**
@@ -80,12 +80,14 @@ class LinkExtractor {
 			}
 	}
 
-	def getText(link: LinkTitle): String = {
+	def getText(link: ContentNode): String = {
 		link.getContent.flatMap {
 			case textNode: Text =>
 				Some(textNode.getContent)
+			case otherNode: ContentNode =>
+				Some(getText(otherNode))
 			case _ => None
-		}.mkString(" ")
+		}.mkString("")
 	}
 
 	/**
