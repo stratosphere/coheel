@@ -202,8 +202,8 @@ class WikipediaTrainingProgram(dumpFile: File = new File("src/test/resources/tes
 			val docList = it.toList
 			(docList(0).word, docList.groupBy { word => word.document }.size)
 		}.name("Document Frequencies: Word-DocFrequency")
-		val tokensOutput = languageModel.write(languageModelsPath, probOutputFormat)
+		val languageModelsOutput = languageModel.write(languageModelsPath, probOutputFormat)
 		val documentFrequencyOutput = documentFrequencies.write(documentFrequencyPath, surfaceDocumentFormat)
-		List(tokensOutput, documentFrequencyOutput)
+		List(languageModelsOutput, documentFrequencyOutput)
 	}
 }

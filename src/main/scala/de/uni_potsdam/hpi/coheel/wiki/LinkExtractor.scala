@@ -1,15 +1,12 @@
 package de.uni_potsdam.hpi.coheel.wiki
 
 import org.dbpedia.extraction.sources.WikiPage
-import org.dbpedia.extraction.wikiparser.InternalLinkNode
-import org.dbpedia.extraction.wikiparser.Node
 import scala.collection.mutable
 import org.sweble.wikitext.engine.{PageId, PageTitle, Compiler}
-import de.uni_potsdam.hpi.coheel.wiki.wikiparser.ExtendedSimpleWikiParser
 import scala.collection.JavaConversions._
 import org.sweble.wikitext.engine.utils.SimpleWikiConfiguration
 import de.fau.cs.osr.ptk.common.ast.{ContentNode, Text, AstNode, NodeList}
-import org.sweble.wikitext.`lazy`.parser.{LinkTitle, InternalLink}
+import org.sweble.wikitext.`lazy`.parser.InternalLink
 
 /**
  * Represents a link in a Wikipedia article.
@@ -37,6 +34,13 @@ class LinkExtractor {
 	var currentWikiTitle: String = _
 	def extractLinks(wikiPage: WikiPage): Seq[Link] = {
 		currentWikiTitle = wikiPage.title.decodedWithNamespace
+
+		val rootNode = getRootNode(wikiPage)
+		val links = walkAST(rootNode)
+		links
+	}
+
+	private def getRootNode(wikiPage: WikiPage): NodeList = {
 		val config = new SimpleWikiConfiguration(
 			"classpath:/org/sweble/wikitext/engine/SimpleWikiConfiguration.xml")
 		val compiler = new Compiler(config)
@@ -45,9 +49,8 @@ class LinkExtractor {
 
 		val page = compiler.postprocess(pageId, wikiPage.source, null).getPage
 
-		val nodeList = page.getContent
-		val links = walkAST(nodeList)
-		links
+		val rootNode = page.getContent
+		rootNode
 	}
 
 	private def walkAST(parentNode: NodeList): Seq[Link] = {
@@ -61,6 +64,24 @@ class LinkExtractor {
 			}
 		}
 		links
+	}
+
+	def getFullText(wikiPage: WikiPage): String = {
+		val sb = new mutable.StringBuilder()
+		val rootNode = getRootNode(wikiPage)
+		val nodeQueue = mutable.Queue[AstNode](rootNode)
+		while (!nodeQueue.isEmpty) {
+			val node = nodeQueue.dequeue()
+			if (node != null) {
+				node match {
+					case textNode: Text =>
+						sb.append(textNode.getContent)
+					case _ =>
+				}
+				nodeQueue.enqueue(node.iterator().toList: _*)
+			}
+		}
+		sb.toString
 	}
 
 	private def handleNode(node: AstNode): Unit = {
