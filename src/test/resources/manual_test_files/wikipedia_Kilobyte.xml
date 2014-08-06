@@ -22,6 +22,9 @@
 						Wrong external link, with two brackets
 						[[http://www.google.de]]
 
+						Wrong link with empty link text
+						[[Bilateral relations of Bosnia and Herzegovina| ]]
+
 						Link text starting with a #
 						... systems; [[1ESS switch|1A]]/[[4ESS switch|#4 TOLL]] Electronic Switching Systems (ESS) ...
 

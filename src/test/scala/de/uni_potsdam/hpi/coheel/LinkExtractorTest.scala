@@ -32,6 +32,12 @@ class LinkExtractorTest extends FunSuite {
 	test("parsing a link with template inside and starting with a blank") {
 		assert(links.exists { _.text == "mortar" })
 	}
+	test("empty links are recognized") {
+		assert(links.exists { link =>
+			link.text == "Bilateral relations of Bosnia and Herzegovina" &&
+				link.destination == "Bilateral relations of Bosnia and Herzegovina"
+		})
+	}
 	test("parsing an internal link with different label '[[Computer data storage|digital information]]'") {
 		assert(links.exists { link =>
 			link.text == "digital information" && link.destination == "Computer data storage"
@@ -59,7 +65,7 @@ class LinkExtractorTest extends FunSuite {
 	}
 
 	test("all links are found (currently, we cannot find links in refs)") {
-		assert(links.size === 51 /* hand-counted :) */)
+		assert(links.size === 52 /* hand-counted :) */)
 	}
 
 	test("just print links") {

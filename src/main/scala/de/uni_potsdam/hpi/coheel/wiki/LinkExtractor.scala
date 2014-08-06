@@ -135,7 +135,7 @@ class LinkExtractor {
 	 * @return The sanitized link.
 	 */
 	def removeAnchorLinks(link: InternalFooLink): Option[InternalFooLink] = {
-		if (link.text == "")
+		if (link.text.trim == "")
 			link.text = link.destination
 		val hashTagIndex = link.destination.indexOf("#")
 		// if a hashtag was found, but not on the first position
