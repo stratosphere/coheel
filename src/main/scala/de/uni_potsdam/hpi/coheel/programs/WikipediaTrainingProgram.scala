@@ -151,7 +151,13 @@ class WikipediaTrainingProgram(dumpFile: File = new File("src/test/resources/tes
 		pages.flatMap { wikiPage =>
 			// extract all links
 			val extractor = new LinkExtractor()
-			extractor.extractLinks(wikiPage)
+			try {
+				extractor.extractLinks(wikiPage)
+			} catch {
+				case e: Throwable =>
+					println(s"Error in ${wikiPage.pageTitle}")
+					List()
+			}
 		}
 	}
 
