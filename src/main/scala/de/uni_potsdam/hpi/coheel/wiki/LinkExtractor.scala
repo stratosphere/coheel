@@ -67,21 +67,7 @@ class LinkExtractor {
 	}
 
 	def getFullText(wikiPage: WikiPage): String = {
-		val sb = new mutable.StringBuilder()
-		val rootNode = getRootNode(wikiPage)
-		val nodeQueue = mutable.Queue[AstNode](rootNode)
-		while (!nodeQueue.isEmpty) {
-			val node = nodeQueue.dequeue()
-			if (node != null) {
-				node match {
-					case textNode: Text =>
-						sb.append(textNode.getContent)
-					case _ =>
-				}
-				nodeQueue.enqueue(node.iterator().toList: _*)
-			}
-		}
-		sb.toString
+		SwebleUtils.getFullText(wikiPage)
 	}
 
 	private def handleNode(node: AstNode): Unit = {
