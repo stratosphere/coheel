@@ -17,6 +17,8 @@ class SurfaceNotALinkCountProgram extends Program with ProgramDescription {
 
 	override def getPlan(args: String*): Plan = {
 
+		val wikiPages = ProgramHelper.getWikiPages
+
 		val languageModels = DataSource(languageModelsPath, probInputFormat).map { case (doc, word, _) =>
 			LanguageModelEntry(doc, word)
 		}

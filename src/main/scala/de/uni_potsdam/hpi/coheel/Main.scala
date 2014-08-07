@@ -12,7 +12,6 @@ import eu.stratosphere.api.common.Program
 object Main {
 
 	val config   = ConfigFactory.load()
-	val taskFile = new File(config.getString("base_path") + config.getString("dump_file"))
 	/**
 	 * Helpful commands:
 	 * grep -A 5 -i "{{disambiguation" --color=always enwiki-latest-pages-articles1.xml-p000000010p000010000 | less -R
@@ -29,7 +28,7 @@ object Main {
 		// 6295 pages in the first chunk dump
 
 		val program = if (config.getBoolean("is_production"))
-			new WikipediaTrainingProgram(taskFile)
+			new WikipediaTrainingProgram()
 		else
 //			new WikipediaTrainingProgram(taskFile)
 			new SurfaceNotALinkCountProgram

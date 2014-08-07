@@ -4,7 +4,6 @@ import eu.stratosphere.api.scala._
 import eu.stratosphere.api.scala.operators._
 import eu.stratosphere.api.common.{Program, ProgramDescription, Plan}
 import de.uni_potsdam.hpi.coheel.wiki._
-import scala.io.Source
 import de.uni_potsdam.hpi.coheel.wiki.Link
 import DataSetNaming.toDataSetWithName
 
@@ -13,13 +12,10 @@ import org.slf4s.Logging
 import java.io.File
 
 
-class WikipediaTrainingProgram(dumpFile: File = new File("src/test/resources/test.wikirun"))
+class WikipediaTrainingProgram()
 	extends Program with ProgramDescription with Logging {
 
 	override def getDescription = "Training the model parameters for CohEEL."
-
-	// input files, file with the names of the test wikipedia articles
-	lazy val wikipediaFilesPath = s"file://${dumpFile.getAbsolutePath}"
 
 	/**
 	 * Builds a plan to create the three main data structures CohEEL needs.
@@ -30,20 +26,7 @@ class WikipediaTrainingProgram(dumpFile: File = new File("src/test/resources/tes
 	 * @param args Not used.
 	 */
 	override def getPlan(args: String*): Plan = {
-		val input = TextFile(wikipediaFilesPath)
-		val wikiPages = input.map { file =>
-			log.info(file)
-			val pageSource = Source.fromFile(s"${dumpFile.getAbsoluteFile.getParent}/$file").mkString
-			pageSource
-		}.flatMap { pageSource =>
-			if (pageSource.startsWith("#")) {
-				List()
-			} else {
-				val wikiPages = WikiPageReader.xmlToWikiPages(pageSource)
-
-				wikiPages.filter { page => page.ns == 0 }
-			}
-		}
+		val wikiPages = ProgramHelper.getWikiPages
 		val plans = buildLinkPlans(wikiPages)
 		val languageModelPlans = buildLanguageModelPlan(wikiPages)
 
