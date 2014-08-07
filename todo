@@ -1,8 +1,4 @@
 ---------------------------------
-Stem mentions:
-To handle plural etc.
-Remove tokens (What if token is the only thing)?
----------------------------------
 Copy data to HDFS
 ---------------------------------
 Redirect resolving:
@@ -23,9 +19,5 @@ For each word in mention:
  - stem
  - join with language model to find out documents
  - intersection
-
-Introduce fake bigrams for the unigram links?
---------------------------------
-Write tests
 --------------------------------
 RUN ON SERVER, DISTRIBUTED
