@@ -4,7 +4,9 @@ import eu.stratosphere.api.common.{Program, ProgramDescription, Plan}
 import eu.stratosphere.api.scala._
 import eu.stratosphere.api.scala.operators._
 import OutputFiles._
-import de.uni_potsdam.hpi.coheel.wiki.TextAnalyzer
+import de.uni_potsdam.hpi.coheel.wiki.{SwebleUtils, TextAnalyzer}
+import java.io.{FileReader, BufferedReader}
+import org.apache.commons.lang3.StringUtils
 
 case class Surface(surfaceText: String, firstWord: String)
 case class LanguageModelEntry(doc: String, word: String)
@@ -18,6 +20,23 @@ class SurfaceNotALinkCountProgram extends Program with ProgramDescription {
 	override def getPlan(args: String*): Plan = {
 
 		val wikiPages = ProgramHelper.getWikiPages
+		var c = 0
+		val actualSurfaceOccurrences = wikiPages.flatMap { wikiPage =>
+			println(c)
+			c += 1
+			var surfaceCounts = List[(String, Int)]()
+			val br = new BufferedReader(new FileReader("testoutput/surfaces.wiki"))
+			val fullText = SwebleUtils.getFullText(wikiPage)
+			var surface: String = br.readLine()
+			while (surface != null) {
+				val count = StringUtils.countMatches(fullText, surface)
+				surfaceCounts = (surface, count) :: surfaceCounts
+				surface = br.readLine()
+			}
+			surfaceCounts
+		}
+		.groupBy { case (surface, _) => surface }
+		.reduce { case ((surface, c1), (_, c2)) => (surface, c1 + c2)}
 
 		val languageModels = DataSource(languageModelsPath, probInputFormat).map { case (doc, word, _) =>
 			LanguageModelEntry(doc, word)
@@ -61,11 +80,13 @@ class SurfaceNotALinkCountProgram extends Program with ProgramDescription {
 				threshold
 			}.reduce { case ((t1, c1), (t2, c2)) => (t1, c1 + c2) }
 
-		val surfaceLinkOccurrenceOutput = documentOccurrences.write(surfaceOccurrenceCountPath,
+		val surfacePossibleDocumentOutput = documentOccurrences.write(surfacePossibleDocumentCountsPath,
+			CsvOutputFormat[(String, Int)]("\n", "\t"))
+		val surfaceOccurrenceOutput = actualSurfaceOccurrences.write(surfaceOccurrenceCountsPath,
 			CsvOutputFormat[(String, Int)]("\n", "\t"))
 		val thresholdEvaluationOutput = thresholdEvaluation.write(thresholdEvaluationPath,
 			CsvOutputFormat[(Double, Int)]("\n", "\t"))
-		val plan = new ScalaPlan(Seq(surfaceLinkOccurrenceOutput))
+		val plan = new ScalaPlan(Seq(surfaceOccurrenceOutput))
 		plan
 	}
 }

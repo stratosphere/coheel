@@ -6,16 +6,17 @@ import de.uni_potsdam.hpi.coheel.Main
 object OutputFiles {
 	lazy val currentPath = Main.config.getString("output_files_dir")
 
-	lazy val surfaceProbsPath           = s"file://$currentPath/testoutput/surface-probs.wiki"
-	lazy val contextLinkProbsPath       = s"file://$currentPath/testoutput/context-link-probs-test.wiki"
-	lazy val languageModelsPath         = s"file://$currentPath/testoutput/language-models.wiki"
-	lazy val documentFrequencyPath      = s"file://$currentPath/testoutput/document-frequency-counts.wiki"
-	lazy val redirectPath               = s"file://$currentPath/testoutput/redirects-test.wiki"
-	lazy val surfaceDocumentPath        = s"file://$currentPath/testoutput/surface-document-counts.wiki"
-	lazy val textDumpsPath              = s"file://$currentPath/testoutput/text-dumps.wiki"
-	lazy val surfaceOccurrenceCountPath = s"file://$currentPath/testoutput/surface-occurence-counts.wiki"
-	lazy val thresholdEvaluationPath    = s"file://$currentPath/testoutput/threshold-evaluation.wiki"
-	lazy val redirectResolvPath         = s"file://$currentPath/testoutput/resolved-redirects.wiki"
+	lazy val surfaceProbsPath                  = s"file://$currentPath/testoutput/surface-probs.wiki"
+	lazy val contextLinkProbsPath              = s"file://$currentPath/testoutput/context-link-probs-test.wiki"
+	lazy val languageModelsPath                = s"file://$currentPath/testoutput/language-models.wiki"
+	lazy val documentFrequencyPath             = s"file://$currentPath/testoutput/document-frequency-counts.wiki"
+	lazy val redirectPath                      = s"file://$currentPath/testoutput/redirects-test.wiki"
+	lazy val surfaceDocumentPath               = s"file://$currentPath/testoutput/surface-document-counts.wiki"
+	lazy val textDumpsPath                     = s"file://$currentPath/testoutput/text-dumps.wiki"
+	lazy val surfacePossibleDocumentCountsPath = s"file://$currentPath/testoutput/surface-possible-document-counts.wiki"
+	lazy val surfaceOccurrenceCountsPath       = s"file://$currentPath/testoutput/surface-occurrence-counts.wiki"
+	lazy val thresholdEvaluationPath           = s"file://$currentPath/testoutput/threshold-evaluation.wiki"
+	lazy val redirectResolvPath                = s"file://$currentPath/testoutput/resolved-redirects.wiki"
 
 
 	val textFormat            = CsvOutputFormat[(String, String)]("\n", "\t")
