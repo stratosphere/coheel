@@ -106,6 +106,22 @@ object SwebleUtils {
 			iterate(p.getContent)
 		}
 
+		def visit(t: Table) {
+			iterate(t.getBody)
+		}
+
+		def visit(tr: TableRow) {
+			iterate(tr.getBody)
+		}
+
+		def visit(tc: TableCell) {
+			iterate(tc.getBody)
+		}
+
+		def visit(tc: TableCaption) {
+			iterate(tc.getBody)
+		}
+
 		def visit(text: Text) {
 			write(text.getContent)
 		}
