@@ -1,4 +1,6 @@
 ---------------------------------
+Run two local stratospheres at the same time.
+---------------------------------
 Extract links directly when extracting wiki pages --> Performance improvement?
 ---------------------------------
 Copy data to HDFS
