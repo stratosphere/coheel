@@ -1,4 +1,6 @@
 ---------------------------------
+Extract links directly when extracting wiki pages --> Performance improvement?
+---------------------------------
 Copy data to HDFS
 ---------------------------------
 Redirect resolving:
