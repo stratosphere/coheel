@@ -29,34 +29,32 @@ import org.apache.commons.lang3.StringEscapeUtils
 case class WikiPage(pageTitle: String, ns: Int, redirectTitle: String, source: String) {
 	val redirect        = if (redirectTitle == "") null else redirectTitle
 
-
-	def isRedirect: Boolean = this.redirect != null
-	def isDisambiguation: Boolean = {
+	val isRedirect: Boolean = this.redirect != null
+	val isDisambiguation: Boolean = {
 		val isDisambiguationFromTitle = pageTitle.contains("(disambiguation)")
 		if (isDisambiguationFromTitle)
-			return true
-
-		// in case of performance problems:
-		// disambiguation links are always (as seen so far) at the end of the text
-		// maybe this could be used to not scan the whole text
-		val disambiguationRegex = """(?ui)\{\{disambiguation.*?\}\}""".r
-		val matches = disambiguationRegex.findAllIn(source)
-			// check whether the regex sometimes accidentially matches too much text
-			.map { s =>
+			true
+		else {
+			// in case of performance problems:
+			// disambiguation links are always (as seen so far) at the end of the text
+			// maybe this could be used to not scan the whole text
+			val disambiguationRegex = """(?ui)\{\{disambiguation.*?\}\}""".r
+			val matches = disambiguationRegex.findAllIn(source)
+				// check whether the regex sometimes accidentially matches too much text
+				.map { s =>
 				if (s.length > 200)
 					throw new RuntimeException(s"Disambiguation regex went wrong on $s.")
 				s
 			}
-			.map(_.toLowerCase)
-			.filter { s =>
+				.map(_.toLowerCase)
+				.filter { s =>
 				!s.contains("disambiguation needed")
 			}
-		matches.nonEmpty
+			matches.nonEmpty
+		}
 	}
 
-	def isList: Boolean = {
-		source.contains("[[Category:List")
-	}
+	val isList: Boolean = source.contains("[[Category:List")
 }
 
 object WikiPageReader {
