@@ -1248,6 +1248,17 @@
         <root url="jar://$MAVEN_REPOSITORY$/org/sweble/wikitext/swc-parser-lazy/1.1.0/swc-parser-lazy-1.1.0-sources.jar!/" />
       </SOURCES>
     </library>
+    <library name="Maven: org.tukaani:xz:1.0">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/tukaani/xz/1.0/xz-1.0.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/org/tukaani/xz/1.0/xz-1.0-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/tukaani/xz/1.0/xz-1.0-sources.jar!/" />
+      </SOURCES>
+    </library>
     <library name="Maven: org.xerial.snappy:snappy-java:1.0.5">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/org/xerial/snappy/snappy-java/1.0.5/snappy-java-1.0.5.jar!/" />

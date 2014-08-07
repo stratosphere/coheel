@@ -1,8 +1,5 @@
 package de.uni_potsdam.hpi.coheel.wiki
 
-import org.dbpedia.extraction.sources.WikiPage
-import org.dbpedia.extraction.wikiparser.WikiTitle
-import org.dbpedia.extraction.util.Language
 import java.io.{StringReader, BufferedReader}
 import javax.xml.stream.{XMLStreamConstants, XMLInputFactory}
 import org.apache.commons.lang3.StringEscapeUtils
@@ -27,19 +24,11 @@ import org.apache.commons.lang3.StringEscapeUtils
  * @param pageTitle The title of the page as a string.
  * @param ns The namespace of the wiki page.
  * @param redirectTitle The title of the page this page is redirecting to or "", if it is not a redirect.
- * @param text This page's content.
+ * @param source This page's content.
  */
-case class CoheelWikiPage(pageTitle: String, ns: Int, redirectTitle: String, text: String) extends WikiPage(
-	title           = WikiTitle.parse(pageTitle, Language.English),
-	redirect        = if (redirectTitle == "") null else WikiTitle.parse(redirectTitle, Language.English),
-	id              = 0,
-	revision        = 0,
-	timestamp       = 0,
-	contributorID   = 0,
-	contributorName = "",
-	source          = text,
-	format          = "text/x-wiki"
-) {
+case class WikiPage(pageTitle: String, ns: Int, redirectTitle: String, source: String) {
+	val redirect        = if (redirectTitle == "") null else redirectTitle
+
 
 	def isRedirect: Boolean = this.redirect != null
 	def isDisambiguation: Boolean = {
@@ -51,7 +40,7 @@ case class CoheelWikiPage(pageTitle: String, ns: Int, redirectTitle: String, tex
 		// disambiguation links are always (as seen so far) at the end of the text
 		// maybe this could be used to not scan the whole text
 		val disambiguationRegex = """(?ui)\{\{disambiguation.*?\}\}""".r
-		val matches = disambiguationRegex.findAllIn(text)
+		val matches = disambiguationRegex.findAllIn(source)
 			// check whether the regex sometimes accidentially matches too much text
 			.map { s =>
 				if (s.length > 200)
@@ -66,7 +55,7 @@ case class CoheelWikiPage(pageTitle: String, ns: Int, redirectTitle: String, tex
 	}
 
 	def isList: Boolean = {
-		text.contains("[[Category:List")
+		source.contains("[[Category:List")
 	}
 }
 
@@ -75,7 +64,7 @@ object WikiPageReader {
 	/**
 	 * @return A tuple of the pages title and the page's plain text content.
 	 */
-	def wikiPageToText(wikiPage: CoheelWikiPage): (String, String) = {
+	def wikiPageToText(wikiPage: WikiPage): (String, String) = {
 		val linkExtractor = new LinkExtractor()
 		val fullText = linkExtractor.getFullText(wikiPage)
 		(wikiPage.pageTitle, fullText)
@@ -83,8 +72,8 @@ object WikiPageReader {
 
 	lazy val factory = XMLInputFactory.newInstance()
 	var i = 0
-	def xmlToWikiPages(xml: String): Iterator[CoheelWikiPage] = {
-		new Iterator[CoheelWikiPage] {
+	def xmlToWikiPages(xml: String): Iterator[WikiPage] = {
+		new Iterator[WikiPage] {
 			var hasMorePages = true
 
 			// XML related
@@ -121,13 +110,13 @@ object WikiPageReader {
 
 
 			def hasNext = hasMorePages
-			def next(): CoheelWikiPage = {
+			def next(): WikiPage = {
 				readNextPage()
-				new CoheelWikiPage(
+				new WikiPage(
 					pageTitle = pageTitle,
 					ns = ns,
 					redirectTitle = redirectTitle,
-					text  = text
+					source = text
 				)
 			}
 

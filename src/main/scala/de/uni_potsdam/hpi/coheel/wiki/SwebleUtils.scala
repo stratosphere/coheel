@@ -26,7 +26,6 @@ import de.fau.cs.osr.ptk.common.ast.AstNode
 import de.fau.cs.osr.ptk.common.ast.NodeList
 import de.fau.cs.osr.ptk.common.ast.Text
 import de.fau.cs.osr.utils.StringUtils
-import org.dbpedia.extraction.sources.WikiPage
 
 object SwebleUtils {
 
@@ -36,7 +35,7 @@ object SwebleUtils {
 		val config = new SimpleWikiConfiguration(
 			"classpath:/org/sweble/wikitext/engine/SimpleWikiConfiguration.xml")
 		val plainTextConverter = new PlainTextConverter(config)
-		parsePage(plainTextConverter, wikiPage.source, wikiPage.title.decodedWithNamespace, wikiPage.revision)
+		parsePage(plainTextConverter, wikiPage.source, wikiPage.pageTitle, 0)
 	}
 	def parsePage(v: AstVisitor, text: String, title: String, revision: Long): String = {
 		val page = getCompiledPage(text, title, revision).getPage

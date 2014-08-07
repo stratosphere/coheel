@@ -43,6 +43,7 @@
     <orderEntry type="library" name="Maven: com.thoughtworks.paranamer:paranamer:2.3" level="project" />
     <orderEntry type="library" name="Maven: org.xerial.snappy:snappy-java:1.0.5" level="project" />
     <orderEntry type="library" name="Maven: org.apache.commons:commons-compress:1.4.1" level="project" />
+    <orderEntry type="library" name="Maven: org.tukaani:xz:1.0" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.6" level="project" />
     <orderEntry type="library" name="Maven: com.esotericsoftware.kryo:kryo:2.23.0" level="project" />
     <orderEntry type="library" name="Maven: com.esotericsoftware.minlog:minlog:1.2" level="project" />
@@ -105,7 +106,6 @@
     <orderEntry type="library" name="Maven: org.ow2.asm:asm:4.0" level="project" />
     <orderEntry type="library" name="Maven: eu.stratosphere:stratosphere-clients:0.5" level="project" />
     <orderEntry type="library" name="Maven: commons-fileupload:commons-fileupload:1.2.2" level="project" />
-    <orderEntry type="library" name="Maven: org.dbpedia.extraction:core:3.9" level="project" />
     <orderEntry type="library" name="Maven: org.sweble.wikitext:swc-engine:1.1.0" level="project" />
     <orderEntry type="library" name="Maven: org.sweble.wikitext:swc-parser-lazy:1.1.0" level="project" />
     <orderEntry type="library" name="Maven: de.fau.cs.osr.ptk:ptk-common:1.1.0" level="project" />

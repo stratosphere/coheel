@@ -1,6 +1,5 @@
 package de.uni_potsdam.hpi.coheel.wiki
 
-import org.dbpedia.extraction.sources.WikiPage
 import scala.collection.mutable
 import org.sweble.wikitext.engine.{PageId, PageTitle, Compiler}
 import scala.collection.JavaConversions._
@@ -33,7 +32,7 @@ class LinkExtractor {
 	var links: Seq[Link] = _
 	var currentWikiTitle: String = _
 	def extractLinks(wikiPage: WikiPage): Seq[Link] = {
-		currentWikiTitle = wikiPage.title.decodedWithNamespace
+		currentWikiTitle = wikiPage.pageTitle
 
 		val rootNode = getRootNode(wikiPage)
 		val links = walkAST(rootNode)
@@ -44,8 +43,8 @@ class LinkExtractor {
 		val config = new SimpleWikiConfiguration(
 			"classpath:/org/sweble/wikitext/engine/SimpleWikiConfiguration.xml")
 		val compiler = new Compiler(config)
-		val pageTitle = PageTitle.make(config, wikiPage.title.decodedWithNamespace)
-		val pageId = new PageId(pageTitle, wikiPage.id)
+		val pageTitle = PageTitle.make(config, wikiPage.pageTitle)
+		val pageId = new PageId(pageTitle, 0)
 
 		val page = compiler.postprocess(pageId, wikiPage.source, null).getPage
 

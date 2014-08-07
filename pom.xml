@@ -25,12 +25,6 @@
 			<artifactId>stratosphere-clients</artifactId>
 			<version>0.5</version>
 		</dependency>
-		<!-- DBpedia extraction framework for parsing the wikipages -->
-		<dependency>
-			<groupId>org.dbpedia.extraction</groupId>
-			<artifactId>core</artifactId>
-			<version>3.9</version>
-		</dependency>
 		<dependency>
 			<groupId>org.sweble.wikitext</groupId>
 			<artifactId>swc-engine</artifactId>
@@ -97,14 +91,6 @@
 			<id>central</id>
 			<name>Central Repository</name>
 			<url>http://repo.maven.apache.org/maven2</url>
-		</repository>
-		<repository>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>maven.aksw.internal</id>
-			<name>University Leipzig, AKSW Maven2 Repository</name>
-			<url>http://maven.aksw.org/archiva/repository/internal</url>
 		</repository>
 	</repositories>
 	<build>

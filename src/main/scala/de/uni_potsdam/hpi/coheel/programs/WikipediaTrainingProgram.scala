@@ -48,7 +48,7 @@ class WikipediaTrainingProgram(dumpFile: File = new File("src/test/resources/tes
 		val languageModelPlans = buildLanguageModelPlan(wikiPages)
 
 		val textDumps = wikiPages.map { wikiPage =>
-			(wikiPage.pageTitle, wikiPage.text)
+			(wikiPage.pageTitle, wikiPage.source)
 		}.write(textDumpsPath, textFormat)
 
 		val plan = new ScalaPlan(
@@ -63,7 +63,7 @@ class WikipediaTrainingProgram(dumpFile: File = new File("src/test/resources/tes
 	 *   <li> the plan who counts how often one document links to another
 	 *   <li> the plan who counts how often a link occurs under a certain surface
 	 */
-	def buildLinkPlans(wikiPages: DataSet[CoheelWikiPage]): List[ScalaSink[_]] = {
+	def buildLinkPlans(wikiPages: DataSet[WikiPage]): List[ScalaSink[_]] = {
 		val normalPages = wikiPages.filter { !_.isDisambiguation }
 
 		val normalPageLinks = linksFrom(normalPages)
@@ -147,7 +147,7 @@ class WikipediaTrainingProgram(dumpFile: File = new File("src/test/resources/tes
 		List(surfaceProbOutput, contextLinkOutput, redirectOutput, surfaceDocumentsOutput)
 	}
 
-	def linksFrom(pages: DataSet[CoheelWikiPage]): DataSet[Link] = {
+	def linksFrom(pages: DataSet[WikiPage]): DataSet[Link] = {
 		pages.flatMap { wikiPage =>
 			// extract all links
 			val extractor = new LinkExtractor()
@@ -164,7 +164,7 @@ class WikipediaTrainingProgram(dumpFile: File = new File("src/test/resources/tes
 	/**
 	 * Builds the plan who creates the language model for a given entity.
 	 */
-	def buildLanguageModelPlan(wikiPages: DataSet[CoheelWikiPage]): List[ScalaSink[_]] = {
+	def buildLanguageModelPlan(wikiPages: DataSet[WikiPage]): List[ScalaSink[_]] = {
 		// Helper case class to avoid passing tuples around
 		case class Word(document: String, word: String)
 		val words = wikiPages.filter { wikiPage =>
