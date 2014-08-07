@@ -30,8 +30,8 @@ object Main {
 		val program = if (config.getBoolean("is_production"))
 			new WikipediaTrainingProgram()
 		else
-//			new WikipediaTrainingProgram(taskFile)
-			new SurfaceNotALinkCountProgram
+			new WikipediaTrainingProgram()
+//			new SurfaceNotALinkCountProgram
 //		    new RedirectResolvingProgram
 		runProgram(program)
 	}

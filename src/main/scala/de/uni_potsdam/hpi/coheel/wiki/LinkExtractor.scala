@@ -25,7 +25,7 @@ class LinkExtractor {
 	 * @param text The link's text.
 	 * @param destination The link's destination.
 	 */
-	protected case class InternalFooLink(node: AstNode, var text: String, var destination: String) {
+	protected case class LinkWithNode(node: AstNode, var text: String, var destination: String) {
 		def this(node: AstNode) = this(node, null, null)
 	}
 
@@ -37,6 +37,10 @@ class LinkExtractor {
 		val rootNode = getRootNode(wikiPage)
 		val links = walkAST(rootNode)
 		links
+	}
+
+	def getFullText(wikiPage: WikiPage): String = {
+		SwebleUtils.getFullText(wikiPage)
 	}
 
 	private def getRootNode(wikiPage: WikiPage): NodeList = {
@@ -65,12 +69,8 @@ class LinkExtractor {
 		links
 	}
 
-	def getFullText(wikiPage: WikiPage): String = {
-		SwebleUtils.getFullText(wikiPage)
-	}
-
 	private def handleNode(node: AstNode): Unit = {
-		val link: Option[InternalFooLink] = Some(new InternalFooLink(node))
+		val link: Option[LinkWithNode] = Some(new LinkWithNode(node))
 		link
 			.flatMap(filterNonLinks)
 //			.flatMap(debugPrintAllLinks)
@@ -86,7 +86,7 @@ class LinkExtractor {
 			}
 	}
 
-	def getText(link: ContentNode): String = {
+	private def getText(link: ContentNode): String = {
 		link.getContent.flatMap {
 			case textNode: Text =>
 				Some(textNode.getContent)
@@ -100,7 +100,7 @@ class LinkExtractor {
 	 * Filters out a wikiparser.Node, if it is not an internal link.
 	 * @return Some(link), if it is a internal link, None otherwise.
 	 */
-	def filterNonLinks(link: InternalFooLink): Option[InternalFooLink] = {
+	private def filterNonLinks(link: LinkWithNode): Option[LinkWithNode] = {
 		if (!link.node.isInstanceOf[InternalLink])
 			None
 		else {
@@ -116,7 +116,7 @@ class LinkExtractor {
 	 * This can be used for debugging.
 	 * @return The unaltered link.
 	 */
-	def debugPrintAllLinks(link: InternalFooLink): Option[InternalFooLink] = {
+	private def debugPrintAllLinks(link: LinkWithNode): Option[LinkWithNode] = {
 		println(link.text + "#" + link.destination)
 		Some(link)
 	}
@@ -128,21 +128,21 @@ class LinkExtractor {
 	 * @return Some(link) if the link does not start with the given string,
 	 *         None otherwise.
 	 */
-	def filterStartsWith(link: InternalFooLink, startStrings: String*): Option[InternalFooLink] = {
+	private def filterStartsWith(link: LinkWithNode, startStrings: String*): Option[LinkWithNode] = {
 		if (startStrings.exists { s => link.destination.startsWith(s) ||
 			link.destination.startsWith(s":$s") }) None
 		else Some(link)
 	}
-	def filterImages(link: InternalFooLink): Option[InternalFooLink] = filterStartsWith(link, "Image:")
-	def filterFiles(link: InternalFooLink): Option[InternalFooLink] = filterStartsWith(link, "File:")
-	def filterCategories(link: InternalFooLink): Option[InternalFooLink] = filterStartsWith(link, "Category:")
+	private def filterImages(link: LinkWithNode): Option[LinkWithNode] = filterStartsWith(link, "Image:")
+	private def filterFiles(link: LinkWithNode): Option[LinkWithNode] = filterStartsWith(link, "File:")
+	private def filterCategories(link: LinkWithNode): Option[LinkWithNode] = filterStartsWith(link, "Category:")
 
 	/**
 	 * Handles anchor links like Germany#History (link to a specific point in
 	 * a page) and removes the part after '#'
 	 * @return The sanitized link.
 	 */
-	def removeAnchorLinks(link: InternalFooLink): Option[InternalFooLink] = {
+	private def removeAnchorLinks(link: LinkWithNode): Option[LinkWithNode] = {
 		if (link.text.trim == "")
 			link.text = link.destination
 		val hashTagIndex = link.destination.indexOf("#")
@@ -156,7 +156,7 @@ class LinkExtractor {
 	 * Handles link texts like '  Germany ' and removes the whitespace.
 	 * @return The sanitized link.
 	 */
-	def trimWhitespace(link: InternalFooLink): Option[InternalFooLink] = {
+	private def trimWhitespace(link: LinkWithNode): Option[LinkWithNode] = {
 		link.text = link.text.trim
 		Some(link)
 	}
@@ -167,7 +167,7 @@ class LinkExtractor {
 	 * [[http://www.google.de]].
 	 * @return None, if it is an external link, Some(link) otherwise.
 	 */
-	def filterExternalLinks(link: InternalFooLink): Option[InternalFooLink] = {
+	private def filterExternalLinks(link: LinkWithNode): Option[LinkWithNode] = {
 		if (link.destination.toLowerCase.startsWith("http://"))
 			None
 		else Some(link)
@@ -176,7 +176,7 @@ class LinkExtractor {
 	/**
 	 * Translates an internal link to an link, that can be exposed to the user.
 	 */
-	def toLink(link: InternalFooLink): Option[Link] = {
+	private def toLink(link: LinkWithNode): Option[Link] = {
 		Some(Link(currentWikiTitle, link.text, link.destination))
 	}
 }

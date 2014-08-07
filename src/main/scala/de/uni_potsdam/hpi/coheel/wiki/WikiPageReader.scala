@@ -61,15 +61,6 @@ case class WikiPage(pageTitle: String, ns: Int, redirectTitle: String, source: S
 
 object WikiPageReader {
 
-	/**
-	 * @return A tuple of the pages title and the page's plain text content.
-	 */
-	def wikiPageToText(wikiPage: WikiPage): (String, String) = {
-		val linkExtractor = new LinkExtractor()
-		val fullText = linkExtractor.getFullText(wikiPage)
-		(wikiPage.pageTitle, fullText)
-	}
-
 	lazy val factory = XMLInputFactory.newInstance()
 	var i = 0
 	def xmlToWikiPages(xml: String): Iterator[WikiPage] = {
