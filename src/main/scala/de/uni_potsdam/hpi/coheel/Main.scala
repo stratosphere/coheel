@@ -30,8 +30,8 @@ object Main {
 		val program = if (config.getBoolean("is_production"))
 			new WikipediaTrainingProgram()
 		else
-//			new WikipediaTrainingProgram()
-			new SurfaceNotALinkCountProgram
+			new WikipediaTrainingProgram()
+//			new SurfaceNotALinkCountProgram
 //		    new RedirectResolvingProgram
 		runProgram(program)
 	}
@@ -69,8 +69,8 @@ object Main {
 			classOf[eu.stratosphere.nephele.instance.local.LocalInstanceManager],
 			classOf[eu.stratosphere.nephele.executiongraph.ExecutionGraph],
 			classOf[eu.stratosphere.compiler.PactCompiler],
-			classOf[eu.stratosphere.nephele.taskmanager.bufferprovider.GlobalBufferPool],
-			classOf[eu.stratosphere.nephele.taskmanager.bytebuffered.ByteBufferedChannelManager],
+			classOf[eu.stratosphere.runtime.io.network.bufferprovider.GlobalBufferPool],
+			classOf[eu.stratosphere.runtime.io.network.netty.NettyConnectionManager],
 			classOf[eu.stratosphere.nephele.jobmanager.splitassigner.InputSplitAssigner],
 			classOf[eu.stratosphere.nephele.jobmanager.splitassigner.InputSplitManager],
 			classOf[eu.stratosphere.nephele.jobmanager.splitassigner.file.FileInputSplitList],

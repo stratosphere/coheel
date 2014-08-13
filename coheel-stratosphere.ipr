@@ -51,6 +51,7 @@
     <file url="file://$PROJECT_DIR$/src/test/resources/manual_test_files/wikipedia_Kilobyte.xml" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/test/scala/de/uni_potsdam/hpi/coheel/LinkExtractorInfiniteLoop.scala" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/test/scala/de/uni_potsdam/hpi/coheel/LinkExtractorTest.scala" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/test/scala/de/uni_potsdam/hpi/coheel/NerTest.scala" charset="UTF-8" />
   </component>
   <component name="EntryPointsManager">
     <entry_points version="2.0" />
@@ -328,17 +329,6 @@
         <root url="jar://$MAVEN_REPOSITORY$/com/esotericsoftware/minlog/minlog/1.2/minlog-1.2-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: com.github.tototoshi:scala-csv_2.10:1.0.0">
-      <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/github/tototoshi/scala-csv_2.10/1.0.0/scala-csv_2.10-1.0.0.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/com/github/tototoshi/scala-csv_2.10/1.0.0/scala-csv_2.10-1.0.0-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/github/tototoshi/scala-csv_2.10/1.0.0/scala-csv_2.10-1.0.0-sources.jar!/" />
-      </SOURCES>
-    </library>
     <library name="Maven: com.google.guava:guava:14.0.1">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/com/google/guava/guava/14.0.1/guava-14.0.1.jar!/" />
@@ -603,70 +593,70 @@
         <root url="jar://$MAVEN_REPOSITORY$/de/fau/cs/osr/utils/utils/0.3.0/utils-0.3.0-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: eu.stratosphere:stratosphere-clients:0.5">
+    <library name="Maven: eu.stratosphere:stratosphere-clients:0.5.2">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-clients/0.5/stratosphere-clients-0.5.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-clients/0.5.2/stratosphere-clients-0.5.2.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-clients/0.5/stratosphere-clients-0.5-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-clients/0.5.2/stratosphere-clients-0.5.2-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-clients/0.5/stratosphere-clients-0.5-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-clients/0.5.2/stratosphere-clients-0.5.2-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: eu.stratosphere:stratosphere-compiler:0.5">
+    <library name="Maven: eu.stratosphere:stratosphere-compiler:0.5.2">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-compiler/0.5/stratosphere-compiler-0.5.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-compiler/0.5.2/stratosphere-compiler-0.5.2.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-compiler/0.5/stratosphere-compiler-0.5-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-compiler/0.5.2/stratosphere-compiler-0.5.2-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-compiler/0.5/stratosphere-compiler-0.5-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-compiler/0.5.2/stratosphere-compiler-0.5.2-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: eu.stratosphere:stratosphere-core:0.5">
+    <library name="Maven: eu.stratosphere:stratosphere-core:0.5.2">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-core/0.5/stratosphere-core-0.5.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-core/0.5.2/stratosphere-core-0.5.2.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-core/0.5/stratosphere-core-0.5-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-core/0.5.2/stratosphere-core-0.5.2-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-core/0.5/stratosphere-core-0.5-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-core/0.5.2/stratosphere-core-0.5.2-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: eu.stratosphere:stratosphere-java:0.5">
+    <library name="Maven: eu.stratosphere:stratosphere-java:0.5.2">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-java/0.5/stratosphere-java-0.5.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-java/0.5.2/stratosphere-java-0.5.2.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-java/0.5/stratosphere-java-0.5-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-java/0.5.2/stratosphere-java-0.5.2-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-java/0.5/stratosphere-java-0.5-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-java/0.5.2/stratosphere-java-0.5.2-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: eu.stratosphere:stratosphere-runtime:0.5">
+    <library name="Maven: eu.stratosphere:stratosphere-runtime:0.5.2">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-runtime/0.5/stratosphere-runtime-0.5.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-runtime/0.5.2/stratosphere-runtime-0.5.2.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-runtime/0.5/stratosphere-runtime-0.5-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-runtime/0.5.2/stratosphere-runtime-0.5.2-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-runtime/0.5/stratosphere-runtime-0.5-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-runtime/0.5.2/stratosphere-runtime-0.5.2-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: eu.stratosphere:stratosphere-scala:0.5">
+    <library name="Maven: eu.stratosphere:stratosphere-scala:0.5.2">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-scala/0.5/stratosphere-scala-0.5.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-scala/0.5.2/stratosphere-scala-0.5.2.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-scala/0.5/stratosphere-scala-0.5-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-scala/0.5.2/stratosphere-scala-0.5.2-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-scala/0.5/stratosphere-scala-0.5-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/eu/stratosphere/stratosphere-scala/0.5.2/stratosphere-scala-0.5.2-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: hsqldb:hsqldb:1.8.0.10">
@@ -680,6 +670,17 @@
         <root url="jar://$MAVEN_REPOSITORY$/hsqldb/hsqldb/1.8.0.10/hsqldb-1.8.0.10-sources.jar!/" />
       </SOURCES>
     </library>
+    <library name="Maven: io.netty:netty-all:4.0.19.Final">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-all/4.0.19.Final/netty-all-4.0.19.Final.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-all/4.0.19.Final/netty-all-4.0.19.Final-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-all/4.0.19.Final/netty-all-4.0.19.Final-sources.jar!/" />
+      </SOURCES>
+    </library>
     <library name="Maven: javax.activation:activation:1.1">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/javax/activation/activation/1.1/activation-1.1.jar!/" />
@@ -691,15 +692,15 @@
         <root url="jar://$MAVEN_REPOSITORY$/javax/activation/activation/1.1/activation-1.1-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: javax.mail:mail:1.4.7">
+    <library name="Maven: javax.mail:mail:1.5.0-b01">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/javax/mail/mail/1.4.7/mail-1.4.7.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/javax/mail/mail/1.5.0-b01/mail-1.5.0-b01.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/javax/mail/mail/1.4.7/mail-1.4.7-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/javax/mail/mail/1.5.0-b01/mail-1.5.0-b01-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/javax/mail/mail/1.4.7/mail-1.4.7-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/javax/mail/mail/1.5.0-b01/mail-1.5.0-b01-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: javax.xml.bind:jaxb-api:2.2.2">
