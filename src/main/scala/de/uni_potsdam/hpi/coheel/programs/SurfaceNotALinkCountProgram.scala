@@ -29,7 +29,7 @@ class SurfaceNotALinkCountProgram extends Program with ProgramDescription {
 			val fullText = SwebleUtils.getFullText(wikiPage)
 			var surface: String = br.readLine()
 			while (surface != null) {
-				val count = StringUtils.countMatches(fullText, surface)
+				val count = if (fullText.contains(surface)) 1 else 0
 				surfaceCounts = (surface, count) :: surfaceCounts
 				surface = br.readLine()
 			}
