@@ -12,26 +12,19 @@ import eu.stratosphere.api.common.Program
 object Main {
 
 	val config   = ConfigFactory.load()
-	/**
-	 * Helpful commands:
-	 * grep -A 5 -i "{{disambiguation" --color=always enwiki-latest-pages-articles1.xml-p000000010p000010000 | less -R
-	 * Open tasks:
-	 * <ul>
-	 *   <li> Remove wiktionary links?
-	 */
 	turnOffLogging()
 	LocalExecutor.setOverwriteFilesByDefault(true)
 
 	def main(args: Array[String]): Unit = {
 		// -Xms3g -Xmx7g
 		// -verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails
-		// 6295 pages in the first chunk dump
+		// 4379 pages in the first chunk dump
 
 		val program = if (config.getBoolean("is_production"))
 			new WikipediaTrainingProgram()
 		else
-//			new WikipediaTrainingProgram()
-			new SurfaceNotALinkCountProgram
+			new WikipediaTrainingProgram()
+//			new SurfaceNotALinkCountProgram
 //		    new RedirectResolvingProgram
 		runProgram(program)
 	}

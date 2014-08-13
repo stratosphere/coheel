@@ -4,13 +4,13 @@ import org.scalatest.FunSuite
 import scala.xml.XML
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import de.uni_potsdam.hpi.coheel.wiki.{Link, LinkExtractor, WikiPageReader}
+import de.uni_potsdam.hpi.coheel.wiki.{Link, Extractor, WikiPageReader}
 import scala.io.Source
 
 @RunWith(classOf[JUnitRunner])
-class LinkExtractorTest extends FunSuite {
+class ExtractorTest extends FunSuite {
 
-	def fixture = (new LinkExtractor(), wikiPage)
+	def fixture() = new Extractor(wikiPage)
 
 	lazy val wikiPage = {
 		val source = getClass.getResource("/manual_test_files/wikipedia_Kilobyte.xml")
@@ -19,8 +19,8 @@ class LinkExtractorTest extends FunSuite {
 	}
 
 	def links: Seq[Link] = {
-		val (extractor, wikiPage) = fixture
-		extractor.extractLinks(wikiPage)
+		val extractor = fixture()
+		extractor.extractLinks()
 	}
 
 	test("parsing a simple internal link '[[byte]]'") {

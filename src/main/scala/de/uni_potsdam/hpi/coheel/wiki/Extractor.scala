@@ -1,7 +1,9 @@
 package de.uni_potsdam.hpi.coheel.wiki
 
+import de.uni_potsdam.hpi.coheel.wiki.SwebleUtils.PlainTextConverter
+
 import scala.collection.mutable
-import org.sweble.wikitext.engine.{PageId, PageTitle, Compiler}
+import org.sweble.wikitext.engine._
 import scala.collection.JavaConversions._
 import org.sweble.wikitext.engine.utils.SimpleWikiConfiguration
 import de.fau.cs.osr.ptk.common.ast.{ContentNode, Text, AstNode, NodeList}
@@ -17,7 +19,11 @@ import org.sweble.wikitext.`lazy`.parser.InternalLink
 // that should not be part of the interface of this class.
 case class Link(source: String, text: String, destination: String)
 
-class LinkExtractor {
+object Extractor {
+	val config = new SimpleWikiConfiguration(
+		"classpath:/org/sweble/wikitext/engine/SimpleWikiConfiguration.xml")
+}
+class Extractor(wikiPage: WikiPage) {
 
 	/**
 	 * Internal class for processing a possible link.
@@ -29,37 +35,37 @@ class LinkExtractor {
 		def this(node: AstNode) = this(node, null, null)
 	}
 
+	val compiledWikiPage = getCompiledWikiPage(wikiPage)
 	var links: Seq[Link] = _
 	var currentWikiTitle: String = _
-	def extractLinks(wikiPage: WikiPage): Seq[Link] = {
-		currentWikiTitle = wikiPage.pageTitle
 
-		val rootNode = getRootNode(wikiPage)
-		val links = walkAST(rootNode)
+	def extractLinks(): Seq[Link] = {
+		currentWikiTitle = wikiPage.pageTitle
+		val rootNode = compiledWikiPage.getContent
+		val links = extractLinks(rootNode)
 		links
 	}
 
-	def getFullText(wikiPage: WikiPage): String = {
-		SwebleUtils.getFullText(wikiPage)
+	def extractPlainText(): String = {
+		val plainTextConverter = new PlainTextConverter(Extractor.config)
+		val page = compiledWikiPage
+		plainTextConverter.go(page).asInstanceOf[String]
 	}
 
-	private def getRootNode(wikiPage: WikiPage): NodeList = {
-		val config = new SimpleWikiConfiguration(
-			"classpath:/org/sweble/wikitext/engine/SimpleWikiConfiguration.xml")
-		val compiler = new Compiler(config)
-		val pageTitle = PageTitle.make(config, wikiPage.pageTitle)
+	private def getCompiledWikiPage(wikiPage: WikiPage): Page = {
+		val compiler = new Compiler(Extractor.config)
+		val pageTitle = PageTitle.make(Extractor.config, wikiPage.pageTitle)
 		val pageId = new PageId(pageTitle, 0)
 
 		val page = compiler.postprocess(pageId, wikiPage.source, null).getPage
 
-		val rootNode = page.getContent
-		rootNode
+		page
 	}
 
-	private def walkAST(parentNode: NodeList): Seq[Link] = {
+	private def extractLinks(parentNode: NodeList): Seq[Link] = {
 		links = Vector()
 		val nodeQueue = mutable.Queue[AstNode](parentNode)
-		while (!nodeQueue.isEmpty) {
+		while (nodeQueue.nonEmpty) {
 			val node = nodeQueue.dequeue()
 			if (node != null) {
 				handleNode(node)

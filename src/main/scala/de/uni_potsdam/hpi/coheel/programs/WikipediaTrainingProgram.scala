@@ -31,7 +31,7 @@ class WikipediaTrainingProgram()
 		val languageModelPlans = buildLanguageModelPlan(wikiPages)
 
 		val textDumps = wikiPages.map { wikiPage =>
-			(wikiPage.pageTitle, wikiPage.source)
+			(wikiPage.pageTitle, wikiPage.plainText)
 		}.write(textDumpsPath, textFormat)
 
 		val plan = new ScalaPlan(
@@ -120,7 +120,7 @@ class WikipediaTrainingProgram()
 		// save redirects (to - from)
 		val redirects = wikiPages
 			.filter { wikiPage => wikiPage.isRedirect }
-			.map { wikiPage => (wikiPage.pageTitle, wikiPage.redirectTitle) }
+			.map { wikiPage => (wikiPage.pageTitle, wikiPage.redirect) }
 
 
 		val surfaceProbOutput = surfaceProbabilities.write(surfaceProbsPath, probOutputFormat)
@@ -132,15 +132,7 @@ class WikipediaTrainingProgram()
 
 	def linksFrom(pages: DataSet[WikiPage]): DataSet[Link] = {
 		pages.flatMap { wikiPage =>
-			// extract all links
-			val extractor = new LinkExtractor()
-			try {
-				extractor.extractLinks(wikiPage)
-			} catch {
-				case e: Throwable =>
-					println(s"Error in ${wikiPage.pageTitle}")
-					List()
-			}
+			wikiPage.links
 		}
 	}
 
@@ -153,9 +145,9 @@ class WikipediaTrainingProgram()
 		val words = wikiPages.filter { wikiPage =>
 			!wikiPage.isDisambiguation && !wikiPage.isRedirect && !wikiPage.isList
 		} flatMap { wikiPage =>
-			val linkExtractor = new LinkExtractor()
-			val text = linkExtractor.getFullText(wikiPage)
-			val tokens = TextAnalyzer.tokenize(text).map { token => Word(wikiPage.pageTitle, token) }
+			val tokens = TextAnalyzer.tokenize(wikiPage.plainText).map { token =>
+				Word(wikiPage.pageTitle, token)
+			}
 			tokens
 		}
 

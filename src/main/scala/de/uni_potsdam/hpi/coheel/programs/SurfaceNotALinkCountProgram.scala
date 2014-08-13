@@ -4,7 +4,7 @@ import eu.stratosphere.api.common.{Program, ProgramDescription, Plan}
 import eu.stratosphere.api.scala._
 import eu.stratosphere.api.scala.operators._
 import OutputFiles._
-import de.uni_potsdam.hpi.coheel.wiki.{SwebleUtils, TextAnalyzer}
+import de.uni_potsdam.hpi.coheel.wiki.{Extractor, SwebleUtils, TextAnalyzer}
 import java.io.{FileReader, BufferedReader}
 import org.apache.commons.lang3.StringUtils
 
@@ -26,7 +26,7 @@ class SurfaceNotALinkCountProgram extends Program with ProgramDescription {
 			c += 1
 			var surfaceCounts = List[(String, Int)]()
 			val br = new BufferedReader(new FileReader("testoutput/surfaces.wiki"))
-			val fullText = SwebleUtils.getFullText(wikiPage)
+			val fullText = wikiPage.plainText
 			var surface: String = br.readLine()
 			while (surface != null) {
 				val count = if (fullText.contains(surface)) 1 else 0

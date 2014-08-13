@@ -29,27 +29,6 @@ import de.fau.cs.osr.utils.StringUtils
 
 object SwebleUtils {
 
-	val SWEBLE_CONFIG = "classpath:/org/sweble/wikitext/engine/SimpleWikiConfiguration.xml"
-
-	def getFullText(wikiPage: WikiPage): String = {
-		val config = new SimpleWikiConfiguration(
-			"classpath:/org/sweble/wikitext/engine/SimpleWikiConfiguration.xml")
-		val plainTextConverter = new PlainTextConverter(config)
-		parsePage(plainTextConverter, wikiPage.source, wikiPage.pageTitle, 0)
-	}
-	def parsePage(v: AstVisitor, text: String, title: String, revision: Long): String = {
-		val page = getCompiledPage(text, title, revision).getPage
-		v.go(page).asInstanceOf[String]
-	}
-
-	private def getCompiledPage(text: String, title: String, revision: Long): CompiledPage = {
-		val config = new SimpleWikiConfiguration(SWEBLE_CONFIG)
-		val pageTitle = PageTitle.make(config, title)
-		val pageId = new PageId(pageTitle, revision)
-		val compiler = new Compiler(config)
-		compiler.postprocess(pageId, text, null)
-	}
-
 	private val ws = Pattern.compile("\\s+")
 
 	class PlainTextConverter(private val config: SimpleWikiConfiguration, private var enumerateSections: Boolean, private var wrapCol: Int) extends Visitor {
