@@ -20,23 +20,26 @@ class SurfaceNotALinkCountProgram extends Program with ProgramDescription {
 	override def getPlan(args: String*): Plan = {
 
 		val wikiPages = ProgramHelper.getWikiPages
-		var c = 0
-		val actualSurfaceOccurrences = wikiPages.flatMap { wikiPage =>
-			println(c)
-			c += 1
-			var surfaceCounts = List[(String, Int)]()
-			val br = new BufferedReader(new FileReader("testoutput/surfaces.wiki"))
-			val fullText = wikiPage.plainText
-			var surface: String = br.readLine()
-			while (surface != null) {
-				val count = if (fullText.contains(surface)) 1 else 0
-				surfaceCounts = (surface, count) :: surfaceCounts
-				surface = br.readLine()
-			}
-			surfaceCounts
-		}
-		.groupBy { case (surface, _) => surface }
-		.reduce { case ((surface, c1), (_, c2)) => (surface, c1 + c2)}
+
+		val actualSurfaceOccurrences = DataSource(actualSurfaceOccurrencesPath,
+			CsvInputFormat[(String, Int)]("\n", '\t'))
+//		var c = 0
+//		val actualSurfaceOccurrences = wikiPages.flatMap { wikiPage =>
+//			println(c)
+//			c += 1
+//			var surfaceCounts = List[(String, Int)]()
+//			val br = new BufferedReader(new FileReader("testoutput/surfaces.wiki"))
+//			val fullText = wikiPage.plainText
+//			var surface: String = br.readLine()
+//			while (surface != null) {
+//				val count = if (fullText.contains(surface)) 1 else 0
+//				surfaceCounts = (surface, count) :: surfaceCounts
+//				surface = br.readLine()
+//			}
+//			surfaceCounts
+//		}
+//		.groupBy { case (surface, _) => surface }
+//		.reduce { case ((surface, c1), (_, c2)) => (surface, c1 + c2)}
 
 		val languageModels = DataSource(languageModelsPath, probInputFormat).map { case (doc, word, _) =>
 			LanguageModelEntry(doc, word)
@@ -58,7 +61,7 @@ class SurfaceNotALinkCountProgram extends Program with ProgramDescription {
 					Surface(surface, tokens.head)
 		}
 
-		val documentOccurrences = languageModels.cogroup(surfaces)
+		val possibleOccurrences = languageModels.cogroup(surfaces)
 			.where { case LanguageModelEntry(_, word) => word }
 			.isEqualTo { case Surface(_, firstWord) => firstWord }
 			.flatMap { case (lmEntries, surfaceIt) =>
@@ -69,8 +72,13 @@ class SurfaceNotALinkCountProgram extends Program with ProgramDescription {
 					}
 				} else
 					List()
-			}
-		val thresholdEvaluation = documentOccurrences.flatMap { case (_, _, count) =>
+			}.join(actualSurfaceOccurrences)
+			.where { case (surfaceText, _, _) => surfaceText }
+			.isEqualTo { case (surfaceText, _) => surfaceText }
+			.map { case ((surfaceText, firstWord, possibleOccurrences), (_, actualOccurrences)) =>
+			(surfaceText, firstWord, actualOccurrences, possibleOccurrences)
+		}
+		val thresholdEvaluation = possibleOccurrences.flatMap { case (_, _, _, count) =>
 				(0.5 to 100.0 by 0.5).map { thresholdPercent =>
 					val threshold = thresholdPercent * DOC_NUMBER.toDouble / 100.0
 					val missedMentions = if (count > threshold) count else 0
@@ -80,13 +88,14 @@ class SurfaceNotALinkCountProgram extends Program with ProgramDescription {
 				threshold
 			}.reduce { case ((t1, c1), (t2, c2)) => (t1, c1 + c2) }
 
-		val surfacePossibleDocumentOutput = documentOccurrences.write(surfacePossibleDocumentCountsPath,
-			CsvOutputFormat[(String, String, Int)]("\n", "\t"))
-		val surfaceOccurrenceOutput = actualSurfaceOccurrences.write(surfaceOccurrenceCountsPath,
+
+		val possibleOccurrencesOutput = possibleOccurrences.write(possibleSurfaceOccurrencesPath,
+			CsvOutputFormat[(String, String, Int, Int)]("\n", "\t"))
+		val actualOccurrencesOutput = actualSurfaceOccurrences.write(actualSurfaceOccurrencesPath,
 			CsvOutputFormat[(String, Int)]("\n", "\t"))
 		val thresholdEvaluationOutput = thresholdEvaluation.write(thresholdEvaluationPath,
 			CsvOutputFormat[(Double, Int)]("\n", "\t"))
-		val plan = new ScalaPlan(Seq(surfacePossibleDocumentOutput))
+		val plan = new ScalaPlan(Seq(possibleOccurrencesOutput))
 		plan
 	}
 }

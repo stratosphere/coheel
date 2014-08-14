@@ -11,10 +11,10 @@ object OutputFiles {
 	lazy val languageModelsPath                = s"file://$currentPath/testoutput/language-models.wiki"
 	lazy val documentFrequencyPath             = s"file://$currentPath/testoutput/document-frequency-counts.wiki"
 	lazy val redirectPath                      = s"file://$currentPath/testoutput/redirects-test.wiki"
-	lazy val surfaceDocumentPath               = s"file://$currentPath/testoutput/surface-link-document-counts.wiki"
 	lazy val textDumpsPath                     = s"file://$currentPath/testoutput/text-dumps.wiki"
-	lazy val surfacePossibleDocumentCountsPath = s"file://$currentPath/testoutput/surface-possible-document-counts.wiki"
-	lazy val surfaceOccurrenceCountsPath       = s"file://$currentPath/testoutput/surface-occurrence-counts.wiki"
+	lazy val surfaceDocumentPath               = s"file://$currentPath/testoutput/surface-link-occurrences.wiki"
+	lazy val possibleSurfaceOccurrencesPath    = s"file://$currentPath/testoutput/possible-surface-occurrences.wiki"
+	lazy val actualSurfaceOccurrencesPath      = s"file://$currentPath/testoutput/actual-surface-occurrences.wiki"
 	lazy val thresholdEvaluationPath           = s"file://$currentPath/testoutput/threshold-evaluation.wiki"
 	lazy val redirectResolvPath                = s"file://$currentPath/testoutput/resolved-redirects.wiki"
 
