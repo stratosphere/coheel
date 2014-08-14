@@ -26,8 +26,8 @@ object Main {
 			new WikipediaTrainingProgram()
 //			new SurfaceNotALinkCountProgram
 //		    new RedirectResolvingProgram
-		runProgram(program)
-//		buildRocPlot()
+//		runProgram(program)
+		buildRocPlot()
 	}
 
 	def runProgram(program: Program): Unit = {
@@ -46,7 +46,7 @@ object Main {
 
 	def buildRocPlot(): Unit = {
 		val bw = new BufferedWriter(new FileWriter("plots/roc.csv", false))
-		(0 to 4400 by 20).foreach { threshold =>
+		(0 to 4400 by 250).foreach { threshold =>
 			var tp = 0
 			var fp = 0
 			var fn = 0
@@ -71,7 +71,7 @@ object Main {
 			val tpr = tp.toDouble / (tp + fn).toDouble
 			val fpr = fp.toDouble / (fp + tn).toDouble
 
-			bw.write(s"$fpr,$tpr,$threshold")
+			bw.write(s"$fpr,$tpr,$threshold,$tp,$tn,$fp,$fn")
 			bw.newLine()
 		}
 		bw.close()

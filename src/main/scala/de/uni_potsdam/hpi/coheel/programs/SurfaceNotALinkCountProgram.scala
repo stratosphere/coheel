@@ -34,6 +34,7 @@ class SurfaceNotALinkCountProgram extends Program with ProgramDescription {
 //			val fullText = wikiPage.plainText
 //			var surface: String = br.readLine()
 //			while (surface != null) {
+//				TODO: Tokenize
 //				val count = if (fullText.contains(surface)) 1 else 0
 //				surfaceCounts = (surface, count) :: surfaceCounts
 //				surface = br.readLine()
