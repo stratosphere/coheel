@@ -1,7 +1,6 @@
 package de.uni_potsdam.hpi.coheel
 
 import org.scalatest.FunSuite
-import scala.xml.XML
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import de.uni_potsdam.hpi.coheel.wiki.{Link, Extractor, WikiPageReader}
