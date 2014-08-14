@@ -82,4 +82,12 @@ class ExtractorTest extends FunSuite {
 		}
 	}
 
+	test("does not run in infinite loop") {
+		val source = getClass.getResource("/manual_test_files/infinite_loop.xml")
+		val xml = Source.fromFile(source.toURI, "UTF-8").mkString
+		val wikiPage = WikiPageReader.xmlToWikiPages(xml).next()
+		val linkExtractor = new Extractor(wikiPage)
+		linkExtractor.extractLinks()
+	}
+
 }
