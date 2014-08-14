@@ -21,8 +21,10 @@ class SurfaceNotALinkCountProgram extends Program with ProgramDescription {
 
 		val wikiPages = ProgramHelper.getWikiPages
 
-		val actualSurfaceOccurrences = DataSource(actualSurfaceOccurrencesPath,
-			CsvInputFormat[(String, Int)]("\n", '\t'))
+		val actualSurfaceOccurrences = TextFile(actualSurfaceOccurrencesPath).map { line =>
+			val split = line.split('\t')
+			(split(0), split(1).toInt)
+		}
 //		var c = 0
 //		val actualSurfaceOccurrences = wikiPages.flatMap { wikiPage =>
 //			println(c)
