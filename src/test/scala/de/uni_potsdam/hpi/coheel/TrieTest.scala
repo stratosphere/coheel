@@ -9,7 +9,7 @@ import org.scalatest.junit.JUnitRunner
 class TrieTest extends FunSuite {
 
 	def newTrie(): Trie = {
-		val trie = new Trie("", Nil)
+		val trie = new Trie()
 		trie
 	}
 

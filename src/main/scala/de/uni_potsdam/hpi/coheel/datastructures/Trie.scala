@@ -2,7 +2,7 @@ package de.uni_potsdam.hpi.coheel.datastructures
 
 import scala.collection.mutable.Map
 
-case class Trie(value: String, children: List[Trie]) {
+case class Trie() {
 
 	val rootNode = TrieNode(Map())
 
@@ -22,7 +22,6 @@ case class Trie(value: String, children: List[Trie]) {
 }
 
 case class TrieNode(children: Map[String, TrieNode]) {
-
 	var isEntry = false
 
 	def add(tokens: Seq[String]): Unit = {
