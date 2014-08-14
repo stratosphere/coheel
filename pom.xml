@@ -105,7 +105,7 @@
 					<launchers>
 						<launcher>
 							<id>Wikipedia Training Task</id>
-							<mainClass>de.uni_potsdam.hpi.coheel.Main</mainClass>
+							<mainClass>de.uni_potsdam.hpi.coheel.FlinkProgramRunner</mainClass>
 							<args>
 								<arg>arg1</arg>
 							</args>

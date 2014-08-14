@@ -5,14 +5,14 @@ import org.slf4s.Logging
 import scala.io.Source
 import de.uni_potsdam.hpi.coheel.wiki.{Extractor, WikiPage, WikiPageReader}
 import java.io.File
-import de.uni_potsdam.hpi.coheel.Main
+import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
 
 /**
  * Helper object for reused parts of Flink programs.
  */
 object ProgramHelper extends Logging {
 
-	val dumpFile = new File(Main.config.getString("base_path") + Main.config.getString("dump_file"))
+	val dumpFile = new File(FlinkProgramRunner.config.getString("base_path") + FlinkProgramRunner.config.getString("dump_file"))
 
 	lazy val wikipediaFilesPath = s"file://${dumpFile.getAbsolutePath}"
 

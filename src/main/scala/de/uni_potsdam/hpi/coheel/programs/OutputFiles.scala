@@ -1,10 +1,10 @@
 package de.uni_potsdam.hpi.coheel.programs
 
 import eu.stratosphere.api.scala.operators.{CsvInputFormat, CsvOutputFormat}
-import de.uni_potsdam.hpi.coheel.Main
+import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
 
 object OutputFiles {
-	lazy val currentPath = Main.config.getString("output_files_dir")
+	lazy val currentPath = FlinkProgramRunner.config.getString("output_files_dir")
 
 	lazy val surfaceProbsPath                  = s"file://$currentPath/testoutput/surface-probs.wiki"
 	lazy val contextLinkProbsPath              = s"file://$currentPath/testoutput/context-link-probs-test.wiki"

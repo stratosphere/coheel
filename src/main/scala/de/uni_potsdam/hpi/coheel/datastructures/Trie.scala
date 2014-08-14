@@ -1,6 +1,5 @@
 package de.uni_potsdam.hpi.coheel.datastructures
 
-import scala.collection.mutable
 import scala.collection.mutable.Map
 
 case class Trie(value: String, children: List[Trie]) {
@@ -58,5 +57,4 @@ case class TrieNode(children: Map[String, TrieNode]) {
 			}
 		}
 	}
-
 }
