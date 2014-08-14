@@ -65,12 +65,12 @@ class SurfaceNotALinkCountProgram extends Program with ProgramDescription {
 				val docs = lmEntries.toList.map { lmEntry => lmEntry.doc}
 				if (docs.nonEmpty) {
 					surfaceIt.map { surface =>
-						(surface.surfaceText, docs.size)
+						(surface.surfaceText, surface.firstWord, docs.size)
 					}
 				} else
 					List()
 			}
-		val thresholdEvaluation = documentOccurrences.flatMap { case (_, count) =>
+		val thresholdEvaluation = documentOccurrences.flatMap { case (_, _, count) =>
 				(0.5 to 100.0 by 0.5).map { thresholdPercent =>
 					val threshold = thresholdPercent * DOC_NUMBER.toDouble / 100.0
 					val missedMentions = if (count > threshold) count else 0
@@ -81,12 +81,12 @@ class SurfaceNotALinkCountProgram extends Program with ProgramDescription {
 			}.reduce { case ((t1, c1), (t2, c2)) => (t1, c1 + c2) }
 
 		val surfacePossibleDocumentOutput = documentOccurrences.write(surfacePossibleDocumentCountsPath,
-			CsvOutputFormat[(String, Int)]("\n", "\t"))
+			CsvOutputFormat[(String, String, Int)]("\n", "\t"))
 		val surfaceOccurrenceOutput = actualSurfaceOccurrences.write(surfaceOccurrenceCountsPath,
 			CsvOutputFormat[(String, Int)]("\n", "\t"))
 		val thresholdEvaluationOutput = thresholdEvaluation.write(thresholdEvaluationPath,
 			CsvOutputFormat[(Double, Int)]("\n", "\t"))
-		val plan = new ScalaPlan(Seq(surfaceOccurrenceOutput))
+		val plan = new ScalaPlan(Seq(surfacePossibleDocumentOutput))
 		plan
 	}
 }
