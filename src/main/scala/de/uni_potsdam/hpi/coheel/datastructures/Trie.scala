@@ -2,10 +2,11 @@ package de.uni_potsdam.hpi.coheel.datastructures
 
 import java.util
 import java.util.Map
+import gnu.trove.map.hash.THashMap
 
 case class Trie() {
 
-	val rootNode = TrieNode(new util.HashMap())
+	val rootNode = TrieNode(new THashMap())
 
 	def add(tokens: Seq[String]): Unit = {
 		if (tokens.isEmpty)
@@ -29,7 +30,7 @@ case class TrieNode(children: Map[String, TrieNode]) {
 		if (tokens.tail.isEmpty) {
 			children.get(tokens.head) match {
 				case null =>
-					val newNode = TrieNode(new util.HashMap())
+					val newNode = TrieNode(new THashMap())
 					newNode.isEntry = true
 					children.put(tokens.head, newNode)
 				case trieNode => trieNode.isEntry = true
@@ -38,7 +39,7 @@ case class TrieNode(children: Map[String, TrieNode]) {
 		else {
 			children.get(tokens.head) match {
 				case null =>
-					val newNode = TrieNode(new util.HashMap())
+					val newNode = TrieNode(new THashMap())
 					newNode.add(tokens.tail)
 					children.put(tokens.head, newNode)
 				case trieNode =>

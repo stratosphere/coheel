@@ -59,8 +59,8 @@ object TrieTester {
 				}
 			} catch {
 				case e: OutOfMemoryError =>
-					println(e)
 					println(i)
+					println(e)
 					System.exit(1)
 			}
 		}
