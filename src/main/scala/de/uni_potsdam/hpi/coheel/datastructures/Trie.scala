@@ -5,7 +5,7 @@ import java.util.Map
 
 case class Trie() {
 
-	val rootNode = TrieNode(new util.HashMap())
+	val rootNode = TrieNode()
 
 	def add(tokens: Seq[String]): Unit = {
 		if (tokens.isEmpty)
@@ -22,14 +22,18 @@ case class Trie() {
 	def contains(tokenString: String): Boolean = contains(tokenString.split(' '))
 }
 
-case class TrieNode(children: Map[String, TrieNode]) {
+case class TrieNode() {
 	var isEntry = false
 
+	var children: Map[String, TrieNode] = _
+
 	def add(tokens: Seq[String]): Unit = {
+		if (children == null)
+			children = new util.HashMap()
 		if (tokens.tail.isEmpty) {
 			children.get(tokens.head) match {
 				case null =>
-					val newNode = TrieNode(new util.HashMap())
+					val newNode = TrieNode()
 					newNode.isEntry = true
 					children.put(tokens.head, newNode)
 				case trieNode => trieNode.isEntry = true
@@ -38,7 +42,7 @@ case class TrieNode(children: Map[String, TrieNode]) {
 		else {
 			children.get(tokens.head) match {
 				case null =>
-					val newNode = TrieNode(new util.HashMap())
+					val newNode = TrieNode()
 					newNode.add(tokens.tail)
 					children.put(tokens.head, newNode)
 				case trieNode =>
@@ -50,6 +54,8 @@ case class TrieNode(children: Map[String, TrieNode]) {
 	def contains(tokens: Seq[String]): Boolean = {
 		if (tokens.isEmpty)
 			isEntry
+		else if (children == null)
+			false
 		else {
 			children.get(tokens.head) match {
 				case null => false
