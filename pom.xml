@@ -111,9 +111,6 @@
 						<launcher>
 							<id>Wikipedia Training Task</id>
 							<mainClass>de.uni_potsdam.hpi.coheel.FlinkProgramRunner</mainClass>
-							<args>
-								<arg>arg1</arg>
-							</args>
 							<jvmArgs>
 								<jvmArg>-Xms3g</jvmArg>
 								<jvmArg>-Xmx7g</jvmArg>

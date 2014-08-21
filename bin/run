@@ -1,12 +1,28 @@
 #!/usr/bin/env /bin/sh
+
+if [ $# -eq 0 ]
+then
+	echo "Usage:"
+	echo "  bin/run [dataset] [program]"
+	echo "Available datasets:"
+	echo "  - full"
+	echo "  - chunk"
+	echo "Available programs:"
+	echo "  - main"
+	echo "  - surfaces"
+	echo "  - redirects"
+	exit
+fi
+
 if [ -e "src/main/resources/$1.conf" ]
 then
-	echo "Running '$1'."
-	date
+	date --rfc-3339=seconds
 	cp src/main/resources/$1.conf src/main/resources/application.conf
 	rm run-output 2> /dev/null
-	mvn -q scala:run | tee run-output
-	date
+	echo "------------"
+	mvn -q scala:run -DaddArgs=$2 | tee run-output
+	echo "------------"
+	date --rfc-3339=seconds
 else
 	echo "Configuration '$1' does not exist."
 	echo "Available configurations:"

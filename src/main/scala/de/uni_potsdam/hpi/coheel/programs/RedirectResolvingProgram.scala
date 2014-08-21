@@ -9,7 +9,7 @@ class RedirectResolvingProgram extends Program with ProgramDescription {
 
 	case class ContextLink(from: String, origTo: String, to: String)
 	case class Redirect(from: String, to: String)
-	override def getDescription = ""
+	override def getDescription = "Resolving redirects"
 
 	override def getPlan(args: String*): Plan = {
 

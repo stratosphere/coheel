@@ -7,7 +7,7 @@ import org.apache.log4j.{Level, Logger}
 import com.typesafe.config.ConfigFactory
 import de.uni_potsdam.hpi.coheel.programs.{RedirectResolvingProgram, SurfaceNotALinkCountProgram, WikipediaTrainingProgram}
 import org.apache.commons.io.FileUtils
-import eu.stratosphere.api.common.Program
+import eu.stratosphere.api.common.{ProgramDescription, Program}
 
 object FlinkProgramRunner {
 
@@ -20,15 +20,18 @@ object FlinkProgramRunner {
 		// -verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails
 		// 4379 pages in the first chunk dump
 
+		val programName = if (args.nonEmpty) args(0) else "main"
+
 		val program = Map(
 			"main" -> new WikipediaTrainingProgram,
 			"surfaces" -> new SurfaceNotALinkCountProgram,
-			"redirects" -> new RedirectResolvingProgram)(config.getString("program"))
+			"redirects" -> new RedirectResolvingProgram)(programName)
 		runProgram(program)
 	}
 
-	def runProgram(program: Program): Unit = {
-		println("Parsing wikipedia. Dataset: " + config.getString("name"))
+	def runProgram(program: Program with ProgramDescription): Unit = {
+		println(program.getDescription)
+		println("Dataset: " + config.getString("name"))
 		val processingTime = time {
 			// Dump downloaded from http://dumps.wikimedia.org/enwiki/latest/
 
