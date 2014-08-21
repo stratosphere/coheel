@@ -1,6 +1,6 @@
 package de.uni_potsdam.hpi.coheel
 
-import java.io.File
+import java.io.{FileWriter, BufferedWriter, File}
 
 import de.uni_potsdam.hpi.coheel.datastructures.Trie
 import de.uni_potsdam.hpi.coheel.wiki.TextAnalyzer
@@ -11,24 +11,57 @@ object TrieTester {
 
 	def main(args: Array[String]): Unit = {
 		printMemoryStatus()
-		Thread.sleep(5000)
+//		tokenizeSurfaces()
 		buildTrie()
 		printMemoryStatus()
 	}
 
-	def buildTrie(): Unit = {
+	def tokenizeSurfaces(): Unit = {
 		val lines = Source.fromFile(new File("testoutput/surfaces.wiki")).getLines()
 
+		val bw = new BufferedWriter(new FileWriter(new File("testoutput/surfaces-tokenized.wiki"), false))
+
 		var i = 0
-		val trie = new Trie()
 		lines.foreach { line =>
 			val tokens = TextAnalyzer.tokenize(line)
-			if (tokens.nonEmpty)
-				trie.add(tokens)
+			if (tokens.nonEmpty) {
+				bw.write(tokens.mkString("\t"))
+				bw.newLine()
+			}
 			i += 1
 			if (i % 1000000 == 0) {
 				println(f"$i")
 				printMemoryStatus()
+			}
+		}
+		bw.close()
+	}
+
+	def buildTrie(): Unit = {
+		println("Sleeping")
+//		Thread.sleep(10000)
+		println("Done")
+		val lines = Source.fromFile(new File("testoutput/surfaces-tokenized.wiki")).getLines()
+//		Thread.sleep(10000)
+		println("Done")
+
+		var i = 0
+		val trie = new Trie()
+		lines.foreach { line =>
+			try {
+				val tokens = line.split('\t')
+				if (tokens.nonEmpty)
+					trie.add(tokens)
+				i += 1
+				if (i % 1000000 == 0) {
+					println(f"$i")
+					printMemoryStatus()
+				}
+			} catch {
+				case e: OutOfMemoryError =>
+					println(e)
+					println(i)
+					System.exit(1)
 			}
 		}
 	}
