@@ -1,3 +1,0 @@
-#!/usr/bin/env /bin/sh
-cp src/main/resources/{standard,application}.conf
-mvn scala:run

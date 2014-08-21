@@ -1,0 +1,14 @@
+#!/usr/bin/env /bin/sh
+if [ -e "src/main/resources/$1.conf" ]
+then
+	echo "Running '$1'."
+	cp src/main/resources/$1.conf src/main/resources/application.conf
+	rm run-output 2> /dev/null
+	mvn -q scala:run | tee run-output
+else
+	echo "Configuration '$1' does not exist."
+	echo "Available configurations:"
+	cd src/main/resources
+	ls *.conf
+	cd ../../..
+fi

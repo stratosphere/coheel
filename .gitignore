@@ -8,3 +8,4 @@ testoutput/
 *.pdf
 src/test/resources/
 src/main/resources/*.conf
+run-output
