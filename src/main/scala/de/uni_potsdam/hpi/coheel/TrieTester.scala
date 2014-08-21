@@ -39,10 +39,10 @@ object TrieTester {
 
 	def buildTrie(): Unit = {
 		println("Sleeping")
-		Thread.sleep(10000)
+//		Thread.sleep(10000)
 		println("Done")
 		val lines = Source.fromFile(new File("testoutput/surfaces-tokenized.wiki")).getLines()
-		Thread.sleep(10000)
+//		Thread.sleep(10000)
 		println("Done")
 
 		var i = 0
