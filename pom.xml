@@ -35,6 +35,11 @@
 			<artifactId>slf4s-api_2.10</artifactId>
 			<version>1.7.6</version>
 		</dependency>
+		<dependency>
+			<groupId>net.sf.trove4j</groupId>
+			<artifactId>trove4j</artifactId>
+			<version>3.0.3</version>
+		</dependency>
 		<!-- for tokenization, stemming, stopping -->
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
