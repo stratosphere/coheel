@@ -2,9 +2,11 @@
 if [ -e "src/main/resources/$1.conf" ]
 then
 	echo "Running '$1'."
+	date
 	cp src/main/resources/$1.conf src/main/resources/application.conf
 	rm run-output 2> /dev/null
 	mvn -q scala:run | tee run-output
+	date
 else
 	echo "Configuration '$1' does not exist."
 	echo "Available configurations:"
