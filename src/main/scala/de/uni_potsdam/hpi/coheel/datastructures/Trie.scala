@@ -1,10 +1,11 @@
 package de.uni_potsdam.hpi.coheel.datastructures
 
-import scala.collection.mutable.Map
+import java.util
+import java.util.Map
 
 case class Trie() {
 
-	val rootNode = TrieNode(Map())
+	val rootNode = TrieNode(new util.HashMap())
 
 	def add(tokens: Seq[String]): Unit = {
 		if (tokens.isEmpty)
@@ -27,21 +28,21 @@ case class TrieNode(children: Map[String, TrieNode]) {
 	def add(tokens: Seq[String]): Unit = {
 		if (tokens.tail.isEmpty) {
 			children.get(tokens.head) match {
-				case Some(trieNode) => trieNode.isEntry = true
-				case None =>
-					val newNode = TrieNode(Map())
+				case null =>
+					val newNode = TrieNode(new util.HashMap())
 					newNode.isEntry = true
 					children.put(tokens.head, newNode)
+				case trieNode => trieNode.isEntry = true
 			}
 		}
 		else {
 			children.get(tokens.head) match {
-				case Some(trieNode) =>
-					trieNode.add(tokens.tail)
-				case None =>
-					val newNode = TrieNode(Map())
+				case null =>
+					val newNode = TrieNode(new util.HashMap())
 					newNode.add(tokens.tail)
 					children.put(tokens.head, newNode)
+				case trieNode =>
+					trieNode.add(tokens.tail)
 			}
 		}
 	}
@@ -51,8 +52,8 @@ case class TrieNode(children: Map[String, TrieNode]) {
 			isEntry
 		else {
 			children.get(tokens.head) match {
-				case Some(trieNode) => trieNode.contains(tokens.tail)
-				case None => false
+				case null => false
+				case trieNode => trieNode.contains(tokens.tail)
 			}
 		}
 	}
