@@ -20,12 +20,10 @@ object FlinkProgramRunner {
 		// -verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails
 		// 4379 pages in the first chunk dump
 
-		val program = if (config.getBoolean("is_production"))
-			new WikipediaTrainingProgram()
-		else
-//			new WikipediaTrainingProgram()
-//			new SurfaceNotALinkCountProgram
-		    new RedirectResolvingProgram
+		val program = Map(
+			"main" -> new WikipediaTrainingProgram,
+			"surfaces" -> new SurfaceNotALinkCountProgram,
+			"redirects" -> new RedirectResolvingProgram)(config.getString("program"))
 		runProgram(program)
 	}
 

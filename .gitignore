@@ -7,5 +7,5 @@ testoutput/
 *.log
 *.pdf
 src/test/resources/
-src/main/resources/*.conf
+src/main/resources/application.conf
 run-output
