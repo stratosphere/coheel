@@ -13,7 +13,10 @@ class RedirectResolvingProgram extends Program with ProgramDescription {
 
 	override def getPlan(args: String*): Plan = {
 
-		val redirects    = DataSource(redirectPath, textInput).map { t => Redirect(t._1, t._2)}
+		val redirects    = TextFile(redirectPath).map { line =>
+			val split = line.split('\t')
+			Redirect(split(0), split(1))
+		}
 		val contextLinks = TextFile(contextLinkProbsPath).map { line =>
 			val split = line.split('\t')
 			ContextLink(split(0), split(1), split(1))
