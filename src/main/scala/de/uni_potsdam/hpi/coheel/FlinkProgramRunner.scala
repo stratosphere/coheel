@@ -23,9 +23,9 @@ object FlinkProgramRunner {
 		val program = if (config.getBoolean("is_production"))
 			new WikipediaTrainingProgram()
 		else
-			new WikipediaTrainingProgram()
+//			new WikipediaTrainingProgram()
 //			new SurfaceNotALinkCountProgram
-//		    new RedirectResolvingProgram
+		    new RedirectResolvingProgram
 		runProgram(program)
 	}
 
@@ -66,7 +66,12 @@ object FlinkProgramRunner {
 			classOf[eu.stratosphere.nephele.jobmanager.splitassigner.InputSplitAssigner],
 			classOf[eu.stratosphere.nephele.jobmanager.splitassigner.InputSplitManager],
 			classOf[eu.stratosphere.nephele.jobmanager.splitassigner.file.FileInputSplitList],
-			classOf[eu.stratosphere.nephele.jobmanager.scheduler.AbstractScheduler]
+			classOf[eu.stratosphere.nephele.jobmanager.scheduler.AbstractScheduler],
+			classOf[eu.stratosphere.pact.runtime.iterative.task.IterationTailPactTask[_, _]],
+			classOf[eu.stratosphere.pact.runtime.iterative.task.IterationSynchronizationSinkTask],
+			classOf[eu.stratosphere.pact.runtime.iterative.task.IterationIntermediatePactTask[_, _]],
+			classOf[eu.stratosphere.pact.runtime.iterative.task.IterationHeadPactTask[_, _, _, _]],
+			classOf[eu.stratosphere.pact.runtime.iterative.convergence.WorksetEmptyConvergenceCriterion]
 		).foreach {
 			Logger.getLogger(_).setLevel(Level.WARN)
 		}

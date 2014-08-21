@@ -9,7 +9,7 @@ class RedirectResolvingProgram extends Program with ProgramDescription {
 
 	case class ContextLink(from: String, origTo: String, to: String)
 	case class Redirect(from: String, to: String)
-	override def getDescription = "Counting how often a surface occurs, but not as a link."
+	override def getDescription = ""
 
 	override def getPlan(args: String*): Plan = {
 
@@ -20,17 +20,22 @@ class RedirectResolvingProgram extends Program with ProgramDescription {
 		}
 
 		def iterate(s: DataSet[ContextLink], ws: DataSet[ContextLink]): (DataSet[ContextLink], DataSet[ContextLink]) = {
-			val resolvedRedirects = ws.join(redirects)
-				.where { case ContextLink(from, to, orig) => to }
+			val resolvedRedirects = ws.filter { input =>
+					true
+				}.join(redirects)
+				.where { case ContextLink(from, origTo, to) => to }
 				.isEqualTo { case Redirect(from, to) => from }
 				.map { case (contextLink, redirect) =>
 					ContextLink(contextLink.from, contextLink.origTo, redirect.to)
 				}
 			val result = s.join(resolvedRedirects)
-				.where { cl => (cl.to, cl.origTo) }
-				.isEqualTo { cl => (cl.to, cl.origTo) }
+				.where { cl => (cl.from, cl.origTo) }
+				.isEqualTo { cl => (cl.from, cl.origTo) }
 				.map { (orig, resolved) =>
-					orig
+					resolved
+				}.filter { resolved =>
+					println("Resolved: " + resolved)
+					true
 				}
 			(result, result)
 		}
