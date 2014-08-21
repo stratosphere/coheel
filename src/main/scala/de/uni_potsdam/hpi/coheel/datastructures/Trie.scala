@@ -28,11 +28,11 @@ case class TrieNode() {
 
 	var isEntry = false
 
-	var children: TIntObjectHashMap[TrieNode] = _
+	var children: Map[Int, TrieNode] = _
 
 	def add(tokens: Seq[String]): Unit = {
 		if (children == null)
-			children = new TIntObjectHashMap[TrieNode]()
+			children = new util.HashMap()
 		if (tokens.tail.isEmpty) {
 			children.get(tokens.head.hashCode) match {
 				case null =>
