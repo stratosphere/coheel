@@ -29,12 +29,17 @@ class RedirectResolvingProgram extends Program with ProgramDescription {
 				.map { case (contextLink, redirect) =>
 					ContextLink(contextLink.from, contextLink.origTo, redirect.to)
 				}
+			var shownDelimiter = false
 			val result = s.join(resolvedRedirects)
 				.where { cl => (cl.from, cl.origTo) }
 				.isEqualTo { cl => (cl.from, cl.origTo) }
 				.map { (orig, resolved) =>
 					resolved
 				}.filter { resolved =>
+					if (!shownDelimiter) {
+						println("#########NEXT ITERATION###########")
+						shownDelimiter = true
+					}
 					println("Resolved: " + resolved)
 					true
 				}
