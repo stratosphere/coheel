@@ -24,6 +24,8 @@ case class Trie() {
 	def contains(tokenString: String): Boolean = contains(tokenString.split(' '))
 }
 
+case class ContainsResult(asEntry: Boolean, asIntermediateNode: Boolean)
+
 case class TrieNode() {
 
 	var isEntry = false

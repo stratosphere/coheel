@@ -24,7 +24,7 @@ class WikipediaTrainingProgram()
 	 * @param args Not used.
 	 */
 	override def getPlan(args: String*): Plan = {
-		val wikiPages = ProgramHelper.getWikiPages
+		val wikiPages = ProgramHelper.getWikiPages()
 		val plans = buildLinkPlans(wikiPages)
 		val languageModelPlans = buildLanguageModelPlan(wikiPages)
 

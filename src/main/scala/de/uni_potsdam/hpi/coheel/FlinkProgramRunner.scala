@@ -4,10 +4,9 @@ import java.io.File
 
 import org.apache.flink.api.common.{ProgramDescription, Program}
 import org.apache.flink.client.LocalExecutor
-import org.apache.flink.runtime.iterative.task.IterationTailPactTask
 import org.apache.log4j.{Level, Logger}
 import com.typesafe.config.ConfigFactory
-import de.uni_potsdam.hpi.coheel.programs.{RedirectResolvingProgram, SurfaceNotALinkProgram, WikipediaTrainingProgram}
+import de.uni_potsdam.hpi.coheel.programs.{SurfaceNotALinkTrieProgram, RedirectResolvingProgram, SurfaceNotALinkProgram, WikipediaTrainingProgram}
 import org.apache.commons.io.FileUtils
 
 object FlinkProgramRunner {
@@ -26,6 +25,7 @@ object FlinkProgramRunner {
 		val program = Map(
 			"main" -> new WikipediaTrainingProgram,
 			"surfaces" -> new SurfaceNotALinkProgram,
+			"trie" -> new SurfaceNotALinkTrieProgram,
 			"redirects" -> new RedirectResolvingProgram)(programName)
 		runProgram(program)
 	}

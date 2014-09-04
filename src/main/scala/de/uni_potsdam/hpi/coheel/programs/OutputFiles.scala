@@ -13,6 +13,7 @@ object OutputFiles {
 	lazy val redirectPath                      = s"file://$currentPath/testoutput/redirects.wiki"
 	lazy val textDumpsPath                     = s"file://$currentPath/testoutput/text-dumps.wiki"
 	lazy val surfaceDocumentPath               = s"file://$currentPath/testoutput/surface-link-occurrences.wiki"
+	lazy val surfaceNotALinkPath               = s"file://$currentPath/testoutput/surface-not-a-link-occurrences.wiki"
 	lazy val possibleSurfaceOccurrencesPath    = s"file://$currentPath/testoutput/possible-surface-occurrences.wiki"
 	lazy val actualSurfaceOccurrencesPath      = s"file://$currentPath/testoutput/actual-surface-occurrences.wiki"
 	lazy val thresholdEvaluationPath           = s"file://$currentPath/testoutput/threshold-evaluation.wiki"

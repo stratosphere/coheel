@@ -16,7 +16,7 @@ object ProgramHelper extends Logging {
 
 	lazy val wikipediaFilesPath = s"file://${dumpFile.getAbsolutePath}"
 
-	def getWikiPages: DataSet[WikiPage] = {
+	def getWikiPages(count: Int = -1): DataSet[WikiPage] = {
 		val input = TextFile(wikipediaFilesPath)
 		input.map { file =>
 			log.info(file)
@@ -27,7 +27,8 @@ object ProgramHelper extends Logging {
 				List[WikiPage]().iterator
 			} else {
 				val wikiPages = WikiPageReader.xmlToWikiPages(pageSource)
-				wikiPages.filter { page => page.ns == 0 && page.source.nonEmpty }.map { wikiPage =>
+				(if (count == -1) wikiPages else wikiPages.take(count))
+					.filter { page => page.ns == 0 && page.source.nonEmpty }.map { wikiPage =>
 					try {
 						val extractor = new Extractor(wikiPage)
 						wikiPage.links = extractor.extractLinks()

@@ -10,11 +10,27 @@ import scala.io.Source
 object TrieTester {
 
 	def main(args: Array[String]): Unit = {
-		printMemoryStatus()
-//		tokenizeSurfaces()
-		val trie = buildTrie()
-		testTrie(trie)
-		printMemoryStatus()
+		val trieRunner = new TrieRunner
+		trieRunner.printMemoryStatus()
+//		trieRunner.tokenizeSurfaces()
+		val trie = trieRunner.buildTrie()
+		trieRunner.testTrie(trie)
+		trieRunner.printMemoryStatus()
+	}
+
+}
+
+class TrieRunner {
+
+	def printMemoryStatus(): Unit = {
+		val maxMem   = Runtime.getRuntime.maxMemory().toDouble / 1024 / 1024
+		val freeMem  = Runtime.getRuntime.freeMemory().toDouble / 1024 / 1024
+		val totalMem = Runtime.getRuntime.totalMemory().toDouble / 1024 / 1024
+		val actualMem = maxMem - (totalMem - freeMem)
+//		println(f"Max  : $maxMem%.2f MB")
+//		println(f"Free : $freeMem%.2f MB")
+//		println(f"Total: $totalMem%.2f MB")
+		println(f"Act. : $actualMem%.2f MB")
 	}
 
 	def tokenizeSurfaces(): Unit = {
@@ -37,7 +53,6 @@ object TrieTester {
 		}
 		bw.close()
 	}
-
 	def buildTrie(): Trie = {
 		println("Done")
 		val lines = Source.fromFile(new File("testoutput/surfaces-tokenized.wiki")).getLines()
@@ -67,17 +82,6 @@ object TrieTester {
 
 	def testTrie(trie: Trie): Unit = {
 
-	}
-
-	def printMemoryStatus(): Unit = {
-		val maxMem   = Runtime.getRuntime.maxMemory().toDouble / 1024 / 1024
-		val freeMem  = Runtime.getRuntime.freeMemory().toDouble / 1024 / 1024
-		val totalMem = Runtime.getRuntime.totalMemory().toDouble / 1024 / 1024
-		val actualMem = maxMem - (totalMem - freeMem)
-//		println(f"Max  : $maxMem%.2f MB")
-//		println(f"Free : $freeMem%.2f MB")
-//		println(f"Total: $totalMem%.2f MB")
-		println(f"Act. : $actualMem%.2f MB")
 	}
 
 }
