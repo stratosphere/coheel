@@ -19,7 +19,14 @@ object TrieTester {
 	}
 
 }
-
+object TrieRunner {
+	lazy val trie: Trie = {
+		print("Trieing .. ")
+		val trie = new TrieRunner().buildTrie()
+		println("Done.")
+		trie
+	}
+}
 class TrieRunner {
 
 	def printMemoryStatus(): Unit = {
@@ -30,7 +37,7 @@ class TrieRunner {
 //		println(f"Max  : $maxMem%.2f MB")
 //		println(f"Free : $freeMem%.2f MB")
 //		println(f"Total: $totalMem%.2f MB")
-		println(f"Act. : $actualMem%.2f MB")
+//		println(f"Act. : $actualMem%.2f MB")
 	}
 
 	def tokenizeSurfaces(): Unit = {
@@ -54,9 +61,7 @@ class TrieRunner {
 		bw.close()
 	}
 	def buildTrie(): Trie = {
-		println("Done")
-		val lines = Source.fromFile(new File("testoutput/surfaces-tokenized.wiki")).getLines()
-		println("Done")
+		val lines = Source.fromFile(new File("testoutput/tokenized-surfaces")).getLines()
 
 		var i = 0
 		val trie = new Trie()
@@ -67,7 +72,7 @@ class TrieRunner {
 					trie.add(tokens)
 				i += 1
 				if (i % 1000000 == 0) {
-					println(f"$i")
+//					println(f"$i")
 					printMemoryStatus()
 				}
 			} catch {
@@ -77,6 +82,7 @@ class TrieRunner {
 					System.exit(1)
 			}
 		}
+//		println("Built trie.")
 		trie
 	}
 

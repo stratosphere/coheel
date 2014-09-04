@@ -3,7 +3,7 @@ package de.uni_potsdam.hpi.coheel.datastructures
 import java.util
 import java.util.Map
 
-import gnu.trove.map.hash.TIntObjectHashMap
+case class ContainsResult(asEntry: Boolean, asIntermediateNode: Boolean)
 
 case class Trie() {
 
@@ -16,15 +16,13 @@ case class Trie() {
 	}
 	def add(tokenString: String): Unit = add(tokenString.split(' '))
 
-	def contains(tokens: Seq[String]): Boolean = {
+	def contains(tokens: Seq[String]): ContainsResult = {
 		if (tokens.isEmpty)
 			throw new RuntimeException("Cannot add empty tokens.")
 		rootNode.contains(tokens)
 	}
-	def contains(tokenString: String): Boolean = contains(tokenString.split(' '))
+	def contains(tokenString: String): ContainsResult = contains(tokenString.split(' '))
 }
-
-case class ContainsResult(asEntry: Boolean, asIntermediateNode: Boolean)
 
 case class TrieNode() {
 
@@ -56,14 +54,16 @@ case class TrieNode() {
 		}
 	}
 
-	def contains(tokens: Seq[String]): Boolean = {
+	def contains(tokens: Seq[String]): ContainsResult = {
+		// We found the correct node, now check if it is an entry
 		if (tokens.isEmpty)
-			isEntry
+			ContainsResult(isEntry, true)
+		// We reached an early end in the tree (no child node, even though we have more tokens to process)
 		else if (children == null)
-			false
+			ContainsResult(false, false)
 		else {
 			children.get(tokens.head.hashCode) match {
-				case null => false
+				case null => ContainsResult(false, false)
 				case trieNode => trieNode.contains(tokens.tail)
 			}
 		}

@@ -16,19 +16,32 @@ class TrieTest extends FunSuite {
 	test("single word queries work") {
 		val trie = newTrie()
 		trie.add("angela")
-		assert(trie.contains("angela"))
+		assert(trie.contains("angela").asEntry)
 	}
 
 	test("multiple word queries work") {
 		val trie = newTrie()
 		trie.add("angela merkel")
-		assert(trie.contains("angela merkel"))
+		assert(trie.contains("angela merkel").asEntry)
+	}
+
+	test("distinction between contains-asEntry and contains-asIntermediateNode") {
+		val trie = newTrie()
+		trie.add("angela dorothea merkel")
+
+		assert(trie.contains("angela").asIntermediateNode)
+		assert(trie.contains("angela dorothea").asIntermediateNode)
+		assert(trie.contains("angela dorothea merkel").asIntermediateNode)
+
+		assert(!trie.contains("angela").asEntry)
+		assert(!trie.contains("angela dorothea").asEntry)
+		assert(trie.contains("angela dorothea merkel").asEntry)
 	}
 
 	test("only actually added words are considered") {
 		val trie = newTrie()
 		trie.add("angela merkel")
-		assert(!trie.contains("angela"))
+		assert(!trie.contains("angela").asEntry)
 	}
 
 	test("multiple adds do not cause harm") {
@@ -36,22 +49,22 @@ class TrieTest extends FunSuite {
 		trie.add("angela merkel")
 		trie.add("angela merkel")
 		trie.add("angela merkel")
-		assert(!trie.contains("angela"))
-		assert(trie.contains("angela merkel"))
+		assert(!trie.contains("angela").asEntry)
+		assert(trie.contains("angela merkel").asEntry)
 	}
 
 	test("branching works at every level") {
 		val trie = newTrie()
 		trie.add("angela dorothea merkel")
 		trie.add("angela dorothea kanzler")
-		assert(!trie.contains("dorothea"))
-		assert(!trie.contains("angela dorothea"))
-		assert(trie.contains("angela dorothea merkel"))
+		assert(!trie.contains("dorothea").asEntry)
+		assert(!trie.contains("angela dorothea").asEntry)
+		assert(trie.contains("angela dorothea merkel").asEntry)
 	}
 
 	test("can go many levels deep") {
 		val trie = newTrie()
 		trie.add("ab cd ef gh ij kl")
-		assert(trie.contains("ab cd ef gh ij kl"))
+		assert(trie.contains("ab cd ef gh ij kl").asEntry)
 	}
 }
