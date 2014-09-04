@@ -100,8 +100,6 @@ object WikiPageReader {
 		if (isDisambiguationFromTitle)
 			true
 		else {
-			if (source.isEmpty)
-				throw new RuntimeException(pageTitle)
 			// in case of performance problems:
 			// disambiguation links are always (as seen so far) at the end of the text
 			// maybe this could be used to not scan the whole text

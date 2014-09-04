@@ -27,7 +27,7 @@ object ProgramHelper extends Logging {
 				List[WikiPage]().iterator
 			} else {
 				val wikiPages = WikiPageReader.xmlToWikiPages(pageSource)
-				wikiPages.filter { page => page.ns == 0}.map { wikiPage =>
+				wikiPages.filter { page => page.ns == 0 && page.source.nonEmpty }.map { wikiPage =>
 					try {
 						val extractor = new Extractor(wikiPage)
 						wikiPage.links = extractor.extractLinks()
