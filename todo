@@ -1,30 +1,14 @@
 ---------------------------------
 Run two local stratospheres at the same time.
 ---------------------------------
----------------------------------
 Remove wiktionary links.
 ---------------------------------
-Extract links directly when extracting wiki pages --> Performance improvement?
----------------------------------
 Copy data to HDFS
----------------------------------
-Redirect resolving:
-One pass to determine context links and redirects
-Join context links with redirects (context link.destination and redirect.source)
-Write new context links.
-Repeat.
 ---------------------------------
 Determine the following counts for NER:
 For each surface:
 a) # of documents, in which the mention occurs as a link
 b) # of documents, in which the mention does not occur as a link
 --> get percentage to use for NER later
-
-Problem is to determine b).
-Idea:
-For each word in mention:
- - stem
- - join with language model to find out documents
- - intersection
 --------------------------------
 RUN ON SERVER, DISTRIBUTED
