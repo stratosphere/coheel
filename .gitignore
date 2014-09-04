@@ -9,3 +9,4 @@ testoutput/
 src/test/resources/
 src/main/resources/application.conf
 run-output
+bin/file-concatenator/

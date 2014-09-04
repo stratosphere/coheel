@@ -36,8 +36,8 @@ object FlinkProgramRunner {
 		val processingTime = time {
 			// Dump downloaded from http://dumps.wikimedia.org/enwiki/latest/
 
-			val json = LocalExecutor.optimizerPlanAsJSON(program.getPlan())
-			FileUtils.writeStringToFile(new File("plan.json"), json, "UTF-8")
+//			val json = LocalExecutor.optimizerPlanAsJSON(program.getPlan())
+//			FileUtils.writeStringToFile(new File("plan.json"), json, "UTF-8")
 
 			LocalExecutor.execute(program)
 		} * 10.2 * 1024 /* full data dump size*/ / 42.7 /* test dump size */ / 60 /* in minutes */ / 60 /* in hours */
