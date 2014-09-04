@@ -10,7 +10,7 @@ import org.apache.flink.api.scala.{ScalaPlan, DataSource, TextFile}
 case class Surface(surfaceText: String, firstWord: String)
 case class LanguageModelEntry(doc: String, word: String)
 
-class SurfaceNotALinkCountProgram extends Program with ProgramDescription {
+class SurfaceNotALinkProgram extends Program with ProgramDescription {
 
 	val DOC_NUMBER = 6295
 
@@ -18,30 +18,10 @@ class SurfaceNotALinkCountProgram extends Program with ProgramDescription {
 
 	override def getPlan(args: String*): Plan = {
 
-		val wikiPages = ProgramHelper.getWikiPages
-
 		val actualSurfaceOccurrences = TextFile(actualSurfaceOccurrencesPath).map { line =>
 			val split = line.split('\t')
 			(split(0), split(1).toInt)
 		}
-//		var c = 0
-//		val actualSurfaceOccurrences = wikiPages.flatMap { wikiPage =>
-//			println(c)
-//			c += 1
-//			var surfaceCounts = List[(String, Int)]()
-//			val br = new BufferedReader(new FileReader("testoutput/surfaces.wiki"))
-//			val fullText = wikiPage.plainText
-//			var surface: String = br.readLine()
-//			while (surface != null) {
-//				TODO: Tokenize
-//				val count = if (fullText.contains(surface)) 1 else 0
-//				surfaceCounts = (surface, count) :: surfaceCounts
-//				surface = br.readLine()
-//			}
-//			surfaceCounts
-//		}
-//		.groupBy { case (surface, _) => surface }
-//		.reduce { case ((surface, c1), (_, c2)) => (surface, c1 + c2)}
 
 		val languageModels = DataSource(languageModelsPath, probInputFormat).map { case (doc, word, _) =>
 			LanguageModelEntry(doc, word)
@@ -57,7 +37,7 @@ class SurfaceNotALinkCountProgram extends Program with ProgramDescription {
 		.map { surface =>
 			val tokens = TextAnalyzer.tokenize(surface)
 				if (tokens.isEmpty)
-					// TODO: Print these, and look, why they are not tokenizable
+					// We do not want to link these anyways, because they are no entities
 					Surface(surface, surface)
 				else
 					Surface(surface, tokens.head)

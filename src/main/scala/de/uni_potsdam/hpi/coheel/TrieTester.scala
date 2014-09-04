@@ -12,7 +12,8 @@ object TrieTester {
 	def main(args: Array[String]): Unit = {
 		printMemoryStatus()
 //		tokenizeSurfaces()
-		buildTrie()
+		val trie = buildTrie()
+		testTrie(trie)
 		printMemoryStatus()
 	}
 
@@ -37,12 +38,9 @@ object TrieTester {
 		bw.close()
 	}
 
-	def buildTrie(): Unit = {
-//		println("Sleeping")
-//		Thread.sleep(10000)
+	def buildTrie(): Trie = {
 		println("Done")
 		val lines = Source.fromFile(new File("testoutput/surfaces-tokenized.wiki")).getLines()
-//		Thread.sleep(10000)
 		println("Done")
 
 		var i = 0
@@ -64,6 +62,11 @@ object TrieTester {
 					System.exit(1)
 			}
 		}
+		trie
+	}
+
+	def testTrie(trie: Trie): Unit = {
+
 	}
 
 	def printMemoryStatus(): Unit = {
