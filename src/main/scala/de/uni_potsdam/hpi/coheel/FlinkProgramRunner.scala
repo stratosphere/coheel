@@ -2,12 +2,13 @@ package de.uni_potsdam.hpi.coheel
 
 import java.io.File
 
-import eu.stratosphere.client.LocalExecutor
+import org.apache.flink.api.common.{ProgramDescription, Program}
+import org.apache.flink.client.LocalExecutor
+import org.apache.flink.runtime.iterative.task.IterationTailPactTask
 import org.apache.log4j.{Level, Logger}
 import com.typesafe.config.ConfigFactory
 import de.uni_potsdam.hpi.coheel.programs.{RedirectResolvingProgram, SurfaceNotALinkCountProgram, WikipediaTrainingProgram}
 import org.apache.commons.io.FileUtils
-import eu.stratosphere.api.common.{ProgramDescription, Program}
 
 object FlinkProgramRunner {
 
@@ -54,25 +55,25 @@ object FlinkProgramRunner {
 
 	def turnOffLogging(): Unit = {
 		List(
-			classOf[eu.stratosphere.nephele.taskmanager.TaskManager],
-			classOf[eu.stratosphere.nephele.execution.ExecutionStateTransition],
-			classOf[eu.stratosphere.nephele.client.JobClient],
-			classOf[eu.stratosphere.nephele.jobmanager.JobManager],
-			classOf[eu.stratosphere.nephele.jobmanager.scheduler.AbstractScheduler],
-			classOf[eu.stratosphere.nephele.instance.local.LocalInstanceManager],
-			classOf[eu.stratosphere.nephele.executiongraph.ExecutionGraph],
-			classOf[eu.stratosphere.compiler.PactCompiler],
-			classOf[eu.stratosphere.runtime.io.network.bufferprovider.GlobalBufferPool],
-			classOf[eu.stratosphere.runtime.io.network.netty.NettyConnectionManager],
-			classOf[eu.stratosphere.nephele.jobmanager.splitassigner.InputSplitAssigner],
-			classOf[eu.stratosphere.nephele.jobmanager.splitassigner.InputSplitManager],
-			classOf[eu.stratosphere.nephele.jobmanager.splitassigner.file.FileInputSplitList],
-			classOf[eu.stratosphere.nephele.jobmanager.scheduler.AbstractScheduler],
-			classOf[eu.stratosphere.pact.runtime.iterative.task.IterationTailPactTask[_, _]],
-			classOf[eu.stratosphere.pact.runtime.iterative.task.IterationSynchronizationSinkTask],
-			classOf[eu.stratosphere.pact.runtime.iterative.task.IterationIntermediatePactTask[_, _]],
-			classOf[eu.stratosphere.pact.runtime.iterative.task.IterationHeadPactTask[_, _, _, _]],
-			classOf[eu.stratosphere.pact.runtime.iterative.convergence.WorksetEmptyConvergenceCriterion]
+			classOf[org.apache.flink.runtime.taskmanager.TaskManager],
+			classOf[org.apache.flink.runtime.execution.ExecutionStateTransition],
+			classOf[org.apache.flink.runtime.client.JobClient],
+			classOf[org.apache.flink.runtime.jobmanager.JobManager],
+			classOf[org.apache.flink.runtime.instance.LocalInstanceManager],
+			classOf[org.apache.flink.runtime.executiongraph.ExecutionGraph],
+			classOf[org.apache.flink.compiler.PactCompiler],
+			classOf[org.apache.flink.runtime.instance.DefaultInstanceManager],
+			classOf[org.apache.flink.runtime.jobmanager.scheduler.DefaultScheduler],
+			classOf[org.apache.flink.runtime.io.network.bufferprovider.GlobalBufferPool],
+			classOf[org.apache.flink.runtime.io.network.netty.NettyConnectionManager],
+			classOf[org.apache.flink.runtime.jobmanager.splitassigner.InputSplitAssigner],
+			classOf[org.apache.flink.runtime.jobmanager.splitassigner.InputSplitManager],
+			classOf[org.apache.flink.runtime.jobmanager.splitassigner.file.FileInputSplitList],
+			classOf[org.apache.flink.runtime.iterative.task.IterationTailPactTask[_, _]],
+			classOf[org.apache.flink.runtime.iterative.task.IterationSynchronizationSinkTask],
+			classOf[org.apache.flink.runtime.iterative.task.IterationIntermediatePactTask[_, _]],
+			classOf[org.apache.flink.runtime.iterative.task.IterationHeadPactTask[_, _, _, _]],
+			classOf[org.apache.flink.runtime.iterative.convergence.WorksetEmptyConvergenceCriterion]
 		).foreach {
 			Logger.getLogger(_).setLevel(Level.WARN)
 		}

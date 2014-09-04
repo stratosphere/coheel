@@ -1,12 +1,11 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import eu.stratosphere.api.common.{Program, ProgramDescription, Plan}
-import eu.stratosphere.api.scala._
-import eu.stratosphere.api.scala.operators._
 import OutputFiles._
-import de.uni_potsdam.hpi.coheel.wiki.{Extractor, SwebleUtils, TextAnalyzer}
-import java.io.{FileReader, BufferedReader}
-import org.apache.commons.lang3.StringUtils
+import de.uni_potsdam.hpi.coheel.wiki.TextAnalyzer
+
+import org.apache.flink.api.common.{Plan, ProgramDescription, Program}
+import org.apache.flink.api.scala.operators.CsvOutputFormat
+import org.apache.flink.api.scala.{ScalaPlan, DataSource, TextFile}
 
 case class Surface(surfaceText: String, firstWord: String)
 case class LanguageModelEntry(doc: String, word: String)
@@ -72,9 +71,9 @@ class SurfaceNotALinkCountProgram extends Program with ProgramDescription {
 				if (docs.nonEmpty) {
 					surfaceIt.map { surface =>
 						(surface.surfaceText, surface.firstWord, docs.size)
-					}
+					}.toIterator
 				} else
-					List()
+					List().toIterator
 			}.join(actualSurfaceOccurrences)
 			.where { case (surfaceText, _, _) => surfaceText }
 			.isEqualTo { case (surfaceText, _) => surfaceText }
@@ -86,7 +85,7 @@ class SurfaceNotALinkCountProgram extends Program with ProgramDescription {
 					val threshold = thresholdPercent * DOC_NUMBER.toDouble / 100.0
 					val missedMentions = if (count > threshold) count else 0
 					(thresholdPercent, missedMentions)
-				}
+				}.toIterator
 			}.groupBy { case (threshold, _) =>
 				threshold
 			}.reduce { case ((t1, c1), (t2, c2)) => (t1, c1 + c2) }

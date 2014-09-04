@@ -1,7 +1,7 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import eu.stratosphere.api.scala.operators.{CsvInputFormat, CsvOutputFormat}
 import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
+import org.apache.flink.api.scala.operators.{CsvInputFormat, CsvOutputFormat}
 
 object OutputFiles {
 	lazy val currentPath = FlinkProgramRunner.config.getString("output_files_dir")
