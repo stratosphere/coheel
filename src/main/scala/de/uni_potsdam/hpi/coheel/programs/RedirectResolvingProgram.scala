@@ -23,10 +23,10 @@ class RedirectResolvingProgram extends Program with ProgramDescription {
 		}
 
 		def iterate(s: DataSet[ContextLink], ws: DataSet[ContextLink]): (DataSet[ContextLink], DataSet[ContextLink]) = {
-			val resolvedRedirects = ws.join(redirects)
-				.where { case ContextLink(from, origTo, to) => to }
-				.isEqualTo { case Redirect(from, to) => from }
-				.map { case (contextLink, redirect) =>
+			val resolvedRedirects = redirects.join(ws)
+				.where { case Redirect(from, to) => from }
+				.isEqualTo { case ContextLink(from, origTo, to) => to }
+				.map { case (redirect, contextLink) =>
 					ContextLink(contextLink.from, contextLink.origTo, redirect.to)
 				}
 			var shownDelimiter = false
