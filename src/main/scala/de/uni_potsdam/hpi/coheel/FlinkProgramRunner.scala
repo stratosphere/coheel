@@ -1,7 +1,10 @@
 package de.uni_potsdam.hpi.coheel
 
 
+import java.io.File
+
 import ch.qos.logback.core.Appender
+import org.apache.commons.io.FileUtils
 import org.apache.flink.api.common.{ProgramDescription, Program}
 import org.apache.flink.client.LocalExecutor
 import org.apache.log4j.{ConsoleAppender, Level, Logger}
@@ -37,8 +40,8 @@ object FlinkProgramRunner {
 		val processingTime = time {
 			// Dump downloaded from http://dumps.wikimedia.org/enwiki/latest/
 
-//			val json = LocalExecutor.optimizerPlanAsJSON(program.getPlan())
-//			FileUtils.writeStringToFile(new File("plan.json"), json, "UTF-8")
+			val json = LocalExecutor.optimizerPlanAsJSON(program.getPlan())
+			FileUtils.writeStringToFile(new File("plan.json"), json, "UTF-8")
 
 			LocalExecutor.execute(program)
 		} * 10.2 * 1024 /* full data dump size*/ / 42.7 /* test dump size */ / 60 /* in minutes */ / 60 /* in hours */

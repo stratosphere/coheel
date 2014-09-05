@@ -46,8 +46,6 @@ object WikiPageReader {
 		new Iterator[WikiPage] {
 			var hasMorePages = true
 
-			// XML related
-//			val reader = new BufferedReader(new StringReader(xml))
 			val streamReader = factory.createXMLStreamReader(reader)
 
 			// Values for the current page
