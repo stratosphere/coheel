@@ -3,15 +3,17 @@
 if [ $# -eq 0 ]
 then
 	echo "Usage:"
-	echo "  bin/run [dataset] [program]"
+	echo "  bin/run [dataset] [program] [params]"
 	echo "Available datasets:"
-	echo "  - full (Results from the last run)"
-	echo "  - full_run (Results from a run on the full dataset)"
-	echo "  - chunk"
+	echo "    full (Results from the last run)"
+	echo "    full_run (Results from a run on the full dataset)"
+	echo "    chunk"
 	echo "Available programs:"
-	echo "  - main"
-	echo "  - surfaces"
-	echo "  - redirects"
+	echo "    main"
+	echo "    surfaces"
+	echo "    redirects"
+	echo "Available params:"
+	echo "    -log: turns on Flink logging"
 	exit
 fi
 
