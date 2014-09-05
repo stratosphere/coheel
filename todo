@@ -12,3 +12,5 @@ b) # of documents, in which the mention does not occur as a link
 --> get percentage to use for NER later
 --------------------------------
 RUN ON SERVER, DISTRIBUTED
+--------------------------------
+Set links to empty string?
