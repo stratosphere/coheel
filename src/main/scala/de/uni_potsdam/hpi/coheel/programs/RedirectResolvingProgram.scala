@@ -5,8 +5,9 @@ import org.apache.flink.api.common.{Plan, ProgramDescription, Program}
 import org.apache.flink.api.scala.operators.CsvOutputFormat
 import org.apache.flink.api.scala.{ScalaPlan, DataSet, TextFile}
 import DataSetNaming._
+import org.slf4s.Logging
 
-class RedirectResolvingProgram extends Program with ProgramDescription {
+class RedirectResolvingProgram extends Program with ProgramDescription with Logging {
 
 	case class ContextLink(from: String, origTo: String, to: String)
 	case class Redirect(from: String, to: String)
@@ -30,7 +31,7 @@ class RedirectResolvingProgram extends Program with ProgramDescription {
 				.isEqualTo { case ContextLink(from, origTo, to) => to }
 				.map { case (redirect, contextLink) =>
 					val cl = ContextLink(contextLink.from, contextLink.origTo, redirect.to)
-					println(cl)
+					log.info(cl.toString)
 					cl
 				}.name("Resolved-Redirects-From-Iteration")
 			var shownDelimiter = false
@@ -39,13 +40,6 @@ class RedirectResolvingProgram extends Program with ProgramDescription {
 				.isEqualTo { cl => (cl.from, cl.origTo) }
 				.map { (orig, resolved) =>
 					resolved
-				}.filter { resolved =>
-					if (!shownDelimiter) {
-						println("#########NEXT ITERATION###########")
-						shownDelimiter = true
-					}
-					println("Resolved: " + resolved)
-					true
 				}.name("Useless-Join-Still-Resolved-Redirects-From-Iteration")
 			(result, result)
 		}

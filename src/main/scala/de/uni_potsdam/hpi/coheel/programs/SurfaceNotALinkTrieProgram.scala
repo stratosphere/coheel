@@ -8,24 +8,23 @@ import org.apache.flink.api.scala.ScalaPlan
 import org.apache.flink.api.scala.operators.CsvOutputFormat
 import OutputFiles._
 import DataSetNaming._
+import org.slf4s.Logging
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
-class SurfaceNotALinkTrieProgram extends Program with ProgramDescription {
-
+class SurfaceNotALinkTrieProgram extends Program with ProgramDescription with Logging {
 	// prepare the trie
 	TrieBuilder.build()
 
 	override def getDescription = "Counting how often a surface occurs, but not as a link. This approach uses a trie."
 
 	override def getPlan(args: String*): Plan = {
-
 		val wikiPages = ProgramHelper.getWikiPages(1)
 
 		var c = 0
 		val notALinkCounts = wikiPages.flatMap { wikiPage =>
-			println(f"$c%6s ${wikiPage.pageTitle}")
+			log.info(f"$c%6s ${wikiPage.pageTitle}")
 			c += 1
 			val tokens = TextAnalyzer.tokenize(wikiPage.plainText).toArray
 

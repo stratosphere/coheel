@@ -87,8 +87,7 @@ object FlinkProgramRunner extends Logging {
 			val logger = Logger.getLogger(logClass)
 			logger.setLevel(Level.WARN)
 			logger.getAllAppenders.foreach { appender =>
-				println("--")
-				println(appender.getClass)
+				log.info("Appender-Class: " + appender.getClass)
 			}
 		}
 	}

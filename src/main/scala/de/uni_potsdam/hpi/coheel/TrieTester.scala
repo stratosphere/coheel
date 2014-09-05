@@ -4,6 +4,7 @@ import java.io.{FileWriter, BufferedWriter, File}
 
 import de.uni_potsdam.hpi.coheel.datastructures.Trie
 import de.uni_potsdam.hpi.coheel.wiki.TextAnalyzer
+import org.slf4s.Logging
 
 import scala.io.Source
 
@@ -27,17 +28,14 @@ object TrieBuilder {
 		new TrieBuilder().buildTrie()
 	}
 }
-class TrieBuilder {
+class TrieBuilder extends Logging {
 
 	def printMemoryStatus(): Unit = {
 		val maxMem   = Runtime.getRuntime.maxMemory().toDouble / 1024 / 1024
 		val freeMem  = Runtime.getRuntime.freeMemory().toDouble / 1024 / 1024
 		val totalMem = Runtime.getRuntime.totalMemory().toDouble / 1024 / 1024
 		val actualMem = maxMem - (totalMem - freeMem)
-//		println(f"Max  : $maxMem%.2f MB")
-//		println(f"Free : $freeMem%.2f MB")
-//		println(f"Total: $totalMem%.2f MB")
-		println(f"Act. : $actualMem%.2f MB")
+		log.info(f"Act. : $actualMem%.2f MB")
 	}
 
 	def tokenizeSurfaces(): Unit = {
@@ -54,7 +52,7 @@ class TrieBuilder {
 			}
 			i += 1
 			if (i % 1000000 == 0) {
-				println(f"$i")
+				log.info(f"$i")
 				printMemoryStatus()
 			}
 		}
@@ -72,17 +70,17 @@ class TrieBuilder {
 					trie.add(tokens)
 				i += 1
 				if (i % 1000000 == 0) {
-//					println(f"$i")
+//					log.info(f"$i")
 //					printMemoryStatus()
 				}
 			} catch {
 				case e: OutOfMemoryError =>
-					println(e)
-					println(i)
+					log.error(e.toString)
+					log.error(i.toString)
 					System.exit(1)
 			}
 		}
-		println("Built trie.")
+		log.info("Built trie.")
 		trie
 	}
 

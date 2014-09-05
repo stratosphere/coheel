@@ -3,6 +3,7 @@ package de.uni_potsdam.hpi.coheel.wiki
 import java.io.{Reader, StringReader, BufferedReader}
 import javax.xml.stream.{XMLStreamConstants, XMLInputFactory}
 import org.apache.commons.lang3.StringEscapeUtils
+import org.slf4s.Logging
 
 
 /**
@@ -33,7 +34,7 @@ case class WikiPage(pageTitle: String, ns: Int, redirect: String, var plainText:
 	var source: String = _
 }
 
-object WikiPageReader {
+object WikiPageReader extends Logging {
 
 	lazy val factory = XMLInputFactory.newInstance()
 	var i = 0
@@ -76,7 +77,6 @@ object WikiPageReader {
 				hasMorePages = streamReader.hasNext
 			}
 
-
 			def hasNext = hasMorePages
 			def next(): WikiPage = {
 				readNextPage()
@@ -95,7 +95,6 @@ object WikiPageReader {
 				wikiPage
 			}
 		}
-
 	}
 
 	def checkDisambiguation(source: String, pageTitle: String): Boolean = {
@@ -111,7 +110,7 @@ object WikiPageReader {
 				// check whether the regex sometimes accidentially matches too much text
 				.map { s =>
 				if (s.length > 200)
-					println(s"Disambiguation regex returns long result: $s.")
+					log.warn(s"Disambiguation regex returns long result: $s.")
 				s
 			}
 				.map(_.toLowerCase)
