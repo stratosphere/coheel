@@ -1,6 +1,6 @@
 package de.uni_potsdam.hpi.coheel.wiki
 
-import java.io.{StringReader, BufferedReader}
+import java.io.{Reader, StringReader, BufferedReader}
 import javax.xml.stream.{XMLStreamConstants, XMLInputFactory}
 import org.apache.commons.lang3.StringEscapeUtils
 
@@ -37,12 +37,17 @@ object WikiPageReader {
 
 	lazy val factory = XMLInputFactory.newInstance()
 	var i = 0
-	def xmlToWikiPages(xml: String): Iterator[WikiPage] = {
+	def xmlToWikiPages(s: String): Iterator[WikiPage] = {
+		val reader = new BufferedReader(new StringReader(s))
+		xmlToWikiPages(reader)
+	}
+
+	def xmlToWikiPages(reader: Reader): Iterator[WikiPage] = {
 		new Iterator[WikiPage] {
 			var hasMorePages = true
 
 			// XML related
-			val reader = new BufferedReader(new StringReader(xml))
+//			val reader = new BufferedReader(new StringReader(xml))
 			val streamReader = factory.createXMLStreamReader(reader)
 
 			// Values for the current page
