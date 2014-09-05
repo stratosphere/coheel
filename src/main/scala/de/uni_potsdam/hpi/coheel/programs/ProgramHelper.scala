@@ -6,6 +6,7 @@ import scala.io.Source
 import de.uni_potsdam.hpi.coheel.wiki.{Extractor, WikiPage, WikiPageReader}
 import java.io.File
 import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
+import DataSetNaming._
 
 /**
  * Helper object for reused parts of Flink programs.
@@ -17,12 +18,12 @@ object ProgramHelper extends Logging {
 	lazy val wikipediaFilesPath = s"file://${dumpFile.getAbsolutePath}"
 
 	def getWikiPages(count: Int = -1): DataSet[WikiPage] = {
-		val input = TextFile(wikipediaFilesPath)
+		val input = TextFile(wikipediaFilesPath).name("Input-Text-Files")
 		input.map { file =>
 			log.info(file)
 			val pageSource = Source.fromFile(s"${dumpFile.getAbsoluteFile.getParent}/$file").mkString
 			pageSource
-		}.flatMap { pageSource =>
+		}.name("Page-Sources").flatMap { pageSource =>
 			if (pageSource.startsWith("#")) {
 				List[WikiPage]().iterator
 			} else {
@@ -41,6 +42,6 @@ object ProgramHelper extends Logging {
 					wikiPage
 				}
 			}
-		}
+		}.name("Wiki-Pages")
 	}
 }

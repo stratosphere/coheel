@@ -54,7 +54,7 @@ class SurfaceNotALinkTrieProgram extends Program with ProgramDescription {
 				}
 			}
 			resultSurfaces.toIterator
-		}
+		}.name("Resulting-Not-A-Link-Surfaces")
 
 		val notALinkCountOutput = notALinkCounts.write(surfaceNotALinkPath,
 			CsvOutputFormat[String]("\n", "\t"))
