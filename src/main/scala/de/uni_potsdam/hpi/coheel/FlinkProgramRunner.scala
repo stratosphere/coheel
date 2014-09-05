@@ -11,9 +11,10 @@ import org.apache.flink.client.LocalExecutor
 import org.apache.log4j.{ConsoleAppender, Level, Logger}
 import com.typesafe.config.ConfigFactory
 import de.uni_potsdam.hpi.coheel.programs.{SurfaceNotALinkTrieProgram, RedirectResolvingProgram, SurfaceNotALinkProgram, WikipediaTrainingProgram}
+import org.slf4s.Logging
 import scala.collection.JavaConversions._
 
-object FlinkProgramRunner {
+object FlinkProgramRunner extends Logging {
 
 	val config   = ConfigFactory.load()
 	LocalExecutor.setOverwriteFilesByDefault(true)
@@ -36,28 +37,28 @@ object FlinkProgramRunner {
 	}
 
 	def runProgram(program: Program with ProgramDescription): Unit = {
-		println(StringUtils.repeat('#', 140))
-		println("# " + StringUtils.center(program.getDescription, 136) + " #")
-		println("# " + StringUtils.rightPad("Dataset: " + config.getString("name"), 136) + " #")
-		println(StringUtils.repeat('#', 140))
+		log.info(StringUtils.repeat('#', 140))
+		log.info("# " + StringUtils.center(program.getDescription, 136) + " #")
+		log.info("# " + StringUtils.rightPad("Dataset: " + config.getString("name"), 136) + " #")
+		log.info(StringUtils.repeat('#', 140))
 		val processingTime = time {
 			// Dump downloaded from http://dumps.wikimedia.org/enwiki/latest/
 
 			val json = LocalExecutor.optimizerPlanAsJSON(program.getPlan())
 			FileUtils.writeStringToFile(new File("plan.json"), json, "UTF-8")
 
-			println("Starting ..")
+			log.info("Starting ..")
 			LocalExecutor.execute(program)
 		} * 10.2 * 1024 /* full data dump size*/ / 42.7 /* test dump size */ / 60 /* in minutes */ / 60 /* in hours */
 		if (config.getBoolean("print_approximation"))
-			println(f"Approximately $processingTime%.2f hours on the full dump, one machine.")
+			log.info(f"Approximately $processingTime%.2f hours on the full dump, one machine.")
 	}
 	def time[R](block: => R): Double = {
 		val start = System.nanoTime()
 		val result = block
 		val end = System.nanoTime()
 		val time = (end - start) / 1000 / 1000 / 1000
-		println("Took " + time + " s.")
+		log.info("Took " + time + " s.")
 		time
 	}
 

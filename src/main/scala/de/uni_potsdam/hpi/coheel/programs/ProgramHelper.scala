@@ -24,7 +24,7 @@ object ProgramHelper extends Logging {
 	def getWikiPages(count: Int = -1): DataSet[WikiPage] = {
 		val input = TextFile(wikipediaFilesPath).name("Input-Text-Files")
 		input.flatMap { fileName =>
-			log.info(fileName)
+			log.info(s"Reading $fileName")
 			val file= new File(s"${dumpFile.getAbsoluteFile.getParent}/$fileName")
 			val wikiPages = WikiPageReader.xmlToWikiPages(getReader(file))
 			(if (count == -1) wikiPages else wikiPages.take(count))
