@@ -1,6 +1,6 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import org.apache.flink.api.scala.{TextFile, DataSet}
+import eu.stratosphere.api.scala.{DataSet, TextFile}
 import org.slf4s.Logging
 import scala.io.Source
 import de.uni_potsdam.hpi.coheel.wiki.{Extractor, WikiPage, WikiPageReader}

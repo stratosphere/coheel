@@ -3,11 +3,11 @@ package de.uni_potsdam.hpi.coheel.programs
 import de.uni_potsdam.hpi.coheel.TrieBuilder
 import de.uni_potsdam.hpi.coheel.datastructures.ContainsResult
 import de.uni_potsdam.hpi.coheel.wiki.TextAnalyzer
-import org.apache.flink.api.common.{Plan, ProgramDescription, Program}
-import org.apache.flink.api.scala.ScalaPlan
-import org.apache.flink.api.scala.operators.CsvOutputFormat
 import OutputFiles._
 import DataSetNaming._
+import eu.stratosphere.api.common.{Plan, ProgramDescription, Program}
+import eu.stratosphere.api.scala.ScalaPlan
+import eu.stratosphere.api.scala.operators.CsvOutputFormat
 import org.slf4s.Logging
 
 import scala.collection.mutable

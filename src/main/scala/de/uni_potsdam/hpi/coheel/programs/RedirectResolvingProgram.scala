@@ -1,11 +1,11 @@
 package de.uni_potsdam.hpi.coheel.programs
 
+import eu.stratosphere.api.common.{Program, Plan, ProgramDescription}
+import eu.stratosphere.api.scala.{DataSet, TextFile, ScalaPlan, DataSource}
 import OutputFiles._
-import org.apache.flink.api.common.{Plan, ProgramDescription, Program}
-import org.apache.flink.api.scala.operators.CsvOutputFormat
-import org.apache.flink.api.scala.{ScalaPlan, DataSet, TextFile}
 import DataSetNaming._
 import org.slf4s.Logging
+import eu.stratosphere.api.scala.operators.CsvOutputFormat
 
 class RedirectResolvingProgram extends Program with ProgramDescription with Logging {
 

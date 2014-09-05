@@ -1,6 +1,6 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import org.apache.flink.api.scala.DataSet
+import eu.stratosphere.api.scala.DataSet
 
 class DataSetWithName[T](ds: DataSet[T]) {
 

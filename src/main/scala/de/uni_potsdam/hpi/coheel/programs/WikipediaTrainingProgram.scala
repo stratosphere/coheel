@@ -1,13 +1,15 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import org.apache.flink.api.common.{Plan, Program, ProgramDescription}
-import org.apache.flink.api.scala._
+import eu.stratosphere.api.scala._
+import eu.stratosphere.api.scala.operators._
+import eu.stratosphere.api.common.{Program, ProgramDescription, Plan}
 import de.uni_potsdam.hpi.coheel.wiki._
 import de.uni_potsdam.hpi.coheel.wiki.Link
 import DataSetNaming.toDataSetWithName
 
 import OutputFiles._
 import org.slf4s.Logging
+import java.io.File
 
 
 class WikipediaTrainingProgram()
@@ -130,7 +132,7 @@ class WikipediaTrainingProgram()
 
 	def linksFrom(pages: DataSet[WikiPage]): DataSet[Link] = {
 		pages.flatMap { wikiPage =>
-			wikiPage.links.toIterator
+			wikiPage.links
 		}
 	}
 
@@ -145,7 +147,7 @@ class WikipediaTrainingProgram()
 		} flatMap { wikiPage =>
 			val tokens = TextAnalyzer.tokenize(wikiPage.plainText).map { token =>
 				Word(wikiPage.pageTitle, token)
-			}.toIterator
+			}
 			tokens
 		}
 
