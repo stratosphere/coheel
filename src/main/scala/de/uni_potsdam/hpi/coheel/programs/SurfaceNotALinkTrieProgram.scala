@@ -1,6 +1,6 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import de.uni_potsdam.hpi.coheel.TrieRunner
+import de.uni_potsdam.hpi.coheel.TrieBuilder
 import de.uni_potsdam.hpi.coheel.datastructures.ContainsResult
 import de.uni_potsdam.hpi.coheel.wiki.TextAnalyzer
 import org.apache.flink.api.common.{Plan, ProgramDescription, Program}
@@ -13,8 +13,10 @@ import scala.collection.mutable.ListBuffer
 
 class SurfaceNotALinkTrieProgram extends Program with ProgramDescription {
 
-	override def getDescription = "Counting how often a surface occurs, but not as a link. This approach uses a trie."
+	// prepare the trie
+	TrieBuilder.build()
 
+	override def getDescription = "Counting how often a surface occurs, but not as a link. This approach uses a trie."
 
 	override def getPlan(args: String*): Plan = {
 
@@ -31,7 +33,7 @@ class SurfaceNotALinkTrieProgram extends Program with ProgramDescription {
 			// each word must be checked, if it is a surface somewhere
 			for (i <- 0 until tokens.size) {
 				val currentCheck = ListBuffer[String](tokens(i))
-				var containsResult = TrieRunner.trie.contains(currentCheck)
+				var containsResult = TrieBuilder.trie.contains(currentCheck)
 
 				var j = 1
 				// for each word, go so far until it is no intermediate node anymore
@@ -42,7 +44,7 @@ class SurfaceNotALinkTrieProgram extends Program with ProgramDescription {
 					// expand current window, if possible
 					if (i + j < tokens.size) {
 						currentCheck.append(tokens(i + j))
-						containsResult = TrieRunner.trie.contains(currentCheck)
+						containsResult = TrieBuilder.trie.contains(currentCheck)
 						j += 1
 					} else {
 						// if we reached the end of the text, we need to break

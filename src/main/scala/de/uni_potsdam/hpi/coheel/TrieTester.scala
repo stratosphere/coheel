@@ -10,24 +10,24 @@ import scala.io.Source
 object TrieTester {
 
 	def main(args: Array[String]): Unit = {
-		val trieRunner = new TrieRunner
-		trieRunner.printMemoryStatus()
-//		trieRunner.tokenizeSurfaces()
-		val trie = trieRunner.buildTrie()
-		trieRunner.testTrie(trie)
-		trieRunner.printMemoryStatus()
+		val trieBuilder = new TrieBuilder
+		trieBuilder.printMemoryStatus()
+//		trieBuilder.tokenizeSurfaces()
+		val trie = trieBuilder.buildTrie()
+		trieBuilder.printMemoryStatus()
 	}
 
 }
-object TrieRunner {
+object TrieBuilder {
+
+	// builds the trie by accessing the lazy value
+	def build(): Unit = trie
+
 	lazy val trie: Trie = {
-		print("Trieing .. ")
-		val trie = new TrieRunner().buildTrie()
-		println("Done.")
-		trie
+		new TrieBuilder().buildTrie()
 	}
 }
-class TrieRunner {
+class TrieBuilder {
 
 	def printMemoryStatus(): Unit = {
 		val maxMem   = Runtime.getRuntime.maxMemory().toDouble / 1024 / 1024
@@ -37,7 +37,7 @@ class TrieRunner {
 //		println(f"Max  : $maxMem%.2f MB")
 //		println(f"Free : $freeMem%.2f MB")
 //		println(f"Total: $totalMem%.2f MB")
-//		println(f"Act. : $actualMem%.2f MB")
+		println(f"Act. : $actualMem%.2f MB")
 	}
 
 	def tokenizeSurfaces(): Unit = {
@@ -73,7 +73,7 @@ class TrieRunner {
 				i += 1
 				if (i % 1000000 == 0) {
 //					println(f"$i")
-					printMemoryStatus()
+//					printMemoryStatus()
 				}
 			} catch {
 				case e: OutOfMemoryError =>
@@ -82,12 +82,8 @@ class TrieRunner {
 					System.exit(1)
 			}
 		}
-//		println("Built trie.")
+		println("Built trie.")
 		trie
-	}
-
-	def testTrie(trie: Trie): Unit = {
-
 	}
 
 }
