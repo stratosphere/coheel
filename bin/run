@@ -19,7 +19,7 @@ fi
 
 if [ -e "src/main/resources/$1.conf" ]
 then
-	rm run-output 2> /dev/null
+	rm run-output compile-output 2> /dev/null
 	date --rfc-3339=seconds | tee -a run-output
 	cp src/main/resources/$1.conf src/main/resources/application.conf
 	echo "Compiling .."
