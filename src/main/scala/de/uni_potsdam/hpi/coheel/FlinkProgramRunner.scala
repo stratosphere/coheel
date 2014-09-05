@@ -12,7 +12,6 @@ import org.apache.commons.io.FileUtils
 object FlinkProgramRunner {
 
 	val config   = ConfigFactory.load()
-	turnOffLogging()
 	LocalExecutor.setOverwriteFilesByDefault(true)
 
 	def main(args: Array[String]): Unit = {
@@ -21,6 +20,9 @@ object FlinkProgramRunner {
 		// 4379 pages in the first chunk dump
 
 		val programName = if (args.nonEmpty) args(0) else "main"
+
+		if (!args.contains("-log"))
+			turnOffLogging()
 
 		val program = Map(
 			"main" -> new WikipediaTrainingProgram,

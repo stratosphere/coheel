@@ -7,6 +7,7 @@ import org.apache.flink.api.common.{Plan, ProgramDescription, Program}
 import org.apache.flink.api.scala.ScalaPlan
 import org.apache.flink.api.scala.operators.CsvOutputFormat
 import OutputFiles._
+import DataSetNaming._
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
