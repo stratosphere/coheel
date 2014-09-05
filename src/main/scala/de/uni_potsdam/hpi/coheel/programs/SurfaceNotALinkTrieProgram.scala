@@ -20,7 +20,7 @@ class SurfaceNotALinkTrieProgram extends Program with ProgramDescription with Lo
 	override def getDescription = "Counting how often a surface occurs, but not as a link. This approach uses a trie."
 
 	override def getPlan(args: String*): Plan = {
-		val wikiPages = ProgramHelper.getWikiPages(1)
+		val wikiPages = ProgramHelper.getWikiPages()
 
 		var c = 0
 		val notALinkCounts = wikiPages.flatMap { wikiPage =>
