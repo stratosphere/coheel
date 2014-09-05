@@ -4,6 +4,7 @@ import OutputFiles._
 import org.apache.flink.api.common.{Plan, ProgramDescription, Program}
 import org.apache.flink.api.scala.operators.CsvOutputFormat
 import org.apache.flink.api.scala.{ScalaPlan, DataSet, TextFile}
+import DataSetNaming._
 
 class RedirectResolvingProgram extends Program with ProgramDescription {
 
@@ -16,19 +17,22 @@ class RedirectResolvingProgram extends Program with ProgramDescription {
 		val redirects    = TextFile(redirectPath).map { line =>
 			val split = line.split('\t')
 			Redirect(split(0), split(1))
-		}
+		}.name("Redirects")
+
 		val contextLinks = TextFile(contextLinkProbsPath).map { line =>
 			val split = line.split('\t')
 			ContextLink(split(0), split(1), split(1))
-		}
+		}.name("Context-Links")
 
 		def iterate(s: DataSet[ContextLink], ws: DataSet[ContextLink]): (DataSet[ContextLink], DataSet[ContextLink]) = {
 			val resolvedRedirects = redirects.join(ws)
 				.where { case Redirect(from, to) => from }
 				.isEqualTo { case ContextLink(from, origTo, to) => to }
 				.map { case (redirect, contextLink) =>
-					ContextLink(contextLink.from, contextLink.origTo, redirect.to)
-				}
+					val cl = ContextLink(contextLink.from, contextLink.origTo, redirect.to)
+					println(cl)
+					cl
+				}.name("Resolved-Redirects-From-Iteration")
 			var shownDelimiter = false
 			val result = s.join(resolvedRedirects)
 				.where { cl => (cl.from, cl.origTo) }
@@ -42,12 +46,14 @@ class RedirectResolvingProgram extends Program with ProgramDescription {
 					}
 					println("Resolved: " + resolved)
 					true
-				}
+				}.name("Useless-Join-Still-Resolved-Redirects-From-Iteration")
 			(result, result)
 		}
 		val resolvedRedirects = contextLinks
 			.iterateWithDelta(contextLinks, { cl => (cl.from, cl.origTo) }, iterate, 10)
+			.name("Resolved-Redirects")
 			.map { cl => (cl.from, cl.to) }
+			.name("Final-Redirect-Result")
 
 		val surfaceLinkOccurrenceOutput = resolvedRedirects.write(redirectResolvPath,
 			CsvOutputFormat[(String, String)]("\n", "\t"))
