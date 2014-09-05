@@ -25,11 +25,11 @@ object FlinkProgramRunner {
 			turnOffLogging()
 
 		val program = Map(
-			"main" -> new WikipediaTrainingProgram,
-			"surfaces" -> new SurfaceNotALinkProgram,
-			"trie" -> new SurfaceNotALinkTrieProgram,
-			"redirects" -> new RedirectResolvingProgram)(programName)
-		runProgram(program)
+			"main" -> classOf[WikipediaTrainingProgram],
+			"surfaces" -> classOf[SurfaceNotALinkProgram],
+			"trie" -> classOf[SurfaceNotALinkTrieProgram],
+			"redirects" -> classOf[RedirectResolvingProgram])(programName)
+		runProgram(program.newInstance())
 	}
 
 	def runProgram(program: Program with ProgramDescription): Unit = {
