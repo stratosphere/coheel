@@ -8,5 +8,5 @@ testoutput/
 *.pdf
 src/test/resources/
 src/main/resources/application.conf
-run-output
+/*-output
 bin/file-concatenator/
