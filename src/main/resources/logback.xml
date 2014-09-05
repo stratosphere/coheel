@@ -1,10 +1,11 @@
 <configuration>
 	<appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.out</target>
 		<encoder>
-			<pattern>[%-5level] - %d{HH:mm} - %msg%n</pattern>
+			<pattern>[%-5level] - %d{d.M.Y-HH:mm} - %msg%n</pattern>
 		</encoder>
 	</appender>
-	<logger level="ERROR" name="eu.stratosphere">
+	<logger level="ERROR" name="org.apache.flink">
         <appender-ref ref="Console" />
 	</logger>
 	<root level="INFO">

@@ -1,13 +1,13 @@
 package de.uni_potsdam.hpi.coheel
 
-import java.io.File
 
+import ch.qos.logback.core.Appender
 import org.apache.flink.api.common.{ProgramDescription, Program}
 import org.apache.flink.client.LocalExecutor
-import org.apache.log4j.{Level, Logger}
+import org.apache.log4j.{ConsoleAppender, Level, Logger}
 import com.typesafe.config.ConfigFactory
 import de.uni_potsdam.hpi.coheel.programs.{SurfaceNotALinkTrieProgram, RedirectResolvingProgram, SurfaceNotALinkProgram, WikipediaTrainingProgram}
-import org.apache.commons.io.FileUtils
+import scala.collection.JavaConversions._
 
 object FlinkProgramRunner {
 
@@ -75,8 +75,13 @@ object FlinkProgramRunner {
 			classOf[org.apache.flink.runtime.iterative.task.IterationIntermediatePactTask[_, _]],
 			classOf[org.apache.flink.runtime.iterative.task.IterationHeadPactTask[_, _, _, _]],
 			classOf[org.apache.flink.runtime.iterative.convergence.WorksetEmptyConvergenceCriterion]
-		).foreach {
-			Logger.getLogger(_).setLevel(Level.WARN)
+		).foreach { logClass =>
+			val logger = Logger.getLogger(logClass)
+			logger.setLevel(Level.WARN)
+			logger.getAllAppenders.foreach { appender =>
+				println("--")
+				println(appender.getClass)
+			}
 		}
 	}
 }
