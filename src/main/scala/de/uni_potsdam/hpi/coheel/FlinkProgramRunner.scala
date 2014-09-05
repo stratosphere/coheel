@@ -17,7 +17,6 @@ object FlinkProgramRunner {
 	def main(args: Array[String]): Unit = {
 		// -Xms3g -Xmx7g
 		// -verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails
-		// 4379 pages in the first chunk dump
 
 		val programName = if (args.nonEmpty) args(0) else "main"
 

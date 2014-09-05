@@ -23,7 +23,7 @@ then
 	cp src/main/resources/$1.conf src/main/resources/application.conf
 	rm run-output 2> /dev/null
 	echo "------------"
-	mvn -q scala:run -DaddArgs=$2|$3 | tee run-output
+	mvn -q scala:run -DaddArgs="$2|$3" | tee run-output
 	echo "------------"
 	date --rfc-3339=seconds
 else
