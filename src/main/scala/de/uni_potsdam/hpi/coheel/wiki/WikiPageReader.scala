@@ -108,7 +108,7 @@ object WikiPageReader {
 				// check whether the regex sometimes accidentially matches too much text
 				.map { s =>
 				if (s.length > 200)
-					throw new RuntimeException(s"Disambiguation regex went wrong on $s.")
+					println(s"Disambiguation regex returns long result: $s.")
 				s
 			}
 				.map(_.toLowerCase)
