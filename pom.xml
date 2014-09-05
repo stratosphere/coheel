@@ -112,7 +112,7 @@
 							<id>Wikipedia Training Task</id>
 							<mainClass>de.uni_potsdam.hpi.coheel.FlinkProgramRunner</mainClass>
 							<jvmArgs>
-								<jvmArg>-Xms3g</jvmArg>
+								<jvmArg>-Xms7g</jvmArg>
 								<jvmArg>-Xmx7g</jvmArg>
 							</jvmArgs>
 						</launcher>
