@@ -33,7 +33,9 @@ class WikipediaTrainingProgram()
 		}.write(textDumpsPath, textFormat)
 
 		val plan = new ScalaPlan(
-			 textDumps :: languageModelPlans ::: plans)
+//			 textDumps ::
+			 languageModelPlans :::
+			 plans)
 
 		plan
 	}
