@@ -10,7 +10,7 @@ then
 	echo "    chunk"
 	echo "Available programs:"
 	echo "    main"
-	echo "    surfaces"
+	echo "    trie"
 	echo "    redirects"
 	echo "Available params:"
 	echo "    -log: turns on Flink logging"
