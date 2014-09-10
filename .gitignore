@@ -2,7 +2,7 @@ target/
 *.iws
 out/
 .idea/
-testoutput/
+output/
 *.aux
 *.log
 *.pdf

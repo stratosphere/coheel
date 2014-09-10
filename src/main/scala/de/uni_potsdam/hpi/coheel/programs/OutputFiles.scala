@@ -6,16 +6,15 @@ import org.apache.flink.api.scala.operators.{CsvInputFormat, CsvOutputFormat}
 object OutputFiles {
 	lazy val currentPath = FlinkProgramRunner.config.getString("output_files_dir")
 
-	lazy val surfaceProbsPath          = s"file://$currentPath/testoutput/surface-probs.wiki"
-	lazy val contextLinkProbsPath      = s"file://$currentPath/testoutput/context-link-probs.wiki"
-	lazy val languageModelProbsPath    = s"file://$currentPath/testoutput/language-model-probs.wiki"
-	lazy val documentFreqsPath         = s"file://$currentPath/testoutput/document-frequency-freqs.wiki"
-	lazy val redirectPath              = s"file://$currentPath/testoutput/redirects.wiki"
-	lazy val resolvedRedirectsPath     = s"file://$currentPath/testoutput/resolved-redirects.wiki"
-	lazy val textDumpsPath             = s"file://$currentPath/testoutput/text-dumps.wiki"
-	lazy val surfaceDocumentFreqsPath  = s"file://$currentPath/testoutput/surface-document-freqs.wiki"
-	lazy val surfaceNotALinkFreqsPath  = s"file://$currentPath/testoutput/surface-not-a-link-freqs.wiki"
-
+	lazy val surfaceProbsPath          = s"file://$currentPath/surface-probs.wiki"
+	lazy val contextLinkProbsPath      = s"file://$currentPath/context-link-probs.wiki"
+	lazy val languageModelProbsPath    = s"file://$currentPath/language-model-probs.wiki"
+	lazy val documentFreqsPath         = s"file://$currentPath/document-frequency-freqs.wiki"
+	lazy val redirectPath              = s"file://$currentPath/redirects.wiki"
+	lazy val resolvedRedirectsPath     = s"file://$currentPath/resolved-redirects.wiki"
+	lazy val textDumpsPath             = s"file://$currentPath/text-dumps.wiki"
+	lazy val surfaceDocumentFreqsPath  = s"file://$currentPath/surface-document-freqs.wiki"
+	lazy val surfaceNotALinkFreqsPath  = s"file://$currentPath/surface-not-a-link-freqs.wiki"
 
 	val textFormat            = CsvOutputFormat[(String, String)]("\n", "\t")
 	val textInput             = CsvInputFormat[(String, String)]("\n", '\t')

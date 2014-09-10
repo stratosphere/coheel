@@ -16,7 +16,7 @@ object RocBuilder {
 			var fn = 0
 			var tn = 0
 
-			val br = new BufferedReader(new FileReader("testoutput/possible-surface-occurrences.wiki"))
+			val br = new BufferedReader(new FileReader("output/possible-surface-occurrences.wiki"))
 			var line: String = br.readLine()
 			while (line != null) {
 				val split = line.split('\t')

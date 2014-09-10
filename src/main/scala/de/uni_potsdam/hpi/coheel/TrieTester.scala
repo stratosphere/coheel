@@ -30,7 +30,7 @@ object TrieBuilder {
 }
 class TrieBuilder extends Logging {
 
-	val TOKENIZED_SURFACES_FILE = "testoutput/tokenized-surfaces"
+	val TOKENIZED_SURFACES_FILE = "output/tokenized-surfaces"
 
 	def printMemoryStatus(): Unit = {
 		val maxMem   = Runtime.getRuntime.maxMemory().toDouble / 1024 / 1024
@@ -41,7 +41,7 @@ class TrieBuilder extends Logging {
 	}
 
 	def tokenizeSurfaces(): Unit = {
-		val lines = Source.fromFile(new File("testoutput/surface-probs.wiki")).getLines()
+		val lines = Source.fromFile(new File("output/surface-probs.wiki")).getLines()
 
 		val bw = new BufferedWriter(new FileWriter(new File(TOKENIZED_SURFACES_FILE), false))
 
@@ -62,7 +62,7 @@ class TrieBuilder extends Logging {
 		bw.close()
 	}
 	def buildTrie(): Trie = {
-		val lines = Source.fromFile(new File(TOKENIZED_SURFACES_FILE).getLines()
+		val lines = Source.fromFile(new File(TOKENIZED_SURFACES_FILE)).getLines()
 
 		var i = 0
 		val trie = new Trie()

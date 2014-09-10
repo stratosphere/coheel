@@ -1,3 +1,3 @@
 #!/bin/sh
-cat testoutput/surface-probs.wiki | grep -oh -P '^.*?(?=\t)' | sort | uniq > testoutput/surfaces.wiki
-wc -l testoutput/surfaces.wiki
+cat output/surface-probs.wiki | grep -oh -P '^.*?(?=\t)' | sort | uniq > output/surfaces.wiki
+wc -l output/surfaces.wiki
