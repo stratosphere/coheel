@@ -14,6 +14,3 @@ b) # of documents, in which the mention does not occur as a link
 RUN ON SERVER, DISTRIBUTED
 --------------------------------
 Set links to empty string?
---------------------------------
-Contains check to trie
-Save documents as well

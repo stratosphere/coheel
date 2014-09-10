@@ -10,7 +10,7 @@ import org.apache.flink.api.common.{ProgramDescription, Program}
 import org.apache.flink.client.LocalExecutor
 import org.apache.log4j.{ConsoleAppender, Level, Logger}
 import com.typesafe.config.ConfigFactory
-import de.uni_potsdam.hpi.coheel.programs.{SurfaceNotALinkTrieProgram, RedirectResolvingProgram, WikipediaTrainingProgram}
+import de.uni_potsdam.hpi.coheel.programs.{WholeTextSurfacesProgram, RedirectResolvingProgram, WikipediaTrainingProgram}
 import org.slf4s.Logging
 import scala.collection.JavaConversions._
 
@@ -30,7 +30,7 @@ object FlinkProgramRunner extends Logging {
 
 		val program = Map(
 			"main" -> classOf[WikipediaTrainingProgram],
-			"trie" -> classOf[SurfaceNotALinkTrieProgram],
+			"trie" -> classOf[WholeTextSurfacesProgram],
 			"redirects" -> classOf[RedirectResolvingProgram])(programName)
 		runProgram(program.newInstance())
 	}
