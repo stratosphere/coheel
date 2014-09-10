@@ -53,6 +53,22 @@ class TrieTest extends FunSuite {
 		assert(trie.contains("angela merkel").asEntry)
 	}
 
+	test("sliding contains works as expected") {
+		val trie = newTrie()
+		trie.add("angela merkel")
+		trie.add("angela merkel is german")
+		trie.add("angela")
+		trie.add("merkel")
+
+		val testSentence = Array("angela", "merkel", "is", "german")
+		val result1 = trie.slidingContains(testSentence, 0)
+		val expected1 = Seq("angela", "angela merkel", "angela merkel is german")
+
+		val result2 = trie.slidingContains(testSentence, 1)
+		assert(result2.size === 1)
+		assert(result2.contains("merkel"))
+	}
+
 	test("branching works at every level") {
 		val trie = newTrie()
 		trie.add("angela dorothea merkel")

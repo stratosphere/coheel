@@ -3,6 +3,8 @@ package de.uni_potsdam.hpi.coheel.datastructures
 import java.util
 import java.util.Map
 
+import scala.collection.mutable.ListBuffer
+
 case class ContainsResult(asEntry: Boolean, asIntermediateNode: Boolean)
 
 case class Trie() {
@@ -22,6 +24,10 @@ case class Trie() {
 		rootNode.contains(tokens)
 	}
 	def contains(tokenString: String): ContainsResult = contains(tokenString.split(' '))
+
+	def slidingContains(arr: Array[String], startIndex: Int): Seq[String] = {
+		rootNode.slidingContains(arr, startIndex)
+	}
 }
 
 case class TrieNode() {
@@ -69,8 +75,27 @@ case class TrieNode() {
 		}
 	}
 
-	def checkArray(arr: Array[String], startIndex: Int): Seq[String] = {
-		Seq()
+	def slidingContains(arr: Array[String], startIndex: Int): Seq[String] = {
+		var result = List[String]()
+		val currentCheck = ListBuffer[String](arr(startIndex))
+		var containsResult = this.contains(currentCheck)
 
+		var i = 1
+		// for each word, go so far until it is no intermediate node anymore
+		while (containsResult.asIntermediateNode) {
+			// if it is a entry, add to to result list
+			if (containsResult.asEntry)
+				result ::= currentCheck.mkString(" ")
+			// expand current window, if possible
+			if (startIndex + i < arr.size) {
+				currentCheck.append(arr(startIndex + i))
+				containsResult = this.contains(currentCheck)
+				i += 1
+			} else {
+				// if we reached the end of the text, we need to break
+				containsResult = ContainsResult(false, false)
+			}
+		}
+		result
 	}
 }

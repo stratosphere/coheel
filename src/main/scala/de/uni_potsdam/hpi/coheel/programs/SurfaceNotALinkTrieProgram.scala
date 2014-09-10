@@ -32,25 +32,7 @@ class SurfaceNotALinkTrieProgram extends Program with ProgramDescription with Lo
 
 			// each word must be checked, if it is a surface somewhere
 			for (i <- 0 until tokens.size) {
-				val currentCheck = ListBuffer[String](tokens(i))
-				var containsResult = TrieBuilder.trie.contains(currentCheck)
-
-				var j = 1
-				// for each word, go so far until it is no intermediate node anymore
-				while (containsResult.asIntermediateNode) {
-					// if it is a entry, add to to result list
-					if (containsResult.asEntry)
-						resultSurfaces.add(currentCheck.mkString(" "))
-					// expand current window, if possible
-					if (i + j < tokens.size) {
-						currentCheck.append(tokens(i + j))
-						containsResult = TrieBuilder.trie.contains(currentCheck)
-						j += 1
-					} else {
-						// if we reached the end of the text, we need to break
-						containsResult = ContainsResult(false, false)
-					}
-				}
+				resultSurfaces ++= TrieBuilder.trie.slidingContains(tokens, i)
 			}
 			resultSurfaces.toIterator
 		}.name("Resulting-Not-A-Link-Surfaces")
