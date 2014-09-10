@@ -56,7 +56,7 @@ class WikipediaTrainingProgram()
 		val groupedByLinkText = allPageLinks
 			.groupBy { link => link.text }
 		// counts in how many documents a surface occurs
-		val surfaceDocumentCounts = groupedByLinkText
+		val surfaceDocumentFreqs = groupedByLinkText
 			.reduceGroup { linksWithSameText =>
 				val asList = linksWithSameText.toList
 				val text = asList(0).text
@@ -71,7 +71,7 @@ class WikipediaTrainingProgram()
 					.size
 
 				if (i % 1000000 == 0)
-					log.info(s"Surface document counts: $i ")
+					log.info(s"Surface document frequencies: $i ")
 				i += 1
 				(text, count)
 			}
@@ -79,15 +79,15 @@ class WikipediaTrainingProgram()
 
 		var j = 0
 		// count how often a surface occurs
-		val surfaceCounts = groupedByLinkText
+		val surfaceFreqs = groupedByLinkText
 			.count()
 		// count how often a surface occurs with a certain destination
-		val surfaceLinkCounts = allPageLinks
+		val surfaceLinkFreqs = allPageLinks
 			.groupBy { link => (link.text, link.destination) }
 			.count()
-			.name("Surface-LinkTo-Counts")
+			.name("Surface-LinkTo-Freqs")
 		// join them together and calculate the probabilities
-		val surfaceProbabilities = surfaceCounts.join(surfaceLinkCounts)
+		val surfaceProbabilities = surfaceFreqs.join(surfaceLinkFreqs)
 			.where     { case (link, _) => link.text }
 			.isEqualTo { case (link, _) => link.text }
 			.map { case (surfaceCount, surfaceLinkCount) =>
@@ -99,7 +99,7 @@ class WikipediaTrainingProgram()
 			}
 
 		var k = 0
-		// calculate context link counts only for non-disambiguation pages
+		// calculate context link frequencies only for non-disambiguation pages
 		val linkCounts = normalPageLinks
 			.groupBy { link => link.source }
 			.count()
@@ -126,7 +126,7 @@ class WikipediaTrainingProgram()
 		val surfaceProbOutput = surfaceProbabilities.write(surfaceProbsPath, probOutputFormat)
 		val contextLinkOutput = contextLinkProbabilities.write(contextLinkProbsPath, probOutputFormat)
 		val redirectOutput    = redirects.write(redirectPath, textFormat)
-		val surfaceDocumentsOutput = surfaceDocumentCounts.write(surfaceDocumentFreqsPath, surfaceDocumentFormat)
+		val surfaceDocumentsOutput = surfaceDocumentFreqs.write(surfaceDocumentFreqsPath, surfaceDocumentFormat)
 		List(surfaceProbOutput, contextLinkOutput, redirectOutput, surfaceDocumentsOutput)
 	}
 

@@ -23,7 +23,7 @@ class SurfaceNotALinkTrieProgram extends Program with ProgramDescription with Lo
 		val wikiPages = ProgramHelper.getWikiPages()
 
 		var c = 0
-		val notALinkCounts = wikiPages.flatMap { wikiPage =>
+		val notALinkFreqs = wikiPages.flatMap { wikiPage =>
 			log.info(f"$c%6s ${wikiPage.pageTitle}")
 			c += 1
 			val tokens = TextAnalyzer.tokenize(wikiPage.plainText).toArray
@@ -55,9 +55,9 @@ class SurfaceNotALinkTrieProgram extends Program with ProgramDescription with Lo
 			resultSurfaces.toIterator
 		}.name("Resulting-Not-A-Link-Surfaces")
 
-		val notALinkCountOutput = notALinkCounts.write(surfaceNotALinkFreqsPath,
+		val notALinkFreqOutput = notALinkFreqs.write(surfaceNotALinkFreqsPath,
 			CsvOutputFormat[String]("\n", "\t"))
-		val plan = new ScalaPlan(Seq(notALinkCountOutput))
+		val plan = new ScalaPlan(Seq(notALinkFreqOutput))
 		plan
 	}
 }
