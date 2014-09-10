@@ -3,6 +3,7 @@ package de.uni_potsdam.hpi.coheel
 import java.io.{FileWriter, BufferedWriter, File}
 
 import de.uni_potsdam.hpi.coheel.datastructures.Trie
+import de.uni_potsdam.hpi.coheel.programs.OutputFiles._
 import de.uni_potsdam.hpi.coheel.wiki.TextAnalyzer
 import org.slf4s.Logging
 
@@ -30,7 +31,7 @@ object TrieBuilder {
 }
 class TrieBuilder extends Logging {
 
-	val TOKENIZED_SURFACES_FILE = "output/tokenized-surfaces"
+	val TOKENIZED_SURFACES_FILE = s"${FlinkProgramRunner.config.getString("output_files_dir")}/tokenized-surfaces"
 
 	def printMemoryStatus(): Unit = {
 		val maxMem   = Runtime.getRuntime.maxMemory().toDouble / 1024 / 1024
@@ -41,7 +42,8 @@ class TrieBuilder extends Logging {
 	}
 
 	def tokenizeSurfaces(): Unit = {
-		val lines = Source.fromFile(new File("output/surface-probs.wiki")).getLines()
+		val fileName = surfaceProbsPath.replace("file://", "")
+		val lines = Source.fromFile(new File(fileName)).getLines()
 
 		val bw = new BufferedWriter(new FileWriter(new File(TOKENIZED_SURFACES_FILE), false))
 
