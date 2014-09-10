@@ -30,7 +30,6 @@ object FlinkProgramRunner extends Logging {
 
 		val program = Map(
 			"main" -> classOf[WikipediaTrainingProgram],
-			"surfaces" -> classOf[SurfaceNotALinkProgram],
 			"trie" -> classOf[SurfaceNotALinkTrieProgram],
 			"redirects" -> classOf[RedirectResolvingProgram])(programName)
 		runProgram(program.newInstance())
