@@ -49,7 +49,7 @@ class RedirectResolvingProgram extends Program with ProgramDescription with Logg
 			.map { cl => (cl.from, cl.to) }
 			.name("Final-Redirect-Result")
 
-		val surfaceLinkOccurrenceOutput = resolvedRedirects.write(redirectResolvPath,
+		val surfaceLinkOccurrenceOutput = resolvedRedirects.write(resolvedRedirectsPath,
 			CsvOutputFormat[(String, String)]("\n", "\t"))
 		val plan = new ScalaPlan(Seq(surfaceLinkOccurrenceOutput))
 		plan

@@ -6,18 +6,15 @@ import org.apache.flink.api.scala.operators.{CsvInputFormat, CsvOutputFormat}
 object OutputFiles {
 	lazy val currentPath = FlinkProgramRunner.config.getString("output_files_dir")
 
-	lazy val surfaceProbsPath                  = s"file://$currentPath/testoutput/surface-probs.wiki"
-	lazy val contextLinkProbsPath              = s"file://$currentPath/testoutput/context-link-probs.wiki"
-	lazy val languageModelsPath                = s"file://$currentPath/testoutput/language-models.wiki"
-	lazy val documentFrequencyPath             = s"file://$currentPath/testoutput/document-frequency-counts.wiki"
-	lazy val redirectPath                      = s"file://$currentPath/testoutput/redirects.wiki"
-	lazy val textDumpsPath                     = s"file://$currentPath/testoutput/text-dumps.wiki"
-	lazy val surfaceDocumentPath               = s"file://$currentPath/testoutput/surface-link-occurrences.wiki"
-	lazy val surfaceNotALinkPath               = s"file://$currentPath/testoutput/surface-not-a-link-occurrences.wiki"
-	lazy val possibleSurfaceOccurrencesPath    = s"file://$currentPath/testoutput/possible-surface-occurrences.wiki"
-	lazy val actualSurfaceOccurrencesPath      = s"file://$currentPath/testoutput/actual-surface-occurrences.wiki"
-	lazy val thresholdEvaluationPath           = s"file://$currentPath/testoutput/threshold-evaluation.wiki"
-	lazy val redirectResolvPath                = s"file://$currentPath/testoutput/resolved-redirects.wiki"
+	lazy val surfaceProbsPath          = s"file://$currentPath/testoutput/surface-probs.wiki"
+	lazy val contextLinkProbsPath      = s"file://$currentPath/testoutput/context-link-probs.wiki"
+	lazy val languageModelProbsPath    = s"file://$currentPath/testoutput/language-model-probs.wiki"
+	lazy val documentFreqsPath         = s"file://$currentPath/testoutput/document-frequency-freqs.wiki"
+	lazy val redirectPath              = s"file://$currentPath/testoutput/redirects.wiki"
+	lazy val resolvedRedirectsPath     = s"file://$currentPath/testoutput/resolved-redirects.wiki"
+	lazy val textDumpsPath             = s"file://$currentPath/testoutput/text-dumps.wiki"
+	lazy val surfaceDocumentFreqsPath  = s"file://$currentPath/testoutput/surface-document-freqs.wiki"
+	lazy val surfaceNotALinkFreqsPath  = s"file://$currentPath/testoutput/surface-not-a-link-freqs.wiki"
 
 
 	val textFormat            = CsvOutputFormat[(String, String)]("\n", "\t")

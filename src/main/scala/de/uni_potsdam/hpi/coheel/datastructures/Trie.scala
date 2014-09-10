@@ -68,4 +68,9 @@ case class TrieNode() {
 			}
 		}
 	}
+
+	def checkArray(arr: Array[String], startIndex: Int): Seq[String] = {
+		Seq()
+
+	}
 }

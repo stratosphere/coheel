@@ -55,7 +55,7 @@ class SurfaceNotALinkTrieProgram extends Program with ProgramDescription with Lo
 			resultSurfaces.toIterator
 		}.name("Resulting-Not-A-Link-Surfaces")
 
-		val notALinkCountOutput = notALinkCounts.write(surfaceNotALinkPath,
+		val notALinkCountOutput = notALinkCounts.write(surfaceNotALinkFreqsPath,
 			CsvOutputFormat[String]("\n", "\t"))
 		val plan = new ScalaPlan(Seq(notALinkCountOutput))
 		plan

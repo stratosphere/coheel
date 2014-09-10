@@ -124,7 +124,7 @@ class WikipediaTrainingProgram()
 		val surfaceProbOutput = surfaceProbabilities.write(surfaceProbsPath, probOutputFormat)
 		val contextLinkOutput = contextLinkProbabilities.write(contextLinkProbsPath, probOutputFormat)
 		val redirectOutput    = redirects.write(redirectPath, textFormat)
-		val surfaceDocumentsOutput = surfaceDocumentCounts.write(surfaceDocumentPath, surfaceDocumentFormat)
+		val surfaceDocumentsOutput = surfaceDocumentCounts.write(surfaceDocumentFreqsPath, surfaceDocumentFormat)
 		List(surfaceProbOutput, contextLinkOutput, redirectOutput, surfaceDocumentsOutput)
 	}
 
@@ -176,8 +176,8 @@ class WikipediaTrainingProgram()
 			val docList = it.toList
 			(docList(0).word, docList.groupBy { word => word.document }.size)
 		}.name("Document Frequencies: Word-DocFrequency")
-		val languageModelsOutput = languageModel.write(languageModelsPath, probOutputFormat)
-		val documentFrequencyOutput = documentFrequencies.write(documentFrequencyPath, surfaceDocumentFormat)
+		val languageModelsOutput = languageModel.write(languageModelProbsPath, probOutputFormat)
+		val documentFrequencyOutput = documentFrequencies.write(documentFreqsPath, surfaceDocumentFormat)
 		List(languageModelsOutput, documentFrequencyOutput)
 	}
 }

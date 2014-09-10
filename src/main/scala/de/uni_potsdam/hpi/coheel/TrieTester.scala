@@ -12,9 +12,9 @@ object TrieTester {
 
 	def main(args: Array[String]): Unit = {
 		val trieBuilder = new TrieBuilder
-		trieBuilder.printMemoryStatus()
-//		trieBuilder.tokenizeSurfaces()
-		val trie = trieBuilder.buildTrie()
+//		trieBuilder.printMemoryStatus()
+		trieBuilder.tokenizeSurfaces()
+//		val trie = trieBuilder.buildTrie()
 		trieBuilder.printMemoryStatus()
 	}
 
