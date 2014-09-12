@@ -35,17 +35,17 @@ class EntireTextSurfacesProgram extends Program with ProgramDescription with Log
 			resultSurfaces.map { surface => (wikiPage.pageTitle, surface) }.toIterator
 		}.name("Entire-Text-Surfaces-Along-With-Document")
 
-		val entireTextFreqs = entireTextSurfaces
+		val entireTextSurfaceCounts = entireTextSurfaces
 			.groupBy { case (title, surface) => surface }
 			.count()
 			.map { case ((title, surface), count) => (surface, count) }
-			.name("Entire-Text-Surface-Frequencies")
+			.name("Entire-Text-Surface-Counts")
 
 		val entireTextSurfacesOutput = entireTextSurfaces.write(entireTextSurfacesPath,
 			CsvOutputFormat[(String, String)]("\n", "\t"))
-		val entireTextSurfacesFreqsOutput = entireTextFreqs.write(entireTextSurfaceFreqsPath,
+		val entireTextSurfacesCountsOutput = entireTextSurfaceCounts.write(entireTextSurfaceCountsPath,
 			CsvOutputFormat[(String, Int)]("\n", "\t"))
-		val plan = new ScalaPlan(Seq(entireTextSurfacesOutput, entireTextSurfacesFreqsOutput))
+		val plan = new ScalaPlan(Seq(entireTextSurfacesOutput, entireTextSurfacesCountsOutput))
 		plan
 	}
 }

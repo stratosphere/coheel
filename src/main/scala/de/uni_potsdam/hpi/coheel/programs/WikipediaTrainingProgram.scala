@@ -56,7 +56,7 @@ class WikipediaTrainingProgram()
 		val groupedByLinkText = allPageLinks
 			.groupBy { link => link.text }
 		// counts in how many documents a surface occurs
-		val surfaceDocumentFreqs = groupedByLinkText
+		val surfaceDocumentCounts = groupedByLinkText
 			.reduceGroup { linksWithSameText =>
 				val asList = linksWithSameText.toList
 				val text = asList(0).text
@@ -71,7 +71,7 @@ class WikipediaTrainingProgram()
 					.size
 
 				if (i % 1000000 == 0)
-					log.info(s"Surface document frequencies: $i ")
+					log.info(s"Surface document counts: $i ")
 				i += 1
 				(text, count)
 			}
@@ -79,15 +79,15 @@ class WikipediaTrainingProgram()
 
 		var j = 0
 		// count how often a surface occurs
-		val surfaceFreqs = groupedByLinkText
+		val surfaceCounts = groupedByLinkText
 			.count()
 		// count how often a surface occurs with a certain destination
-		val surfaceLinkFreqs = allPageLinks
+		val surfaceLinkCounts = allPageLinks
 			.groupBy { link => (link.text, link.destination) }
 			.count()
-			.name("Surface-LinkTo-Freqs")
+			.name("Surface-LinkTo-Counts")
 		// join them together and calculate the probabilities
-		val surfaceProbabilities = surfaceFreqs.join(surfaceLinkFreqs)
+		val surfaceProbabilities = surfaceCounts.join(surfaceLinkCounts)
 			.where     { case (link, _) => link.text }
 			.isEqualTo { case (link, _) => link.text }
 			.map { case (surfaceCount, surfaceLinkCount) =>
@@ -99,7 +99,7 @@ class WikipediaTrainingProgram()
 			}
 
 		var k = 0
-		// calculate context link frequencies only for non-disambiguation pages
+		// calculate context link counts only for non-disambiguation pages
 		val linkCounts = normalPageLinks
 			.groupBy { link => link.source }
 			.count()
@@ -126,7 +126,7 @@ class WikipediaTrainingProgram()
 		val surfaceProbOutput = surfaceProbabilities.write(surfaceProbsPath, probOutputFormat)
 		val contextLinkOutput = contextLinkProbabilities.write(contextLinkProbsPath, probOutputFormat)
 		val redirectOutput    = redirects.write(redirectPath, textFormat)
-		val surfaceDocumentsOutput = surfaceDocumentFreqs.write(surfaceDocumentFreqsPath, surfaceDocumentFormat)
+		val surfaceDocumentsOutput = surfaceDocumentCounts.write(surfaceDocumentCountsPath, surfaceDocumentFormat)
 		List(surfaceProbOutput, contextLinkOutput, redirectOutput, surfaceDocumentsOutput)
 	}
 
@@ -171,15 +171,15 @@ class WikipediaTrainingProgram()
 				(word.document, word.word, wordCount._2.toDouble / documentCount._2.toDouble)
 			}.name("Language Model: Document-Word-Prob")
 
-		// count document frequencies
-		val documentFrequencies = words
+		// count document word counts (in how many documents does a word occur?)
+		val documentWordCounts = words
 			.groupBy { word => word.word }
 			.reduceGroup { it =>
 			val docList = it.toList
 			(docList(0).word, docList.groupBy { word => word.document }.size)
-		}.name("Document Frequencies: Word-DocFrequency")
+		}.name("Document Word Counts: Word-DocumentCount")
 		val languageModelsOutput = languageModel.write(languageModelProbsPath, probOutputFormat)
-		val documentFrequencyOutput = documentFrequencies.write(documentFreqsPath, surfaceDocumentFormat)
-		List(languageModelsOutput, documentFrequencyOutput)
+		val documentWordCountsOutput = documentWordCounts.write(documentWordCountsPath, surfaceDocumentFormat)
+		List(languageModelsOutput, documentWordCountsOutput)
 	}
 }
