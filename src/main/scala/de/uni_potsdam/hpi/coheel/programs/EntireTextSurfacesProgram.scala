@@ -22,7 +22,8 @@ class EntireTextSurfacesProgram extends Program with ProgramDescription with Log
 
 		var c = 0
 		val entireTextSurfaces = wikiPages.flatMap { wikiPage =>
-			log.info(f"$c%6s ${wikiPage.pageTitle}")
+			if (c % 200000 == 0)
+				log.info(f"$c%8s/11023933")
 			c += 1
 			val tokens = TextAnalyzer.tokenize(wikiPage.plainText).toArray
 
