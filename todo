@@ -4,13 +4,10 @@ Run two local stratospheres at the same time.
 Remove wiktionary links.
 ---------------------------------
 Copy data to HDFS
----------------------------------
-Determine the following counts for NER:
-For each surface:
-a) # of documents, in which the mention occurs as a link
-b) # of documents, in which the mention does not occur as a link
---> get percentage to use for NER later
 --------------------------------
 RUN ON SERVER, DISTRIBUTED
 --------------------------------
 Set links to empty string?
+--------------------------------
+For all surfaces:
+Percentage of link and non-link.
