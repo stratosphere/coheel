@@ -11,17 +11,17 @@ import org.slf4s.Logging
 
 import scala.collection.mutable
 
-class WholeTextSurfacesProgram extends Program with ProgramDescription with Logging {
+class EntireTextSurfacesProgram extends Program with ProgramDescription with Logging {
 	// prepare the trie
 	TrieBuilder.build()
 
-	override def getDescription = "Counting how often a surface occurs, in the whole text. This approach uses a trie."
+	override def getDescription = "Counting how often a surface occurs, in the entire text. This approach uses a trie."
 
 	override def getPlan(args: String*): Plan = {
 		val wikiPages = ProgramHelper.getWikiPages()
 
 		var c = 0
-		val wholeTextSurfaces = wikiPages.flatMap { wikiPage =>
+		val entireTextSurfaces = wikiPages.flatMap { wikiPage =>
 			log.info(f"$c%6s ${wikiPage.pageTitle}")
 			c += 1
 			val tokens = TextAnalyzer.tokenize(wikiPage.plainText).toArray
@@ -33,19 +33,19 @@ class WholeTextSurfacesProgram extends Program with ProgramDescription with Logg
 				resultSurfaces ++= TrieBuilder.trie.slidingContains(tokens, i)
 			}
 			resultSurfaces.map { surface => (wikiPage.pageTitle, surface) }.toIterator
-		}.name("Whole-Text-Surfaces-Along-With-Document")
+		}.name("Entire-Text-Surfaces-Along-With-Document")
 
-		val wholeTextFreqs = wholeTextSurfaces
+		val entireTextFreqs = entireTextSurfaces
 			.groupBy { case (title, surface) => surface }
 			.count()
 			.map { case ((title, surface), count) => (surface, count) }
-			.name("Whole-Text-Surface-Frequencies")
+			.name("Entire-Text-Surface-Frequencies")
 
-		val wholeTextSurfacesOutput = wholeTextSurfaces.write(wholeTextSurfacesPath,
+		val entireTextSurfacesOutput = entireTextSurfaces.write(entireTextSurfacesPath,
 			CsvOutputFormat[(String, String)]("\n", "\t"))
-		val wholeTextSurfacesFreqsOutput = wholeTextFreqs.write(wholeTextSurfaceFreqsPath,
+		val entireTextSurfacesFreqsOutput = entireTextFreqs.write(entireTextSurfaceFreqsPath,
 			CsvOutputFormat[(String, Int)]("\n", "\t"))
-		val plan = new ScalaPlan(Seq(wholeTextSurfacesOutput, wholeTextSurfacesFreqsOutput))
+		val plan = new ScalaPlan(Seq(entireTextSurfacesOutput, entireTextSurfacesFreqsOutput))
 		plan
 	}
 }

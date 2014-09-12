@@ -14,8 +14,8 @@ object OutputFiles {
 	lazy val resolvedRedirectsPath     = s"file://$currentPath/resolved-redirects.wiki"
 	lazy val textDumpsPath             = s"file://$currentPath/text-dumps.wiki"
 	lazy val surfaceDocumentFreqsPath  = s"file://$currentPath/surface-document-freqs.wiki"
-	lazy val wholeTextSurfacesPath     = s"file://$currentPath/whole-text-surfaces.wiki"
-	lazy val wholeTextSurfaceFreqsPath = s"file://$currentPath/whole-text-surface-freqs.wiki"
+	lazy val entireTextSurfacesPath     = s"file://$currentPath/entire-text-surfaces.wiki"
+	lazy val entireTextSurfaceFreqsPath = s"file://$currentPath/entire-text-surface-freqs.wiki"
 
 	val textFormat            = CsvOutputFormat[(String, String)]("\n", "\t")
 	val textInput             = CsvInputFormat[(String, String)]("\n", '\t')

@@ -104,7 +104,7 @@ object WikiPageReader extends Logging {
 		else {
 			// in case of performance problems:
 			// disambiguation links are always (as seen so far) at the end of the text
-			// maybe this could be used to not scan the whole text
+			// maybe this could be used to not scan the entire text
 			val disambiguationRegex = """(?ui)\{\{disambiguation.*?\}\}""".r
 			val matches = disambiguationRegex.findAllIn(source)
 				// check whether the regex sometimes accidentially matches too much text
