@@ -31,8 +31,6 @@ object TrieBuilder {
 }
 class TrieBuilder extends Logging {
 
-	val TOKENIZED_SURFACES_FILE = s"${FlinkProgramRunner.config.getString("output_files_dir")}/tokenized-surfaces"
-
 	def printMemoryStatus(): Unit = {
 		val maxMem   = Runtime.getRuntime.maxMemory().toDouble / 1024 / 1024
 		val freeMem  = Runtime.getRuntime.freeMemory().toDouble / 1024 / 1024
@@ -45,15 +43,12 @@ class TrieBuilder extends Logging {
 		val fileName = surfaceProbsPath.replace("file://", "")
 		val lines = Source.fromFile(new File(fileName)).getLines()
 
-		val bw = new BufferedWriter(new FileWriter(new File(TOKENIZED_SURFACES_FILE), false))
-
 		var i = 0
 		lines.foreach { line =>
 			val surface = line.split('\t')(0)
 			val tokens = TextAnalyzer.tokenize(surface)
 			if (tokens.nonEmpty) {
-				bw.write(tokens.mkString("\t"))
-				bw.newLine()
+				println(tokens.mkString("\t"))
 			}
 			i += 1
 			if (i % 1000000 == 0) {
@@ -61,16 +56,17 @@ class TrieBuilder extends Logging {
 				printMemoryStatus()
 			}
 		}
-		bw.close()
 	}
 	def buildTrie(): Trie = {
-		val lines = Source.fromFile(new File(TOKENIZED_SURFACES_FILE)).getLines()
+		val fileName = surfaceProbsPath.replace("file://", "")
+		val lines = Source.fromFile(new File(fileName)).getLines()
 
 		var i = 0
 		val trie = new Trie()
 		lines.foreach { line =>
 			try {
-				val tokens = line.split('\t')
+				val surface = line.split('\t')(0)
+				val tokens = TextAnalyzer.tokenize(surface)
 				if (tokens.nonEmpty)
 					trie.add(tokens)
 				i += 1
