@@ -47,11 +47,16 @@ class EntireTextSurfacesProgram extends Program with ProgramDescription with Log
 		val surfaceLinkProbs = surfaceDocumentCounts.map { line =>
 			val split = line.split('\t')
 			// not clear, why lines without a count occur, but they do
-			if (split.size < 2)
-				(split(0), 0)
-			else {
-				val (surface, count) = (split(0), split(1).toInt)
-				(TextAnalyzer.tokenize(surface).mkString(" "), count)
+			try {
+				if (split.size < 2)
+					(split(0), 0)
+				else {
+					val (surface, count) = (split(0), split(1).toInt)
+					(TextAnalyzer.tokenize(surface).mkString(" "), count)
+				}
+			} catch {
+				case e: NumberFormatException =>
+					(split(0), 0)
 			}
 		}.join(entireTextSurfaceCounts)
 		.where { case (surface, _) => surface }
