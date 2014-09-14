@@ -1,8 +1,8 @@
-package de.uni_potsdam.hpi.coheel
+package de.uni_potsdam.hpi.coheel.datastructures
 
-import java.io.{FileWriter, BufferedWriter, File}
+import java.io.{BufferedWriter, File, FileWriter}
 
-import de.uni_potsdam.hpi.coheel.datastructures.Trie
+import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
 import de.uni_potsdam.hpi.coheel.programs.OutputFiles._
 import de.uni_potsdam.hpi.coheel.wiki.TextAnalyzer
 import org.slf4s.Logging

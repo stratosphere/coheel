@@ -1,6 +1,6 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import de.uni_potsdam.hpi.coheel.TrieBuilder
+import de.uni_potsdam.hpi.coheel.datastructures.TrieBuilder
 import de.uni_potsdam.hpi.coheel.wiki.TextAnalyzer
 import org.apache.flink.api.common.{Plan, ProgramDescription, Program}
 import org.apache.flink.api.scala.{TextFile, DataSource, ScalaPlan}
