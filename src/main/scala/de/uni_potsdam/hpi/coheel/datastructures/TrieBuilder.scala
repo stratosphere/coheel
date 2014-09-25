@@ -62,12 +62,16 @@ object TrieBuilder extends Logging {
 	def buildThresholdTrie(threshold: Double): Unit = {
 		thresholdTrie = new Trie()
 
-//		trieBuilderHelper() { line =>
-//			val surface = line.split('\t')(0)
-//			val tokens = TokenizerHelper.tokenize(surface)
-//			if (tokens.nonEmpty)
-//				fullTrie.add(tokens)
-//		}
+		trieBuilderHelper(surfaceProbsPath) { line =>
+			val split = line.split('\t')
+			val surface = split(0)
+			val prob = split(2).toDouble
+			if (prob >= threshold) {
+				val tokens = surface.split(' ')
+				if (tokens.nonEmpty)
+					thresholdTrie.add(tokens)
+			}
+		}
 	}
 
 	def buildFullTrie(): Unit = {
