@@ -1,7 +1,7 @@
 package de.uni_potsdam.hpi.coheel.programs
 
 import de.uni_potsdam.hpi.coheel.datastructures.TrieBuilder
-import de.uni_potsdam.hpi.coheel.wiki.TextAnalyzer
+import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
 import org.apache.flink.api.common.{Plan, ProgramDescription, Program}
 import org.apache.flink.api.scala.{TextFile, DataSource, ScalaPlan}
 import org.apache.flink.api.scala.operators.CsvOutputFormat
@@ -25,7 +25,7 @@ class EntireTextSurfacesProgram extends Program with ProgramDescription with Log
 			if (c % 200000 == 0)
 				log.info(f"$c%8s/11023933")
 			c += 1
-			val tokens = TextAnalyzer.tokenize(wikiPage.plainText).toArray
+			val tokens = TokenizerHelper.tokenize(wikiPage.plainText).toArray
 
 			val resultSurfaces = mutable.HashSet[String]()
 
@@ -52,7 +52,7 @@ class EntireTextSurfacesProgram extends Program with ProgramDescription with Log
 					(split(0), 0)
 				else {
 					val (surface, count) = (split(0), split(1).toInt)
-					(TextAnalyzer.tokenize(surface).mkString(" "), count)
+					(TokenizerHelper.tokenize(surface).mkString(" "), count)
 				}
 			} catch {
 				case e: NumberFormatException =>

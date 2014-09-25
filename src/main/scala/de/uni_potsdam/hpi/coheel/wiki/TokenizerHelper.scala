@@ -4,12 +4,12 @@ import org.apache.lucene.analysis.en.{PorterStemFilter, EnglishAnalyzer}
 import org.apache.lucene.util.Version
 import java.io.StringReader
 import scala.collection.mutable.ListBuffer
-import org.apache.lucene.analysis.tokenattributes.CharTermAttribute
+import org.apache.lucene.analysis.tokenattributes.{OffsetAttribute, CharTermAttribute}
 
 /**
  * Small wrapper around Lucene's tokenizing and stemming.
  */
-object TextAnalyzer {
+object TokenizerHelper {
 
 	def tokenize(text: String, stemming: Boolean = true): List[String] = {
 		val analyzer = new EnglishAnalyzer(Version.LUCENE_48)
@@ -22,8 +22,13 @@ object TextAnalyzer {
 
 		tokenStream.reset()
 		val tokens = ListBuffer[String]()
+
+		val charTermAttribute = tokenStream.addAttribute(classOf[CharTermAttribute])
+		val offsetAttribute   = tokenStream.addAttribute(classOf[OffsetAttribute])
 		while (tokenStream.incrementToken()) {
-			tokens += tokenStream.getAttribute(classOf[CharTermAttribute]).toString
+			tokens += charTermAttribute.toString
+			println(offsetAttribute.startOffset())
+			println(offsetAttribute.endOffset())
 		}
 		analyzer.close()
 		tokens.result()

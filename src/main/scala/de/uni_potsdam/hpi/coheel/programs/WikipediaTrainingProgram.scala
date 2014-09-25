@@ -145,7 +145,7 @@ class WikipediaTrainingProgram()
 		val words = wikiPages.filter { wikiPage =>
 			!wikiPage.isDisambiguation && !wikiPage.isRedirect && !wikiPage.isList
 		} flatMap { wikiPage =>
-			val tokens = TextAnalyzer.tokenize(wikiPage.plainText).map { token =>
+			val tokens = TokenizerHelper.tokenize(wikiPage.plainText).map { token =>
 				Word(wikiPage.pageTitle, token)
 			}.toIterator
 			tokens

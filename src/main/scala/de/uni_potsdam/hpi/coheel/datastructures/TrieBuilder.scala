@@ -4,7 +4,7 @@ import java.io.{BufferedWriter, File, FileWriter}
 
 import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
 import de.uni_potsdam.hpi.coheel.programs.OutputFiles._
-import de.uni_potsdam.hpi.coheel.wiki.TextAnalyzer
+import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
 import org.slf4s.Logging
 
 import scala.io.Source
@@ -46,7 +46,7 @@ class TrieBuilder extends Logging {
 		var i = 0
 		lines.foreach { line =>
 			val surface = line.split('\t')(0)
-			val tokens = TextAnalyzer.tokenize(surface)
+			val tokens = TokenizerHelper.tokenize(surface)
 			if (tokens.nonEmpty) {
 				println(tokens.mkString("\t"))
 			}
@@ -66,7 +66,7 @@ class TrieBuilder extends Logging {
 		lines.foreach { line =>
 			try {
 				val surface = line.split('\t')(0)
-				val tokens = TextAnalyzer.tokenize(surface)
+				val tokens = TokenizerHelper.tokenize(surface)
 				if (tokens.nonEmpty)
 					trie.add(tokens)
 				i += 1
