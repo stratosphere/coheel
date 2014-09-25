@@ -81,7 +81,7 @@ object WikiPageReader extends Logging {
 			def next(): WikiPage = {
 				readNextPage()
 				val isDisambiguation = checkDisambiguation(text, pageTitle)
-				val isList           = checkList(text)
+				val isList           = checkList(pageTitle)
 				val wikiPage = new WikiPage(
 					pageTitle,
 					ns,
@@ -121,5 +121,6 @@ object WikiPageReader extends Logging {
 		}
 	}
 
-	def checkList(source:String): Boolean = source.contains("[[Category:List")
+	def checkList(pageTitle: String): Boolean = pageTitle.startsWith("List of") ||
+		pageTitle.startsWith("Lists of")
 }
