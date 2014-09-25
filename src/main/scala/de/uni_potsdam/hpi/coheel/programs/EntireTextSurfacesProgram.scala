@@ -22,7 +22,7 @@ class EntireTextSurfacesProgram extends Program with ProgramDescription with Log
 
 		var c = 0
 		// which surfaces occur in which documents
-		val entireTextSurfaces = wikiPages.flatMap { wikiPage =>
+		val entireTextSurfaces = ProgramHelper.filterNormalPages(wikiPages).flatMap { wikiPage =>
 			if (c % 200000 == 0)
 				log.info(f"$c%8s/11023933")
 			c += 1

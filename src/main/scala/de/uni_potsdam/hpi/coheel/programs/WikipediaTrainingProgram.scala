@@ -142,9 +142,7 @@ class WikipediaTrainingProgram()
 	def buildLanguageModelPlan(wikiPages: DataSet[WikiPage]): List[ScalaSink[_]] = {
 		// Helper case class to avoid passing tuples around
 		case class Word(document: String, word: String)
-		val words = wikiPages.filter { wikiPage =>
-			!wikiPage.isDisambiguation && !wikiPage.isRedirect && !wikiPage.isList
-		} flatMap { wikiPage =>
+		val words = ProgramHelper.filterNormalPages(wikiPages) flatMap { wikiPage =>
 			val tokens = TokenizerHelper.tokenize(wikiPage.plainText).map { token =>
 				Word(wikiPage.pageTitle, token)
 			}.toIterator

@@ -42,4 +42,10 @@ object ProgramHelper extends Logging {
 			}
 		}.name("Wiki-Pages")
 	}
+
+	def filterNormalPages(wikiPages: DataSet[WikiPage]): DataSet[WikiPage] = {
+		wikiPages.filter { wikiPage =>
+			!wikiPage.isDisambiguation && !wikiPage.isRedirect && !wikiPage.isList
+	}
+
 }
