@@ -15,7 +15,6 @@ object OutputFiles {
 	lazy val textDumpsPath               = s"file://$currentPath/text-dumps.wiki"
 	lazy val surfaceDocumentCountsPath   = s"file://$currentPath/surface-document-counts.wiki"
 	lazy val entireTextSurfacesPath      = s"file://$currentPath/entire-text-surfaces.wiki"
-	lazy val entireTextSurfaceCountsPath = s"file://$currentPath/entire-text-surface-counts.wiki"
 	lazy val surfaceLinkProbsPath        = s"file://$currentPath/surface-link-probs.wiki"
 
 	val textFormat            = CsvOutputFormat[(String, String)]("\n", "\t")

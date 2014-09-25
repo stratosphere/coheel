@@ -68,11 +68,9 @@ class EntireTextSurfacesProgram extends Program with ProgramDescription with Log
 
 		val entireTextSurfacesOutput = entireTextSurfaces.write(entireTextSurfacesPath,
 			CsvOutputFormat[(String, String)]("\n", "\t"))
-		val entireTextSurfacesCountsOutput = entireTextSurfaceCounts.write(entireTextSurfaceCountsPath,
-			CsvOutputFormat[(String, Int)]("\n", "\t"))
 		val surfaceLinkProbsOutput = surfaceLinkProbs.write(surfaceLinkProbsPath,
 			CsvOutputFormat[(String, Int, Double)]("\n", "\t"))
-		val plan = new ScalaPlan(Seq(entireTextSurfacesOutput, entireTextSurfacesCountsOutput, surfaceLinkProbsOutput))
+		val plan = new ScalaPlan(Seq(entireTextSurfacesOutput, surfaceLinkProbsOutput))
 		plan
 	}
 }
