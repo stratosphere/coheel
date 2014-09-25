@@ -1,6 +1,4 @@
 ---------------------------------
-Run two local stratospheres at the same time.
----------------------------------
 Remove wiktionary links.
 ---------------------------------
 Copy data to HDFS
@@ -9,5 +7,13 @@ RUN ON SERVER, DISTRIBUTED
 --------------------------------
 Set links to empty string?
 --------------------------------
-For all surfaces:
-Percentage of link and non-link.
+Idea:
+First bold text in article usually gives another surface. Use that?
+Example: http://en.wikipedia.org/wiki/Michael_Jordan_(Irish_politician)
+--------------------------------
+Investigate, why these values are different:
+stefan.bunk@isfet:/data/wikipedia/results/last_output$ grep -P "^merkel\t" document-word-counts.wiki
+merkel  1479
+stefan.bunk@isfet:/data/wikipedia/results/last_output$ grep -P "^merkel\t" entire-text-surface-counts.wiki
+merkel  1607
+
