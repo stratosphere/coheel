@@ -27,8 +27,8 @@ object TokenizerHelper {
 		val offsetAttribute   = tokenStream.addAttribute(classOf[OffsetAttribute])
 		while (tokenStream.incrementToken()) {
 			tokens += charTermAttribute.toString
-			println(offsetAttribute.startOffset())
-			println(offsetAttribute.endOffset())
+//			println(offsetAttribute.startOffset())
+//			println(offsetAttribute.endOffset())
 		}
 		analyzer.close()
 		tokens.result()

@@ -175,8 +175,8 @@ class WikipediaTrainingProgram()
 		val documentWordCounts = words
 			.groupBy { word => word.word }
 			.reduceGroup { it =>
-			val docList = it.toList
-			(docList(0).word, docList.groupBy { word => word.document }.size)
+				val docList = it.toList
+				(docList(0).word, docList.groupBy { word => word.document }.size)
 		}.name("Document Word Counts: Word-DocumentCount")
 		val languageModelsOutput = languageModel.write(languageModelProbsPath, probOutputFormat)
 		val documentWordCountsOutput = documentWordCounts.write(documentWordCountsPath, surfaceDocumentFormat)

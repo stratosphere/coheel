@@ -13,7 +13,7 @@ import scala.collection.mutable
 
 class EntireTextSurfacesProgram extends Program with ProgramDescription with Logging {
 	// prepare the trie
-	TrieBuilder.build()
+	TrieBuilder.buildFullTrie()
 
 	override def getDescription = "Counting how often a surface occurs, in the entire text. This approach uses a trie."
 
@@ -21,6 +21,7 @@ class EntireTextSurfacesProgram extends Program with ProgramDescription with Log
 		val wikiPages = ProgramHelper.getWikiPages()
 
 		var c = 0
+		// which surfaces occur in which documents
 		val entireTextSurfaces = wikiPages.flatMap { wikiPage =>
 			if (c % 200000 == 0)
 				log.info(f"$c%8s/11023933")
@@ -31,7 +32,7 @@ class EntireTextSurfacesProgram extends Program with ProgramDescription with Log
 
 			// each word and its following words must be checked, if it is a surface
 			for (i <- 0 until tokens.size) {
-				resultSurfaces ++= TrieBuilder.trie.slidingContains(tokens, i)
+				resultSurfaces ++= TrieBuilder.fullTrie.slidingContains(tokens, i)
 			}
 			resultSurfaces.map { surface => (wikiPage.pageTitle, surface) }.toIterator
 		}.name("Entire-Text-Surfaces-Along-With-Document")

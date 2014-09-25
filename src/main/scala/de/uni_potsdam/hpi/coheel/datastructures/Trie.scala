@@ -92,7 +92,7 @@ case class TrieNode() {
 				containsResult = this.contains(currentCheck)
 				i += 1
 			} else {
-				// if we reached the end of the text, we need to break
+				// if we reached the end of the text, we need to break manually
 				containsResult = ContainsResult(false, false)
 			}
 		}

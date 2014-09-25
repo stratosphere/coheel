@@ -1,8 +1,7 @@
 package de.uni_potsdam.hpi.coheel.datastructures
 
-import java.io.{BufferedWriter, File, FileWriter}
+import java.io.File
 
-import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
 import de.uni_potsdam.hpi.coheel.programs.OutputFiles._
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
 import org.slf4s.Logging
@@ -10,70 +9,47 @@ import org.slf4s.Logging
 import scala.io.Source
 
 object TrieTester {
-
 	def main(args: Array[String]): Unit = {
-		val trieBuilder = new TrieBuilder
-//		trieBuilder.printMemoryStatus()
-		trieBuilder.tokenizeSurfaces()
-//		val trie = trieBuilder.buildTrie()
-		trieBuilder.printMemoryStatus()
-	}
-
-}
-object TrieBuilder {
-
-	// builds the trie by accessing the lazy value
-	def build(): Unit = trie
-
-	lazy val trie: Trie = {
-		new TrieBuilder().buildTrie()
+		TrieBuilder.printMemoryStatus()
+		val trie = TrieBuilder.buildFullTrie()
+		TrieBuilder.printMemoryStatus()
 	}
 }
-class TrieBuilder extends Logging {
 
-	def printMemoryStatus(): Unit = {
-		val maxMem   = Runtime.getRuntime.maxMemory().toDouble / 1024 / 1024
-		val freeMem  = Runtime.getRuntime.freeMemory().toDouble / 1024 / 1024
-		val totalMem = Runtime.getRuntime.totalMemory().toDouble / 1024 / 1024
-		val actualMem = maxMem - (totalMem - freeMem)
-		log.info(f"Act. : $actualMem%.2f MB")
-	}
+/**
+ * Singleton objects for the tries.
+ */
+object TrieBuilder extends Logging {
 
-	def tokenizeSurfaces(): Unit = {
-		val fileName = surfaceProbsPath.replace("file://", "")
+	// this contains all surfaces
+	var fullTrie: Trie = _
+
+	// this contains only surfaces, above a certain percentage
+	var thresholdTrie: Trie = _
+
+
+	/**
+	 * Private helper function to encapsulate reoccurring code for building a trie from an output file
+	 * @param filePath The output file
+	 * @param trieBuildingPart The method, which, given the line, parses the line and adds it to the trie.
+	 */
+	private def trieBuilderHelper(filePath: String)(trieBuildingPart: String => Unit): Unit = {
+		val fileName = filePath.replace("file://", "")
 		val lines = Source.fromFile(new File(fileName)).getLines()
 
 		var i = 0
-		lines.foreach { line =>
-			val surface = line.split('\t')(0)
-			val tokens = TokenizerHelper.tokenize(surface)
-			if (tokens.nonEmpty) {
-				println(tokens.mkString("\t"))
-			}
-			i += 1
-			if (i % 1000000 == 0) {
-				log.info(f"$i")
-				printMemoryStatus()
-			}
-		}
-	}
-	def buildTrie(): Trie = {
-		val fileName = surfaceProbsPath.replace("file://", "")
-		val lines = Source.fromFile(new File(fileName)).getLines()
-
-		var i = 0
-		val trie = new Trie()
 		lines.foreach { line =>
 			try {
+				trieBuildingPart(line)
 				val surface = line.split('\t')(0)
 				val tokens = TokenizerHelper.tokenize(surface)
 				if (tokens.nonEmpty)
-					trie.add(tokens)
+					fullTrie.add(tokens)
 				i += 1
-				if (i % 1000000 == 0) {
+//				if (i % 1000000 == 0) {
 //					log.info(f"$i")
 //					printMemoryStatus()
-				}
+//				}
 			} catch {
 				case e: OutOfMemoryError =>
 					log.error(e.toString)
@@ -82,7 +58,38 @@ class TrieBuilder extends Logging {
 			}
 		}
 		log.info("Built trie.")
-		trie
+	}
+	def buildThresholdTrie(threshold: Double): Unit = {
+		thresholdTrie = new Trie()
+
+//		trieBuilderHelper() { line =>
+//			val surface = line.split('\t')(0)
+//			val tokens = TokenizerHelper.tokenize(surface)
+//			if (tokens.nonEmpty)
+//				fullTrie.add(tokens)
+//		}
+	}
+
+	def buildFullTrie(): Unit = {
+		fullTrie = new Trie()
+
+		trieBuilderHelper(surfaceProbsPath) { line =>
+			val surface = line.split('\t')(0)
+			val tokens = TokenizerHelper.tokenize(surface)
+			if (tokens.nonEmpty)
+				fullTrie.add(tokens)
+		}
+	}
+
+	/**
+	 * Helper function for printing the memory status.
+	 */
+	def printMemoryStatus(): Unit = {
+		val maxMem   = Runtime.getRuntime.maxMemory().toDouble / 1024 / 1024
+		val freeMem  = Runtime.getRuntime.freeMemory().toDouble / 1024 / 1024
+		val totalMem = Runtime.getRuntime.totalMemory().toDouble / 1024 / 1024
+		val actualMem = maxMem - (totalMem - freeMem)
+		log.info(f"Act. : $actualMem%.2f MB")
 	}
 
 }
