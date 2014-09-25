@@ -5,7 +5,7 @@ then
 	echo "Usage:"
 	echo "  bin/run [dataset] [program] [params]"
 	echo "Available datasets:"
-	echo "    full (Full dataset, and results from the last run for the second iteration))"
+	echo "    full (Full dataset, and results from the last run for the second iteration)"
 	echo "    chunk"
 	echo "Available programs:"
 	echo "    main"
