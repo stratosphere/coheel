@@ -61,12 +61,31 @@ class TrieTest extends FunSuite {
 		trie.add("merkel")
 
 		val testSentence = Array("angela", "merkel", "is", "german")
-		val result1 = trie.slidingContains(testSentence, 0)
+		val result1 = trie.slidingContains(testSentence, 0).map { containment => containment.mkString(" ")}
 		val expected1 = Seq("angela", "angela merkel", "angela merkel is german")
+		println(result1)
+		expected1.foreach { expected =>
+			assert(result1.contains(expected))
+		}
 
-		val result2 = trie.slidingContains(testSentence, 1)
+		val result2 = trie.slidingContains(testSentence, 1).map { containment => containment.mkString(" ") }
+//		println(result2)
 		assert(result2.size === 1)
 		assert(result2.contains("merkel"))
+	}
+
+	test("sliding contains works as expected for arbitrary type") {
+		case class Foo(a: Int, b: Double)
+
+		val trie = newTrie()
+		trie.add("1 2")
+		trie.add("1 2 3")
+
+		val testSentence = Array(Foo(1, 1.0), Foo(2, 2.0))
+		val result = trie.slidingContains[Foo](testSentence, { f => f.a.toString }, 0)
+		assert (result.size === 1)
+		assert (result(0)(0).a === 1 && result(0)(1).a === 2)
+
 	}
 
 	test("branching works at every level") {

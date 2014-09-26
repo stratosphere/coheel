@@ -32,7 +32,9 @@ class EntireTextSurfacesProgram extends Program with ProgramDescription with Log
 
 			// each word and its following words must be checked, if it is a surface
 			for (i <- 0 until tokens.size) {
-				resultSurfaces ++= TrieBuilder.fullTrie.slidingContains(tokens, i)
+				resultSurfaces ++= TrieBuilder.fullTrie.slidingContains(tokens, i).map {
+					containment => containment.mkString(" ")
+				}
 			}
 			resultSurfaces.map { surface => (wikiPage.pageTitle, surface) }.toIterator
 		}.name("Entire-Text-Surfaces-Along-With-Document")
