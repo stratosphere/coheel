@@ -51,8 +51,8 @@ object TrieBuilder extends Logging {
 //					printMemoryStatus()
 //				}
 			} catch {
-				case e: ArrayIndexOutOfBoundsException =>
-					log.warn("Array index out of bounds: bad line in input.")
+				case e @ (_: ArrayIndexOutOfBoundsException | _: NumberFormatException) =>
+					log.warn(s"Bad line in input: ${e.getMessage}")
 				case e: OutOfMemoryError =>
 					log.error(e.toString)
 					log.error(i.toString)

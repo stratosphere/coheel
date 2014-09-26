@@ -17,7 +17,7 @@ class NerRocCurveProgram extends Program with ProgramDescription with Logging {
 	override def getDescription = "Determining the ROC curve for the NER threshold."
 	override def getPlan(args: String*): Plan = {
 
-		val thresholds = ProgramHelper.getWikiPages(1).flatMap { wikiPage =>
+		val thresholds = ProgramHelper.filterNormalPages(ProgramHelper.getWikiPages(10)).flatMap { wikiPage =>
 			println(s"Reading ${wikiPage.pageTitle}.")
 			// introduce all thresholds for each wikipage
 			(0.5 to 0.5 by 0.05).map { threshold =>

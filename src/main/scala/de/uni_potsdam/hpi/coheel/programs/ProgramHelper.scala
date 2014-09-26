@@ -44,7 +44,6 @@ object ProgramHelper extends Logging {
 				}
 				wikiPage
 			}
-			log.info(s"Remaining page count: $remainingPageCount")
 			result
 		}.name("Wiki-Pages")
 	}
