@@ -25,9 +25,13 @@ object ProgramHelper extends Logging {
 		var remainingPageCount = count
 		val input = TextFile(wikipediaFilesPath).name("Input-Text-Files")
 		input.flatMap { fileName =>
-			val file= new File(s"${dumpFile.getAbsoluteFile.getParent}/$fileName")
+			val file = new File(s"${dumpFile.getAbsoluteFile.getParent}/$fileName")
 			val wikiPages = WikiPageReader.xmlToWikiPages(getReader(file))
-			val filteredWikiPages = wikiPages.filter { page => page.ns == 0 && page.source.nonEmpty }
+			val filteredWikiPages = wikiPages.filter { page =>
+				val filter = page.ns == 0 && page.source.nonEmpty && remainingPageCount > 0
+				remainingPageCount -= 1
+				filter
+			}
 			val result = filteredWikiPages.take(remainingPageCount).map { wikiPage =>
 				try {
 					val extractor = new Extractor(wikiPage)
@@ -40,7 +44,7 @@ object ProgramHelper extends Logging {
 				}
 				wikiPage
 			}
-			remainingPageCount -= filteredWikiPages.size
+			log.info(s"Remaining page count: $remainingPageCount")
 			result
 		}.name("Wiki-Pages")
 	}

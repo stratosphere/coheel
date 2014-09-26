@@ -42,7 +42,7 @@ object WikiPageReader extends Logging {
 		xmlToWikiPages(reader)
 	}
 
-	private var readCounter = 0
+	private var readCounter = 1
 
 	def xmlToWikiPages(reader: Reader): Iterator[WikiPage] = {
 		new Iterator[WikiPage] {
@@ -83,7 +83,7 @@ object WikiPageReader extends Logging {
 			def next(): WikiPage = {
 				if (!alreadyRead) {
 					alreadyRead = true
-					log.info(f"Reading $readCounter%5s. wiki file on this node.")
+					log.info(f"Reading $readCounter%4s. wiki file on this node.")
 					readCounter += 1
 				}
 				readNextPage()
