@@ -52,7 +52,7 @@ object TrieBuilder extends Logging {
 //				}
 			} catch {
 				case e @ (_: ArrayIndexOutOfBoundsException | _: NumberFormatException) =>
-					log.warn(s"Bad line in input: ${e.getMessage}")
+					log.warn(s"Bad line in input: ${e.toString}")
 				case e: OutOfMemoryError =>
 					log.error(e.toString)
 					log.error(i.toString)
@@ -85,7 +85,7 @@ object TrieBuilder extends Logging {
 	def buildFullTrie(): Unit = {
 		fullTrie = new Trie()
 
-		trieBuilderHelper(surfaceProbsPath) { line =>
+		trieBuilderHelper(surfaceLinkProbsPath) { line =>
 			val surface = line.split('\t')(0)
 			val tokens = TokenizerHelper.tokenize(surface)
 			if (tokens.nonEmpty)
