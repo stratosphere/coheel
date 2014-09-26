@@ -42,8 +42,11 @@ object WikiPageReader extends Logging {
 		xmlToWikiPages(reader)
 	}
 
+	private var readCounter = 0
+
 	def xmlToWikiPages(reader: Reader): Iterator[WikiPage] = {
 		new Iterator[WikiPage] {
+			var alreadyRead = false
 			var hasMorePages = true
 
 			val streamReader = factory.createXMLStreamReader(reader)
@@ -78,6 +81,11 @@ object WikiPageReader extends Logging {
 
 			def hasNext = hasMorePages
 			def next(): WikiPage = {
+				if (!alreadyRead) {
+					alreadyRead = true
+					log.info(f"Reading $readCounter%5s. wiki file on this node.")
+					readCounter += 1
+				}
 				readNextPage()
 				val isDisambiguation = checkDisambiguation(text, pageTitle)
 				val isList           = checkList(pageTitle)
