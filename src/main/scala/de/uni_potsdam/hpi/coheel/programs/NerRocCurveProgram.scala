@@ -9,8 +9,6 @@ import org.apache.flink.api.scala.operators.CsvOutputFormat
 import org.slf4s.Logging
 import OutputFiles._
 
-import scala.collection.mutable
-
 class NerRocCurveProgram extends Program with ProgramDescription with Logging {
 
 	TrieBuilder.buildFullTrie()

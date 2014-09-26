@@ -37,7 +37,6 @@ case class WikiPage(pageTitle: String, ns: Int, redirect: String, var plainText:
 object WikiPageReader extends Logging {
 
 	lazy val factory = XMLInputFactory.newInstance()
-	var i = 0
 	def xmlToWikiPages(s: String): Iterator[WikiPage] = {
 		val reader = new BufferedReader(new StringReader(s))
 		xmlToWikiPages(reader)

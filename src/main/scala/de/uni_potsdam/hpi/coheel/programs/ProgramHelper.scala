@@ -21,14 +21,15 @@ object ProgramHelper extends Logging {
 		new BufferedReader(new FileReader(f))
 	}
 
-	def getWikiPages(count: Int = -1): DataSet[WikiPage] = {
+	def getWikiPages(count: Int = Int.MaxValue): DataSet[WikiPage] = {
+		var remainingPageCount = count
 		val input = TextFile(wikipediaFilesPath).name("Input-Text-Files")
 		input.flatMap { fileName =>
 			log.info(s"Reading $fileName")
 			val file= new File(s"${dumpFile.getAbsoluteFile.getParent}/$fileName")
 			val wikiPages = WikiPageReader.xmlToWikiPages(getReader(file))
-			(if (count == -1) wikiPages else wikiPages.take(count))
-				.filter { page => page.ns == 0 && page.source.nonEmpty }.map { wikiPage =>
+			val filteredWikiPages = wikiPages.filter { page => page.ns == 0 && page.source.nonEmpty }
+			val result = filteredWikiPages.take(remainingPageCount).map { wikiPage =>
 				try {
 					val extractor = new Extractor(wikiPage)
 					wikiPage.links = extractor.extractLinks()
@@ -40,6 +41,8 @@ object ProgramHelper extends Logging {
 				}
 				wikiPage
 			}
+			remainingPageCount -= filteredWikiPages.size
+			result
 		}.name("Wiki-Pages")
 	}
 
