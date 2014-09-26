@@ -70,7 +70,7 @@ object TrieBuilder extends Logging {
 		}
 		thresholdTrie = new Trie()
 
-		trieBuilderHelper(surfaceProbsPath) { line =>
+		trieBuilderHelper(surfaceLinkProbsPath) { line =>
 			val split = line.split('\t')
 			val surface = split(0)
 			val prob = split(2).toDouble
@@ -85,7 +85,7 @@ object TrieBuilder extends Logging {
 	def buildFullTrie(): Unit = {
 		fullTrie = new Trie()
 
-		trieBuilderHelper(surfaceLinkProbsPath) { line =>
+		trieBuilderHelper(surfaceProbsPath) { line =>
 			val surface = line.split('\t')(0)
 			val tokens = TokenizerHelper.tokenize(surface)
 			if (tokens.nonEmpty)
