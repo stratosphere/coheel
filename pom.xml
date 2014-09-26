@@ -15,6 +15,7 @@
 	</properties>
 
 	<dependencies>
+		<!-- Flink dependencies -->
 		<dependency>
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-scala</artifactId>
@@ -25,16 +26,13 @@
 			<artifactId>flink-clients</artifactId>
 			<version>0.6-incubating</version>
 		</dependency>
+		<!-- Sweble for wikitext parsing -->
 		<dependency>
 			<groupId>org.sweble.wikitext</groupId>
 			<artifactId>swc-engine</artifactId>
 			<version>1.1.0</version>
 		</dependency>
-		<dependency>
-			<groupId>org.slf4s</groupId>
-			<artifactId>slf4s-api_2.10</artifactId>
-			<version>1.7.6</version>
-		</dependency>
+		<!-- performance primitive collections for Java -->
 		<dependency>
 			<groupId>net.sf.trove4j</groupId>
 			<artifactId>trove4j</artifactId>
@@ -58,11 +56,23 @@
 			<artifactId>config</artifactId>
 			<version>1.2.1</version>
 		</dependency>
+		<!-- command line argument parsing -->
+		<dependency>
+			<groupId>com.github.scopt</groupId>
+			<artifactId>scopt_2.10</artifactId>
+			<version>3.2.0</version>
+		</dependency>
 		<!-- logging framework logback -->
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>1.1.1</version>
+		</dependency>
+		<!-- Scala bindings for loggers -->
+		<dependency>
+			<groupId>org.slf4s</groupId>
+			<artifactId>slf4s-api_2.10</artifactId>
+			<version>1.7.6</version>
 		</dependency>
 		<!-- tests -->
 		<dependency>

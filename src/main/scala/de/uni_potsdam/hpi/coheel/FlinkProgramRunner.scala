@@ -1,38 +1,68 @@
 package de.uni_potsdam.hpi.coheel
 
-
 import java.io.File
 
-import ch.qos.logback.core.Appender
 import org.apache.commons.io.FileUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.{ProgramDescription, Program}
 import org.apache.flink.client.LocalExecutor
-import org.apache.log4j.{ConsoleAppender, Level, Logger}
-import com.typesafe.config.ConfigFactory
+import org.apache.log4j.{Level, Logger}
+import com.typesafe.config.{Config, ConfigFactory}
 import de.uni_potsdam.hpi.coheel.programs.{EntireTextSurfacesProgram, RedirectResolvingProgram, WikipediaTrainingProgram}
 import org.slf4s.Logging
 import scala.collection.JavaConversions._
 
+/**
+ * Basic runner for several Flink programs.
+ * Can be configured via several command line arguments.
+ * Run without arguments for a list of available options.
+ */
+// -verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails
 object FlinkProgramRunner extends Logging {
 
-	val config   = ConfigFactory.load()
+	/**
+	 * Command line parameter configuration
+	 */
+	case class Params(dataSetConf: String = "chunk", programName: String = "main", doLogging: Boolean = false)
+	val parser = new scopt.OptionParser[Params]("bin/run") {
+		head("CohEEL", "0.0.1")
+		opt[String]('d', "dataset") required() action { (x, c) =>
+			c.copy(dataSetConf = x) } text "specifies the dataset to use, either 'full' or 'chunk'" validate { x =>
+			if (List("full", "chunk").contains(x)) success else failure("dataset must be either 'full' or 'chunk'") }
+		opt[String]('p', "program") required() action { (x, c) =>
+			c.copy(programName = x) } text "specifies the program to run"
+		opt[Boolean]('l', "logging") action { case (x, c) =>
+			c.copy(doLogging = x) }
+		note("some notes.\n")
+		help("help") text "prints this usage text"
+	}
+
+	/**
+	 * Runnable Flink programs.
+	 */
+	val programs = Map(
+		"main" -> classOf[WikipediaTrainingProgram],
+		"trie" -> classOf[EntireTextSurfacesProgram],
+		"redirects" -> classOf[RedirectResolvingProgram])
+
+	// Always overwrite already existing files.
 	LocalExecutor.setOverwriteFilesByDefault(true)
 
+	var config: Config = _
+
 	def main(args: Array[String]): Unit = {
-		// -Xms3g -Xmx7g
-		// -verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails
+		// parser.parse returns Option[C]
+		parser.parse(args, Params()) map { params =>
+			config   = ConfigFactory.load(params.dataSetConf)
+			val programName = params.programName
+			if (!params.doLogging)
+				turnOffLogging()
 
-		val programName = if (args.nonEmpty) args(0) else "main"
-
-		if (!args.contains("-log"))
-			turnOffLogging()
-
-		val program = Map(
-			"main" -> classOf[WikipediaTrainingProgram],
-			"trie" -> classOf[EntireTextSurfacesProgram],
-			"redirects" -> classOf[RedirectResolvingProgram])(programName)
-		runProgram(program.newInstance())
+			val program = programs(programName).newInstance()
+			runProgram(program)
+		} getOrElse {
+			parser.showUsage
+		}
 	}
 
 	def runProgram(program: Program with ProgramDescription): Unit = {

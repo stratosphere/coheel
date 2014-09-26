@@ -1,37 +1,25 @@
-#!/usr/bin/env /bin/sh
+#!/usr/bin/env /bin/bash
 
-if [ $# -eq 0 ]
-then
-	echo "Usage:"
-	echo "  bin/run [dataset] [program] [params]"
-	echo "Available datasets:"
-	echo "    full (Full dataset, and results from the last run for the second iteration)"
-	echo "    chunk"
-	echo "Available programs:"
-	echo "    main"
-	echo "    trie"
-	echo "    redirects"
-	echo "Available params:"
-	echo "    -log: turns on Flink logging"
-	exit
-fi
+# Prepare the params with an '|' character in between, as Maven requires
+PARAMS=
+for i in "$@"; do
+	# Concatenate with '|' in-between
+	PARAMS="$PARAMS|$i"
+done
+# Remove the leading '|'
+PARAMS="${PARAMS#"|"}"
 
-if [ -e "src/main/resources/$1.conf" ]
-then
-	rm run-output compile-output 2> /dev/null
-	date --rfc-3339=seconds | tee -a run-output
-	cp src/main/resources/$1.conf src/main/resources/application.conf
-	echo "Compiling .."
-	mvn compile > compile-output
-	echo "Running .."
-	echo "--------------------------------------------------------------------------" | tee -a run-output
-	mvn -q scala:run -DaddArgs="$2|$3" | tee -a run-output
-	echo "--------------------------------------------------------------------------" | tee -a run-output
-	date --rfc-3339=seconds | tee -a run-output
-else
-	echo "Configuration '$1' does not exist."
-	echo "Available configurations:"
-	cd src/main/resources
-	ls *.conf
-	cd ../../..
-fi
+# Remove old log files
+rm run-output compile-output 2> /dev/null
+# Display start time
+date --rfc-3339=seconds | tee -a run-output
+# Compile first ..
+echo "Compiling .."
+mvn compile > compile-output
+# .. then run the app
+echo "Running .."
+echo "--------------------------------------------------------------------------" | tee -a run-output
+mvn -q scala:run -DaddArgs="$PARAMS" | tee -a run-output
+echo "--------------------------------------------------------------------------" | tee -a run-output
+# Display end time
+date --rfc-3339=seconds | tee -a run-output

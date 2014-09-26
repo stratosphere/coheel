@@ -7,6 +7,5 @@ output/
 *.log
 *.pdf
 src/test/resources/
-src/main/resources/application.conf
 /*-output
 bin/file-concatenator/
