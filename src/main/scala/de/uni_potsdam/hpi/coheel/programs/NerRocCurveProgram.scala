@@ -19,6 +19,7 @@ class NerRocCurveProgram extends Program with ProgramDescription with Logging {
 	override def getPlan(args: String*): Plan = {
 
 		val thresholds = ProgramHelper.getWikiPages(1).flatMap { wikiPage =>
+			println(s"Reading ${wikiPage.pageTitle}.")
 			// introduce all thresholds for each wikipage
 			(0.5 to 0.5 by 0.05).map { threshold =>
 				(threshold, wikiPage)
@@ -28,6 +29,7 @@ class NerRocCurveProgram extends Program with ProgramDescription with Logging {
 
 
 		val rocValues = thresholds.reduceGroup { case wikiPages =>
+			println("Reducing a group.")
 			var trie: Trie = null
 
 			var tp = 0
