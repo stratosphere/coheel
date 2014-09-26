@@ -8,7 +8,7 @@ import org.apache.flink.api.common.{ProgramDescription, Program}
 import org.apache.flink.client.LocalExecutor
 import org.apache.log4j.{Level, Logger}
 import com.typesafe.config.{Config, ConfigFactory}
-import de.uni_potsdam.hpi.coheel.programs.{EntireTextSurfacesProgram, RedirectResolvingProgram, WikipediaTrainingProgram}
+import de.uni_potsdam.hpi.coheel.programs.{NerRocCurveProgram, EntireTextSurfacesProgram, RedirectResolvingProgram, WikipediaTrainingProgram}
 import org.slf4s.Logging
 import scala.collection.JavaConversions._
 
@@ -22,6 +22,15 @@ import scala.collection.JavaConversions._
 object FlinkProgramRunner extends Logging {
 
 	/**
+	 * Runnable Flink programs.
+	 */
+	val programs = Map(
+		"main" -> classOf[WikipediaTrainingProgram],
+		"trie" -> classOf[EntireTextSurfacesProgram],
+		"ner-roc" -> classOf[NerRocCurveProgram],
+		"redirects" -> classOf[RedirectResolvingProgram])
+
+	/**
 	 * Command line parameter configuration
 	 */
 	case class Params(dataSetConf: String = "chunk", programName: String = "main", doLogging: Boolean = false)
@@ -31,20 +40,17 @@ object FlinkProgramRunner extends Logging {
 			c.copy(dataSetConf = x) } text "specifies the dataset to use, either 'full' or 'chunk'" validate { x =>
 			if (List("full", "chunk").contains(x)) success else failure("dataset must be either 'full' or 'chunk'") }
 		opt[String]('p', "program") required() action { (x, c) =>
-			c.copy(programName = x) } text "specifies the program to run"
+			c.copy(programName = x) } text "specifies the program to run" validate { x =>
+			if (programs.keys.contains(x))
+				success
+			else
+				failure("program must be one of the following: " + programs.keys.mkString(",")) }
 		opt[Boolean]('l', "logging") action { case (x, c) =>
 			c.copy(doLogging = x) }
 		note("some notes.\n")
 		help("help") text "prints this usage text"
 	}
 
-	/**
-	 * Runnable Flink programs.
-	 */
-	val programs = Map(
-		"main" -> classOf[WikipediaTrainingProgram],
-		"trie" -> classOf[EntireTextSurfacesProgram],
-		"redirects" -> classOf[RedirectResolvingProgram])
 
 	// Always overwrite already existing files.
 	LocalExecutor.setOverwriteFilesByDefault(true)
@@ -71,6 +77,8 @@ object FlinkProgramRunner extends Logging {
 		log.info(StringUtils.repeat('#', 140))
 		log.info("# " + StringUtils.center(program.getDescription, 136) + " #")
 		log.info("# " + StringUtils.rightPad("Dataset: " + config.getString("name"), 136) + " #")
+		log.info("# " + StringUtils.rightPad("Base path: " + config.getString("base_path"), 136) + " #")
+		log.info("# " + StringUtils.rightPad("Output folder: " + config.getString("output_files_dir"), 136) + " #")
 		log.info(StringUtils.repeat('#', 140))
 		val processingTime = time {
 			val json = LocalExecutor.optimizerPlanAsJSON(program.getPlan())
