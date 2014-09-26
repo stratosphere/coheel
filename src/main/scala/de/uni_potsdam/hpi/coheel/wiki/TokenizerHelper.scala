@@ -12,6 +12,23 @@ import org.apache.lucene.analysis.tokenattributes.{OffsetAttribute, CharTermAttr
 object TokenizerHelper {
 
 	def tokenize(text: String, stemming: Boolean = true): List[String] = {
+		val tokens = ListBuffer[String]()
+		tokenizeHelper(text, stemming) { (charTermAttribute, _) =>
+			tokens += charTermAttribute.toString
+		}
+		tokens.result()
+	}
+
+	case class Token(word: String, startOffset: Int, endOffset: Int)
+	def tokenizeWithPositions(text: String, stemming: Boolean = true): List[Token] = {
+		val tokens = ListBuffer[Token]()
+		tokenizeHelper(text, stemming) { (charTermAttribute, offsetAttribute) =>
+			tokens += Token(charTermAttribute.toString, offsetAttribute.startOffset(), offsetAttribute.endOffset())
+		}
+		tokens.result()
+	}
+
+	private def tokenizeHelper(text: String, stemming: Boolean)(tokenHandler: (CharTermAttribute, OffsetAttribute) => Unit): Unit = {
 		val analyzer = new EnglishAnalyzer(Version.LUCENE_48)
 		// implemented following this guide:
 		// http://stackoverflow.com/questions/6334692/how-to-use-a-lucene-analyzer-to-tokenize-a-string
@@ -21,17 +38,14 @@ object TokenizerHelper {
 			analyzer.tokenStream(null, new StringReader(text))
 
 		tokenStream.reset()
-		val tokens = ListBuffer[String]()
 
 		val charTermAttribute = tokenStream.addAttribute(classOf[CharTermAttribute])
 		val offsetAttribute   = tokenStream.addAttribute(classOf[OffsetAttribute])
+
 		while (tokenStream.incrementToken()) {
-			tokens += charTermAttribute.toString
-//			println(offsetAttribute.startOffset())
-//			println(offsetAttribute.endOffset())
+			tokenHandler(charTermAttribute, offsetAttribute)
 		}
 		analyzer.close()
-		tokens.result()
 	}
 
 }

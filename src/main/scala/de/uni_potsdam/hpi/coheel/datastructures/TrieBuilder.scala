@@ -59,6 +59,7 @@ object TrieBuilder extends Logging {
 		}
 		log.info("Built trie.")
 	}
+
 	def buildThresholdTrie(threshold: Double): Unit = {
 		if (thresholdTrie != null) {
 			thresholdTrie = null

@@ -14,7 +14,6 @@ class RedirectResolvingProgram extends Program with ProgramDescription with Logg
 	override def getDescription = "Resolving redirects"
 
 	override def getPlan(args: String*): Plan = {
-
 		val redirects    = TextFile(redirectPath).map { line =>
 			val split = line.split('\t')
 			Redirect(split(0), split(1))

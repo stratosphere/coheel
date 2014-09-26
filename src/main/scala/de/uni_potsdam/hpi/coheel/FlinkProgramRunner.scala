@@ -17,7 +17,8 @@ import scala.collection.JavaConversions._
  * Can be configured via several command line arguments.
  * Run without arguments for a list of available options.
  */
-// -verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails
+// GC parameters: -verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails
+// Dump downloaded from http://dumps.wikimedia.org/enwiki/latest/
 object FlinkProgramRunner extends Logging {
 
 	/**
@@ -48,12 +49,13 @@ object FlinkProgramRunner extends Logging {
 	// Always overwrite already existing files.
 	LocalExecutor.setOverwriteFilesByDefault(true)
 
+	// Configuration for various input and output folders in src/main/resources.
 	var config: Config = _
 
 	def main(args: Array[String]): Unit = {
-		// parser.parse returns Option[C]
+		// Parse the arguments
 		parser.parse(args, Params()) map { params =>
-			config   = ConfigFactory.load(params.dataSetConf)
+			config = ConfigFactory.load(params.dataSetConf)
 			val programName = params.programName
 			if (!params.doLogging)
 				turnOffLogging()
@@ -71,8 +73,6 @@ object FlinkProgramRunner extends Logging {
 		log.info("# " + StringUtils.rightPad("Dataset: " + config.getString("name"), 136) + " #")
 		log.info(StringUtils.repeat('#', 140))
 		val processingTime = time {
-			// Dump downloaded from http://dumps.wikimedia.org/enwiki/latest/
-
 			val json = LocalExecutor.optimizerPlanAsJSON(program.getPlan())
 			FileUtils.writeStringToFile(new File("plan.json"), json, "UTF-8")
 
