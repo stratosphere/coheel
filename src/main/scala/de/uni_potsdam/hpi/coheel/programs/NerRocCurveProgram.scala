@@ -8,6 +8,7 @@ import org.apache.flink.api.scala.ScalaPlan
 import org.apache.flink.api.scala.operators.CsvOutputFormat
 import org.slf4s.Logging
 import OutputFiles._
+import DataSetNaming._
 
 class NerRocCurveProgram extends Program with ProgramDescription with Logging {
 
@@ -51,7 +52,7 @@ class NerRocCurveProgram extends Program with ProgramDescription with Logging {
 
 				(threshold, actualSurfaces.size, potentialSurfaces.size)
 			}
-		}
+		}.name("ROC-Curve-Values")
 
 		val rocValuesOutput = rocValues.write(nerRocCurvePath, CsvOutputFormat("\n", "\t"))
 		new ScalaPlan(Seq(rocValuesOutput))
