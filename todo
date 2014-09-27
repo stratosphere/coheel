@@ -24,13 +24,3 @@ Idea:
 First bold text in article usually gives another surface. Use that?
 Example: http://en.wikipedia.org/wiki/Michael_Jordan_(Irish_politician)
 --------------------------------
-Investigate, why these values are different:
-stefan.bunk@isfet:/data/wikipedia/results/last_output$ grep -P "^merkel\t" document-word-counts.wiki
-merkel  1479
-stefan.bunk@isfet:/data/wikipedia/results/last_output$ grep -P "^merkel\t" entire-text-surface-counts.wiki
-merkel  1607
------
-After the filter refactoring, it is:
-stefan.bunk@isfet:/data/wikipedia/results/latest_output$ grep -P "^merkel\t" surface-link-probs.wiki
-merkel  1446    0.04149377593360996
-Why is it less now?
