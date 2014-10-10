@@ -17,9 +17,9 @@ class NerRocCurveProgram extends Program with ProgramDescription with Logging {
 	override def getDescription = "Determining the ROC curve for the NER threshold."
 	override def getPlan(args: String*): Plan = {
 
-		val thresholds = ProgramHelper.filterNormalPages(ProgramHelper.getWikiPages(15)).flatMap { wikiPage =>
+		val thresholds = ProgramHelper.filterNormalPages(ProgramHelper.getWikiPages(30)).flatMap { wikiPage =>
 			// introduce all thresholds for each wikipage
-			(0.00 to 0.95 by 0.05).map { threshold =>
+			(0.00 to 1.00 by 0.01).map { threshold =>
 				(threshold, wikiPage)
 			}.toIterator
 		// group all computations for one threshold together, so that the trie needs to be built only once
@@ -31,7 +31,7 @@ class NerRocCurveProgram extends Program with ProgramDescription with Logging {
 			val wikiPages = wikiPagesIt.toList
 
 			val threshold = wikiPages.head._1
-			println(s"Working on threshold $threshold.")
+			println(f"Working on threshold $threshold%.2f.")
 			TrieBuilder.buildThresholdTrie(threshold)
 			val thresholdTrie: Trie = TrieBuilder.thresholdTrie
 
@@ -61,7 +61,8 @@ class NerRocCurveProgram extends Program with ProgramDescription with Logging {
 				// FN are those surfaces, which are actual surfaces, but are not returned
 				fn += actualSurfaces.diff(potentialSurfaces).size
 			}
-			(threshold, tp, tn, fp, fn, tp.toDouble / (tp + fn), fp.toDouble / (fp + tn))
+			// output threshold as a string, because otherwise rounding errors occur
+			(f"$threshold%.2f", tp, tn, fp, fn, tp.toDouble / (tp + fn), fp.toDouble / (fp + tn))
 		}.name("ROC-Curve-Values")
 
 		val rocValuesOutput = rocValues.write(nerRocCurvePath, CsvOutputFormat("\n", "\t"))
