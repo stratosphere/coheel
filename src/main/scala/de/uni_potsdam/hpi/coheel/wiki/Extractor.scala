@@ -7,7 +7,7 @@ import org.sweble.wikitext.engine._
 import scala.collection.JavaConversions._
 import org.sweble.wikitext.engine.utils.SimpleWikiConfiguration
 import de.fau.cs.osr.ptk.common.ast.{ContentNode, Text, AstNode, NodeList}
-import org.sweble.wikitext.`lazy`.parser.InternalLink
+import org.sweble.wikitext.`lazy`.parser.{Bold, Paragraph, InternalLink}
 
 /**
  * Represents a link in a Wikipedia article.
@@ -46,10 +46,56 @@ class Extractor(wikiPage: WikiPage) {
 		links
 	}
 
+	/**
+	 * Extracts plain text, with all wiki markup removed.
+	 * @return The plain text of the wikipage.
+	 */
 	def extractPlainText(): String = {
 		val plainTextConverter = new PlainTextConverter(Extractor.config)
 		val page = compiledWikiPage
 		plainTextConverter.go(page).asInstanceOf[String]
+	}
+
+	/**
+	 * This searches for the first paragraph in the text, and returns all bold texts within that first paragraph.
+	 * These are supposed to be alternative names for the entity.
+	 * @return A list of alternative names
+	 */
+	def extractAlternativeNames(): List[String] = {
+		// The minimum number of characters for the first paragraph
+		val MIN_PARAGRAPH_LENGTH = 20
+		val rootNode = compiledWikiPage.getContent
+
+		val nodeQueue = mutable.Queue[AstNode](rootNode)
+		while (nodeQueue.nonEmpty) {
+			val node = nodeQueue.dequeue()
+			if (node != null) {
+				node match {
+					case paragraph: Paragraph =>
+						val paragraphText = getText(paragraph)
+						if (paragraphText.length > MIN_PARAGRAPH_LENGTH)
+							return extractBoldWordsFrom(node.asInstanceOf[Paragraph])
+					case _ =>
+				}
+				nodeQueue.enqueue(node.iterator().toList: _*)
+			}
+		}
+		List()
+	}
+
+	def extractBoldWordsFrom(paragraph: Paragraph): List[String] = {
+		var boldWords = List[String]()
+		val nodeQueue = mutable.Queue[AstNode](paragraph)
+		while (nodeQueue.nonEmpty) {
+			val node = nodeQueue.dequeue()
+			node match {
+				case bold: Bold =>
+					boldWords ::= getText(bold)
+				case _ =>
+			}
+			nodeQueue.enqueue(node.iterator().toList: _*)
+		}
+		boldWords
 	}
 
 	private def getCompiledWikiPage(wikiPage: WikiPage): Page = {

@@ -3,7 +3,7 @@ package de.uni_potsdam.hpi.coheel.programs
 import org.apache.flink.api.scala.{TextFile, DataSet}
 import org.slf4s.Logging
 import scala.io.Source
-import de.uni_potsdam.hpi.coheel.wiki.{Extractor, WikiPage, WikiPageReader}
+import de.uni_potsdam.hpi.coheel.wiki.{Link, Extractor, WikiPage, WikiPageReader}
 import java.io.{BufferedReader, FileReader, Reader, File}
 import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
 import DataSetNaming._
@@ -35,7 +35,10 @@ object ProgramHelper extends Logging {
 			val result = filteredWikiPages.take(remainingPageCount).map { wikiPage =>
 				try {
 					val extractor = new Extractor(wikiPage)
-					wikiPage.links = extractor.extractLinks()
+					val alternativeNames = extractor.extractAlternativeNames().map {
+						Link(wikiPage.pageTitle, _, wikiPage.pageTitle)
+					}
+					wikiPage.links = alternativeNames ++ extractor.extractLinks()
 					wikiPage.plainText = extractor.extractPlainText()
 					wikiPage.source = ""
 				} catch {
@@ -53,5 +56,4 @@ object ProgramHelper extends Logging {
 			!wikiPage.isDisambiguation && !wikiPage.isRedirect && !wikiPage.isList
 		}
 	}
-
 }
