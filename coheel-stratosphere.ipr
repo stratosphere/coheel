@@ -693,15 +693,15 @@
         <root url="jar://$MAVEN_REPOSITORY$/javax/xml/stream/stax-api/1.0-2/stax-api-1.0-2-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: joda-time:joda-time:2.4">
+    <library name="Maven: joda-time:joda-time:2.5">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/joda-time/joda-time/2.4/joda-time-2.4.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/joda-time/joda-time/2.5/joda-time-2.5.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/joda-time/joda-time/2.4/joda-time-2.4-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/joda-time/joda-time/2.5/joda-time-2.5-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/joda-time/joda-time/2.4/joda-time-2.4-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/joda-time/joda-time/2.5/joda-time-2.5-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: junit:junit:4.11">
@@ -803,70 +803,70 @@
         <root url="jar://$MAVEN_REPOSITORY$/org/apache/commons/commons-math/2.1/commons-math-2.1-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.apache.flink:flink-clients:0.6-incubating">
+    <library name="Maven: org.apache.flink:flink-clients:0.6.1-incubating">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-clients/0.6-incubating/flink-clients-0.6-incubating.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-clients/0.6.1-incubating/flink-clients-0.6.1-incubating.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-clients/0.6-incubating/flink-clients-0.6-incubating-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-clients/0.6.1-incubating/flink-clients-0.6.1-incubating-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-clients/0.6-incubating/flink-clients-0.6-incubating-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-clients/0.6.1-incubating/flink-clients-0.6.1-incubating-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.apache.flink:flink-compiler:0.6-incubating">
+    <library name="Maven: org.apache.flink:flink-compiler:0.6.1-incubating">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-compiler/0.6-incubating/flink-compiler-0.6-incubating.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-compiler/0.6.1-incubating/flink-compiler-0.6.1-incubating.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-compiler/0.6-incubating/flink-compiler-0.6-incubating-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-compiler/0.6.1-incubating/flink-compiler-0.6.1-incubating-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-compiler/0.6-incubating/flink-compiler-0.6-incubating-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-compiler/0.6.1-incubating/flink-compiler-0.6.1-incubating-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.apache.flink:flink-core:0.6-incubating">
+    <library name="Maven: org.apache.flink:flink-core:0.6.1-incubating">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-core/0.6-incubating/flink-core-0.6-incubating.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-core/0.6.1-incubating/flink-core-0.6.1-incubating.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-core/0.6-incubating/flink-core-0.6-incubating-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-core/0.6.1-incubating/flink-core-0.6.1-incubating-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-core/0.6-incubating/flink-core-0.6-incubating-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-core/0.6.1-incubating/flink-core-0.6.1-incubating-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.apache.flink:flink-java:0.6-incubating">
+    <library name="Maven: org.apache.flink:flink-java:0.6.1-incubating">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-java/0.6-incubating/flink-java-0.6-incubating.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-java/0.6.1-incubating/flink-java-0.6.1-incubating.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-java/0.6-incubating/flink-java-0.6-incubating-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-java/0.6.1-incubating/flink-java-0.6.1-incubating-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-java/0.6-incubating/flink-java-0.6-incubating-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-java/0.6.1-incubating/flink-java-0.6.1-incubating-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.apache.flink:flink-runtime:0.6-incubating">
+    <library name="Maven: org.apache.flink:flink-runtime:0.6.1-incubating">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-runtime/0.6-incubating/flink-runtime-0.6-incubating.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-runtime/0.6.1-incubating/flink-runtime-0.6.1-incubating.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-runtime/0.6-incubating/flink-runtime-0.6-incubating-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-runtime/0.6.1-incubating/flink-runtime-0.6.1-incubating-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-runtime/0.6-incubating/flink-runtime-0.6-incubating-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-runtime/0.6.1-incubating/flink-runtime-0.6.1-incubating-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.apache.flink:flink-scala:0.6-incubating">
+    <library name="Maven: org.apache.flink:flink-scala:0.6.1-incubating">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-scala/0.6-incubating/flink-scala-0.6-incubating.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-scala/0.6.1-incubating/flink-scala-0.6.1-incubating.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-scala/0.6-incubating/flink-scala-0.6-incubating-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-scala/0.6.1-incubating/flink-scala-0.6.1-incubating-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-scala/0.6-incubating/flink-scala-0.6-incubating-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-scala/0.6.1-incubating/flink-scala-0.6.1-incubating-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: org.apache.hadoop:hadoop-core:1.2.1">
