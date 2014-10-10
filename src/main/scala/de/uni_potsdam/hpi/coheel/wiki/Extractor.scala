@@ -66,36 +66,35 @@ class Extractor(wikiPage: WikiPage) {
 		val MIN_PARAGRAPH_LENGTH = 20
 		val rootNode = compiledWikiPage.getContent
 
-		val nodeQueue = mutable.Queue[AstNode](rootNode)
-		while (nodeQueue.nonEmpty) {
-			val node = nodeQueue.dequeue()
-			if (node != null) {
-				node match {
-					case paragraph: Paragraph =>
-						val paragraphText = getText(paragraph)
-						if (paragraphText.length > MIN_PARAGRAPH_LENGTH)
-							return extractBoldWordsFrom(node.asInstanceOf[Paragraph])
-					case _ =>
-				}
-				nodeQueue.enqueue(node.iterator().toList: _*)
-			}
+		nodeIterator(rootNode) {
+			case paragraph: Paragraph =>
+				val paragraphText = getText(paragraph)
+				if (paragraphText.length > MIN_PARAGRAPH_LENGTH)
+					return extractBoldWordsFrom(paragraph)
+			case _ =>
 		}
 		List()
 	}
 
-	def extractBoldWordsFrom(paragraph: Paragraph): List[String] = {
+	private def extractBoldWordsFrom(paragraph: Paragraph): List[String] = {
 		var boldWords = List[String]()
-		val nodeQueue = mutable.Queue[AstNode](paragraph)
-		while (nodeQueue.nonEmpty) {
-			val node = nodeQueue.dequeue()
-			node match {
-				case bold: Bold =>
-					boldWords ::= getText(bold)
-				case _ =>
-			}
-			nodeQueue.enqueue(node.iterator().toList: _*)
+		nodeIterator(paragraph) {
+			case bold: Bold =>
+				boldWords ::= getText(bold)
+			case _ =>
 		}
 		boldWords
+	}
+
+	// Private helper function to extract breadth-first search in the node tree
+	private def nodeIterator(startNode: AstNode)(nodeHandlerFunction: AstNode => Unit): Unit = {
+		val nodeQueue = mutable.Queue[AstNode](startNode)
+		while (nodeQueue.nonEmpty) {
+			val node = nodeQueue.dequeue()
+			if (node != null)
+				nodeHandlerFunction(node)
+			nodeQueue.enqueue(node.iterator().toList: _*)
+		}
 	}
 
 	private def getCompiledWikiPage(wikiPage: WikiPage): Page = {
@@ -110,18 +109,13 @@ class Extractor(wikiPage: WikiPage) {
 
 	private def extractLinks(parentNode: NodeList): Seq[Link] = {
 		links = Vector()
-		val nodeQueue = mutable.Queue[AstNode](parentNode)
-		while (nodeQueue.nonEmpty) {
-			val node = nodeQueue.dequeue()
-			if (node != null) {
-				handleNode(node)
-				nodeQueue.enqueue(node.iterator().toList: _*)
-			}
+		nodeIterator(parentNode) { node =>
+			extractPotentialLink(node)
 		}
 		links
 	}
 
-	private def handleNode(node: AstNode): Unit = {
+	private def extractPotentialLink(node: AstNode): Unit = {
 		val link: Option[LinkWithNode] = Some(new LinkWithNode(node))
 		link
 			.flatMap(filterNonLinks)

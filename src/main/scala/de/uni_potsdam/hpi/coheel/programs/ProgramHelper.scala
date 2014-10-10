@@ -43,7 +43,7 @@ object ProgramHelper extends Logging {
 					wikiPage.source = ""
 				} catch {
 					case e: Throwable =>
-						log.error(s"Error in ${wikiPage.pageTitle}, ${e.getMessage}, ${e.getStackTrace}")
+						log.error(s"${e.getClass.getSimpleName} in ${wikiPage.pageTitle}, ${e.getMessage}, ${e.getStackTraceString}")
 				}
 				wikiPage
 			}
