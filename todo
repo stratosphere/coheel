@@ -3,7 +3,7 @@ Currently, I am working on the ROC curve.
 I started with the basic implementation in NerRocCurveProgram.scala, so far the only thing determined are the actual surfaces and the possible surfaces.
 These have not been tested yet and need to!
 
-One set is still missing: the seet of possible surfaces, that would have been found, if the threshold were zero.
+One set is still missing: the set of possible surfaces, that would have been found, if the threshold were zero.
 Using these three sets then, it would be possible to determine the TP, TN, FP and FN for the actual ROC curve.
 
 ---

@@ -65,8 +65,8 @@ object TrieBuilder extends Logging {
 	def buildThresholdTrie(threshold: Double): Unit = {
 		if (thresholdTrie != null) {
 			thresholdTrie = null
-			for (i <- 1 to 5)
-				System.gc()
+			// clean up trie
+			for (i <- 1 to 5) System.gc()
 		}
 		thresholdTrie = new Trie()
 
