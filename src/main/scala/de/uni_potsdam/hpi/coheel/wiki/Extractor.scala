@@ -91,9 +91,10 @@ class Extractor(wikiPage: WikiPage) {
 		val nodeQueue = mutable.Queue[AstNode](startNode)
 		while (nodeQueue.nonEmpty) {
 			val node = nodeQueue.dequeue()
-			if (node != null)
+			if (node != null) {
 				nodeHandlerFunction(node)
-			nodeQueue.enqueue(node.iterator().toList: _*)
+				nodeQueue.enqueue(node.iterator().toList: _*)
+			}
 		}
 	}
 
