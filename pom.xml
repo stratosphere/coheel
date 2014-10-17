@@ -19,12 +19,12 @@
 		<dependency>
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-scala</artifactId>
-			<version>0.6.1-incubating</version>
+			<version>0.7-incubating-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-clients</artifactId>
-			<version>0.6.1-incubating</version>
+			<version>0.7-incubating-SNAPSHOT</version>
 		</dependency>
 		<!-- Sweble for wikitext parsing -->
 		<dependency>
@@ -93,6 +93,13 @@
 			<id>central</id>
 			<name>Central Repository</name>
 			<url>http://repo.maven.apache.org/maven2</url>
+		</repository>
+		<repository>
+			<id>apache.snapshots</id>
+			<name>Apache Development Snapshot Repository</name>
+			<url>https://repository.apache.org/content/repositories/snapshots/</url>
+			<releases><enabled>false</enabled></releases>
+			<snapshots><enabled>true</enabled></snapshots>
 		</repository>
 	</repositories>
 	<build>

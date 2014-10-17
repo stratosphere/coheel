@@ -2,25 +2,25 @@ package de.uni_potsdam.hpi.coheel.programs
 
 import de.uni_potsdam.hpi.coheel.datastructures.TrieBuilder
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
-import org.apache.flink.api.common.{Plan, ProgramDescription, Program}
-import org.apache.flink.api.scala.{TextFile, DataSource, ScalaPlan}
-import org.apache.flink.api.scala.operators.CsvOutputFormat
+import org.apache.flink.api.common.{Plan, ProgramDescription}
 import OutputFiles._
-import DataSetNaming._
+import org.apache.flink.api.scala._
 import org.slf4s.Logging
 
 import scala.collection.mutable
 
-class EntireTextSurfacesProgram extends Program with ProgramDescription with Logging {
+class EntireTextSurfacesProgram extends CoheelProgram with ProgramDescription with Logging {
 	// prepare the trie
 	TrieBuilder.buildFullTrie()
 
 	override def getDescription = "Counting how often a surface occurs, in the entire text. This approach uses a trie."
 
-	override def getPlan(args: String*): Plan = {
-		val wikiPages = ProgramHelper.getWikiPages()
+	override def buildProgram(env: ExecutionEnvironment): Unit = {
+		val wikiPages = ProgramHelper.getWikiPages(env)
 
 		var c = 0
+
+		case class EntireTextSurfaces(pageTitle: String, surface: String)
 		// which surfaces occur in which documents
 		val entireTextSurfaces = ProgramHelper.filterNormalPages(wikiPages).flatMap { wikiPage =>
 			if (c % 200000 == 0)
@@ -36,43 +36,47 @@ class EntireTextSurfacesProgram extends Program with ProgramDescription with Log
 					containment => containment.mkString(" ")
 				}
 			}
-			resultSurfaces.map { surface => (wikiPage.pageTitle, surface) }.toIterator
+			resultSurfaces.map { surface => EntireTextSurfaces(wikiPage.pageTitle, surface) }.toIterator
 		}.name("Entire-Text-Surfaces-Along-With-Document")
 
-		val surfaceDocumentCounts = TextFile(surfaceDocumentCountsPath)
+		val surfaceDocumentCounts = env.readTextFile(surfaceDocumentCountsPath)
 
+		case class EntireTextSurfaceCounts(surface: String, count: Int)
 		val entireTextSurfaceCounts = entireTextSurfaces
-			.groupBy { case (title, surface) => surface }
-			.count()
-			.map { case ((title, surface), count) => (surface, count) }
+			.groupBy { _.surface }
+			.reduceGroup { group =>
+				val surfaces = group.toList
+				EntireTextSurfaceCounts(surfaces.head.surface, surfaces.size)
+			}
 			.name("Entire-Text-Surface-Counts")
 
+
+		case class SurfaceAsLinkCount(surface: String, count: Int)
 		val surfaceLinkProbs = surfaceDocumentCounts.map { line =>
 			val split = line.split('\t')
 			// not clear, why lines without a count occur, but they do
 			try {
 				if (split.size < 2)
-					(split(0), 0)
+					SurfaceAsLinkCount(split(0), 0)
 				else {
 					val (surface, count) = (split(0), split(1).toInt)
-					(TokenizerHelper.tokenize(surface).mkString(" "), count)
+					SurfaceAsLinkCount(TokenizerHelper.tokenize(surface).mkString(" "), count)
 				}
 			} catch {
 				case e: NumberFormatException =>
-					(split(0), 0)
+					SurfaceAsLinkCount(split(0), 0)
 			}
 		}.join(entireTextSurfaceCounts)
-		.where { case (surface, _) => surface }
-		.isEqualTo { case (surface, _) => surface }
-		.map { case ((surface, asLinkCount), (_, entireTextCount)) =>
-			(surface, entireTextCount, asLinkCount.toDouble / entireTextCount.toDouble)
+			.where { _.surface }
+			.equalTo { _.surface }
+			.map { joinResult => joinResult match {
+				case (surfaceAsLinkCount, entireTextSurfaceCount) =>
+					(surfaceAsLinkCount.surface, entireTextSurfaceCount.count,
+						surfaceAsLinkCount.count.toDouble / entireTextSurfaceCount.count.toDouble)
+			}
 		}
 
-		val entireTextSurfacesOutput = entireTextSurfaces.write(entireTextSurfacesPath,
-			CsvOutputFormat[(String, String)]("\n", "\t"))
-		val surfaceLinkProbsOutput = surfaceLinkProbs.write(surfaceLinkProbsPath,
-			CsvOutputFormat[(String, Int, Double)]("\n", "\t"))
-		val plan = new ScalaPlan(Seq(entireTextSurfacesOutput, surfaceLinkProbsOutput))
-		plan
+		entireTextSurfaces.writeAsTsv(entireTextSurfacesPath)
+		surfaceLinkProbs.writeAsTsv(surfaceLinkProbsPath)
 	}
 }

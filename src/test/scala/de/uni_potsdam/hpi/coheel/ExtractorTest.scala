@@ -23,36 +23,36 @@ class ExtractorTest extends FunSuite {
 	}
 
 	test("parsing a simple internal link '[[byte]]'") {
-		assert(links.exists { _.text == "byte" })
+		assert(links.exists { _.surface == "byte" })
 	}
 	test("parsing a link whose text starts with an hash") {
-		assert(links.exists { _.text == "#4 TOLL" })
+		assert(links.exists { _.surface == "#4 TOLL" })
 	}
 	test("parsing a link with template inside and starting with a blank") {
-		assert(links.exists { _.text == "mortar" })
+		assert(links.exists { _.surface == "mortar" })
 	}
 	test("empty links are recognized") {
 		assert(links.exists { link =>
-			link.text == "Bilateral relations of Bosnia and Herzegovina" &&
+			link.surface == "Bilateral relations of Bosnia and Herzegovina" &&
 				link.destination == "Bilateral relations of Bosnia and Herzegovina"
 		})
 	}
 	test("parsing links with wiki markup") {
 		assert(links.exists { link =>
-			link.text == "Information theory" && link.destination == "Information theory"
+			link.surface == "Information theory" && link.destination == "Information theory"
 		})
 		assert(links.exists { link =>
-			link.text == "\"Antwort\"" && link.destination == "wikt:antwort"
+			link.surface == "\"Antwort\"" && link.destination == "wikt:antwort"
 		})
 	}
 	test("parsing an internal link with different label '[[Computer data storage|digital information]]'") {
 		assert(links.exists { link =>
-			link.text == "digital information" && link.destination == "Computer data storage"
+			link.surface == "digital information" && link.destination == "Computer data storage"
 		})
 	}
 	test("parsing an internal link with anchor '[[Hertz#Computing|CPU clock speeds]]'") {
 		assert(links.exists { link =>
-			link.text == "CPU clock speeds" && link.destination == "Hertz"
+			link.surface == "CPU clock speeds" && link.destination == "Hertz"
 		})
 	}
 	test("no categories, files or images are returned") {
@@ -77,7 +77,7 @@ class ExtractorTest extends FunSuite {
 
 	test("just print links") {
 		links.foreach { link =>
-			println(String.format("%80s||%s", link.text, link.destination))
+			println(String.format("%80s||%s", link.surface, link.destination))
 		}
 	}
 

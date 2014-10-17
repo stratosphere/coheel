@@ -2,13 +2,14 @@ package de.uni_potsdam.hpi.coheel
 
 import java.io.File
 
+import de.uni_potsdam.hpi.coheel.wiki.WikiPage
 import org.apache.commons.io.FileUtils
 import org.apache.commons.lang3.StringUtils
-import org.apache.flink.api.common.{ProgramDescription, Program}
-import org.apache.flink.client.LocalExecutor
+import org.apache.flink.api.common.ProgramDescription
+import org.apache.flink.api.scala._
 import org.apache.log4j.{Level, Logger}
 import com.typesafe.config.{Config, ConfigFactory}
-import de.uni_potsdam.hpi.coheel.programs.{NerRocCurveProgram, EntireTextSurfacesProgram, RedirectResolvingProgram, WikipediaTrainingProgram}
+import de.uni_potsdam.hpi.coheel.programs._
 import org.slf4s.Logging
 import scala.collection.JavaConversions._
 
@@ -25,10 +26,11 @@ object FlinkProgramRunner extends Logging {
 	 * Runnable Flink programs.
 	 */
 	val programs = Map(
-		"main" -> classOf[WikipediaTrainingProgram],
-		"trie" -> classOf[EntireTextSurfacesProgram],
-		"ner-roc" -> classOf[NerRocCurveProgram],
-		"redirects" -> classOf[RedirectResolvingProgram])
+		"main" -> classOf[WikipediaTrainingProgram]
+//		, "trie" -> classOf[EntireTextSurfacesProgram]
+//		, "ner-roc" -> classOf[NerRocCurveProgram]
+//		, "redirects" -> classOf[RedirectResolvingProgram]
+	)
 
 	/**
 	 * Command line parameter configuration
@@ -51,10 +53,6 @@ object FlinkProgramRunner extends Logging {
 		help("help") text "prints this usage text"
 	}
 
-
-	// Always overwrite already existing files.
-	LocalExecutor.setOverwriteFilesByDefault(true)
-
 	// Configuration for various input and output folders in src/main/resources.
 	var config: Config = _
 
@@ -66,26 +64,28 @@ object FlinkProgramRunner extends Logging {
 			if (!params.doLogging)
 				turnOffLogging()
 
-			val program = programs(programName).newInstance()
+			val program = programs(programName).newInstance()//getDeclaredConstructor(classOf[Params]).newInstance(null)
 			runProgram(program)
 		} getOrElse {
 			parser.showUsage
 		}
 	}
 
-	def runProgram(program: Program with ProgramDescription): Unit = {
+	def runProgram(program: CoheelProgram with ProgramDescription): Unit = {
 		log.info(StringUtils.repeat('#', 140))
 		log.info("# " + StringUtils.center(program.getDescription, 136) + " #")
 		log.info("# " + StringUtils.rightPad("Dataset: " + config.getString("name"), 136) + " #")
 		log.info("# " + StringUtils.rightPad("Base path: " + config.getString("base_path"), 136) + " #")
 		log.info("# " + StringUtils.rightPad("Output folder: " + config.getString("output_files_dir"), 136) + " #")
 		log.info(StringUtils.repeat('#', 140))
+
 		val processingTime = time {
-			val json = LocalExecutor.optimizerPlanAsJSON(program.getPlan())
-			FileUtils.writeStringToFile(new File("plan.json"), json, "UTF-8")
+			val env = ExecutionEnvironment.createLocalEnvironment()
+			program.buildProgram(env)
 
 			log.info("Starting ..")
-			LocalExecutor.execute(program)
+			env.execute()
+//			FileUtils.writeStringToFile(new File("plan.json"), env.getExecutionPlan(), "UTF-8")
 		} * 10.2 * 1024 /* full data dump size*/ / 42.7 /* test dump size */ / 60 /* in minutes */ / 60 /* in hours */
 		if (config.getBoolean("print_approximation"))
 			log.info(f"Approximately $processingTime%.2f hours on the full dump, one machine.")
@@ -102,19 +102,13 @@ object FlinkProgramRunner extends Logging {
 	def turnOffLogging(): Unit = {
 		List(
 			classOf[org.apache.flink.runtime.taskmanager.TaskManager],
-			classOf[org.apache.flink.runtime.execution.ExecutionStateTransition],
 			classOf[org.apache.flink.runtime.client.JobClient],
 			classOf[org.apache.flink.runtime.jobmanager.JobManager],
 			classOf[org.apache.flink.runtime.instance.LocalInstanceManager],
 			classOf[org.apache.flink.runtime.executiongraph.ExecutionGraph],
 			classOf[org.apache.flink.compiler.PactCompiler],
-			classOf[org.apache.flink.runtime.instance.DefaultInstanceManager],
-			classOf[org.apache.flink.runtime.jobmanager.scheduler.DefaultScheduler],
 			classOf[org.apache.flink.runtime.io.network.bufferprovider.GlobalBufferPool],
 			classOf[org.apache.flink.runtime.io.network.netty.NettyConnectionManager],
-			classOf[org.apache.flink.runtime.jobmanager.splitassigner.InputSplitAssigner],
-			classOf[org.apache.flink.runtime.jobmanager.splitassigner.InputSplitManager],
-			classOf[org.apache.flink.runtime.jobmanager.splitassigner.file.FileInputSplitList],
 			classOf[org.apache.flink.runtime.iterative.task.IterationTailPactTask[_, _]],
 			classOf[org.apache.flink.runtime.iterative.task.IterationSynchronizationSinkTask],
 			classOf[org.apache.flink.runtime.iterative.task.IterationIntermediatePactTask[_, _]],

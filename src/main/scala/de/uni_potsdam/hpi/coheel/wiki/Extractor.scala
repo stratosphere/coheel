@@ -2,6 +2,7 @@ package de.uni_potsdam.hpi.coheel.wiki
 
 import de.uni_potsdam.hpi.coheel.wiki.SwebleUtils.PlainTextConverter
 
+import scala.collection.immutable.Queue
 import scala.collection.mutable
 import org.sweble.wikitext.engine._
 import scala.collection.JavaConversions._
@@ -12,12 +13,12 @@ import org.sweble.wikitext.`lazy`.parser.{Bold, Paragraph, InternalLink}
 /**
  * Represents a link in a Wikipedia article.
  * @param source The page the link is on, e.g. 'Germany'
- * @param text The link's text, e.g. 'Merkel'
+ * @param surface The link's text, e.g. 'Merkel'
  * @param destination The link's destination, e.g. 'Angela Merkel'
  */
 // Note: In contrast to InternalLink, this class does not contain a Node, because
 // that should not be part of the interface of this class.
-case class Link(source: String, text: String, destination: String)
+case class Link(source: String, surface: String, destination: String)
 
 object Extractor {
 	val config = new SimpleWikiConfiguration(
@@ -61,7 +62,7 @@ class Extractor(wikiPage: WikiPage) {
 	 * These are supposed to be alternative names for the entity.
 	 * @return A list of alternative names
 	 */
-	def extractAlternativeNames(): List[String] = {
+	def extractAlternativeNames(): Queue[String] = {
 		// The minimum number of characters for the first paragraph
 		val MIN_PARAGRAPH_LENGTH = 20
 		val rootNode = compiledWikiPage.getContent
@@ -73,14 +74,14 @@ class Extractor(wikiPage: WikiPage) {
 					return extractBoldWordsFrom(paragraph)
 			case _ =>
 		}
-		List()
+		Queue()
 	}
 
-	private def extractBoldWordsFrom(paragraph: Paragraph): List[String] = {
-		var boldWords = List[String]()
+	private def extractBoldWordsFrom(paragraph: Paragraph): Queue[String] = {
+		var boldWords = Queue[String]()
 		nodeIterator(paragraph) {
 			case bold: Bold =>
-				boldWords ::= getText(bold)
+				boldWords = boldWords.enqueue(getText(bold))
 			case _ =>
 		}
 		boldWords

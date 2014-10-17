@@ -1,7 +1,9 @@
 package de.uni_potsdam.hpi.coheel.programs
 
 import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
-import org.apache.flink.api.scala.operators.{CsvInputFormat, CsvOutputFormat}
+import org.apache.flink.api.java.operators.DataSink
+import org.apache.flink.api.scala.DataSet
+import org.apache.flink.core.fs.FileSystem
 
 object OutputFiles {
 	lazy val currentPath = FlinkProgramRunner.config.getString("output_files_dir")
@@ -18,14 +20,17 @@ object OutputFiles {
 	lazy val surfaceLinkProbsPath        = s"file://$currentPath/surface-link-probs.wiki"
 	lazy val nerRocCurvePath             = s"file://$currentPath/ner-roc-curve.wiki"
 
-	val textFormat            = CsvOutputFormat[(String, String)]("\n", "\t")
-	val textInput             = CsvInputFormat[(String, String)]("\n", '\t')
+	implicit def toOutputFiles(dataSet: DataSet[_]): OutputFiles = {
+		new OutputFiles(dataSet)
 
-	val surfaceDocumentFormat = CsvOutputFormat[(String, Int)]("\n", "\t")
-	val surfaceDocumentInput  = CsvInputFormat[(String, Int)]("\n", '\t')
+	}
 
-	val probOutputFormat      = CsvOutputFormat[(String, String, Double)]("\n", "\t")
-	val probInputFormat       = CsvInputFormat[(String, String, Double)]("\n", '\t')
+}
 
-	val linkOccurrenceFormat  = CsvOutputFormat[(String, Int, Int)]("\n", "\t")
+class OutputFiles(dataSet: DataSet[_]) {
+
+	def writeAsTsv(path: String): DataSink[_] = {
+		dataSet.writeAsCsv(path, "\n", "\t", FileSystem.WriteMode.OVERWRITE)
+	}
+
 }

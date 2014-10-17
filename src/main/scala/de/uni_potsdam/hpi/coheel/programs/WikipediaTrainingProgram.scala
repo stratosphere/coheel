@@ -1,43 +1,34 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import org.apache.flink.api.common.{Plan, Program, ProgramDescription}
+import de.uni_potsdam.hpi.coheel.FlinkProgramRunner.Params
+import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.scala._
 import de.uni_potsdam.hpi.coheel.wiki._
 import de.uni_potsdam.hpi.coheel.wiki.Link
-import DataSetNaming.toDataSetWithName
 
 import OutputFiles._
 import org.slf4s.Logging
 
-
-class WikipediaTrainingProgram()
-	extends Program with ProgramDescription with Logging {
+class WikipediaTrainingProgram() extends CoheelProgram() with ProgramDescription with Logging {
 
 	override def getDescription = "Training the model parameters for CohEEL."
 
 	/**
 	 * Builds a plan to create the three main data structures CohEEL needs.
 	 * <ul>
-	 *   <li> How often is each entity mention under a certain surface.
+	 *   <li> How often is each entity mentioned under a certain surface.
 	 *   <li> How often does entity A link to entity B?
 	 *   <li> How often does each word occur in an entity's text.
-	 * @param args Not used.
+	 * @param env Flink execution environment.
 	 */
-	override def getPlan(args: String*): Plan = {
-		val wikiPages = ProgramHelper.getWikiPages()
-		val plans = buildLinkPlans(wikiPages)
-		val languageModelPlans = buildLanguageModelPlan(wikiPages)
+	override def buildProgram(env: ExecutionEnvironment): Unit = {
+		val wikiPages = ProgramHelper.getWikiPages(env)
+		buildLinkPlans(wikiPages)
+		buildLanguageModelPlan(wikiPages)
 
-		val textDumps = wikiPages.map { wikiPage =>
-			(wikiPage.pageTitle, wikiPage.plainText)
-		}.write(textDumpsPath, textFormat)
-
-		val plan = new ScalaPlan(
-//			 textDumps ::
-			 languageModelPlans :::
-			 plans)
-
-		plan
+//		val textDumps = wikiPages.map { wikiPage =>
+//			(wikiPage.pageTitle, wikiPage.plainText)
+//		}.writeAsTsv(textDumpsPath)
 	}
 
 	/**
@@ -46,7 +37,7 @@ class WikipediaTrainingProgram()
 	 *   <li> the plan who counts how often one document links to another
 	 *   <li> the plan who counts how often a link occurs under a certain surface
 	 */
-	def buildLinkPlans(wikiPages: DataSet[WikiPage]): List[ScalaSink[_]] = {
+	def buildLinkPlans(wikiPages: DataSet[WikiPage]): Unit = {
 		val normalPages = wikiPages.filter { !_.isDisambiguation }
 
 		val normalPageLinks = linksFrom(normalPages)
@@ -54,18 +45,18 @@ class WikipediaTrainingProgram()
 
 		var i = 0
 		val groupedByLinkText = allPageLinks
-			.groupBy { link => link.text }
+			.groupBy { link => link.surface }
 		// counts in how many documents a surface occurs
 		val surfaceDocumentCounts = groupedByLinkText
 			.reduceGroup { linksWithSameText =>
 				val asList = linksWithSameText.toList
-				val text = asList(0).text
+				val text = asList(0).surface
 
-				// Count each link on one source page only once, i. e. if a surface occurs twice on a page
+				// Count each link on one source page only once, i.e. if a surface occurs twice on a page
 				// it is only counted once.
 				// Note: These are scala functions, no Flink functions.
 				//       Hoping that the list of links with a certain surface is small enough to be handled on
-				//       one machine.
+				//       one slave.
 				val count = asList
 					.groupBy { link => link.source  }
 					.size
@@ -78,44 +69,63 @@ class WikipediaTrainingProgram()
 
 
 		var j = 0
+		case class SurfaceCounts(surface: String, count: Int)
 		// count how often a surface occurs
 		val surfaceCounts = groupedByLinkText
-			.count()
+			.reduceGroup { group =>
+				val links = group.toList
+				SurfaceCounts(links.head.surface, links.size)
+			}
+		case class SurfaceLinkCounts(surface: String, destination: String, count: Int)
 		// count how often a surface occurs with a certain destination
 		val surfaceLinkCounts = allPageLinks
-			.groupBy { link => (link.text, link.destination) }
-			.count()
+			.groupBy { link => (link.surface, link.destination) }
+			.reduceGroup { group =>
+				val links = group.toList
+				SurfaceLinkCounts(links.head.surface, links.head.destination, links.size)
+			}
 			.name("Surface-LinkTo-Counts")
 		// join them together and calculate the probabilities
 		val surfaceProbabilities = surfaceCounts.join(surfaceLinkCounts)
-			.where     { case (link, _) => link.text }
-			.isEqualTo { case (link, _) => link.text }
-			.map { case (surfaceCount, surfaceLinkCount) =>
-				val link = surfaceLinkCount._1
-				if (j % 1000000 == 0)
-					log.info(s"Surface probabilities: $j ")
-				j += 1
-				(link.text, link.destination, surfaceLinkCount._2.toDouble / surfaceCount._2.toDouble)
+			.where { _.surface }
+			.equalTo { _.surface }
+			.map { joinResult => joinResult match {
+				case (surfaceCount, surfaceLinkCount) =>
+					if (j % 1000000 == 0)
+						log.info(s"Surface probabilities: $j ")
+					j += 1
+					(surfaceLinkCount.surface, surfaceLinkCount.destination,
+					 surfaceLinkCount.count / surfaceCount.count.toDouble)
 			}
+		}
 
 		var k = 0
+		case class LinkCounts(source: String, count: Int)
 		// calculate context link counts only for non-disambiguation pages
 		val linkCounts = normalPageLinks
 			.groupBy { link => link.source }
-			.count()
+			.reduceGroup { group =>
+				val links = group.toList
+				LinkCounts(links.head.source, links.size)
+			}
+		case class ContextLinkCounts(source: String, destination: String, count: Int)
 		val contextLinkCounts = normalPageLinks
 			.groupBy { link => (link.source, link.destination) }
-			.count()
+			.reduceGroup { group =>
+				val links = group.toList
+				ContextLinkCounts(links.head.source, links.head.destination, links.size)
+			}
 		val contextLinkProbabilities = linkCounts.join(contextLinkCounts)
-			.where     { case (link, _) => link.source }
-			.isEqualTo { case (link, _) => link.source }
-			.map { case (linkCount, surfaceLinkCount) =>
-				val link = surfaceLinkCount._1
+			.where     { _.source }
+			.equalTo { _.source }
+			.map { joinResult => joinResult match {
+				case (linkCount, surfaceLinkCount) =>
 				if (k % 1000000 == 0)
 					log.info(s"Context link probabilities: $k ")
 				k += 1
-				(link.source, link.destination, surfaceLinkCount._2.toDouble / linkCount._2.toDouble)
+				(linkCount.source, surfaceLinkCount.destination, surfaceLinkCount.count.toDouble / linkCount.count)
 			}
+		}
 
 		// save redirects (to - from)
 		val redirects = wikiPages
@@ -123,11 +133,10 @@ class WikipediaTrainingProgram()
 			.map { wikiPage => (wikiPage.pageTitle, wikiPage.redirect) }
 
 
-		val surfaceProbOutput = surfaceProbabilities.write(surfaceProbsPath, probOutputFormat)
-		val contextLinkOutput = contextLinkProbabilities.write(contextLinkProbsPath, probOutputFormat)
-		val redirectOutput    = redirects.write(redirectPath, textFormat)
-		val surfaceDocumentsOutput = surfaceDocumentCounts.write(surfaceDocumentCountsPath, surfaceDocumentFormat)
-		List(surfaceProbOutput, contextLinkOutput, redirectOutput, surfaceDocumentsOutput)
+		val surfaceProbOutput      = surfaceProbabilities.writeAsTsv(surfaceProbsPath)
+		val contextLinkOutput      = contextLinkProbabilities.writeAsTsv(contextLinkProbsPath)
+		val redirectOutput         = redirects.writeAsTsv(redirectPath)
+		val surfaceDocumentsOutput = surfaceDocumentCounts.writeAsTsv(surfaceDocumentCountsPath)
 	}
 
 	def linksFrom(pages: DataSet[WikiPage]): DataSet[Link] = {
@@ -139,7 +148,7 @@ class WikipediaTrainingProgram()
 	/**
 	 * Builds the plan who creates the language model for a given entity.
 	 */
-	def buildLanguageModelPlan(wikiPages: DataSet[WikiPage]): List[ScalaSink[_]] = {
+	def buildLanguageModelPlan(wikiPages: DataSet[WikiPage]): Unit = {
 		// Helper case class to avoid passing tuples around
 		case class Word(document: String, word: String)
 		val words = ProgramHelper.filterNormalPages(wikiPages) flatMap { wikiPage =>
@@ -151,23 +160,33 @@ class WikipediaTrainingProgram()
 
 		var i = 0
 
+		case class DocumentCounts(document: String, count: Int)
 		// count the words in a document
 		val documentCounts = words
 			.groupBy { word => word.document }
-			.count()
+			.reduceGroup { group =>
+				val words = group.toList
+				DocumentCounts(words.head.document, words.size)
+			}
+		case class WordCounts(word: Word, count: Int)
 		val wordCounts = words
 			.groupBy { word => word }
-			.count()
+			.reduceGroup { group =>
+				val words = group.toList
+				WordCounts(words.head, words.size)
+			}
 		val languageModel = documentCounts.join(wordCounts)
-			.where { case (word, _) => word.document }
-			.isEqualTo { case (word, _) => word.document }
-			.map { case (documentCount, wordCount) =>
-				val word = wordCount._1
-				if (i % 10000000 == 0)
-					log.info(s"Language Models: $i ")
-				i += 1
-				(word.document, word.word, wordCount._2.toDouble / documentCount._2.toDouble)
-			}.name("Language Model: Document-Word-Prob")
+			.where { _.document }
+			.equalTo { _.word.document }
+			.map { joinResult => joinResult match {
+				case (documentCount, wordCount) =>
+					if (i % 10000000 == 0)
+						log.info(s"Language Models: $i ")
+					i += 1
+					(documentCount.document, wordCount.word, wordCount.count.toDouble / documentCount.count)
+			}
+		}.name("Language Model: Document-Word-Prob")
+
 
 		// count document word counts (in how many documents does a word occur?)
 		val documentWordCounts = words
@@ -176,8 +195,8 @@ class WikipediaTrainingProgram()
 				val docList = it.toList
 				(docList(0).word, docList.groupBy { word => word.document }.size)
 		}.name("Document Word Counts: Word-DocumentCount")
-		val languageModelsOutput = languageModel.write(languageModelProbsPath, probOutputFormat)
-		val documentWordCountsOutput = documentWordCounts.write(documentWordCountsPath, surfaceDocumentFormat)
-		List(languageModelsOutput, documentWordCountsOutput)
+
+		val languageModelsOutput = languageModel.writeAsTsv(languageModelProbsPath)
+		val documentWordCountsOutput = documentWordCounts.writeAsTsv(documentWordCountsPath)
 	}
 }

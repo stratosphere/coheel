@@ -1,12 +1,10 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import org.apache.flink.api.scala.{TextFile, DataSet}
+import org.apache.flink.api.scala._
 import org.slf4s.Logging
-import scala.io.Source
 import de.uni_potsdam.hpi.coheel.wiki.{Link, Extractor, WikiPage, WikiPageReader}
 import java.io.{BufferedReader, FileReader, Reader, File}
 import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
-import DataSetNaming._
 
 /**
  * Helper object for reused parts of Flink programs.
@@ -20,10 +18,9 @@ object ProgramHelper extends Logging {
 	def getReader(f: File): Reader = {
 		new BufferedReader(new FileReader(f))
 	}
-
-	def getWikiPages(count: Int = Int.MaxValue): DataSet[WikiPage] = {
+	def getWikiPages(env: ExecutionEnvironment, count: Int = Int.MaxValue): DataSet[WikiPage] = {
 		var remainingPageCount = count
-		val input = TextFile(wikipediaFilesPath).name("Input-Text-Files")
+		val input = env.readTextFile(wikipediaFilesPath)
 		input.flatMap { fileName =>
 			val file = new File(s"${dumpFile.getAbsoluteFile.getParent}/$fileName")
 			val wikiPages = WikiPageReader.xmlToWikiPages(getReader(file))
@@ -32,20 +29,23 @@ object ProgramHelper extends Logging {
 				remainingPageCount -= 1
 				filter
 			}
-			val result = filteredWikiPages.take(remainingPageCount).map { wikiPage =>
-				try {
+			val result = filteredWikiPages.take(remainingPageCount).flatMap { wikiPage =>
+				val parsedWikiPage = try {
 					val extractor = new Extractor(wikiPage)
 					val alternativeNames = extractor.extractAlternativeNames().map {
 						Link(wikiPage.pageTitle, _, wikiPage.pageTitle)
 					}
-					wikiPage.links = alternativeNames ++ extractor.extractLinks()
-					wikiPage.plainText = extractor.extractPlainText()
+					val links = alternativeNames ++ extractor.extractLinks()
+					val plainText = extractor.extractPlainText()
 					wikiPage.source = ""
+					Some(WikiPage(wikiPage.pageTitle, wikiPage.ns, wikiPage.redirect,
+						plainText, links.toArray, wikiPage.isDisambiguation, wikiPage.isList))
 				} catch {
 					case e: Throwable =>
 						log.error(s"${e.getClass.getSimpleName} in ${wikiPage.pageTitle}, ${e.getMessage}, ${e.getStackTraceString}")
+						None
 				}
-				wikiPage
+				parsedWikiPage
 			}
 			result
 		}.name("Wiki-Pages")

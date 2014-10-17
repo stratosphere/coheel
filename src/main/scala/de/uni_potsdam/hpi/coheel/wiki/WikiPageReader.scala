@@ -5,6 +5,8 @@ import javax.xml.stream.{XMLStreamConstants, XMLInputFactory}
 import org.apache.commons.lang3.StringEscapeUtils
 import org.slf4s.Logging
 
+import scala.collection.immutable.Queue
+
 
 /**
  * Captures the important aspects of a WikiPage for our use case, while still
@@ -27,7 +29,7 @@ import org.slf4s.Logging
  * @param redirect The title of the page this page is redirecting to or null, if it is not a redirect.
  * @param plainText This page's plain text content.
  */
-case class WikiPage(pageTitle: String, ns: Int, redirect: String, var plainText: String, var links: Seq[Link],
+case class WikiPage(pageTitle: String, ns: Int, redirect: String, plainText: String, links: Array[Link],
 	                isDisambiguation: Boolean, isList: Boolean) {
 
 	val isRedirect: Boolean = this.redirect != ""
@@ -94,7 +96,7 @@ object WikiPageReader extends Logging {
 					ns,
 					redirectTitle,
 					"",
-					List(),
+					Array(),
 					isDisambiguation,
 					isList
 				)

@@ -3,34 +3,31 @@ package de.uni_potsdam.hpi.coheel.programs
 import de.uni_potsdam.hpi.coheel.datastructures.{TrieBuilder, Trie}
 import de.uni_potsdam.hpi.coheel.wiki.{WikiPage, TokenizerHelper}
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper.Token
-import org.apache.flink.api.common.{Plan, Program, ProgramDescription}
-import org.apache.flink.api.scala.ScalaPlan
-import org.apache.flink.api.scala.operators.CsvOutputFormat
+import org.apache.flink.api.common.{Plan, ProgramDescription}
+import org.apache.flink.api.scala._
 import org.slf4s.Logging
 import OutputFiles._
-import DataSetNaming._
 
-class NerRocCurveProgram extends Program with ProgramDescription with Logging {
+class NerRocCurveProgram extends CoheelProgram with ProgramDescription with Logging {
 
 	TrieBuilder.buildFullTrie()
 
 	override def getDescription = "Determining the ROC curve for the NER threshold."
-	override def getPlan(args: String*): Plan = {
 
-		val thresholds = ProgramHelper.filterNormalPages(ProgramHelper.getWikiPages()).flatMap { wikiPage =>
+	override def buildProgram(env: ExecutionEnvironment): Unit = {
+		case class WikiPageThreshold(threshold: Double, wikiPage: WikiPage)
+		val thresholds = ProgramHelper.filterNormalPages(ProgramHelper.getWikiPages(env)).flatMap { wikiPage =>
 			// introduce all thresholds for each wikipage
 			(0.00 to 1.00 by 0.01).map { threshold =>
-				(threshold, wikiPage)
+				WikiPageThreshold(threshold, wikiPage)
 			}.toIterator
 		// group all computations for one threshold together, so that the trie needs to be built only once
-		}.groupBy { case (threshold, wikiPage) => threshold }
+		}.groupBy { _.threshold }
 
 
-		val rocValues = thresholds.reduceGroup { case wikiPagesIt =>
-
+		val rocValues = thresholds.reduceGroup { wikiPagesIt =>
 			val wikiPages = wikiPagesIt.toList
-
-			val threshold = wikiPages.head._1
+			val threshold = wikiPages.head.threshold
 			println(f"Working on threshold $threshold%.2f.")
 			TrieBuilder.buildThresholdTrie(threshold)
 			val thresholdTrie: Trie = TrieBuilder.thresholdTrie
@@ -39,9 +36,10 @@ class NerRocCurveProgram extends Program with ProgramDescription with Logging {
 			var tn = 0
 			var fp = 0
 			var fn = 0
-			wikiPages.foreach { case (_, wikiPage) =>
+			wikiPages.foreach { pageThreshold =>
+				val wikiPage = pageThreshold.wikiPage
 				// determine the actual surfaces, from the real wikipedia article
-				val actualSurfaces = wikiPage.links.map { link => link.text }.toSet
+				val actualSurfaces = wikiPage.links.map { link => link.surface }.toSet
 //				log.warn(wikiPage.pageTitle)
 
 				// determine potential surfaces, i.e. the surfaces that the NER would return for the current
@@ -65,8 +63,7 @@ class NerRocCurveProgram extends Program with ProgramDescription with Logging {
 			(f"$threshold%.2f", tp, tn, fp, fn, tp.toDouble / (tp + fn), fp.toDouble / (fp + tn))
 		}.name("ROC-Curve-Values")
 
-		val rocValuesOutput = rocValues.write(nerRocCurvePath, CsvOutputFormat("\n", "\t"))
-		new ScalaPlan(Seq(rocValuesOutput))
+		rocValues.writeAsTsv(nerRocCurvePath)
 	}
 
 	def determinePotentialSurfaces(wikiPage: WikiPage, trie: Trie): Set[String] =  {
