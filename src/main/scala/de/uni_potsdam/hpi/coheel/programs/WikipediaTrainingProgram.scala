@@ -3,9 +3,9 @@ package de.uni_potsdam.hpi.coheel.programs
 import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.scala._
 import de.uni_potsdam.hpi.coheel.wiki._
-import de.uni_potsdam.hpi.coheel.wiki.Link
 
 import OutputFiles._
+import DataClasses._
 import org.apache.log4j.Logger
 
 class WikipediaTrainingProgram() extends CoheelProgram() with ProgramDescription {
@@ -44,7 +44,6 @@ class WikipediaTrainingProgram() extends CoheelProgram() with ProgramDescription
 		val normalPageLinks = linksFrom(normalPages)
 		val allPageLinks    = linksFrom(wikiPages)
 
-		var i = 0
 		val groupedByLinkText = allPageLinks
 			.groupBy { link => link.surface }
 		// counts in how many documents a surface occurs
@@ -62,22 +61,15 @@ class WikipediaTrainingProgram() extends CoheelProgram() with ProgramDescription
 					.groupBy { link => link.source  }
 					.size
 
-				if (i % 1000000 == 0)
-					log.info(s"Surface document counts: $i ")
-				i += 1
 				(text, count)
 			}
 
-
-		@transient var j = 0
-		case class SurfaceCounts(surface: String, count: Int)
 		// count how often a surface occurs
 		val surfaceCounts = groupedByLinkText
 			.reduceGroup { group =>
 				val links = group.toList
 				SurfaceCounts(links.head.surface, links.size)
 			}
-		case class SurfaceLinkCounts(surface: String, destination: String, count: Int)
 		// count how often a surface occurs with a certain destination
 		val surfaceLinkCounts = allPageLinks
 			.groupBy { link => (link.surface, link.destination) }
@@ -92,16 +84,11 @@ class WikipediaTrainingProgram() extends CoheelProgram() with ProgramDescription
 			.equalTo { _.surface }
 			.map { joinResult => joinResult match {
 				case (surfaceCount, surfaceLinkCount) =>
-					if (j % 1000000 == 0)
-						log.info(s"Surface probabilities: $j ")
-					j += 1
 					(surfaceLinkCount.surface, surfaceLinkCount.destination,
 					 surfaceLinkCount.count / surfaceCount.count.toDouble)
 			}
 		}
 
-		var k = 0
-		case class LinkCounts(source: String, count: Int)
 		// calculate context link counts only for non-disambiguation pages
 		val linkCounts = normalPageLinks
 			.groupBy { link => link.source }
@@ -109,7 +96,6 @@ class WikipediaTrainingProgram() extends CoheelProgram() with ProgramDescription
 				val links = group.toList
 				LinkCounts(links.head.source, links.size)
 			}
-		case class ContextLinkCounts(source: String, destination: String, count: Int)
 		val contextLinkCounts = normalPageLinks
 			.groupBy { link => (link.source, link.destination) }
 			.reduceGroup { group =>
@@ -121,9 +107,6 @@ class WikipediaTrainingProgram() extends CoheelProgram() with ProgramDescription
 			.equalTo { _.source }
 			.map { joinResult => joinResult match {
 				case (linkCount, surfaceLinkCount) =>
-				if (k % 1000000 == 0)
-					log.info(s"Context link probabilities: $k ")
-				k += 1
 				(linkCount.source, surfaceLinkCount.destination, surfaceLinkCount.count.toDouble / linkCount.count)
 			}
 		}
@@ -150,8 +133,6 @@ class WikipediaTrainingProgram() extends CoheelProgram() with ProgramDescription
 	 * Builds the plan who creates the language model for a given entity.
 	 */
 	def buildLanguageModelPlan(wikiPages: DataSet[WikiPage]): Unit = {
-		// Helper case class to avoid passing tuples around
-		case class Word(document: String, word: String)
 		val words = ProgramHelper.filterNormalPages(wikiPages) flatMap { wikiPage =>
 			val tokens = TokenizerHelper.tokenize(wikiPage.plainText).map { token =>
 				Word(wikiPage.pageTitle, token)
@@ -159,31 +140,29 @@ class WikipediaTrainingProgram() extends CoheelProgram() with ProgramDescription
 			tokens
 		}
 
-		var i = 0
+//		var i = 0
 
-		case class DocumentCounts(document: String, count: Int)
 		// count the words in a document
 		val documentCounts = words
 			.groupBy { word => word.document }
 			.reduceGroup { group =>
 				val words = group.toList
 				DocumentCounts(words.head.document, words.size)
-			}
-		case class WordCounts(word: Word, count: Int)
+			}.name("Document-Counts")
 		val wordCounts = words
 			.groupBy { word => word }
 			.reduceGroup { group =>
 				val words = group.toList
 				WordCounts(words.head, words.size)
-			}
+			}.name("Word-Counts")
 		val languageModel = documentCounts.join(wordCounts)
 			.where { _.document }
 			.equalTo { _.word.document }
 			.map { joinResult => joinResult match {
 				case (documentCount, wordCount) =>
-					if (i % 10000000 == 0)
-						log.info(s"Language Models: $i ")
-					i += 1
+//					if (i % 10000000 == 0)
+//						log.info(s"Language Models: $i ")
+//					i += 1
 					(documentCount.document, wordCount.word, wordCount.count.toDouble / documentCount.count)
 			}
 		}.name("Language Model: Document-Word-Prob")
