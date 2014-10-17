@@ -1,15 +1,16 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import de.uni_potsdam.hpi.coheel.FlinkProgramRunner.Params
 import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.scala._
 import de.uni_potsdam.hpi.coheel.wiki._
 import de.uni_potsdam.hpi.coheel.wiki.Link
 
 import OutputFiles._
-import org.slf4s.Logging
+import org.apache.log4j.Logger
 
-class WikipediaTrainingProgram() extends CoheelProgram() with ProgramDescription with Logging {
+class WikipediaTrainingProgram() extends CoheelProgram() with ProgramDescription {
+
+	@transient val log: Logger = Logger.getLogger(this.getClass)
 
 	override def getDescription = "Training the model parameters for CohEEL."
 
@@ -68,7 +69,7 @@ class WikipediaTrainingProgram() extends CoheelProgram() with ProgramDescription
 			}
 
 
-		var j = 0
+		@transient var j = 0
 		case class SurfaceCounts(surface: String, count: Int)
 		// count how often a surface occurs
 		val surfaceCounts = groupedByLinkText
