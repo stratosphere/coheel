@@ -53,6 +53,7 @@ class EntireTextSurfacesProgram extends CoheelProgram with ProgramDescription wi
 
 		case class SurfaceAsLinkCount(surface: String, count: Int)
 		val surfaceLinkProbs = surfaceDocumentCounts.map { line =>
+
 			val split = line.split('\t')
 			// not clear, why lines without a count occur, but they do
 			try {

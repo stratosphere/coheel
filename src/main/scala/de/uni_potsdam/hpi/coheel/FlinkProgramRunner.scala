@@ -2,8 +2,6 @@ package de.uni_potsdam.hpi.coheel
 
 import java.io.File
 
-import de.uni_potsdam.hpi.coheel.wiki.WikiPage
-import org.apache.commons.io.FileUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.scala._
@@ -27,9 +25,9 @@ object FlinkProgramRunner extends Logging {
 	 */
 	val programs = Map(
 		"main" -> classOf[WikipediaTrainingProgram]
-//		, "trie" -> classOf[EntireTextSurfacesProgram]
-//		, "ner-roc" -> classOf[NerRocCurveProgram]
-//		, "redirects" -> classOf[RedirectResolvingProgram]
+		, "trie" -> classOf[EntireTextSurfacesProgram]
+		, "ner-roc" -> classOf[NerRocCurveProgram]
+		, "redirects" -> classOf[RedirectResolvingProgram]
 	)
 
 	/**
@@ -64,7 +62,7 @@ object FlinkProgramRunner extends Logging {
 			if (!params.doLogging)
 				turnOffLogging()
 
-			val program = programs(programName).newInstance()//getDeclaredConstructor(classOf[Params]).newInstance(null)
+			val program = programs(programName).newInstance()
 			runProgram(program)
 		} getOrElse {
 			parser.showUsage

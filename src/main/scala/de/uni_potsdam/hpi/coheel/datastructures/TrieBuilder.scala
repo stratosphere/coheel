@@ -35,7 +35,7 @@ object TrieBuilder extends Logging {
 	 */
 	private def trieBuilderHelper(filePath: String)(trieBuildingPart: String => Unit): Unit = {
 		val fileName = filePath.replace("file://", "")
-		val lines = Source.fromFile(new File(fileName)).getLines()
+		val lines = Source.fromFile(new File(fileName + ".real")).getLines()
 
 		var i = 0
 		lines.foreach { line =>
