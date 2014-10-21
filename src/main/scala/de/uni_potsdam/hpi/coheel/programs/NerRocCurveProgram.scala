@@ -1,5 +1,6 @@
 package de.uni_potsdam.hpi.coheel.programs
 
+import de.uni_potsdam.hpi.coheel.PerformanceTimer
 import de.uni_potsdam.hpi.coheel.datastructures.{TrieBuilder, Trie}
 import de.uni_potsdam.hpi.coheel.wiki.{WikiPage, TokenizerHelper}
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper.Token
@@ -20,6 +21,7 @@ class NerRocCurveProgram extends CoheelProgram with ProgramDescription {
 		val wikiPages = ProgramHelper.filterNormalPages(ProgramHelper.getWikiPages(env))
 
 		val rocValues = wikiPages.mapPartition { partitionIt =>
+			PerformanceTimer.endTime("PROGRAM STARTUP")
 			val partition = partitionIt.toList
 			println(s"Size of this partition: ${partition.size}")
 			if (partition.isEmpty) {
@@ -27,6 +29,10 @@ class NerRocCurveProgram extends CoheelProgram with ProgramDescription {
 			}
 			else {
 				(0.50 to 0.50 by 0.01).map { threshold =>
+					println(s"MAX  : ${Runtime.getRuntime.maxMemory()}")
+					println(s"FREE : ${Runtime.getRuntime.freeMemory()}")
+					println(s"TOTAL: ${Runtime.getRuntime.totalMemory()}")
+					PerformanceTimer.startTime(s"THRESHOLD-RUN $threshold")
 					println(f"Working on threshold $threshold%.2f.")
 					TrieBuilder.buildThresholdTrie(threshold)
 					val thresholdTrie: Trie = TrieBuilder.thresholdTrie
@@ -36,9 +42,10 @@ class NerRocCurveProgram extends CoheelProgram with ProgramDescription {
 					var fp = 0
 					var fn = 0
 					var i = 0
+					PerformanceTimer.startTime(s"THRESHOLD-RUN-WITHOUT-TRIES $threshold")
 					partition.foreach { wikiPage =>
-						if (i % 100 == 0)
-							println(i)
+//						if (i % 100 == 0)
+//							println(i)
 						i += 1
 						// determine the actual surfaces, from the real wikipedia article
 						val actualSurfaces = wikiPage.links.map { link => link.surface}.toSet
@@ -61,6 +68,8 @@ class NerRocCurveProgram extends CoheelProgram with ProgramDescription {
 						// FN are those surfaces, which are actual surfaces, but are not returned
 						fn += actualSurfaces.diff(potentialSurfaces).size
 					}
+					PerformanceTimer.endTime(s"THRESHOLD-RUN-WITHOUT-TRIES $threshold")
+					PerformanceTimer.endTime(s"THRESHOLD-RUN $threshold")
 					// output threshold as a string, because otherwise rounding errors occur
 					(f"$threshold%.2f", tp, tn, fp, fn, tp.toDouble / (tp + fn), fp.toDouble / (fp + tn))
 				}

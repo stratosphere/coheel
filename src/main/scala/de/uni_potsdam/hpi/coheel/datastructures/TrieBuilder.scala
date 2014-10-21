@@ -2,6 +2,7 @@ package de.uni_potsdam.hpi.coheel.datastructures
 
 import java.io.File
 
+import de.uni_potsdam.hpi.coheel.PerformanceTimer
 import de.uni_potsdam.hpi.coheel.programs.OutputFiles._
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
 import org.slf4s.Logging
@@ -33,9 +34,9 @@ object TrieBuilder extends Logging {
 	 * @param filePath The output file
 	 * @param trieBuildingPart The method, which, given the line, parses the line and adds it to the trie.
 	 */
-	private def trieBuilderHelper(filePath: String)(trieBuildingPart: String => Unit): Unit = {
+	private def trieBuilderHelper(filePath: String, textMessage: String)(trieBuildingPart: String => Unit): Unit = {
 		val fileName = filePath.replace("file://", "")
-		val lines = Source.fromFile(new File(fileName + ".real")).getLines()
+		val lines = Source.fromFile(new File(fileName)).getLines()
 
 		var i = 0
 		lines.foreach { line =>
@@ -59,10 +60,11 @@ object TrieBuilder extends Logging {
 					System.exit(1)
 			}
 		}
-		log.info("Built trie.")
+		log.info(textMessage)
 	}
 
 	def buildThresholdTrie(threshold: Double): Unit = {
+		PerformanceTimer.startTime(s"THRESHOLD-TRIE $threshold")
 		if (thresholdTrie != null) {
 			thresholdTrie = null
 			// clean up trie
@@ -70,7 +72,7 @@ object TrieBuilder extends Logging {
 		}
 		thresholdTrie = new Trie()
 
-		trieBuilderHelper(surfaceLinkProbsPath) { line =>
+		trieBuilderHelper(surfaceLinkProbsPath, s"Built threshold trie with threshold $threshold.") { line =>
 			val split = line.split('\t')
 			val surface = split(0)
 			val prob = split(2).toDouble
@@ -80,17 +82,20 @@ object TrieBuilder extends Logging {
 					thresholdTrie.add(tokens)
 			}
 		}
+		PerformanceTimer.endTime(s"THRESHOLD-TRIE $threshold")
 	}
 
 	def buildFullTrie(): Unit = {
+		PerformanceTimer.startTime(s"FULL-TRIE")
 		fullTrie = new Trie()
 
-		trieBuilderHelper(surfaceProbsPath) { line =>
+		trieBuilderHelper(surfaceProbsPath, "Built full trie.") { line =>
 			val surface = line.split('\t')(0)
 			val tokens = TokenizerHelper.tokenize(surface)
 			if (tokens.nonEmpty)
 				fullTrie.add(tokens)
 		}
+		PerformanceTimer.endTime(s"FULL-TRIE")
 	}
 
 	/**

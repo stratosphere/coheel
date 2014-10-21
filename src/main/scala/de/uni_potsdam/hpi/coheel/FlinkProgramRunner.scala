@@ -55,6 +55,7 @@ object FlinkProgramRunner extends Logging {
 	var config: Config = _
 
 	def main(args: Array[String]): Unit = {
+		PerformanceTimer.startTime("PROGRAM STARTUP")
 		// Parse the arguments
 		parser.parse(args, Params()) map { params =>
 			config = ConfigFactory.load(params.dataSetConf)
@@ -83,8 +84,12 @@ object FlinkProgramRunner extends Logging {
 			program.buildProgram(env)
 
 			log.info("Starting ..")
+//			Thread.sleep(10000)
+//			log.info("NOW!")
 			env.execute()
 //			FileUtils.writeStringToFile(new File("plan.json"), env.getExecutionPlan(), "UTF-8")
+
+			PerformanceTimer.printTimerEvents()
 		} * 10.2 * 1024 /* full data dump size*/ / 42.7 /* test dump size */ / 60 /* in minutes */ / 60 /* in hours */
 		if (config.getBoolean("print_approximation"))
 			log.info(f"Approximately $processingTime%.2f hours on the full dump, one machine.")

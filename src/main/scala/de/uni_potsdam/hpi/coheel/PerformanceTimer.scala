@@ -1,8 +1,11 @@
 package de.uni_potsdam.hpi.coheel
 
+import scala.collection.immutable.ListMap
+
 object PerformanceTimer {
 
-	var timers = Map[String, (Long, Long)]()
+	// order preserving map structure
+	var timers = ListMap[String, (Long, Long)]()
 
 	def startTime(event: String): Unit = {
 		timers.get(event) match {
@@ -20,7 +23,7 @@ object PerformanceTimer {
 				if (end == 0) {
 					val newEnd = getTimeInMs
 					timers += (event ->(start, newEnd))
-					print(event, start, newEnd)
+//					print(event, start, newEnd)
 				}
 				// else ignore, because the event already finished
 		}
