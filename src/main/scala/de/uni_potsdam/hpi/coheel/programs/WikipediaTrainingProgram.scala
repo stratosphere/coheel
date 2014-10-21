@@ -24,7 +24,7 @@ class WikipediaTrainingProgram extends CoheelProgram with ProgramDescription {
 	 */
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val wikiPages = ProgramHelper.getWikiPages(env)
-		buildLinkPlans(wikiPages)
+//		buildLinkPlans(wikiPages)
 		buildLanguageModelPlan(wikiPages)
 
 //		val textDumps = wikiPages.map { wikiPage =>
@@ -140,8 +140,6 @@ class WikipediaTrainingProgram extends CoheelProgram with ProgramDescription {
 			tokens
 		}
 
-//		var i = 0
-
 		// count the words in a document
 		val documentCounts = words
 			.groupBy { word => word.document }
@@ -160,9 +158,6 @@ class WikipediaTrainingProgram extends CoheelProgram with ProgramDescription {
 			.equalTo { _.word.document }
 			.map { joinResult => joinResult match {
 				case (documentCount, wordCount) =>
-//					if (i % 10000000 == 0)
-//						log.info(s"Language Models: $i ")
-//					i += 1
 					(documentCount.document, wordCount.word, wordCount.count.toDouble / documentCount.count)
 			}
 		}.name("Language Model: Document-Word-Prob")
@@ -176,7 +171,7 @@ class WikipediaTrainingProgram extends CoheelProgram with ProgramDescription {
 				(docList(0).word, docList.groupBy { word => word.document }.size)
 		}.name("Document Word Counts: Word-DocumentCount")
 
-		val languageModelsOutput = languageModel.writeAsTsv(languageModelProbsPath)
-		val documentWordCountsOutput = documentWordCounts.writeAsTsv(documentWordCountsPath)
+		languageModel.writeAsTsv(languageModelProbsPath)
+		documentWordCounts.writeAsTsv(documentWordCountsPath)
 	}
 }

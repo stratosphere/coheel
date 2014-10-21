@@ -86,7 +86,12 @@ object FlinkProgramRunner extends Logging {
 			log.info("Starting ..")
 //			Thread.sleep(10000)
 //			log.info("NOW!")
+			PerformanceTimer.endTime("PROGRAM STARTUP")
+
+			PerformanceTimer.startTime("PROGRAM EXECUTION")
+			PerformanceTimer.startTime("FIRST OPERATOR")
 			env.execute()
+			PerformanceTimer.endTime("PROGRAM EXECUTION")
 //			FileUtils.writeStringToFile(new File("plan.json"), env.getExecutionPlan(), "UTF-8")
 
 			PerformanceTimer.printTimerEvents()

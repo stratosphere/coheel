@@ -4,7 +4,7 @@ import org.apache.flink.api.scala._
 import org.slf4s.Logging
 import de.uni_potsdam.hpi.coheel.wiki.{Link, Extractor, WikiPage, WikiPageReader}
 import java.io.{BufferedReader, FileReader, Reader, File}
-import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
+import de.uni_potsdam.hpi.coheel.{PerformanceTimer, FlinkProgramRunner}
 
 /**
  * Helper object for reused parts of Flink programs.
@@ -22,6 +22,7 @@ object ProgramHelper extends Logging {
 		var remainingPageCount = count
 		val input = env.readTextFile(wikipediaFilesPath)
 		input.flatMap { fileName =>
+			PerformanceTimer.endTime("FIRST OPERATOR")
 			val file = new File(s"${dumpFile.getAbsoluteFile.getParent}/$fileName")
 			val wikiPages = WikiPageReader.xmlToWikiPages(getReader(file))
 			val filteredWikiPages = wikiPages.filter { page =>
