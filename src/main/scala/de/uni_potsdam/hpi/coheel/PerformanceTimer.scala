@@ -7,7 +7,7 @@ object PerformanceTimer {
 	// order preserving map structure
 	var timers = ListMap[String, (Long, Long)]()
 
-	def startTime(event: String): Unit = {
+	def startTimeFirst(event: String): Unit = {
 		timers.get(event) match {
 			case Some((start, end)) => // do not update start time
 			case None =>
@@ -15,7 +15,11 @@ object PerformanceTimer {
 		}
 	}
 
-	def endTime(event: String): Unit = {
+	def startTimeLast(event: String): Unit = {
+		timers += (event -> (getTimeInMs, 0))
+	}
+
+	def endTimeFirst(event: String): Unit = {
 		timers.get(event) match {
 			case None =>
 				throw new RuntimeException("Timer not started.")
@@ -23,9 +27,17 @@ object PerformanceTimer {
 				if (end == 0) {
 					val newEnd = getTimeInMs
 					timers += (event ->(start, newEnd))
-//					print(event, start, newEnd)
 				}
 				// else ignore, because the event already finished
+		}
+	}
+	def endTimeLast(event: String): Unit = {
+		timers.get(event) match {
+			case None =>
+				throw new RuntimeException("Timer not started.")
+			case Some((start, end)) =>
+				val newEnd = getTimeInMs
+				timers += (event ->(start, newEnd))
 		}
 	}
 

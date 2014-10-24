@@ -22,7 +22,7 @@ object ProgramHelper extends Logging {
 		var remainingPageCount = count
 		val input = env.readTextFile(wikipediaFilesPath)
 		input.flatMap { fileName =>
-			PerformanceTimer.endTime("FIRST OPERATOR")
+			PerformanceTimer.endTimeFirst("FIRST OPERATOR")
 			val file = new File(s"${dumpFile.getAbsoluteFile.getParent}/$fileName")
 			val wikiPages = WikiPageReader.xmlToWikiPages(getReader(file))
 			val filteredWikiPages = wikiPages.filter { page =>

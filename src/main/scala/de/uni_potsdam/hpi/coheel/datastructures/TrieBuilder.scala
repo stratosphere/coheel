@@ -64,7 +64,7 @@ object TrieBuilder extends Logging {
 	}
 
 	def buildThresholdTrie(threshold: Double): Unit = {
-		PerformanceTimer.startTime(s"THRESHOLD-TRIE $threshold")
+		PerformanceTimer.startTimeFirst(s"THRESHOLD-TRIE $threshold")
 		if (thresholdTrie != null) {
 			thresholdTrie = null
 			// clean up trie
@@ -82,11 +82,11 @@ object TrieBuilder extends Logging {
 					thresholdTrie.add(tokens)
 			}
 		}
-		PerformanceTimer.endTime(s"THRESHOLD-TRIE $threshold")
+		PerformanceTimer.endTimeFirst(s"THRESHOLD-TRIE $threshold")
 	}
 
 	def buildFullTrie(): Unit = {
-		PerformanceTimer.startTime(s"FULL-TRIE")
+		PerformanceTimer.startTimeFirst(s"FULL-TRIE")
 		fullTrie = new Trie()
 
 		trieBuilderHelper(surfaceProbsPath, "Built full trie.") { line =>
@@ -95,7 +95,7 @@ object TrieBuilder extends Logging {
 			if (tokens.nonEmpty)
 				fullTrie.add(tokens)
 		}
-		PerformanceTimer.endTime(s"FULL-TRIE")
+		PerformanceTimer.endTimeFirst(s"FULL-TRIE")
 	}
 
 	/**

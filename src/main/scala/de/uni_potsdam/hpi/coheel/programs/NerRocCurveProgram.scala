@@ -21,7 +21,7 @@ class NerRocCurveProgram extends CoheelProgram with ProgramDescription {
 		val wikiPages = ProgramHelper.filterNormalPages(ProgramHelper.getWikiPages(env))
 
 		val rocValues = wikiPages.mapPartition { partitionIt =>
-			PerformanceTimer.endTime("PROGRAM STARTUP")
+			PerformanceTimer.endTimeFirst("PROGRAM STARTUP")
 			val partition = partitionIt.toList
 			println(s"Size of this partition: ${partition.size}")
 			if (partition.isEmpty) {
@@ -32,7 +32,7 @@ class NerRocCurveProgram extends CoheelProgram with ProgramDescription {
 					println(s"MAX  : ${Runtime.getRuntime.maxMemory()}")
 					println(s"FREE : ${Runtime.getRuntime.freeMemory()}")
 					println(s"TOTAL: ${Runtime.getRuntime.totalMemory()}")
-					PerformanceTimer.startTime(s"THRESHOLD-RUN $threshold")
+					PerformanceTimer.startTimeFirst(s"THRESHOLD-RUN $threshold")
 					println(f"Working on threshold $threshold%.2f.")
 					TrieBuilder.buildThresholdTrie(threshold)
 					val thresholdTrie: Trie = TrieBuilder.thresholdTrie
@@ -42,7 +42,7 @@ class NerRocCurveProgram extends CoheelProgram with ProgramDescription {
 					var fp = 0
 					var fn = 0
 					var i = 0
-					PerformanceTimer.startTime(s"THRESHOLD-RUN-WITHOUT-TRIES $threshold")
+					PerformanceTimer.startTimeFirst(s"THRESHOLD-RUN-WITHOUT-TRIES $threshold")
 					partition.foreach { wikiPage =>
 //						if (i % 100 == 0)
 //							println(i)
@@ -68,8 +68,8 @@ class NerRocCurveProgram extends CoheelProgram with ProgramDescription {
 						// FN are those surfaces, which are actual surfaces, but are not returned
 						fn += actualSurfaces.diff(potentialSurfaces).size
 					}
-					PerformanceTimer.endTime(s"THRESHOLD-RUN-WITHOUT-TRIES $threshold")
-					PerformanceTimer.endTime(s"THRESHOLD-RUN $threshold")
+					PerformanceTimer.endTimeFirst(s"THRESHOLD-RUN-WITHOUT-TRIES $threshold")
+					PerformanceTimer.endTimeFirst(s"THRESHOLD-RUN $threshold")
 					// output threshold as a string, because otherwise rounding errors occur
 					(f"$threshold%.2f", tp, tn, fp, fn, tp.toDouble / (tp + fn), fp.toDouble / (fp + tn))
 				}

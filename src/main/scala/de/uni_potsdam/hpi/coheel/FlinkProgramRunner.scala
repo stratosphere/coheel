@@ -55,7 +55,7 @@ object FlinkProgramRunner extends Logging {
 	var config: Config = _
 
 	def main(args: Array[String]): Unit = {
-		PerformanceTimer.startTime("PROGRAM STARTUP")
+		PerformanceTimer.startTimeFirst("PROGRAM STARTUP")
 		// Parse the arguments
 		parser.parse(args, Params()) map { params =>
 			config = ConfigFactory.load(params.dataSetConf)
@@ -83,12 +83,12 @@ object FlinkProgramRunner extends Logging {
 			log.info("Starting ..")
 //			Thread.sleep(10000)
 //			log.info("NOW!")
-			PerformanceTimer.endTime("PROGRAM STARTUP")
+			PerformanceTimer.endTimeFirst("PROGRAM STARTUP")
 
-			PerformanceTimer.startTime("PROGRAM EXECUTION")
-			PerformanceTimer.startTime("FIRST OPERATOR")
+			PerformanceTimer.startTimeFirst("PROGRAM EXECUTION")
+			PerformanceTimer.startTimeFirst("FIRST OPERATOR")
 			env.execute()
-			PerformanceTimer.endTime("PROGRAM EXECUTION")
+			PerformanceTimer.endTimeFirst("PROGRAM EXECUTION")
 //			FileUtils.writeStringToFile(new File("plan.json"), env.getExecutionPlan(), "UTF-8")
 
 			PerformanceTimer.printTimerEvents()
