@@ -42,15 +42,7 @@ object TrieBuilder extends Logging {
 		lines.foreach { line =>
 			try {
 				trieBuildingPart(line)
-				val surface = line.split('\t')(0)
-				val tokens = TokenizerHelper.tokenize(surface)
-				if (tokens.nonEmpty)
-					fullTrie.add(tokens)
 				i += 1
-//				if (i % 1000000 == 0) {
-//					log.info(f"$i")
-//					printMemoryStatus()
-//				}
 			} catch {
 				case e @ (_: ArrayIndexOutOfBoundsException | _: NumberFormatException) =>
 					log.warn(s"Bad line in input: ${e.toString}")
