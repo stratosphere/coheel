@@ -25,7 +25,9 @@ object ProgramHelper extends Logging {
 			PerformanceTimer.endTimeFirst("FIRST OPERATOR")
 			PerformanceTimer.startTimeFirst("WIKIPARSE-OPERATOR")
 			val file = new File(s"${dumpFile.getAbsoluteFile.getParent}/$fileName")
-			val wikiPages = WikiPageReader.xmlToWikiPages(getReader(file))
+			val reader = getReader(file)
+			val wikiPages = WikiPageReader.xmlToWikiPages(reader)
+			reader.close()
 			val filteredWikiPages = wikiPages.filter { page =>
 				val filter = page.ns == 0 && page.source.nonEmpty && remainingPageCount > 0
 				remainingPageCount -= 1

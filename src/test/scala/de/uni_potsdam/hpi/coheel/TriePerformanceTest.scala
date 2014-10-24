@@ -31,12 +31,15 @@ class TriePerformanceTest extends FunSuite {
 		}
 		println("Tokenized.")
 
-		(1 to 20).foreach { i =>
+		val ITERATIONS = 20
+		val WARMUP = 10
+		(1 to ITERATIONS).foreach { i =>
+			for (i <- 1 to 2) System.gc()
 			println(i)
 			val trie = new Trie()
-			if (i > 10) {
+			if (i > WARMUP) {
 				PerformanceTimer.startTimeFirst(s"FULL-TRIE")
-				PerformanceTimer.startTimeFirst(s"FULL-TRIE ${i - 10}")
+				PerformanceTimer.startTimeFirst(s"FULL-TRIE ${i - WARMUP}")
 			}
 			tokenized.foreach { tokens =>
 				trie.add(tokens)
@@ -46,7 +49,7 @@ class TriePerformanceTest extends FunSuite {
 				assert(contains.asEntry)
 			}
 			if (i > 10)
-				PerformanceTimer.endTimeFirst(s"FULL-TRIE ${i - 10}")
+				PerformanceTimer.endTimeFirst(s"FULL-TRIE ${i - WARMUP}")
 		}
 		PerformanceTimer.endTimeFirst(s"FULL-TRIE")
 		PerformanceTimer.printTimerEvents()
