@@ -1,12 +1,6 @@
 package de.uni_potsdam.hpi.coheel.datastructures
 
-import java.util
-import java.util.Map
-
-import gnu.trove.map.hash.TIntObjectHashMap
-import it.unimi.dsi.fastutil.ints.{Int2ReferenceMap, Int2ReferenceOpenHashMap}
-
-import scala.collection.mutable.ListBuffer
+import it.unimi.dsi.fastutil.ints.Int2ReferenceMap
 
 case class ContainsResult(asEntry: Boolean, asIntermediateNode: Boolean)
 

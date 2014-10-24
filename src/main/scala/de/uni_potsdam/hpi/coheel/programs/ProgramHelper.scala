@@ -1,5 +1,6 @@
 package de.uni_potsdam.hpi.coheel.programs
 
+import com.typesafe.config.ConfigFactory
 import org.apache.flink.api.scala._
 import org.apache.flink.core.fs.Path
 import org.apache.flink.core.fs.local.LocalFileSystem
@@ -16,11 +17,11 @@ object ProgramHelper {
 
 	val log = Logger.getLogger(getClass)
 
-	val fileType = FlinkProgramRunner.config.getString("type")
-	val dumpFile = new Path(FlinkProgramRunner.config.getString("base_path") +
+
+	lazy val fileType = FlinkProgramRunner.config.getString("type")
+	lazy val dumpFile = new Path(FlinkProgramRunner.config.getString("base_path") +
 		FlinkProgramRunner.config.getString("dump_file"))
 	val fileSystem = if (fileType == "file") new LocalFileSystem else new DistributedFileSystem
-
 	lazy val wikipediaFilesPath = if (dumpFile.isAbsolute) dumpFile.toUri.toString
 	                              else dumpFile.makeQualified(new LocalFileSystem).toUri.toString
 
@@ -34,7 +35,13 @@ object ProgramHelper {
 		input.flatMap { fileName =>
 			PerformanceTimer.endTimeFirst("FIRST OPERATOR")
 			PerformanceTimer.startTimeFirst("WIKIPARSE-OPERATOR")
-			val reader = new InputStreamReader(fileSystem.open(new Path(dumpFile.getParent, fileName)))
+			val reader = try {
+				new InputStreamReader(fileSystem.open(new Path(dumpFile.getParent, fileName)))
+			} catch {
+				case _: Throwable =>
+//					FlinkProgramRunner.config = ConfigFactory.load("chunk_cluster")
+					new InputStreamReader(new DistributedFileSystem().open(new Path(s"hdfs://tenemhead2/home/stefan.bunk/data/$fileName")))
+			}
 			val wikiPages = WikiPageReader.xmlToWikiPages(reader)
 			val filteredWikiPages = wikiPages.filter { page =>
 				val filter = page.ns == 0 && page.source.nonEmpty && remainingPageCount > 0

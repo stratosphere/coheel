@@ -1,10 +1,12 @@
 package de.uni_potsdam.hpi.coheel
 
-import java.io.File
+import java.io.{InputStreamReader, File}
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.scala._
+import org.apache.flink.core.fs.Path
+import org.apache.flink.runtime.fs.hdfs.DistributedFileSystem
 import org.apache.log4j.{Level, Logger}
 import com.typesafe.config.{Config, ConfigFactory}
 import de.uni_potsdam.hpi.coheel.programs._
@@ -18,6 +20,13 @@ import scala.collection.JavaConversions._
 // GC parameters: -verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails
 // Dump downloaded from http://dumps.wikimedia.org/enwiki/latest/
 object FlinkProgramRunner {
+	val p = new Path(s"hdfs://tenemhead2/home/stefan.bunk/data/wiki-0000.dump")
+	println(p)
+	val dfs = new DistributedFileSystem()
+//	println(dfs.getWorkingDirectory)
+	val x = new InputStreamReader(new DistributedFileSystem().open(p))
+	System.exit(333)
+
 	val log = Logger.getLogger(getClass)
 
 //	val p1 = new Path("file:/src/test/resources/chunk_dump.wikirun")
@@ -86,7 +95,8 @@ object FlinkProgramRunner {
 			val env = if (config.getString("type") == "file")
 				ExecutionEnvironment.createLocalEnvironment(1)
 			else
-				ExecutionEnvironment.createRemoteEnvironment("tenemhead2", 6123, "target/coheel_stratosphere-0.1-SNAPSHOT.jar")
+				ExecutionEnvironment.createRemoteEnvironment("tenemhead2", 6123,
+					"target/coheel_stratosphere-0.1-SNAPSHOT-jar-with-dependencies.jar")
 			program.buildProgram(env)
 
 			log.info("Starting ..")
