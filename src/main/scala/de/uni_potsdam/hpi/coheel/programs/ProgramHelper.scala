@@ -1,6 +1,9 @@
 package de.uni_potsdam.hpi.coheel.programs
 
+import java.net.InetSocketAddress
+
 import com.typesafe.config.ConfigFactory
+import org.apache.hadoop.fs
 import org.apache.flink.api.scala._
 import org.apache.flink.core.fs.Path
 import org.apache.flink.core.fs.local.LocalFileSystem
@@ -8,6 +11,7 @@ import org.apache.flink.runtime.fs.hdfs.DistributedFileSystem
 import de.uni_potsdam.hpi.coheel.wiki.{Link, Extractor, WikiPage, WikiPageReader}
 import java.io._
 import de.uni_potsdam.hpi.coheel.{PerformanceTimer, FlinkProgramRunner}
+import org.apache.hadoop.conf.Configuration
 import org.apache.log4j.Logger
 
 /**
@@ -28,6 +32,14 @@ object ProgramHelper {
 	def getReader(f: File): Reader = {
 		new BufferedReader(new FileReader(f))
 	}
+
+	def downloadFile(fileName: String): InputStream = {
+		val p = new fs.Path(s"hdfs://tenemhead2/home/stefan.bunk/data/$fileName")
+		val conf = new Configuration(true)
+		val hdfs = new org.apache.hadoop.hdfs.DistributedFileSystem(new InetSocketAddress("tenemhead2", 8020), conf)
+		val is = hdfs.open(p)
+		is
+	}
 	def getWikiPages(env: ExecutionEnvironment, count: Int = Int.MaxValue): DataSet[WikiPage] = {
 		var remainingPageCount = count
 //		val input = env.readTextFile("hdfs://tenemhead2/home/stefan.bunk/wikipediaFilesPath")
@@ -40,7 +52,8 @@ object ProgramHelper {
 			} catch {
 				case _: Throwable =>
 //					FlinkProgramRunner.config = ConfigFactory.load("chunk_cluster")
-					new InputStreamReader(new DistributedFileSystem().open(new Path(s"hdfs://tenemhead2/home/stefan.bunk/data/$fileName")))
+					new InputStreamReader(downloadFile(fileName))
+//					new DistributedFileSystem().open(new Path(s"hdfs://tenemhead2/home/stefan.bunk/data/$fileName")))
 			}
 			val wikiPages = WikiPageReader.xmlToWikiPages(reader)
 			val filteredWikiPages = wikiPages.filter { page =>
@@ -77,6 +90,6 @@ object ProgramHelper {
 			val result = !wikiPage.isDisambiguation && !wikiPage.isRedirect && !wikiPage.isList
 			PerformanceTimer.endTimeLast("WIKIPAGEFILTER-OPERATOR")
 			result
-		}
+		}.name("Filter-Normal-Pages")
 	}
 }
