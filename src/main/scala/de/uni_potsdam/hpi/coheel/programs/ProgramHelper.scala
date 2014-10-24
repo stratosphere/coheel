@@ -1,9 +1,12 @@
 package de.uni_potsdam.hpi.coheel.programs
 
 import org.apache.flink.api.scala._
+import org.apache.flink.core.fs.Path
+import org.apache.flink.core.fs.local.LocalFileSystem
+import org.apache.flink.runtime.fs.hdfs.DistributedFileSystem
 import org.slf4s.Logging
 import de.uni_potsdam.hpi.coheel.wiki.{Link, Extractor, WikiPage, WikiPageReader}
-import java.io.{BufferedReader, FileReader, Reader, File}
+import java.io._
 import de.uni_potsdam.hpi.coheel.{PerformanceTimer, FlinkProgramRunner}
 
 /**
@@ -11,9 +14,13 @@ import de.uni_potsdam.hpi.coheel.{PerformanceTimer, FlinkProgramRunner}
  */
 object ProgramHelper extends Logging {
 
-	val dumpFile = new File(FlinkProgramRunner.config.getString("base_path") + FlinkProgramRunner.config.getString("dump_file"))
+	val fileType = FlinkProgramRunner.config.getString("type")
+	val dumpFile = new Path(FlinkProgramRunner.config.getString("base_path") +
+		FlinkProgramRunner.config.getString("dump_file"))
+	val fileSystem = if (fileType == "file") new LocalFileSystem else new DistributedFileSystem
 
-	lazy val wikipediaFilesPath = s"file://${dumpFile.getAbsolutePath}"
+	lazy val wikipediaFilesPath = if (dumpFile.isAbsolute) dumpFile.toUri.toString
+	                              else dumpFile.makeQualified(new LocalFileSystem).toUri.toString
 
 	def getReader(f: File): Reader = {
 		new BufferedReader(new FileReader(f))
@@ -25,8 +32,8 @@ object ProgramHelper extends Logging {
 		input.flatMap { fileName =>
 			PerformanceTimer.endTimeFirst("FIRST OPERATOR")
 			PerformanceTimer.startTimeFirst("WIKIPARSE-OPERATOR")
-			val file = new File(s"${dumpFile.getAbsoluteFile.getParent}/$fileName")
-			val wikiPages = WikiPageReader.xmlToWikiPages(getReader(file))
+			val reader = new InputStreamReader(fileSystem.open(new Path(dumpFile.getParent, fileName)))
+			val wikiPages = WikiPageReader.xmlToWikiPages(reader)
 			val filteredWikiPages = wikiPages.filter { page =>
 				val filter = page.ns == 0 && page.source.nonEmpty && remainingPageCount > 0
 				remainingPageCount -= 1

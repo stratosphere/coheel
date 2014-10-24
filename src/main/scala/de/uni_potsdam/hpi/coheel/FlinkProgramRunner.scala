@@ -5,6 +5,9 @@ import java.io.File
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.scala._
+import org.apache.flink.core.fs.Path
+import org.apache.flink.core.fs.local.LocalFileSystem
+import org.apache.flink.runtime.fs.hdfs.DistributedFileSystem
 import org.apache.log4j.{Level, Logger}
 import com.typesafe.config.{Config, ConfigFactory}
 import de.uni_potsdam.hpi.coheel.programs._
@@ -19,6 +22,12 @@ import scala.collection.JavaConversions._
 // GC parameters: -verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails
 // Dump downloaded from http://dumps.wikimedia.org/enwiki/latest/
 object FlinkProgramRunner extends Logging {
+
+//	val p1 = new Path("file:/src/test/resources/chunk_dump.wikirun")
+//	println(p1.makeQualified(new LocalFileSystem))
+//	val p2 = new Path("file:/home/knub/Repositories/coheel-stratosphere/src/test/resources/chunk_dump.wikirun")
+//	println(p2)
+//	System.exit(3)
 
 	/**
 	 * Runnable Flink programs.
@@ -38,7 +47,8 @@ object FlinkProgramRunner extends Logging {
 		head("CohEEL", "0.0.1")
 		opt[String]('d', "dataset") required() action { (x, c) =>
 			c.copy(dataSetConf = x) } text "specifies the dataset to use, either 'full' or 'chunk'" validate { x =>
-			if (List("full", "chunk").contains(x)) success else failure("dataset must be either 'full' or 'chunk'") }
+			if (List("full", "chunk", "chunk_cluster").contains(x)) success
+			else failure("dataset must be either 'full', 'chunk' or 'chunk_cluster'") }
 		opt[String]('p', "program") required() action { (x, c) =>
 			c.copy(programName = x) } text "specifies the program to run" validate { x =>
 			if (programs.keys.contains(x))
@@ -76,9 +86,10 @@ object FlinkProgramRunner extends Logging {
 		log.info(StringUtils.repeat('#', 140))
 
 		val processingTime = time {
-//			val env = ExecutionEnvironment.createRemoteEnvironment("tenemhead2", 6123)
-			val env = ExecutionEnvironment.createLocalEnvironment()
-			env.setDegreeOfParallelism(1)
+			val env = if (config.getString("type") == "file")
+				ExecutionEnvironment.createLocalEnvironment(1)
+			else
+				ExecutionEnvironment.createRemoteEnvironment("tenemhead2", 6123, "target/coheel_stratosphere-0.1-SNAPSHOT.jar")
 			program.buildProgram(env)
 
 			log.info("Starting ..")
