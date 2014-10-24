@@ -1,12 +1,16 @@
 package de.uni_potsdam.hpi.coheel
 
 import java.io.{InputStreamReader, File}
+import java.net.InetSocketAddress
 
+import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.scala._
 import org.apache.flink.core.fs.Path
 import org.apache.flink.runtime.fs.hdfs.DistributedFileSystem
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs
 import org.apache.log4j.{Level, Logger}
 import com.typesafe.config.{Config, ConfigFactory}
 import de.uni_potsdam.hpi.coheel.programs._
@@ -23,8 +27,12 @@ object FlinkProgramRunner {
 	val p = new Path(s"hdfs://tenemhead2/home/stefan.bunk/data/wiki-0000.dump")
 	println(p)
 	val dfs = new DistributedFileSystem()
+	val conf = new Configuration(true)
+	val hdfs = new org.apache.hadoop.hdfs.DistributedFileSystem(new InetSocketAddress("tenemhead2", 8020), conf)
+	val is = hdfs.open(new fs.Path(p.toUri))
+	IOUtils.copy(is, System.out)
 //	println(dfs.getWorkingDirectory)
-	val x = new InputStreamReader(new DistributedFileSystem().open(p))
+//	val x = new InputStreamReader(new DistributedFileSystem().open(p))
 	System.exit(333)
 
 	val log = Logger.getLogger(getClass)
