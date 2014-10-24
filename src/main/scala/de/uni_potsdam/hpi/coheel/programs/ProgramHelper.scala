@@ -20,14 +20,13 @@ object ProgramHelper extends Logging {
 	}
 	def getWikiPages(env: ExecutionEnvironment, count: Int = Int.MaxValue): DataSet[WikiPage] = {
 		var remainingPageCount = count
+//		val input = env.readTextFile("hdfs://tenemhead2/home/stefan.bunk/wikipediaFilesPath")
 		val input = env.readTextFile(wikipediaFilesPath)
 		input.flatMap { fileName =>
 			PerformanceTimer.endTimeFirst("FIRST OPERATOR")
 			PerformanceTimer.startTimeFirst("WIKIPARSE-OPERATOR")
 			val file = new File(s"${dumpFile.getAbsoluteFile.getParent}/$fileName")
-			val reader = getReader(file)
-			val wikiPages = WikiPageReader.xmlToWikiPages(reader)
-			reader.close()
+			val wikiPages = WikiPageReader.xmlToWikiPages(getReader(file))
 			val filteredWikiPages = wikiPages.filter { page =>
 				val filter = page.ns == 0 && page.source.nonEmpty && remainingPageCount > 0
 				remainingPageCount -= 1

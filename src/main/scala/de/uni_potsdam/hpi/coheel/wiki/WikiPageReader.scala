@@ -79,6 +79,8 @@ object WikiPageReader extends Logging {
 					}
 				}
 				hasMorePages = streamReader.hasNext
+				if (!hasMorePages)
+					reader.close()
 			}
 
 			def hasNext = hasMorePages

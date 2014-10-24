@@ -76,6 +76,7 @@ object FlinkProgramRunner extends Logging {
 		log.info(StringUtils.repeat('#', 140))
 
 		val processingTime = time {
+//			val env = ExecutionEnvironment.createRemoteEnvironment("tenemhead2", 6123)
 			val env = ExecutionEnvironment.createLocalEnvironment()
 			env.setDegreeOfParallelism(1)
 			program.buildProgram(env)
