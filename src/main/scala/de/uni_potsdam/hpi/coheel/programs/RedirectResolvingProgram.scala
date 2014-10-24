@@ -1,11 +1,13 @@
 package de.uni_potsdam.hpi.coheel.programs
 
 import OutputFiles._
-import org.apache.flink.api.common.{Plan, ProgramDescription, Program}
+import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.scala._
-import org.slf4s.Logging
+import org.apache.log4j.Logger
 
-class RedirectResolvingProgram extends CoheelProgram with ProgramDescription with Logging {
+class RedirectResolvingProgram extends CoheelProgram with ProgramDescription {
+
+	val log = Logger.getLogger(getClass)
 
 	case class ContextLink(from: String, origTo: String, to: String)
 	case class Redirect(from: String, to: String)

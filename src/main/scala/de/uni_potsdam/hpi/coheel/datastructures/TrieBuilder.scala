@@ -5,7 +5,7 @@ import java.io.File
 import de.uni_potsdam.hpi.coheel.PerformanceTimer
 import de.uni_potsdam.hpi.coheel.programs.OutputFiles._
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
-import org.slf4s.Logging
+import org.apache.log4j.Logger
 
 import scala.io.Source
 
@@ -20,7 +20,9 @@ object TrieTester {
 /**
  * Singleton objects for the tries.
  */
-object TrieBuilder extends Logging {
+object TrieBuilder {
+
+	val log = Logger.getLogger(getClass)
 
 	// this contains all surfaces
 	var fullTrie: Trie = _

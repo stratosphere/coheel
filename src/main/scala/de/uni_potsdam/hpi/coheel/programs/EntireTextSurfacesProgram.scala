@@ -5,11 +5,13 @@ import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
 import org.apache.flink.api.common.{Plan, ProgramDescription}
 import OutputFiles._
 import org.apache.flink.api.scala._
-import org.slf4s.Logging
+import org.apache.log4j.Logger
 
 import scala.collection.mutable
 
-class EntireTextSurfacesProgram extends CoheelProgram with ProgramDescription with Logging {
+class EntireTextSurfacesProgram extends CoheelProgram with ProgramDescription {
+
+	val log = Logger.getLogger(getClass)
 	// prepare the trie
 	TrieBuilder.buildFullTrie()
 

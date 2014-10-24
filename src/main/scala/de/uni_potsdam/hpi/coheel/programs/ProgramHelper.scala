@@ -4,15 +4,17 @@ import org.apache.flink.api.scala._
 import org.apache.flink.core.fs.Path
 import org.apache.flink.core.fs.local.LocalFileSystem
 import org.apache.flink.runtime.fs.hdfs.DistributedFileSystem
-import org.slf4s.Logging
 import de.uni_potsdam.hpi.coheel.wiki.{Link, Extractor, WikiPage, WikiPageReader}
 import java.io._
 import de.uni_potsdam.hpi.coheel.{PerformanceTimer, FlinkProgramRunner}
+import org.apache.log4j.Logger
 
 /**
  * Helper object for reused parts of Flink programs.
  */
-object ProgramHelper extends Logging {
+object ProgramHelper {
+
+	val log = Logger.getLogger(getClass)
 
 	val fileType = FlinkProgramRunner.config.getString("type")
 	val dumpFile = new Path(FlinkProgramRunner.config.getString("base_path") +

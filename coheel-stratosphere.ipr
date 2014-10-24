@@ -1198,17 +1198,6 @@
         <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-log4j12/1.7.7/slf4j-log4j12-1.7.7-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.slf4s:slf4s-api_2.10:1.7.6">
-      <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/slf4s/slf4s-api_2.10/1.7.6/slf4s-api_2.10-1.7.6.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/slf4s/slf4s-api_2.10/1.7.6/slf4s-api_2.10-1.7.6-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/slf4s/slf4s-api_2.10/1.7.6/slf4s-api_2.10-1.7.6-sources.jar!/" />
-      </SOURCES>
-    </library>
     <library name="Maven: org.sweble.wikitext:swc-engine:1.1.0">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/org/sweble/wikitext/swc-engine/1.1.0/swc-engine-1.1.0.jar!/" />

@@ -67,12 +67,6 @@
 			<artifactId>scopt_2.10</artifactId>
 			<version>3.2.0</version>
 		</dependency>
-		<!-- Scala bindings for loggers -->
-		<dependency>
-			<groupId>org.slf4s</groupId>
-			<artifactId>slf4s-api_2.10</artifactId>
-			<version>1.7.6</version>
-		</dependency>
 		<!-- tests -->
 		<dependency>
 			<groupId>junit</groupId>

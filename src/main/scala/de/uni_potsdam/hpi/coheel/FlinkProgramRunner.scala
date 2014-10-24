@@ -5,13 +5,9 @@ import java.io.File
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.scala._
-import org.apache.flink.core.fs.Path
-import org.apache.flink.core.fs.local.LocalFileSystem
-import org.apache.flink.runtime.fs.hdfs.DistributedFileSystem
 import org.apache.log4j.{Level, Logger}
 import com.typesafe.config.{Config, ConfigFactory}
 import de.uni_potsdam.hpi.coheel.programs._
-import org.slf4s.Logging
 import scala.collection.JavaConversions._
 
 /**
@@ -21,7 +17,8 @@ import scala.collection.JavaConversions._
  */
 // GC parameters: -verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails
 // Dump downloaded from http://dumps.wikimedia.org/enwiki/latest/
-object FlinkProgramRunner extends Logging {
+object FlinkProgramRunner {
+	val log = Logger.getLogger(getClass)
 
 //	val p1 = new Path("file:/src/test/resources/chunk_dump.wikirun")
 //	println(p1.makeQualified(new LocalFileSystem))

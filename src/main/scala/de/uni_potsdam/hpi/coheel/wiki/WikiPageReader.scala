@@ -3,10 +3,7 @@ package de.uni_potsdam.hpi.coheel.wiki
 import java.io.{Reader, StringReader, BufferedReader}
 import javax.xml.stream.{XMLStreamConstants, XMLInputFactory}
 import org.apache.commons.lang3.StringEscapeUtils
-import org.slf4s.Logging
-
-import scala.collection.immutable.Queue
-
+import org.apache.log4j.Logger
 
 /**
  * Captures the important aspects of a WikiPage for our use case, while still
@@ -36,7 +33,9 @@ case class WikiPage(pageTitle: String, ns: Int, redirect: String, plainText: Str
 	var source: String = _
 }
 
-object WikiPageReader extends Logging {
+object WikiPageReader {
+
+	val log = Logger.getLogger(getClass)
 
 	lazy val factory = XMLInputFactory.newInstance()
 	def xmlToWikiPages(s: String): Iterator[WikiPage] = {
