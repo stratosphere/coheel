@@ -23,6 +23,7 @@ object ProgramHelper extends Logging {
 		val input = env.readTextFile(wikipediaFilesPath)
 		input.flatMap { fileName =>
 			PerformanceTimer.endTimeFirst("FIRST OPERATOR")
+			PerformanceTimer.startTimeFirst("WIKIPARSE-OPERATOR")
 			val file = new File(s"${dumpFile.getAbsoluteFile.getParent}/$fileName")
 			val wikiPages = WikiPageReader.xmlToWikiPages(getReader(file))
 			val filteredWikiPages = wikiPages.filter { page =>
@@ -48,13 +49,17 @@ object ProgramHelper extends Logging {
 				}
 				parsedWikiPage
 			}
+			PerformanceTimer.endTimeLast("WIKIPARSE-OPERATOR")
 			result
 		}.name("Wiki-Pages")
 	}
 
 	def filterNormalPages(wikiPages: DataSet[WikiPage]): DataSet[WikiPage] = {
 		wikiPages.filter { wikiPage =>
-			!wikiPage.isDisambiguation && !wikiPage.isRedirect && !wikiPage.isList
+			PerformanceTimer.startTimeFirst("WIKIPAGEFILTER-OPERATOR")
+			val result = !wikiPage.isDisambiguation && !wikiPage.isRedirect && !wikiPage.isList
+			PerformanceTimer.endTimeLast("WIKIPAGEFILTER-OPERATOR")
+			result
 		}
 	}
 }

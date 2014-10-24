@@ -1,5 +1,6 @@
 package de.uni_potsdam.hpi.coheel.programs
 
+import de.uni_potsdam.hpi.coheel.PerformanceTimer
 import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.scala._
 import de.uni_potsdam.hpi.coheel.wiki._
@@ -134,9 +135,11 @@ class WikipediaTrainingProgram extends CoheelProgram with ProgramDescription {
 	 */
 	def buildLanguageModelPlan(wikiPages: DataSet[WikiPage]): Unit = {
 		val words = ProgramHelper.filterNormalPages(wikiPages) flatMap { wikiPage =>
+			PerformanceTimer.startTimeFirst("TOKENIZE-OPERATOR")
 			val tokens = TokenizerHelper.tokenize(wikiPage.plainText).map { token =>
 				Word(wikiPage.pageTitle, token)
 			}.toIterator
+			PerformanceTimer.endTimeLast("TOKENIZE-OPERATOR")
 			tokens
 		}
 
