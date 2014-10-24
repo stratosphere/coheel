@@ -29,8 +29,6 @@
     <orderEntry type="library" exported="" name="Gradle: slf4j-api-1.7.5" level="project" />
     <orderEntry type="library" exported="" name="Gradle: unresolved_dependency___org_dbpedia_extraction_core_3_9" level="project" />
     <orderEntry type="library" name="scala-library" level="project" />
-    <orderEntry type="library" name="Maven: net.sf.trove4j:trove4j:3.0.3" level="project" />
-    <orderEntry type="library" name="Maven: it.unimi.dsi:fastutil:6.5.15" level="project" />
     <orderEntry type="library" name="Maven: org.apache.flink:flink-scala:0.7-incubating-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.apache.flink:flink-core:0.7-incubating-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.apache.flink:flink-shaded:0.7-incubating-SNAPSHOT" level="project" />
@@ -111,6 +109,8 @@
     <orderEntry type="library" name="Maven: xtc:rats-runtime:1.15.0" level="project" />
     <orderEntry type="library" name="Maven: de.fau.cs.osr.utils:utils:0.3.0" level="project" />
     <orderEntry type="library" name="Maven: net.sf.jopt-simple:jopt-simple:4.3" level="project" />
+    <orderEntry type="library" name="Maven: net.sf.trove4j:trove4j:3.0.3" level="project" />
+    <orderEntry type="library" name="Maven: it.unimi.dsi:fastutil:6.5.15" level="project" />
     <orderEntry type="library" name="Maven: org.apache.lucene:lucene-core:4.8.1" level="project" />
     <orderEntry type="library" name="Maven: org.apache.lucene:lucene-analyzers-common:4.8.1" level="project" />
     <orderEntry type="library" name="Maven: com.typesafe:config:1.2.1" level="project" />
