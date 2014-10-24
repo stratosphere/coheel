@@ -28,7 +28,7 @@ class NerRocCurveProgram extends CoheelProgram with ProgramDescription {
 				List()
 			}
 			else {
-				(0.50 to 0.50 by 0.01).map { threshold =>
+				(0.4 to 0.70 by 0.1).map { threshold =>
 					println(s"MAX  : ${Runtime.getRuntime.maxMemory()}")
 					println(s"FREE : ${Runtime.getRuntime.freeMemory()}")
 					println(s"TOTAL: ${Runtime.getRuntime.totalMemory()}")
