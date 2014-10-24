@@ -45,8 +45,8 @@ object FlinkProgramRunner extends Logging {
 				success
 			else
 				failure("program must be one of the following: " + programs.keys.mkString(",")) }
-		opt[Boolean]('l', "logging") action { case (x, c) =>
-			c.copy(doLogging = x) }
+		opt[Unit]('l', "logging") action { case (_, c) =>
+			c.copy(doLogging = true) }
 		note("some notes.\n")
 		help("help") text "prints this usage text"
 	}
@@ -60,9 +60,6 @@ object FlinkProgramRunner extends Logging {
 		parser.parse(args, Params()) map { params =>
 			config = ConfigFactory.load(params.dataSetConf)
 			val programName = params.programName
-			if (!params.doLogging)
-				turnOffLogging()
-
 			val program = programs(programName).newInstance()
 			runProgram(program)
 		} getOrElse {
@@ -106,29 +103,5 @@ object FlinkProgramRunner extends Logging {
 		val time = (end - start) / 1000 / 1000 / 1000
 		log.info("Took " + time + " s.")
 		time
-	}
-
-	def turnOffLogging(): Unit = {
-		List(
-			classOf[org.apache.flink.runtime.taskmanager.TaskManager],
-			classOf[org.apache.flink.runtime.client.JobClient],
-			classOf[org.apache.flink.runtime.jobmanager.JobManager],
-			classOf[org.apache.flink.runtime.instance.LocalInstanceManager],
-			classOf[org.apache.flink.runtime.executiongraph.ExecutionGraph],
-			classOf[org.apache.flink.compiler.PactCompiler],
-			classOf[org.apache.flink.runtime.io.network.bufferprovider.GlobalBufferPool],
-			classOf[org.apache.flink.runtime.io.network.netty.NettyConnectionManager],
-			classOf[org.apache.flink.runtime.iterative.task.IterationTailPactTask[_, _]],
-			classOf[org.apache.flink.runtime.iterative.task.IterationSynchronizationSinkTask],
-			classOf[org.apache.flink.runtime.iterative.task.IterationIntermediatePactTask[_, _]],
-			classOf[org.apache.flink.runtime.iterative.task.IterationHeadPactTask[_, _, _, _]],
-			classOf[org.apache.flink.runtime.iterative.convergence.WorksetEmptyConvergenceCriterion]
-		).foreach { logClass =>
-			val logger = Logger.getLogger(logClass)
-			logger.setLevel(Level.WARN)
-			logger.getAllAppenders.foreach { appender =>
-				log.info("Appender-Class: " + appender.getClass)
-			}
-		}
 	}
 }
