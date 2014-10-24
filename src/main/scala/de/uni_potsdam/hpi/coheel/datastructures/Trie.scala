@@ -3,6 +3,9 @@ package de.uni_potsdam.hpi.coheel.datastructures
 import java.util
 import java.util.Map
 
+import gnu.trove.map.hash.TIntObjectHashMap
+import it.unimi.dsi.fastutil.ints.{Int2ReferenceMap, Int2ReferenceOpenHashMap}
+
 import scala.collection.mutable.ListBuffer
 
 case class ContainsResult(asEntry: Boolean, asIntermediateNode: Boolean)
@@ -48,11 +51,13 @@ case class TrieNode() {
 
 	var isEntry = false
 
-	var children: Map[Int, TrieNode] = _
+	var children: Int2ReferenceMap[TrieNode] = _
+//	var children: TIntObjectHashMap[TrieNode] = _
 
 	def add(tokens: Seq[String]): Unit = {
 		if (children == null)
-			children = new util.HashMap()
+//			children = new TIntObjectHashMap[TrieNode]()
+			children = new it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap[TrieNode]()
 		if (tokens.tail.isEmpty) {
 			children.get(tokens.head.hashCode) match {
 				case null =>
