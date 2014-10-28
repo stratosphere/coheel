@@ -143,7 +143,7 @@ class WikipediaTrainingProgram extends CoheelProgram with ProgramDescription {
 
 
 		// count the words in a document
-		val documentCounts = words.name("")
+		val documentCounts = words.name("Tokenization")
 			.groupBy { word => word.document }
 			.reduceGroup { group =>
 				val words = group.toList

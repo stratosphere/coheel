@@ -40,8 +40,7 @@ object ProgramHelper {
 		val is = hdfs.open(p)
 		is
 	}
-	def getWikiPages(env: ExecutionEnvironment, count: Int = Int.MaxValue): DataSet[WikiPage] = {
-		var remainingPageCount = count
+	def getWikiPages(env: ExecutionEnvironment): DataSet[WikiPage] = {
 //		val input = env.readTextFile("hdfs://tenemhead2/home/stefan.bunk/wikipediaFilesPath")
 		val input = env.readTextFile(wikipediaFilesPath)
 		input.flatMap { fileName =>
@@ -55,11 +54,10 @@ object ProgramHelper {
 			}
 			val wikiPages = WikiPageReader.xmlToWikiPages(reader)
 			val filteredWikiPages = wikiPages.filter { page =>
-				val filter = page.ns == 0 && page.source.nonEmpty && remainingPageCount > 0
-				remainingPageCount -= 1
+				val filter = page.ns == 0 && page.source.nonEmpty
 				filter
 			}
-			val result = filteredWikiPages.take(remainingPageCount).flatMap { wikiPage =>
+			val result = filteredWikiPages.flatMap { wikiPage =>
 				val parsedWikiPage = try {
 					val extractor = new Extractor(wikiPage)
 					val alternativeNames = extractor.extractAlternativeNames().map {
