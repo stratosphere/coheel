@@ -45,7 +45,7 @@ object PerformanceTimer {
 		}
 	}
 
-	def print(event: String, start: Long, end: Long): Unit = {
+	private def print(event: String, start: Long, end: Long): Unit = {
 		val duration = end - start
 //		List((1000L, "us"), (1000L, "ms"), (1000L, "s"), (60L, "min")).fold(duration, "ns") { (acc, n) =>
 //			if (acc._1 < n._1) {

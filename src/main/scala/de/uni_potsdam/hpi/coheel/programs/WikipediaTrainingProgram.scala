@@ -135,16 +135,15 @@ class WikipediaTrainingProgram extends CoheelProgram with ProgramDescription {
 	 */
 	def buildLanguageModelPlan(wikiPages: DataSet[WikiPage]): Unit = {
 		val words = ProgramHelper.filterNormalPages(wikiPages) flatMap { wikiPage =>
-			PerformanceTimer.startTimeFirst("TOKENIZE-OPERATOR")
 			val tokens = TokenizerHelper.tokenize(wikiPage.plainText).map { token =>
 				Word(wikiPage.pageTitle, token)
 			}.toIterator
-			PerformanceTimer.endTimeLast("TOKENIZE-OPERATOR")
 			tokens
 		}
 
+
 		// count the words in a document
-		val documentCounts = words
+		val documentCounts = words.name("")
 			.groupBy { word => word.document }
 			.reduceGroup { group =>
 				val words = group.toList

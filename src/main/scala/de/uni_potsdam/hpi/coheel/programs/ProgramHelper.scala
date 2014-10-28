@@ -45,8 +45,6 @@ object ProgramHelper {
 //		val input = env.readTextFile("hdfs://tenemhead2/home/stefan.bunk/wikipediaFilesPath")
 		val input = env.readTextFile(wikipediaFilesPath)
 		input.flatMap { fileName =>
-			PerformanceTimer.endTimeFirst("FIRST OPERATOR")
-			PerformanceTimer.startTimeFirst("WIKIPARSE-OPERATOR")
 			val reader = try {
 				new InputStreamReader(fileSystem.open(new Path(dumpFile.getParent, fileName)))
 			} catch {
@@ -79,16 +77,13 @@ object ProgramHelper {
 				}
 				parsedWikiPage
 			}
-			PerformanceTimer.endTimeLast("WIKIPARSE-OPERATOR")
 			result
 		}.name("Wiki-Pages")
 	}
 
 	def filterNormalPages(wikiPages: DataSet[WikiPage]): DataSet[WikiPage] = {
 		wikiPages.filter { wikiPage =>
-			PerformanceTimer.startTimeFirst("WIKIPAGEFILTER-OPERATOR")
 			val result = !wikiPage.isDisambiguation && !wikiPage.isRedirect && !wikiPage.isList
-			PerformanceTimer.endTimeLast("WIKIPAGEFILTER-OPERATOR")
 			result
 		}.name("Filter-Normal-Pages")
 	}

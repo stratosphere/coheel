@@ -81,7 +81,6 @@ object FlinkProgramRunner {
 	var config: Config = _
 
 	def main(args: Array[String]): Unit = {
-		PerformanceTimer.startTimeFirst("PROGRAM STARTUP")
 		// Parse the arguments
 		parser.parse(args, Params()) map { params =>
 			config = ConfigFactory.load(params.dataSetConf)
@@ -110,16 +109,7 @@ object FlinkProgramRunner {
 			program.buildProgram(env)
 
 			log.info("Starting ..")
-//			Thread.sleep(10000)
-//			log.info("NOW!")
-			PerformanceTimer.endTimeFirst("PROGRAM STARTUP")
-
-			PerformanceTimer.startTimeFirst("PROGRAM EXECUTION")
-			PerformanceTimer.startTimeFirst("FIRST OPERATOR")
-			env.execute()
-			PerformanceTimer.endTimeFirst("PROGRAM EXECUTION")
-//			FileUtils.writeStringToFile(new File("plan.json"), env.getExecutionPlan(), "UTF-8")
-
+			env.execute(config.getString("name"))
 			PerformanceTimer.printTimerEvents()
 		} * 10.2 * 1024 /* full data dump size*/ / 42.7 /* test dump size */ / 60 /* in minutes */ / 60 /* in hours */
 		if (config.getBoolean("print_approximation"))
