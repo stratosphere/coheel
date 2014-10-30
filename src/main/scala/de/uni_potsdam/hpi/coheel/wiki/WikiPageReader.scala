@@ -33,11 +33,11 @@ case class WikiPage(pageTitle: String, ns: Int, redirect: String, plainText: Str
 	var source: String = _
 }
 
-object WikiPageReader {
+class WikiPageReader {
 
 	val log = Logger.getLogger(getClass)
 
-	lazy val factory = XMLInputFactory.newInstance()
+	val factory = XMLInputFactory.newInstance()
 	def xmlToWikiPages(s: String): Iterator[WikiPage] = {
 		val reader = new BufferedReader(new StringReader(s))
 		xmlToWikiPages(reader)

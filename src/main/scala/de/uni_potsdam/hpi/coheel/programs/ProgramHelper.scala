@@ -39,7 +39,7 @@ object ProgramHelper {
 		input.mapPartition { linesIt =>
 			val fileContent = linesIt.mkString(" ")
 			val reader = new StringReader(fileContent)
-			val wikiPages = WikiPageReader.xmlToWikiPages(reader)
+			val wikiPages = new WikiPageReader().xmlToWikiPages(reader)
 			val filteredWikiPages = wikiPages.filter { page =>
 				val filter = page.ns == 0 && page.source.nonEmpty
 				filter

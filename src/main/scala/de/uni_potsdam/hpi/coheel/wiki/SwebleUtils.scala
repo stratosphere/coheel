@@ -1,10 +1,5 @@
 package de.uni_potsdam.hpi.coheel.wiki
 
-import org.sweble.wikitext.engine.CompiledPage
-import org.sweble.wikitext.engine.Compiler
-import org.sweble.wikitext.engine.PageId
-import de.fau.cs.osr.ptk.common.AstVisitor
-
 import java.util.LinkedList
 import java.util.regex.Pattern
 import org.sweble.wikitext.engine.Page

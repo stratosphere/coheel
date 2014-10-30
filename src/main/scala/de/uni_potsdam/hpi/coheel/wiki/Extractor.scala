@@ -20,12 +20,10 @@ import org.sweble.wikitext.`lazy`.parser.{Bold, Paragraph, InternalLink}
 // that should not be part of the interface of this class.
 case class Link(source: String, surface: String, destination: String)
 
-object Extractor {
-	val config = new SimpleWikiConfiguration(
-		"classpath:/org/sweble/wikitext/engine/SimpleWikiConfiguration.xml")
-}
 class Extractor(wikiPage: WikiPage) {
 
+	val config = new SimpleWikiConfiguration(
+		"classpath:/org/sweble/wikitext/engine/SimpleWikiConfiguration.xml")
 	/**
 	 * Internal class for processing a possible link.
 	 * @param node The XML node.
@@ -52,7 +50,7 @@ class Extractor(wikiPage: WikiPage) {
 	 * @return The plain text of the wikipage.
 	 */
 	def extractPlainText(): String = {
-		val plainTextConverter = new PlainTextConverter(Extractor.config)
+		val plainTextConverter = new PlainTextConverter(config)
 		val page = compiledWikiPage
 		plainTextConverter.go(page).asInstanceOf[String]
 	}
@@ -100,8 +98,8 @@ class Extractor(wikiPage: WikiPage) {
 	}
 
 	private def getCompiledWikiPage(wikiPage: WikiPage): Page = {
-		val compiler = new Compiler(Extractor.config)
-		val pageTitle = PageTitle.make(Extractor.config, wikiPage.pageTitle)
+		val compiler = new Compiler(config)
+		val pageTitle = PageTitle.make(config, wikiPage.pageTitle)
 		val pageId = new PageId(pageTitle, 0)
 
 		val page = compiler.postprocess(pageId, wikiPage.source, null).getPage
