@@ -23,8 +23,7 @@ object ProgramHelper {
 
 
 	lazy val fileType = FlinkProgramRunner.config.getString("type")
-	lazy val dumpFile = new Path(FlinkProgramRunner.config.getString("base_path") +
-		FlinkProgramRunner.config.getString("dump_file"))
+	lazy val dumpFile = new Path(FlinkProgramRunner.config.getString("base_path"))
 	val fileSystem = if (fileType == "file") new LocalFileSystem else new DistributedFileSystem
 	lazy val wikipediaFilesPath = if (dumpFile.isAbsolute) dumpFile.toUri.toString
 	                              else dumpFile.makeQualified(new LocalFileSystem).toUri.toString
@@ -33,25 +32,13 @@ object ProgramHelper {
 		new BufferedReader(new FileReader(f))
 	}
 
-	def downloadFile(fileName: String): InputStream = {
-		val p = new fs.Path(s"hdfs://tenemhead2/home/stefan.bunk/data/$fileName")
-		val conf = new Configuration(true)
-		val hdfs = new org.apache.hadoop.hdfs.DistributedFileSystem(new InetSocketAddress("tenemhead2", 8020), conf)
-		val is = hdfs.open(p)
-		is
-	}
 	def getWikiPages(env: ExecutionEnvironment): DataSet[WikiPage] = {
 //		val input = env.readTextFile("hdfs://tenemhead2/home/stefan.bunk/wikipediaFilesPath")
 		val input = env.readTextFile(wikipediaFilesPath)
-		input.flatMap { fileName =>
-			val reader = try {
-				new InputStreamReader(fileSystem.open(new Path(dumpFile.getParent, fileName)))
-			} catch {
-				case _: Throwable =>
-//					FlinkProgramRunner.config = ConfigFactory.load("chunk_cluster")
-					new InputStreamReader(downloadFile(fileName))
-//					new DistributedFileSystem().open(new Path(s"hdfs://tenemhead2/home/stefan.bunk/data/$fileName")))
-			}
+
+		input.mapPartition { linesIt =>
+			val fileContent = linesIt.mkString(" ")
+			val reader = new StringReader(fileContent)
 			val wikiPages = WikiPageReader.xmlToWikiPages(reader)
 			val filteredWikiPages = wikiPages.filter { page =>
 				val filter = page.ns == 0 && page.source.nonEmpty
