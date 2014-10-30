@@ -37,7 +37,7 @@ object ProgramHelper {
 		val input = env.readTextFile(wikipediaFilesPath)
 
 		input.mapPartition { linesIt =>
-			val fileContent = linesIt.mkString(" ")
+			val fileContent = "<foo>" + linesIt.mkString("\n") + "</foo>"
 			val reader = new StringReader(fileContent)
 			val wikiPages = new WikiPageReader().xmlToWikiPages(reader)
 			val filteredWikiPages = wikiPages.filter { page =>
