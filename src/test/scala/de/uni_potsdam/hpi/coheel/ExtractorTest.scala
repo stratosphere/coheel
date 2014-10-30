@@ -14,7 +14,7 @@ class ExtractorTest extends FunSuite {
 	lazy val wikiPage = {
 		val source = getClass.getResource("/manual_test_files/wikipedia_Kilobyte.xml")
 		val xml = Source.fromFile(source.toURI, "UTF-8").mkString
-		WikiPageReader.xmlToWikiPages(xml).next()
+		new WikiPageReader().xmlToWikiPages(xml).next()
 	}
 
 	def links: Seq[Link] = {
@@ -84,7 +84,7 @@ class ExtractorTest extends FunSuite {
 	test("does not run in infinite loop") {
 		val source = getClass.getResource("/manual_test_files/infinite_loop.xml")
 		val xml = Source.fromFile(source.toURI, "UTF-8").mkString
-		val wikiPage = WikiPageReader.xmlToWikiPages(xml).next()
+		val wikiPage = new WikiPageReader().xmlToWikiPages(xml).next()
 		val linkExtractor = new Extractor(wikiPage)
 		linkExtractor.extractLinks()
 	}
