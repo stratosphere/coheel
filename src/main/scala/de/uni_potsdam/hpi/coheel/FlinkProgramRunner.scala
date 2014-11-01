@@ -63,8 +63,8 @@ object FlinkProgramRunner {
 		head("CohEEL", "0.0.1")
 		opt[String]('d', "dataset") required() action { (x, c) =>
 			c.copy(dataSetConf = x) } text "specifies the dataset to use, either 'full' or 'chunk'" validate { x =>
-			if (List("full", "chunk", "chunk_cluster").contains(x)) success
-			else failure("dataset must be either 'full', 'chunk' or 'chunk_cluster'") }
+			if (List("full", "chunk", "chunk_cluster", "full_cluster").contains(x)) success
+			else failure("dataset must be either 'full', 'chunk' or 'chunk_cluster', 'full_cluster'") }
 		opt[String]('p', "program") required() action { (x, c) =>
 			c.copy(programName = x) } text "specifies the program to run" validate { x =>
 			if (programs.keys.contains(x))
