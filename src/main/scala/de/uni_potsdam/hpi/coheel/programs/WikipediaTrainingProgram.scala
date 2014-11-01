@@ -25,12 +25,12 @@ class WikipediaTrainingProgram extends CoheelProgram with ProgramDescription {
 	 */
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val wikiPages = ProgramHelper.getWikiPages(env)
-//		buildLinkPlans(wikiPages)
+		buildLinkPlans(wikiPages)
 		buildLanguageModelPlan(wikiPages)
 
-//		val textDumps = wikiPages.map { wikiPage =>
-//			(wikiPage.pageTitle, wikiPage.plainText)
-//		}.writeAsTsv(textDumpsPath)
+		val textDumps = wikiPages.map { wikiPage =>
+			(wikiPage.pageTitle, wikiPage.plainText)
+		}.writeAsTsv(textDumpsPath)
 	}
 
 	/**
@@ -118,10 +118,10 @@ class WikipediaTrainingProgram extends CoheelProgram with ProgramDescription {
 			.map { wikiPage => (wikiPage.pageTitle, wikiPage.redirect) }
 
 
-		val surfaceProbOutput      = surfaceProbabilities.writeAsTsv(surfaceProbsPath)
-		val contextLinkOutput      = contextLinkProbabilities.writeAsTsv(contextLinkProbsPath)
-		val redirectOutput         = redirects.writeAsTsv(redirectPath)
-		val surfaceDocumentsOutput = surfaceDocumentCounts.writeAsTsv(surfaceDocumentCountsPath)
+		surfaceProbabilities.writeAsTsv(surfaceProbsPath)
+		contextLinkProbabilities.writeAsTsv(contextLinkProbsPath)
+		redirects.writeAsTsv(redirectPath)
+		surfaceDocumentCounts.writeAsTsv(surfaceDocumentCountsPath)
 	}
 
 	def linksFrom(pages: DataSet[WikiPage]): DataSet[Link] = {
