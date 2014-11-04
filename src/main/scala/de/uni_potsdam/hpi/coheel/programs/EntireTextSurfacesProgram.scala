@@ -1,6 +1,7 @@
 package de.uni_potsdam.hpi.coheel.programs
 
 import de.uni_potsdam.hpi.coheel.datastructures.TrieBuilder
+import de.uni_potsdam.hpi.coheel.programs.DataClasses.{SurfaceAsLinkCount, EntireTextSurfaceCounts}
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
 import org.apache.flink.api.common.{Plan, ProgramDescription}
 import OutputFiles._
@@ -43,7 +44,6 @@ class EntireTextSurfacesProgram extends CoheelProgram with ProgramDescription {
 
 		val surfaceDocumentCounts = env.readTextFile(surfaceDocumentCountsPath)
 
-		case class EntireTextSurfaceCounts(surface: String, count: Int)
 		val entireTextSurfaceCounts = entireTextSurfaces
 			.groupBy { _.surface }
 			.reduceGroup { group =>
@@ -52,10 +52,7 @@ class EntireTextSurfacesProgram extends CoheelProgram with ProgramDescription {
 			}
 			.name("Entire-Text-Surface-Counts")
 
-
-		case class SurfaceAsLinkCount(surface: String, count: Int)
 		val surfaceLinkProbs = surfaceDocumentCounts.map { line =>
-
 			val split = line.split('\t')
 			// not clear, why lines without a count occur, but they do
 			try {
