@@ -10,6 +10,7 @@ object DataClasses {
 	case class LinkCounts(source: String, count: Int)
 	case class ContextLinkCounts(source: String, destination: String, count: Int)
 
+	case class EntireTextSurfaces(pageTitle: String, surface: String)
 	case class EntireTextSurfaceCounts(surface: String, count: Int)
 	case class SurfaceAsLinkCount(surface: String, count: Int)
 }

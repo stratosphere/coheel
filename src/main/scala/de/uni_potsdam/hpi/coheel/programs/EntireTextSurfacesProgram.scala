@@ -1,7 +1,7 @@
 package de.uni_potsdam.hpi.coheel.programs
 
 import de.uni_potsdam.hpi.coheel.datastructures.TrieBuilder
-import de.uni_potsdam.hpi.coheel.programs.DataClasses.{SurfaceAsLinkCount, EntireTextSurfaceCounts}
+import de.uni_potsdam.hpi.coheel.programs.DataClasses.{EntireTextSurfaces, SurfaceAsLinkCount, EntireTextSurfaceCounts}
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
 import org.apache.flink.api.common.{Plan, ProgramDescription}
 import OutputFiles._
@@ -12,7 +12,7 @@ import scala.collection.mutable
 
 class EntireTextSurfacesProgram extends CoheelProgram with ProgramDescription {
 
-	val log = Logger.getLogger(getClass)
+	@transient val log = Logger.getLogger(getClass)
 	// prepare the trie
 	TrieBuilder.buildFullTrie()
 
@@ -21,14 +21,8 @@ class EntireTextSurfacesProgram extends CoheelProgram with ProgramDescription {
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val wikiPages = ProgramHelper.getWikiPages(env)
 
-		var c = 0
-
-		case class EntireTextSurfaces(pageTitle: String, surface: String)
 		// which surfaces occur in which documents
 		val entireTextSurfaces = ProgramHelper.filterNormalPages(wikiPages).flatMap { wikiPage =>
-			if (c % 200000 == 0)
-				log.info(f"$c%8s/11023933")
-			c += 1
 			val tokens = TokenizerHelper.tokenize(wikiPage.plainText).toArray
 
 			val resultSurfaces = mutable.HashSet[String]()
@@ -39,7 +33,7 @@ class EntireTextSurfacesProgram extends CoheelProgram with ProgramDescription {
 					containment => containment.mkString(" ")
 				}
 			}
-			resultSurfaces.map { surface => EntireTextSurfaces(wikiPage.pageTitle, surface) }.toIterator
+			resultSurfaces.toIterator.map { surface => EntireTextSurfaces(wikiPage.pageTitle, surface) }
 		}.name("Entire-Text-Surfaces-Along-With-Document")
 
 		val surfaceDocumentCounts = env.readTextFile(surfaceDocumentCountsPath)
