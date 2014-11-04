@@ -28,9 +28,9 @@ class WikipediaTrainingProgram extends CoheelProgram with ProgramDescription {
 		buildLinkPlans(wikiPages)
 		buildLanguageModelPlan(wikiPages)
 
-		val textDumps = wikiPages.map { wikiPage =>
-			(wikiPage.pageTitle, wikiPage.plainText)
-		}.writeAsTsv(textDumpsPath)
+//		wikiPages.map { wikiPage =>
+//			(wikiPage.pageTitle, wikiPage.plainText)
+//		}.writeAsTsv(textDumpsPath)
 	}
 
 	/**
@@ -55,13 +55,7 @@ class WikipediaTrainingProgram extends CoheelProgram with ProgramDescription {
 
 				// Count each link on one source page only once, i.e. if a surface occurs twice on a page
 				// it is only counted once.
-				// Note: These are scala functions, no Flink functions.
-				//       Hoping that the list of links with a certain surface is small enough to be handled on
-				//       one slave.
-				val count = asList
-					.groupBy { link => link.source  }
-					.size
-
+				val count = Set(asList.map(_.source)).size
 				(text, count)
 			}
 
@@ -140,7 +134,6 @@ class WikipediaTrainingProgram extends CoheelProgram with ProgramDescription {
 			}.toIterator
 			tokens
 		}
-
 
 		// count the words in a document
 		val documentCounts = words.name("Tokenization")
