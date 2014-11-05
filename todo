@@ -1,27 +1,9 @@
-Status:
-Currently, I am working on the ROC curve.
-I started with the basic implementation in NerRocCurveProgram.scala, so far the only thing determined are the actual surfaces and the possible surfaces.
-These have not been tested yet and need to!
-
-One set is still missing: the set of possible surfaces, that would have been found, if the threshold were zero.
-Using these three sets then, it would be possible to determine the TP, TN, FP and FN for the actual ROC curve.
-
----
 After the ROC curve works, a next step could be to build an easy classifier (naive bayes) for the candidate classification, and try to run this for an example text.
 Including the loss matrix and so on.
-
 ---------------------------------
 Remove wiktionary links.
----------------------------------
-Copy data to HDFS
---------------------------------
-RUN ON SERVER, DISTRIBUTED
 --------------------------------
 Some output files do not have the correct format, i.e. in some rows the probabilities are missing.
-That is strange. Flink bug?
---------------------------------
-Idea:
-First bold text in article usually gives another surface. Use that?
-Example: http://en.wikipedia.org/wiki/Michael_Jordan_(Irish_politician)
+Flink bug? -- Check again for 0.7 release.
 --------------------------------
 Check some empty strings in the surface probs

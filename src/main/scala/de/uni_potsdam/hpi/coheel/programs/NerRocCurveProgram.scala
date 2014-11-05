@@ -73,7 +73,6 @@ class NerRocCurveProgram extends CoheelProgram with ProgramDescription {
 
 		rocValues.writeAsTsv(nerRocCurvePath)
 	}
-
 }
 
 object NerRocCurveProgram {
