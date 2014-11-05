@@ -1,5 +1,6 @@
 package de.uni_potsdam.hpi.coheel.programs
 
+import de.uni_potsdam.hpi.coheel.io.OutputFiles
 import OutputFiles._
 import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.scala._

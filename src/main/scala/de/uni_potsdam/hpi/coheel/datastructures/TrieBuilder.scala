@@ -3,7 +3,8 @@ package de.uni_potsdam.hpi.coheel.datastructures
 import java.io.File
 
 import de.uni_potsdam.hpi.coheel.PerformanceTimer
-import de.uni_potsdam.hpi.coheel.programs.OutputFiles._
+import de.uni_potsdam.hpi.coheel.io.OutputFiles
+import OutputFiles._
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
 import org.apache.log4j.Logger
 

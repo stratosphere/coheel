@@ -3,7 +3,7 @@ package de.uni_potsdam.hpi.coheel
 import java.io.File
 
 import de.uni_potsdam.hpi.coheel.datastructures.Trie
-import de.uni_potsdam.hpi.coheel.programs.OutputFiles
+import de.uni_potsdam.hpi.coheel.io.OutputFiles
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
 import org.scalatest.FunSuite
 import org.junit.runner.RunWith

@@ -1,4 +1,4 @@
-package de.uni_potsdam.hpi.coheel.programs
+package de.uni_potsdam.hpi.coheel.io
 
 import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
 import org.apache.flink.api.java.operators.DataSink
