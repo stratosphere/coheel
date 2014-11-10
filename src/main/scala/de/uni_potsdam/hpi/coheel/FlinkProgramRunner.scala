@@ -95,10 +95,9 @@ object FlinkProgramRunner {
 	def runProgram(program: CoheelProgram with ProgramDescription): Unit = {
 		log.info(StringUtils.repeat('#', 140))
 		log.info("# " + StringUtils.center(program.getDescription, 136) + " #")
-		log.info("# " + StringUtils.rightPad("Dataset: " + config.getString("name"), 136) + " #")
-		log.info("# " + StringUtils.rightPad("Base path: " + config.getString("base_path"), 136) + " #")
-		log.info("# " + StringUtils.rightPad("Output folder: " + config.getString("output_files_dir"), 136) + " #")
-		log.info(StringUtils.repeat('#', 140))
+		log.info("# " + StringUtils.rightPad(s"Dataset: ${config.getString("name")}", 136) + " #")
+		log.info("# " + StringUtils.rightPad(s"Base path: ${config.getString("base_path")}", 136) + " #")
+		log.info("# " + StringUtils.rightPad(s"Output folder: ${config.getString("output_files_dir")}", 136) + " #")
 
 		val processingTime = time {
 			val env = if (config.getString("type") == "file")
@@ -107,6 +106,8 @@ object FlinkProgramRunner {
 				ExecutionEnvironment.createRemoteEnvironment("tenemhead2", 6123,
 					"target/coheel_stratosphere-0.1-SNAPSHOT-jar-with-dependencies.jar")
 			program.buildProgram(env)
+			log.info("# " + StringUtils.rightPad(s"Degree of parallelism: ${env.getDegreeOfParallelism}", 136) + " #")
+			log.info(StringUtils.repeat('#', 140))
 
 			log.info("Starting ..")
 			env.execute(config.getString("name"))
