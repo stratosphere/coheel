@@ -6,4 +6,5 @@ Remove wiktionary links.
 Some output files do not have the correct format, i.e. in some rows the probabilities are missing.
 Flink bug? -- Check again for 0.7 release.
 --------------------------------
-Check some empty strings in the surface probs
+Rework count structure to allow the additional combine phase.
+--------------------------------
