@@ -90,7 +90,7 @@ class WikiPageReader {
 			def next(): WikiPage = {
 				if (!alreadyRead) {
 					alreadyRead = true
-					log.info(f"Reading $readCounter%4s. wiki file on this node.")
+//					log.info(f"Reading $readCounter%4s. wiki file on this node.")
 					readCounter += 1
 				}
 				readNextPage()

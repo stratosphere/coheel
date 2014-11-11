@@ -5,6 +5,7 @@ import de.uni_potsdam.hpi.coheel.io.OutputFiles
 import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.scala._
 import de.uni_potsdam.hpi.coheel.wiki._
+import scala.collection.mutable
 
 import OutputFiles._
 import DataClasses._
@@ -51,12 +52,16 @@ class WikipediaTrainingProgram extends CoheelProgram with ProgramDescription {
 		// counts in how many documents a surface occurs
 		val surfaceDocumentCounts = groupedByLinkText
 			.reduceGroup { linksWithSameText =>
-				val asList = linksWithSameText.toList
-				val text = asList(0).surface
-
+				var text: String = null
 				// Count each link on one source page only once, i.e. if a surface occurs twice on a page
 				// it is only counted once.
-				val count = Set(asList.map(_.source)).size
+				val distinctDocuments = mutable.HashSet[String]()
+				linksWithSameText.foreach { linkWithText =>
+					if (text == null)
+						text = linkWithText.surface
+					distinctDocuments += linkWithText.source
+				}
+				val count = distinctDocuments.size
 				(text, count)
 			}
 
@@ -68,36 +73,33 @@ class WikipediaTrainingProgram extends CoheelProgram with ProgramDescription {
 			}
 		// count how often a surface occurs with a certain destination
 		val surfaceLinkCounts = allPageLinks
-			.groupBy { link => (link.surface, link.destination) }
-			.reduceGroup { group =>
-				val links = group.toList
-				SurfaceLinkCounts(links.head.surface, links.head.destination, links.size)
-			}
-			.name("Surface-LinkTo-Counts")
+			.map { link => SurfaceLinkCounts(link. surface, link.destination, 1) }
+			.groupBy(0, 1)
+			.sum(2).name("Surface-LinkTo-Counts")
 		// join them together and calculate the probabilities
 		val surfaceProbabilities = surfaceCounts.join(surfaceLinkCounts)
 			.where { _.surface }
 			.equalTo { _.surface }
 			.map { joinResult => joinResult match {
 				case (surfaceCount, surfaceLinkCount) =>
-					(surfaceLinkCount.surface, surfaceLinkCount.destination,
+					(surfaceCount.surface, surfaceLinkCount.destination,
 					 surfaceLinkCount.count / surfaceCount.count.toDouble)
 			}
 		}
 
 		// calculate context link counts only for non-disambiguation pages
 		val linkCounts = normalPageLinks
-			.groupBy { link => link.source }
-			.reduceGroup { group =>
-				val links = group.toList
-				LinkCounts(links.head.source, links.size)
-			}
+			.map { link => LinkCounts(link.source, 1) }
+			.groupBy(0)
+			.sum(1)
 		val contextLinkCounts = normalPageLinks
-			.groupBy { link => (link.source, link.destination) }
-			.reduceGroup { group =>
-				val links = group.toList
-				ContextLinkCounts(links.head.source, links.head.destination, links.size)
-			}
+			.map { link => ContextLinkCounts(link.source, link.destination, 1) }
+			.groupBy(0, 1)
+			.sum(2)
+//			.reduceGroup { group =>
+//				val links = group.toList
+//				ContextLinkCounts(links.head.source, links.head.destination, links.size)
+//			}
 		val contextLinkProbabilities = linkCounts.join(contextLinkCounts)
 			.where     { _.source }
 			.equalTo { _.source }
@@ -138,23 +140,19 @@ class WikipediaTrainingProgram extends CoheelProgram with ProgramDescription {
 
 		// count the words in a document
 		val documentCounts = words.name("Tokenization")
-			.groupBy { word => word.document }
-			.reduceGroup { group =>
-				val words = group.toList
-				DocumentCounts(words.head.document, words.size)
-			}.name("Document-Counts")
+			.map { word => DocumentCounts(word.document, 1) }
+			.groupBy(0)
+			.sum(1).name("Document-Counts")
 		val wordCounts = words
-			.groupBy { word => word }
-			.reduceGroup { group =>
-				val words = group.toList
-				WordCounts(words.head, words.size)
-			}.name("Word-Counts")
+			.map { word => WordCounts(word, 1) }
+			.groupBy(0)
+			.sum(1).name("Document-Counts").name("Word-Counts")
 		val languageModel = documentCounts.join(wordCounts)
 			.where { _.document }
 			.equalTo { _.word.document }
 			.map { joinResult => joinResult match {
 				case (documentCount, wordCount) =>
-					(documentCount.document, wordCount.word, wordCount.count.toDouble / documentCount.count)
+					(documentCount.document, wordCount.word.word, wordCount.count.toDouble / documentCount.count)
 			}
 		}.name("Language Model: Document-Word-Prob")
 
@@ -163,8 +161,14 @@ class WikipediaTrainingProgram extends CoheelProgram with ProgramDescription {
 		val documentWordCounts = words
 			.groupBy { word => word.word }
 			.reduceGroup { it =>
-				val docList = it.toList
-				(docList(0).word, docList.groupBy { word => word.document }.size)
+				var word: String = null
+				val distinctDocuments = mutable.HashSet[String]()
+				it.foreach { wordDocument =>
+					if (word == null)
+						word = wordDocument.word
+					distinctDocuments += wordDocument.document
+				}
+				(word, distinctDocuments.size)
 		}.name("Document Word Counts: Word-DocumentCount")
 
 		languageModel.writeAsTsv(languageModelProbsPath)
