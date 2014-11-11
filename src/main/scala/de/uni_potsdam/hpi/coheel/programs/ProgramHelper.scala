@@ -64,7 +64,7 @@ object ProgramHelper {
 							plainText, links.toArray, wikiPage.isDisambiguation, wikiPage.isList))
 					} catch {
 						case e: Throwable =>
-							log.error(s"${e.getClass.getSimpleName} in ${wikiPage.pageTitle}, ${e.getMessage}, ${e.getStackTraceString}")
+							println(s"${e.getClass.getSimpleName} in ${wikiPage.pageTitle}, ${e.getMessage}, ${e.getStackTraceString}")
 							None
 					}
 					parsedWikiPage
