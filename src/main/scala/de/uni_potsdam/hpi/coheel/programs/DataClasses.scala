@@ -13,4 +13,8 @@ object DataClasses {
 	case class EntireTextSurfaces(pageTitle: String, surface: String)
 	case class EntireTextSurfaceCounts(surface: String, count: Int)
 	case class SurfaceAsLinkCount(surface: String, count: Int)
+
+	// Redirect resolving
+	case class ContextLink(from: String, origTo: String, to: String, prob: Double)
+	case class Redirect(from: String, to: String)
 }
