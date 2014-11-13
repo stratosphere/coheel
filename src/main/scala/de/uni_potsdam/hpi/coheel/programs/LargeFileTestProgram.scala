@@ -2,6 +2,8 @@ package de.uni_potsdam.hpi.coheel.programs
 
 import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.scala._
+import org.apache.flink.core.fs.FileSystem
+import org.apache.flink.shaded.com.google.common.io.FileWriteMode
 
 class LargeFileTestProgram extends CoheelProgram with ProgramDescription {
 
@@ -10,10 +12,10 @@ class LargeFileTestProgram extends CoheelProgram with ProgramDescription {
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val input = env.readTextFile("hdfs://tenemhead2/home/stefan.bunk/large_file")
 
-		val result = input.mapPartition { linesIt =>
-			println(s"READHERE: Reading ${linesIt.size} files.")
-			List((1, 1))
+		val result = input.map { linesIt =>
+			println(s"READNOWHERE: Reading ${linesIt.size} files.")
+			(1, 1)
 		}.sum(0)
-		result.writeAsText("hdfs://tenemhead2/home/stefan.bunk/large_file_result")
+		result.writeAsText("hdfs://tenemhead2/home/stefan.bunk/large_file_result", FileSystem.WriteMode.OVERWRITE)
 	}
 }
