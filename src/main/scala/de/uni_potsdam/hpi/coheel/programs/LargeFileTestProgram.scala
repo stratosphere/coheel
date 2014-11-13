@@ -14,6 +14,6 @@ class LargeFileTestProgram extends CoheelProgram with ProgramDescription {
 			println(s"READHERE: Reading ${linesIt.size} files.")
 			List((1, 1))
 		}.sum(0)
-		result.print()
+		result.writeAsText("hdfs://tenemhead2/home/stefan.bunk/large_file_result")
 	}
 }
