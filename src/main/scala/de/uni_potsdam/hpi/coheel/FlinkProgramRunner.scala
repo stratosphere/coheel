@@ -53,6 +53,7 @@ object FlinkProgramRunner {
 		, "trie" -> classOf[EntireTextSurfacesProgram]
 		, "ner-roc" -> classOf[NerRocCurveProgram]
 		, "redirects" -> classOf[RedirectResolvingProgram]
+		, "large" -> classOf[LargeFileTestProgram]
 	)
 
 	/**
