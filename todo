@@ -6,3 +6,4 @@ Remove wiktionary links.
 Some output files do not have the correct format, i.e. in some rows the probabilities are missing.
 Flink bug? -- Check again for 0.7 release.
 --------------------------------
+Aggregating on field positions is only possible on tuple data types.

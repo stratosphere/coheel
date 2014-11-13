@@ -12,7 +12,7 @@ class LargeFileTestProgram extends CoheelProgram with ProgramDescription {
 
 		val result = input.mapPartition { linesIt =>
 			println(s"READHERE: Reading ${linesIt.size} files.")
-			List(1)
+			List((1, 1))
 		}.sum(0)
 		result.print()
 	}
