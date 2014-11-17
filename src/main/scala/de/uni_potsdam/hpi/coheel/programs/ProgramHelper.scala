@@ -39,7 +39,8 @@ object ProgramHelper {
 		val input = env.readFile(new WikiPageInputFormat, wikipediaFilesPath)
 
 		input.flatMap { linesIt =>
-			if (linesIt.contains("<xml_split:root xmlns:xml_split")) {
+			val t1 = System.currentTimeMillis()
+			val wikiPages = if (linesIt.contains("<xml_split:root xmlns:xml_split")) {
 				List()
 			} else {
 				val fileContent = "<foo><page>" + linesIt.replace("</xml_split:root>", "") + "</foo>"
@@ -71,6 +72,9 @@ object ProgramHelper {
 				}
 				result
 			}
+			val t2 = System.currentTimeMillis()
+			println(f"${t2 - t1} ms.")
+			wikiPages
 		}.name("Wiki-Pages")
 	}
 
