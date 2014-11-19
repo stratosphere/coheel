@@ -1,13 +1,11 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import de.uni_potsdam.hpi.coheel.PerformanceTimer
-import de.uni_potsdam.hpi.coheel.io.OutputFiles
+import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.scala._
 import de.uni_potsdam.hpi.coheel.wiki._
 import scala.collection.mutable
 
-import OutputFiles._
 import DataClasses._
 import org.apache.log4j.Logger
 
