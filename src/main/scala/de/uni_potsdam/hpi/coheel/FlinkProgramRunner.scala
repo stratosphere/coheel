@@ -3,7 +3,7 @@ package de.uni_potsdam.hpi.coheel
 import java.io.{InputStream, InputStreamReader, File}
 import java.net.InetSocketAddress
 
-import org.apache.commons.io.IOUtils
+import org.apache.commons.io.{FileUtils, IOUtils}
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.scala._
@@ -111,7 +111,7 @@ object FlinkProgramRunner {
 			log.info(StringUtils.repeat('#', 140))
 
 			log.info("Starting ..")
-			println(env.getExecutionPlan())
+			FileUtils.writeStringToFile(new File("PLAN"), env.getExecutionPlan())
 			env.execute(s"${program.getDescription} (dataset = ${config.getString("name")})")
 //			PerformanceTimer.printTimerEvents()
 		} * 10.2 * 1024 /* full data dump size*/ / 42.7 /* test dump size */ / 60 /* in minutes */ / 60 /* in hours */
