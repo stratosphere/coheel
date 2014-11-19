@@ -15,7 +15,7 @@ class WikipediaTrainingProgram extends CoheelProgram with ProgramDescription {
 
 	@transient val log: Logger = Logger.getLogger(this.getClass)
 
-	override def getDescription = "Training the model parameters for CohEEL."
+	override def getDescription = "Wikipedia Extraction"
 
 	/**
 	 * Builds a plan to create the three main data structures CohEEL needs.
