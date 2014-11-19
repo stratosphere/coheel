@@ -111,6 +111,7 @@ object FlinkProgramRunner {
 			log.info(StringUtils.repeat('#', 140))
 
 			log.info("Starting ..")
+			println(env.getExecutionPlan())
 			env.execute(s"${program.getDescription} (dataset = ${config.getString("name")})")
 //			PerformanceTimer.printTimerEvents()
 		} * 10.2 * 1024 /* full data dump size*/ / 42.7 /* test dump size */ / 60 /* in minutes */ / 60 /* in hours */
