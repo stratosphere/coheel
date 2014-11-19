@@ -1,4 +1,5 @@
-reset
+set terminal "png"
+set output "graph.png"
 
 # Parameters
 n     = 100 # number of intervals
@@ -22,4 +23,4 @@ set tics out nomirror
 set xlabel "Unique words in article"
 set ylabel "Frequency"
 
-plot "data" using (hist($1, width)):(1.0) smooth freq with boxes lc rgb"green" notitle
+plot "data" using (hist($1, width)):(1.0) smooth freq with boxes lc rgb"red" notitle
