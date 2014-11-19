@@ -1,11 +1,10 @@
 package de.uni_potsdam.hpi.coheel.programs
 
 import de.uni_potsdam.hpi.coheel.datastructures.TrieBuilder
-import de.uni_potsdam.hpi.coheel.io.OutputFiles
+import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{EntireTextSurfaces, SurfaceAsLinkCount, EntireTextSurfaceCounts}
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
 import org.apache.flink.api.common.{Plan, ProgramDescription}
-import OutputFiles._
 import org.apache.flink.api.scala._
 import org.apache.log4j.Logger
 
