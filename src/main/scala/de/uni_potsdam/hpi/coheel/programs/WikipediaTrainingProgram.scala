@@ -73,7 +73,7 @@ class WikipediaTrainingProgram extends CoheelProgram with ProgramDescription {
 			}
 		// count how often a surface occurs with a certain destination
 		val surfaceLinkCounts = allPageLinks
-			.map { link => SurfaceLinkCounts(link. surface, link.destination, 1) }
+			.map { link => SurfaceLinkCounts(link.surface, link.destination, 1) }
 			.groupBy(0, 1)
 			.sum(2).name("Surface-LinkTo-Counts")
 		// join them together and calculate the probabilities
