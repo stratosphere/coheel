@@ -77,7 +77,7 @@ class ExtractorTest extends FunSuite {
 
 	test("just print links") {
 		links.foreach { link =>
-			println(String.format("%80s||%s", link.surface, link.destination))
+//			println(String.format("%80s||%s", link.surface, link.destination))
 		}
 	}
 

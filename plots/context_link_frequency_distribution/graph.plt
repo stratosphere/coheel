@@ -1,8 +1,8 @@
 reset
 
 # Parameters
-n     = 100 #number of intervals
-max   = 1000.
+n     = 100 # number of intervals
+max   = 100.
 min   = 0.
 width = (max - min) / n
 

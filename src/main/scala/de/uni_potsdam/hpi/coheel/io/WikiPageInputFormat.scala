@@ -6,9 +6,8 @@ import org.apache.flink.api.common.io.{DelimitedInputFormat, FileInputFormat}
 //class WikiPageInputFormat extends FileInputFormat[String] {
 class WikiPageInputFormat extends DelimitedInputFormat[String] {
 
-	setDelimiter("<page>")
+	setDelimiter("<MARKER />")
 	override def readRecord(reuse: String, bytes: Array[Byte], offset: Int, numBytes: Int): String = {
-//		println(s"${bytes.size} $offset $numBytes")
 		new String(bytes, offset, numBytes)
 	}
 
@@ -17,7 +16,6 @@ class WikiPageInputFormat extends DelimitedInputFormat[String] {
 class Foo extends FileInputFormat[WikiPage] {
 	override def reachedEnd(): Boolean = {
 		true
-
 	}
 
 	override def nextRecord(reuse: WikiPage): WikiPage = {

@@ -1,6 +1,8 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import de.uni_potsdam.hpi.coheel.io.WikiPageInputFormat
+import de.uni_potsdam.hpi.coheel.io.{IteratorReader, WikiPageInputFormat}
+import org.apache.commons.io.{FileUtils, IOUtils}
+import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.scala._
 import org.apache.flink.core.fs.Path
 import org.apache.flink.core.fs.local.LocalFileSystem
@@ -29,44 +31,36 @@ object ProgramHelper {
 	}
 
 	def getWikiPages(env: ExecutionEnvironment): DataSet[WikiPage] = {
-//		val input = env.readTextFile("hdfs://tenemhead2/home/stefan.bunk/wikipediaFilesPath")
-//		val input = env.readTextFile(wikipediaFilesPath)
 		val input = env.readFile(new WikiPageInputFormat, wikipediaFilesPath)
 
-		input.flatMap { linesIt =>
-			val wikiPages = if (linesIt.contains("<xml_split:root xmlns:xml_split")) {
-				List()
-			} else {
-				val fileContent = "<foo><page>" + linesIt.replace("</xml_split:root>", "") + "</foo>"
-//				println("================================")
-//				println(fileContent)
-				val reader = new StringReader(fileContent)
-				val wikiPages = new WikiPageReader().xmlToWikiPages(reader)
-				val filteredWikiPages = wikiPages.filter { page =>
-					val filter = page.ns == 0 && page.source.nonEmpty
-					filter
-				}
-				val result = filteredWikiPages.flatMap { wikiPage =>
-					val parsedWikiPage = try {
-						val extractor = new Extractor(wikiPage)
-						val alternativeNames = extractor.extractAlternativeNames().map {
-							Link(wikiPage.pageTitle, _, wikiPage.pageTitle)
-						}
-						val links = alternativeNames ++ extractor.extractLinks()
-						val plainText = extractor.extractPlainText()
-						wikiPage.source = ""
-						Some(WikiPage(wikiPage.pageTitle, wikiPage.ns, wikiPage.redirect,
-							plainText, links.toArray, wikiPage.isDisambiguation, wikiPage.isList))
-					} catch {
-						case e: Throwable =>
-							println(s"${e.getClass.getSimpleName} in ${wikiPage.pageTitle}, ${e.getMessage}, ${e.getStackTraceString}")
-							None
-					}
-					parsedWikiPage
-				}
-				result
+		input.mapPartition { linesIt =>
+//			val fileContent = "<foo>" + linesIt.mkString("\n") + "</foo>"
+//			val reader = new StringReader(fileContent)
+			val reader = new IteratorReader(List("<foo>").iterator ++ linesIt ++ List("</foo>").iterator)
+			val wikiPages = new WikiPageReader().xmlToWikiPages(reader)
+			val filteredWikiPages = wikiPages.filter { page =>
+				val filter = page.ns == 0 && page.source.nonEmpty
+				filter
 			}
-			wikiPages
+			val result = filteredWikiPages.flatMap { wikiPage =>
+				val parsedWikiPage = try {
+					val extractor = new Extractor(wikiPage)
+					val alternativeNames = extractor.extractAlternativeNames().map {
+						Link(wikiPage.pageTitle, _, wikiPage.pageTitle)
+					}
+					val links = alternativeNames ++ extractor.extractLinks()
+					val plainText = extractor.extractPlainText()
+					wikiPage.source = ""
+					Some(WikiPage(wikiPage.pageTitle, wikiPage.ns, wikiPage.redirect,
+						plainText, links.toArray, wikiPage.isDisambiguation, wikiPage.isList))
+				} catch {
+					case e: Throwable =>
+						println(s"${e.getClass.getSimpleName} in ${wikiPage.pageTitle}, ${e.getMessage}, ${e.getStackTraceString}")
+						None
+				}
+				parsedWikiPage
+			}
+			result
 		}.name("Wiki-Pages")
 	}
 

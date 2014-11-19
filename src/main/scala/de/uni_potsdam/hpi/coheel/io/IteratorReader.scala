@@ -7,10 +7,6 @@ class IteratorReader(var iterator: scala.Iterator[String]) extends Reader {
 
 	private var current: StringReader = _
 
-	if (iterator == null) {
-		throw new NullPointerException()
-	}
-
 	override def read(cbuf: Array[Char], off: Int, len: Int): Int = {
 		if (current != null) {
 			val ret = current.read(cbuf, off, len)
