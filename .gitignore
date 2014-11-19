@@ -9,3 +9,5 @@ output/
 src/test/resources/
 /*-output
 bin/file-concatenator/
+plots/**/data
+plots/**/raw-data
