@@ -25,7 +25,7 @@ class WikipediaTrainingProgram extends CoheelProgram with ProgramDescription {
 	 */
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val wikiPages = ProgramHelper.getWikiPages(env)
-//		buildLinkPlans(wikiPages)
+		buildLinkPlans(wikiPages)
 		buildLanguageModelPlan(wikiPages)
 
 //		wikiPages.map { wikiPage =>
@@ -169,7 +169,7 @@ class WikipediaTrainingProgram extends CoheelProgram with ProgramDescription {
 				(word, distinctDocuments.size)
 		}.name("Document Word Counts: Word-DocumentCount")
 
-//		languageModel.writeAsTsv(languageModelProbsPath)
+		languageModel.writeAsTsv(languageModelProbsPath)
 		documentWordCounts.writeAsTsv(documentWordCountsPath)
 	}
 }
