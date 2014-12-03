@@ -94,10 +94,6 @@ class WikipediaTrainingProgram extends CoheelProgram with ProgramDescription {
 			.map { link => ContextLinkCounts(link.source, link.destination, 1) }
 			.groupBy(0, 1)
 			.sum(2)
-//			.reduceGroup { group =>
-//				val links = group.toList
-//				ContextLinkCounts(links.head.source, links.head.destination, links.size)
-//			}
 		val contextLinkProbabilities = linkCounts.join(contextLinkCounts)
 			.where     { _.source }
 			.equalTo { _.source }
