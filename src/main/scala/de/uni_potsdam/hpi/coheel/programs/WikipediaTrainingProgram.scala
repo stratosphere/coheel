@@ -130,27 +130,25 @@ class WikipediaTrainingProgram extends CoheelProgram with ProgramDescription {
 	 */
 	def buildLanguageModelPlan(wikiPages: DataSet[WikiPage]): Unit = {
 		val words = ProgramHelper.filterNormalPages(wikiPages) flatMap { wikiPage =>
-			val tokens = TokenizerHelper.tokenize(wikiPage.plainText).map { token =>
-				Word(wikiPage.pageTitle, token)
+			val tokens = TokenizerHelper.tokenizeWithCounts(wikiPage.plainText).map { case (token, count) =>
+				WordInDocument(wikiPage.pageTitle, token, count)
 			}.toIterator
 			tokens
 		}
 
 		// count the words in a document
 		val documentCounts = words.name("Tokenization")
-			.map { word => DocumentCounts(word.document, 1) }
 			.groupBy(0)
-			.sum(1).name("Document-Counts")
+			.sum(2).name("Document-Counts")
 		val wordCounts = words
-			.map { word => WordCounts(word, 1) }
-			.groupBy(0)
-			.sum(1).name("Document-Counts").name("Word-Counts")
+			.groupBy(1)
+			.sum(2).name("Word-Counts")
 		val languageModel = documentCounts.join(wordCounts)
 			.where { _.document }
-			.equalTo { _.word.document }
+			.equalTo { _.document }
 			.map { joinResult => joinResult match {
 				case (documentCount, wordCount) =>
-					(documentCount.document, wordCount.word.word, wordCount.count.toDouble / documentCount.count)
+					(documentCount.document, wordCount.word, wordCount.count.toDouble / documentCount.count)
 			}
 		}.name("Language Model: Document-Word-Prob")
 
@@ -160,13 +158,13 @@ class WikipediaTrainingProgram extends CoheelProgram with ProgramDescription {
 			.groupBy { word => word.word }
 			.reduceGroup { it =>
 				var word: String = null
-				val distinctDocuments = mutable.HashSet[String]()
+				var size: Int = 0
 				it.foreach { wordDocument =>
 					if (word == null)
 						word = wordDocument.word
-					distinctDocuments += wordDocument.document
+					size += 1
 				}
-				(word, distinctDocuments.size)
+				(word, size)
 		}.name("Document Word Counts: Word-DocumentCount")
 
 		languageModel.writeAsTsv(languageModelProbsPath)

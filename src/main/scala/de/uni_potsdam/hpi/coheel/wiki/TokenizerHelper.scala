@@ -5,6 +5,7 @@ import org.apache.lucene.util.Version
 import java.io.StringReader
 import scala.collection.mutable.ListBuffer
 import org.apache.lucene.analysis.tokenattributes.{OffsetAttribute, CharTermAttribute}
+import scala.collection.mutable
 
 /**
  * Small wrapper around Lucene's tokenizing and stemming.
@@ -17,6 +18,14 @@ object TokenizerHelper {
 			tokens += charTermAttribute.toString
 		}
 		tokens.result()
+	}
+
+	def tokenizeWithCounts(text: String, stemming: Boolean = true): Map[String, Int] = {
+		val tokens = ListBuffer[String]()
+		tokenizeHelper(text, stemming) { (charTermAttribute, _) =>
+			tokens += charTermAttribute.toString
+		}
+		tokens.groupBy { word => word }.mapValues(_.size)
 	}
 
 	case class Token(word: String, startOffset: Int, endOffset: Int)
