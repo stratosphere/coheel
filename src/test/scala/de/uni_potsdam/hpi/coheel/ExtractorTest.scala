@@ -28,6 +28,7 @@ class ExtractorTest extends FunSuite {
 
 	test("remove quotes around links") {
 		assert(links.exists { _.surface == "Alternatives to common law systems" })
+		assert(links.exists { _.surface == "\"ABC\" (song)" })
 	}
 	test("parsing bold text at beginning of article") {
 		assert(links.exists { _.surface == "Aldrovandia phalacra" })
@@ -83,7 +84,7 @@ class ExtractorTest extends FunSuite {
 	}
 
 	test("all links are found (currently, we cannot find links in refs)") {
-		assert(links.size === 57 /* hand-counted :) */)
+		assert(links.size === 58 /* hand-counted :) */)
 	}
 
 	test("just print links") {
