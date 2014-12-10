@@ -68,8 +68,9 @@ class Extractor(wikiPage: WikiPage) {
 		nodeIterator(rootNode) {
 			case paragraph: Paragraph =>
 				val paragraphText = getText(paragraph)
-				if (paragraphText.length > MIN_PARAGRAPH_LENGTH)
+				if (paragraphText.length > MIN_PARAGRAPH_LENGTH) {
 					return extractBoldWordsFrom(paragraph)
+				}
 			case _ =>
 		}
 		Queue()
@@ -79,7 +80,7 @@ class Extractor(wikiPage: WikiPage) {
 		var boldWords = Queue[String]()
 		nodeIterator(paragraph) {
 			case bold: Bold =>
-				boldWords = boldWords.enqueue(getText(bold))
+				boldWords = boldWords.enqueue(getText(bold).trim)
 			case _ =>
 		}
 		boldWords

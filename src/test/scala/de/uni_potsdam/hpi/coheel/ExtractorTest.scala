@@ -20,8 +20,16 @@ class ExtractorTest extends FunSuite {
 	def links: Seq[Link] = {
 		val extractor = fixture()
 		extractor.extractLinks()
+		val alternativeNames = extractor.extractAlternativeNames().map {
+			Link(wikiPage.pageTitle, _, wikiPage.pageTitle)
+		}
+		extractor.extractLinks() ++ alternativeNames
 	}
 
+	test("parsing bold text at beginning of article") {
+		assert(links.exists { _.surface == "Aldrovandia phalacra" })
+		assert(links.exists { _.surface == "Hawaiian halosaurid" })
+	}
 	test("parsing a simple internal link '[[byte]]'") {
 		assert(links.exists { _.surface == "byte" })
 	}
@@ -72,7 +80,7 @@ class ExtractorTest extends FunSuite {
 	}
 
 	test("all links are found (currently, we cannot find links in refs)") {
-		assert(links.size === 54 /* hand-counted :) */)
+		assert(links.size === 56 /* hand-counted :) */)
 	}
 
 	test("just print links") {
