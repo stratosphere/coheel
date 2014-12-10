@@ -204,7 +204,7 @@ class Extractor(wikiPage: WikiPage) {
 	 * @return The sanitized link.
 	 */
 	private def trimWhitespace(link: LinkWithNode): Option[LinkWithNode] = {
-		link.text = link.text.trim
+		link.text = link.text.trim.stripPrefix("\"").stripSuffix("\"").trim
 		Some(link)
 	}
 

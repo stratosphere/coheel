@@ -16,6 +16,9 @@
 						Note: This file is based on the Kilobyte page, but contains some manually added hard cases for the parser.
 						Regression suite:
 
+                        Test quotes:
+                        [[Common law#Alternatives to common law systems|&quot;Alternatives to common law systems&quot;]] below.
+
 						Wrong Category type: leading colon
 						[[:Category:Information Units]]
 

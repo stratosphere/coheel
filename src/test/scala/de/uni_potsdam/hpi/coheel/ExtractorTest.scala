@@ -26,6 +26,9 @@ class ExtractorTest extends FunSuite {
 		extractor.extractLinks() ++ alternativeNames
 	}
 
+	test("remove quotes around links") {
+		assert(links.exists { _.surface == "Alternatives to common law systems" })
+	}
 	test("parsing bold text at beginning of article") {
 		assert(links.exists { _.surface == "Aldrovandia phalacra" })
 		assert(links.exists { _.surface == "Hawaiian halosaurid" })
@@ -50,7 +53,7 @@ class ExtractorTest extends FunSuite {
 			link.surface == "Information theory" && link.destination == "Information theory"
 		})
 		assert(links.exists { link =>
-			link.surface == "\"Antwort\"" && link.destination == "wikt:antwort"
+			link.surface == "Antwort" && link.destination == "wikt:antwort"
 		})
 	}
 	test("parsing an internal link with different label '[[Computer data storage|digital information]]'") {
@@ -80,7 +83,7 @@ class ExtractorTest extends FunSuite {
 	}
 
 	test("all links are found (currently, we cannot find links in refs)") {
-		assert(links.size === 56 /* hand-counted :) */)
+		assert(links.size === 57 /* hand-counted :) */)
 	}
 
 	test("just print links") {
