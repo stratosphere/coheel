@@ -50,6 +50,7 @@ object FlinkProgramRunner {
 	 */
 	val programs = Map(
 		"main" -> classOf[WikipediaTrainingProgram]
+		, "classify" -> classOf[ClassificationProgram]
 		, "trie" -> classOf[EntireTextSurfacesProgram]
 		, "ner-roc" -> classOf[NerRocCurveProgram]
 		, "redirects" -> classOf[RedirectResolvingProgram]

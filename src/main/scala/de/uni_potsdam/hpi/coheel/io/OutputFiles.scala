@@ -2,7 +2,7 @@ package de.uni_potsdam.hpi.coheel.io
 
 import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
 import org.apache.flink.api.java.operators.DataSink
-import org.apache.flink.api.scala.DataSet
+import org.apache.flink.api.scala._
 import org.apache.flink.core.fs.FileSystem
 
 object OutputFiles {
@@ -31,5 +31,4 @@ class OutputFiles(dataSet: DataSet[_]) {
 	def writeAsTsv(path: String): DataSink[_] = {
 		dataSet.writeAsCsv(path, "\n", "\t", FileSystem.WriteMode.OVERWRITE)
 	}
-
 }

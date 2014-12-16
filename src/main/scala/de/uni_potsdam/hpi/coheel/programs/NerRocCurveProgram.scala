@@ -4,11 +4,10 @@ import de.uni_potsdam.hpi.coheel.datastructures.{TrieBuilder, Trie}
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.wiki.{WikiPage, TokenizerHelper}
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper.Token
-import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.scala._
 import org.apache.log4j.Logger
 
-class NerRocCurveProgram extends CoheelProgram with ProgramDescription {
+class NerRocCurveProgram extends CoheelProgram {
 
 	@transient val log: Logger = Logger.getLogger(this.getClass)
 

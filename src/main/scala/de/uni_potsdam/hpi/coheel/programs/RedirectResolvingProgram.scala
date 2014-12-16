@@ -6,7 +6,7 @@ import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.scala._
 import org.apache.log4j.Logger
 
-class RedirectResolvingProgram extends CoheelProgram with ProgramDescription {
+class RedirectResolvingProgram extends CoheelProgram {
 
 	@transient val log = Logger.getLogger(getClass)
 

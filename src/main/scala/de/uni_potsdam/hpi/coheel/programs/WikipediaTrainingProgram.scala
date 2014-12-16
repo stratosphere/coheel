@@ -9,7 +9,7 @@ import scala.collection.mutable
 import DataClasses._
 import org.apache.log4j.Logger
 
-class WikipediaTrainingProgram extends CoheelProgram with ProgramDescription {
+class WikipediaTrainingProgram extends CoheelProgram {
 
 	@transient val log: Logger = Logger.getLogger(this.getClass)
 

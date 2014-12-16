@@ -10,7 +10,7 @@ import org.apache.log4j.Logger
 
 import scala.collection.mutable
 
-class EntireTextSurfacesProgram extends CoheelProgram with ProgramDescription {
+class EntireTextSurfacesProgram extends CoheelProgram {
 
 	@transient val log = Logger.getLogger(getClass)
 	// prepare the trie
