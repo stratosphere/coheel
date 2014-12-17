@@ -10,7 +10,7 @@ object DataClasses {
 	 */
 	// Note: In contrast to InternalLink, this class does not contain a Node, because
 	// that should not be part of the interface of this class.
-	case class Link(source: String, surface: String, destination: String)
+	case class Link(surface: String, source: String, destination: String)
 
 	case class WordInDocument(document: String, word: String, count: Int)
 	case class WordCounts(word: WordInDocument, count: Int)

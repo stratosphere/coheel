@@ -28,10 +28,8 @@ class Extractor(wikiPage: WikiPage) {
 
 	val compiledWikiPage = getCompiledWikiPage(wikiPage)
 	var links: Seq[Link] = _
-	var currentWikiTitle: String = _
 
 	def extractLinks(): Seq[Link] = {
-		currentWikiTitle = wikiPage.pageTitle
 		val rootNode = compiledWikiPage.getContent
 		val links = extractLinks(rootNode)
 		links
@@ -77,7 +75,7 @@ class Extractor(wikiPage: WikiPage) {
 					boldWords = boldWords.enqueue(text)
 			case _ =>
 		}
-		boldWords.map { word => Link(wikiPage.pageTitle, word, wikiPage.pageTitle) }
+		boldWords.map { word => Link(word, wikiPage.pageTitle, wikiPage.pageTitle) }
 	}
 
 	// Private helper function to extract breadth-first search in the node tree
@@ -221,6 +219,6 @@ class Extractor(wikiPage: WikiPage) {
 	 * Translates an internal link to an link, that can be exposed to the user.
 	 */
 	private def toLink(link: LinkWithNode): Option[Link] = {
-		Some(Link(currentWikiTitle, link.text, link.destination))
+		Some(Link(link.text, wikiPage.pageTitle, link.destination))
 	}
 }
