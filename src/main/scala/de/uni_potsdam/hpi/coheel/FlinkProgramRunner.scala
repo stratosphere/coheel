@@ -106,7 +106,7 @@ object FlinkProgramRunner {
 			val env = if (config.getString("type") == "file")
 				ExecutionEnvironment.createLocalEnvironment(1)
 			else
-				ExecutionEnvironment.createRemoteEnvironment("tenemhead2", 6123, 10,
+				ExecutionEnvironment.createRemoteEnvironment("tenemhead2", 6123, 20,
 					"target/coheel_stratosphere-0.1-SNAPSHOT-jar-with-dependencies.jar")
 			program.buildProgram(env)
 			log.info("# " + StringUtils.rightPad(s"Degree of parallelism: ${env.getDegreeOfParallelism}", 136) + " #")
