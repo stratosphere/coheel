@@ -26,9 +26,14 @@ class ExtractorTest extends FunSuite {
 		extractor.extractLinks() ++ alternativeNames
 	}
 
+	test("Check links inside of ''") {
+		assert(links.exists { link => link.surface == "Anno Domini" && link.destination == "Anno Domini" })
+	}
+
 	test("remove quotes around links") {
 		assert(links.exists { _.surface == "Alternatives to common law systems" })
 		assert(links.exists { _.surface == "\"ABC\" (song)" })
+		assert(links.exists { _.surface == "\"" })
 	}
 	test("parsing bold text at beginning of article") {
 		assert(links.exists { _.surface == "Aldrovandia phalacra" })
@@ -84,7 +89,7 @@ class ExtractorTest extends FunSuite {
 	}
 
 	test("all links are found (currently, we cannot find links in refs)") {
-		assert(links.size === 58 /* hand-counted :) */)
+		assert(links.size === 60 /* hand-counted :) */)
 	}
 
 	test("just print links") {

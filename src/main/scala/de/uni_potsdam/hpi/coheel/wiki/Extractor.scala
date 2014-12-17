@@ -80,7 +80,9 @@ class Extractor(wikiPage: WikiPage) {
 		var boldWords = Queue[String]()
 		nodeIterator(paragraph) {
 			case bold: Bold =>
-				boldWords = boldWords.enqueue(getText(bold).trim)
+				val text = getText(bold).trim
+				if (text.nonEmpty) // TODO: Check why texts can be empty
+					boldWords = boldWords.enqueue(text)
 			case _ =>
 		}
 		boldWords
@@ -176,7 +178,8 @@ class Extractor(wikiPage: WikiPage) {
 	 *         None otherwise.
 	 */
 	private def filterStartsWith(link: LinkWithNode, startStrings: String*): Option[LinkWithNode] = {
-		if (startStrings.exists { s => link.destination.startsWith(s) ||
+		if (startStrings.exists { s =>
+			link.destination.startsWith(s) ||
 			link.destination.startsWith(s":$s") }) None
 		else Some(link)
 	}
@@ -205,7 +208,7 @@ class Extractor(wikiPage: WikiPage) {
 	 */
 	private def trimWhitespace(link: LinkWithNode): Option[LinkWithNode] = {
 		link.text = link.text.trim
-		while (link.text.startsWith("\"") && link.text.endsWith("\""))
+		while (link.text.startsWith("\"") && link.text.endsWith("\"") && link.text.size > 1)
 			link.text = link.text.drop(1).dropRight(1)
 		Some(link)
 	}
