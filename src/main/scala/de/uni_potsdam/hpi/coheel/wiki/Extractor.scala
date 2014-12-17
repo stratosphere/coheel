@@ -29,8 +29,12 @@ class Extractor(wikiPage: WikiPage) {
 	val compiledWikiPage = getCompiledWikiPage(wikiPage)
 	var links: Seq[Link] = _
 
-	def extractAllLinks(): Seq[Link] = {
-		(extractLinks() ++ extractAlternativeNames()).filter { link => link.surfaceRepr.nonEmpty }
+	def extractAllLinks(filterEmptySurfaceRepr: Boolean = true): Seq[Link] = {
+		val allLinks =  (extractLinks() ++ extractAlternativeNames())
+		if (filterEmptySurfaceRepr)
+			allLinks.filter { link => link.surfaceRepr.nonEmpty }
+		else
+			allLinks
 	}
 
 	def extractLinks(): Seq[Link] = {

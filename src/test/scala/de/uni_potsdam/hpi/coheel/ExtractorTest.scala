@@ -20,7 +20,7 @@ class ExtractorTest extends FunSuite {
 
 	def links: Seq[Link] = {
 		val extractor = fixture()
-		extractor.extractAllLinks()
+		extractor.extractAllLinks(filterEmptySurfaceRepr = false)
 	}
 
 	test("Check links inside of ''") {
