@@ -7,6 +7,7 @@ import org.apache.commons.io.{FileUtils, IOUtils}
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.scala._
+import org.apache.flink.client.program.ProgramInvocationException
 import org.apache.flink.runtime.fs.hdfs.DistributedFileSystem
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs
@@ -113,7 +114,13 @@ object FlinkProgramRunner {
 
 			log.info("Starting ..")
 //			FileUtils.writeStringToFile(new File("PLAN"), env.getExecutionPlan())
-			env.execute(s"${program.getDescription} (dataset = ${config.getString("name")})")
+			try {
+				env.execute(s"${program.getDescription} (dataset = ${config.getString("name")})")
+			} catch {
+				case e: ProgramInvocationException =>
+					if (e.getMessage.contains("canceled"))
+						println("Stopping .. Program has been cancelled.")
+			}
 //			PerformanceTimer.printTimerEvents()
 		} * 10.2 * 1024 /* full data dump size*/ / 42.7 /* test dump size */ / 60 /* in minutes */ / 60 /* in hours */
 		if (config.getBoolean("print_approximation"))
