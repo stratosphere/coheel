@@ -3,8 +3,9 @@ package de.uni_potsdam.hpi.coheel
 import org.scalatest.FunSuite
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import de.uni_potsdam.hpi.coheel.wiki.{Link, Extractor, WikiPageReader}
+import de.uni_potsdam.hpi.coheel.wiki.{Extractor, WikiPageReader}
 import scala.io.Source
+import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 
 @RunWith(classOf[JUnitRunner])
 class ExtractorTest extends FunSuite {
@@ -20,9 +21,7 @@ class ExtractorTest extends FunSuite {
 	def links: Seq[Link] = {
 		val extractor = fixture()
 		extractor.extractLinks()
-		val alternativeNames = extractor.extractAlternativeNames().map {
-			Link(wikiPage.pageTitle, _, wikiPage.pageTitle)
-		}
+		val alternativeNames = extractor.extractAlternativeNames()
 		extractor.extractLinks() ++ alternativeNames
 	}
 

@@ -1,15 +1,13 @@
 package de.uni_potsdam.hpi.coheel.programs
 
 import de.uni_potsdam.hpi.coheel.io.{IteratorReader, WikiPageInputFormat}
-import org.apache.commons.io.{FileUtils, IOUtils}
-import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.scala._
 import org.apache.flink.core.fs.Path
 import org.apache.flink.core.fs.local.LocalFileSystem
 import org.apache.flink.runtime.fs.hdfs.DistributedFileSystem
-import de.uni_potsdam.hpi.coheel.wiki.{Link, Extractor, WikiPage, WikiPageReader}
+import de.uni_potsdam.hpi.coheel.wiki.{Extractor, WikiPage, WikiPageReader}
 import java.io._
-import de.uni_potsdam.hpi.coheel.{PerformanceTimer, FlinkProgramRunner}
+import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
 import org.apache.log4j.Logger
 
 /**
@@ -45,9 +43,7 @@ object ProgramHelper {
 			val result = filteredWikiPages.flatMap { wikiPage =>
 				val parsedWikiPage = try {
 					val extractor = new Extractor(wikiPage)
-					val alternativeNames = extractor.extractAlternativeNames().map {
-						Link(wikiPage.pageTitle, _, wikiPage.pageTitle)
-					}
+					val alternativeNames = extractor.extractAlternativeNames()
 					val links = alternativeNames ++ extractor.extractLinks()
 					val plainText = extractor.extractPlainText()
 					wikiPage.source = ""

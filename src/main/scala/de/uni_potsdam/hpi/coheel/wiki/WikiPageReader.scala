@@ -4,6 +4,7 @@ import java.io.{Reader, StringReader, BufferedReader}
 import javax.xml.stream.{XMLStreamConstants, XMLInputFactory}
 import org.apache.commons.lang3.StringEscapeUtils
 import org.apache.log4j.Logger
+import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 
 /**
  * Captures the important aspects of a WikiPage for our use case, while still

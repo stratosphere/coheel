@@ -1,5 +1,6 @@
 package de.uni_potsdam.hpi.coheel.wiki
 
+import de.uni_potsdam.hpi.coheel.programs.DataClasses.Link
 import de.uni_potsdam.hpi.coheel.wiki.SwebleUtils.PlainTextConverter
 
 import scala.collection.immutable.Queue
@@ -10,15 +11,6 @@ import org.sweble.wikitext.engine.utils.SimpleWikiConfiguration
 import de.fau.cs.osr.ptk.common.ast.{ContentNode, Text, AstNode, NodeList}
 import org.sweble.wikitext.`lazy`.parser.{Bold, Paragraph, InternalLink}
 
-/**
- * Represents a link in a Wikipedia article.
- * @param source The page the link is on, e.g. 'Germany'
- * @param surface The link's text, e.g. 'Merkel'
- * @param destination The link's destination, e.g. 'Angela Merkel'
- */
-// Note: In contrast to InternalLink, this class does not contain a Node, because
-// that should not be part of the interface of this class.
-case class Link(source: String, surface: String, destination: String)
 
 class Extractor(wikiPage: WikiPage) {
 
@@ -60,7 +52,7 @@ class Extractor(wikiPage: WikiPage) {
 	 * These are supposed to be alternative names for the entity.
 	 * @return A list of alternative names
 	 */
-	def extractAlternativeNames(): Queue[String] = {
+	def extractAlternativeNames(): Queue[Link] = {
 		// The minimum number of characters for the first paragraph
 		val MIN_PARAGRAPH_LENGTH = 20
 		val rootNode = compiledWikiPage.getContent
@@ -76,7 +68,7 @@ class Extractor(wikiPage: WikiPage) {
 		Queue()
 	}
 
-	private def extractBoldWordsFrom(paragraph: Paragraph): Queue[String] = {
+	private def extractBoldWordsFrom(paragraph: Paragraph): Queue[Link] = {
 		var boldWords = Queue[String]()
 		nodeIterator(paragraph) {
 			case bold: Bold =>
@@ -85,7 +77,7 @@ class Extractor(wikiPage: WikiPage) {
 					boldWords = boldWords.enqueue(text)
 			case _ =>
 		}
-		boldWords
+		boldWords.map { word => Link(wikiPage.pageTitle, word, wikiPage.pageTitle) }
 	}
 
 	// Private helper function to extract breadth-first search in the node tree
