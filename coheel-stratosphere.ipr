@@ -64,6 +64,7 @@
     <file url="file://$PROJECT_DIR$/src/main/scala/de/uni_potsdam/hpi/coheel/wiki/WikiPageReader.scala" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/test/resources/manual_test_files/wikipedia_Kilobyte.xml" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/test/scala/de/uni_potsdam/hpi/coheel/ExtractorTest.scala" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/test/scala/de/uni_potsdam/hpi/coheel/TokenizerTest.scala" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/test/scala/de/uni_potsdam/hpi/coheel/TriePerformanceTest.scala" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/test/scala/de/uni_potsdam/hpi/coheel/TrieTest.scala" charset="UTF-8" />
   </component>
