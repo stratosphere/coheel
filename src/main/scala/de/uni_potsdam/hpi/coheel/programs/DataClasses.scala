@@ -1,5 +1,7 @@
 package de.uni_potsdam.hpi.coheel.programs
 
+import scala.collection.mutable
+
 object DataClasses {
 
 	case class WordInDocument(document: String, word: String, count: Int)
@@ -20,5 +22,5 @@ object DataClasses {
 	case class Redirect(from: String, to: String)
 
 	//
-	case class SurfaceProbLink(surface: String, destination: String, prob: Double)
+	case class SurfaceProbLink(surface: Array[String], destination: String, prob: Double)
 }

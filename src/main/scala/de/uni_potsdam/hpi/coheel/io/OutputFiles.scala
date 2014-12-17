@@ -21,6 +21,8 @@ object OutputFiles {
 	lazy val surfaceLinkProbsPath        = s"$location://${currentPath}surface-link-probs.wiki"
 	lazy val nerRocCurvePath             = s"$location://${currentPath}ner-roc-curve.wiki"
 
+	lazy val classificationPath          = s"$location://${currentPath}classification.wiki"
+
 	implicit def toOutputFiles(dataSet: DataSet[_]): OutputFiles = {
 		new OutputFiles(dataSet)
 	}
