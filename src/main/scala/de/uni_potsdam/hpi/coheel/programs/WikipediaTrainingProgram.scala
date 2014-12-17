@@ -45,7 +45,7 @@ class WikipediaTrainingProgram extends CoheelProgram {
 		val allPageLinks    = linksFrom(wikiPages)
 
 		val groupedByLinkText = allPageLinks
-			.groupBy { link => link.surface }
+			.groupBy { link => link.surfaceRepr }
 		// counts in how many documents a surface occurs
 		val surfaceDocumentCounts = groupedByLinkText
 			.reduceGroup { linksWithSameText =>
@@ -55,7 +55,7 @@ class WikipediaTrainingProgram extends CoheelProgram {
 				val distinctDocuments = mutable.HashSet[String]()
 				linksWithSameText.foreach { linkWithText =>
 					if (text == null)
-						text = linkWithText.surface
+						text = linkWithText.surfaceRepr
 					distinctDocuments += linkWithText.source
 				}
 				val count = distinctDocuments.size
@@ -66,11 +66,11 @@ class WikipediaTrainingProgram extends CoheelProgram {
 		val surfaceCounts = groupedByLinkText
 			.reduceGroup { group =>
 				val links = group.toList
-				SurfaceCounts(links.head.surface, links.size)
+				SurfaceCounts(links.head.surfaceRepr, links.size)
 			}
 		// count how often a surface occurs with a certain destination
 		val surfaceLinkCounts = allPageLinks
-			.map { link => SurfaceLinkCounts(link.surface, link.destination, 1) }
+			.map { link => SurfaceLinkCounts(link.surfaceRepr, link.destination, 1) }
 			.groupBy(0, 1)
 			.sum(2).name("Surface-LinkTo-Counts")
 		// join them together and calculate the probabilities

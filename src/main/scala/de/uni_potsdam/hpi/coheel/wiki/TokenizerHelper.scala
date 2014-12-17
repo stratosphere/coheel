@@ -2,6 +2,7 @@ package de.uni_potsdam.hpi.coheel.wiki
 
 import org.apache.lucene.analysis.en.{PorterStemFilter, EnglishAnalyzer}
 import org.apache.lucene.analysis.standard.StandardAnalyzer
+import org.apache.lucene.analysis.util.CharArraySet
 import org.apache.lucene.util.Version
 import java.io.StringReader
 import scala.collection.mutable.ListBuffer
@@ -12,6 +13,13 @@ import scala.collection.mutable
  * Small wrapper around Lucene's tokenizing and stemming.
  */
 object TokenizerHelper {
+
+	def transformToTokenized(s: String): String = {
+		val tokenized = tokenize(s, stemming = false).mkString(" ")
+//		if (s.nonEmpty && tokenized.isEmpty)
+//			throw new RuntimeException(s"'$s' gets tokenized to '$tokenized'.")
+		tokenized
+	}
 
 	def tokenize(text: String, stemming: Boolean = true): Array[String] = {
 		val tokens = mutable.ArrayBuffer[String]()
@@ -40,7 +48,7 @@ object TokenizerHelper {
 
 	private def tokenizeHelper(text: String, stemming: Boolean)(tokenHandler: (CharTermAttribute, OffsetAttribute) => Unit): Unit = {
 //		val analyzer = new EnglishAnalyzer(Version.LUCENE_48)
-		val analyzer = new StandardAnalyzer(Version.LUCENE_48)
+		val analyzer = new StandardAnalyzer(Version.LUCENE_48, CharArraySet.EMPTY_SET)
 		// implemented following this guide:
 		// http://stackoverflow.com/questions/6334692/how-to-use-a-lucene-analyzer-to-tokenize-a-string
 		val tokenStream = if (stemming)

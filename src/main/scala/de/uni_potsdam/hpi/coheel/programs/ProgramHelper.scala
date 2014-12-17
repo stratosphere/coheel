@@ -43,8 +43,7 @@ object ProgramHelper {
 			val result = filteredWikiPages.flatMap { wikiPage =>
 				val parsedWikiPage = try {
 					val extractor = new Extractor(wikiPage)
-					val alternativeNames = extractor.extractAlternativeNames()
-					val links = alternativeNames ++ extractor.extractLinks()
+					val links = extractor.extractAllLinks()
 					val plainText = extractor.extractPlainText()
 					wikiPage.source = ""
 					Some(WikiPage(wikiPage.pageTitle, wikiPage.ns, wikiPage.redirect,
