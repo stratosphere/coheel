@@ -14,7 +14,7 @@ class EntireTextSurfacesProgram extends CoheelProgram {
 
 	@transient val log = Logger.getLogger(getClass)
 	// prepare the trie
-	TrieBuilder.buildFullTrie()
+//	TrieBuilder.buildFullTrie()
 
 	override def getDescription = "Counting how often a surface occurs, in the entire text. This approach uses a trie."
 
