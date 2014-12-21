@@ -1,11 +1,13 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import de.uni_potsdam.hpi.coheel.datastructures.TrieBuilder
+import de.uni_potsdam.hpi.coheel.datastructures.{Trie, TrieBuilder}
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{EntireTextSurfaces, SurfaceAsLinkCount, EntireTextSurfaceCounts}
-import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
+import de.uni_potsdam.hpi.coheel.wiki.{WikiPage, TokenizerHelper}
+import org.apache.flink.api.common.functions.{RichFlatMapFunction, RichCrossFunction}
 import org.apache.flink.api.common.{Plan, ProgramDescription}
 import org.apache.flink.api.scala._
+import org.apache.flink.util.Collector
 import org.apache.log4j.Logger
 
 import scala.collection.mutable
@@ -19,23 +21,49 @@ class EntireTextSurfacesProgram extends CoheelProgram {
 	override def getDescription = "Counting how often a surface occurs, in the entire text. This approach uses a trie."
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
-		val wikiPages = ProgramHelper.getWikiPages(env)
+		val wikiPages = ProgramHelper.filterNormalPages(ProgramHelper.getWikiPages(env)).mapPartition { pages =>
+			val pagesArray = pages.toArray
+			List(pagesArray)
+		}
+		val surfaces = env.readTextFile(surfaceProbsPath).flatMap { line =>
+			val split = line.split('\t')
+			if (split.size == 3)
+				Some(split(0))
+			else
+				None
+		}
 
-		// which surfaces occur in which documents
-		val entireTextSurfaces = ProgramHelper.filterNormalPages(wikiPages).flatMap { wikiPage =>
-			val tokens = TokenizerHelper.tokenize(wikiPage.plainText).toArray
+		val entireTextSurfaces = surfaces.mapPartition { surfaces =>
+			val surfacesArray = surfaces.toArray
+			println(s"Partition of size ${surfacesArray.size}.")
+			List(surfacesArray)
+		}
+		.cross(wikiPages).flatMap(new RichFlatMapFunction[(Array[String], Array[WikiPage]), EntireTextSurfaces] {
+			override def flatMap(crossProduct: (Array[String], Array[WikiPage]), out: Collector[EntireTextSurfaces]): Unit = {
+				val (surfacePartition, wikiPages) = crossProduct
+				var trie = new Trie()
+				print("Building trie ..")
+				surfacePartition.foreach { surface => trie.add(surface)}
+				println("Done.")
 
-			val resultSurfaces = mutable.HashSet[String]()
+				wikiPages.foreach { wikiPage =>
+					val tokens = TokenizerHelper.tokenize(wikiPage.plainText)
 
-			// each word and its following words must be checked, if it is a surface
-			for (i <- 0 until tokens.size) {
-				resultSurfaces ++= TrieBuilder.fullTrie.slidingContains(tokens, i).map {
-					containment => containment.mkString(" ")
+					val resultSurfaces = mutable.HashSet[String]()
+
+					// each word and its following words must be checked, if it is a surface
+					for (i <- 0 until tokens.size) {
+						resultSurfaces ++= trie.slidingContains(tokens, i).map {
+							containment => containment.mkString(" ")
+						}
+					}
+					resultSurfaces.toIterator.map { surface => EntireTextSurfaces(wikiPage.pageTitle, surface)}.foreach { record =>
+						out.collect(record)
+					}
 				}
+				trie = null
 			}
-			resultSurfaces.toIterator.map { surface => EntireTextSurfaces(wikiPage.pageTitle, surface) }
-		}.name("Entire-Text-Surfaces-Along-With-Document")
-
+		}).name("Entire-Text-Surfaces-Along-With-Document")
 		val surfaceDocumentCounts = env.readTextFile(surfaceDocumentCountsPath)
 
 		val entireTextSurfaceCounts = entireTextSurfaces
