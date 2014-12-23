@@ -18,7 +18,7 @@ class EntireTextSurfacesProgram extends CoheelProgram {
 	// prepare the trie
 //	TrieBuilder.buildFullTrie()
 
-	override def getDescription = "Counting how often a surface occurs, in the entire text. This approach uses a trie."
+	override def getDescription = "Wikipedia Extraction: Entire Text Surfaces"
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val wikiPages = ProgramHelper.filterNormalPages(ProgramHelper.getWikiPages(env))
