@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Created-By: Apache Maven
+Premain-Class: objectexplorer.InstrumentationGrabber
+Main-Class: de.uni_potsdam.hpi.coheel.debugging.ObjectSize
+Built-By: knub
