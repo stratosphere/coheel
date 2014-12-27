@@ -3,6 +3,7 @@ package de.uni_potsdam.hpi.coheel
 import java.io.{InputStream, InputStreamReader, File}
 import java.net.InetSocketAddress
 
+import org.apache.commons.collections4.trie.PatriciaTrie
 import org.apache.commons.io.{FileUtils, IOUtils}
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.ProgramDescription
@@ -15,7 +16,7 @@ import org.apache.hadoop.fs.Path
 import org.apache.log4j.{Level, Logger}
 import com.typesafe.config.{Config, ConfigFactory}
 import de.uni_potsdam.hpi.coheel.programs._
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 /**
  * Basic runner for several Flink programs.
@@ -70,7 +71,7 @@ object FlinkProgramRunner {
 			else failure("dataset must be either 'full', 'chunk' or 'chunk_cluster', 'full_cluster'") }
 		opt[String]('p', "program") required() action { (x, c) =>
 			c.copy(programName = x) } text "specifies the program to run" validate { x =>
-			if (programs.keys.contains(x))
+			if (programs.contains(x))
 				success
 			else
 				failure("program must be one of the following: " + programs.keys.mkString(",")) }
@@ -84,15 +85,22 @@ object FlinkProgramRunner {
 	var config: Config = _
 
 	def main(args: Array[String]): Unit = {
+		val pt = new PatriciaTrie[Boolean]()
+		pt.put("angela", true)
+		println(pt.containsKey("ang"))
+		println(pt.containsKey("angela"))
+		println(pt.prefixMap("ang").isEmpty)
+		println(pt.prefixMap("xang").isEmpty)
+		println(pt.get("angela"))
 		// Parse the arguments
-		parser.parse(args, Params()) map { params =>
-			config = ConfigFactory.load(params.dataSetConf)
-			val programName = params.programName
-			val program = programs(programName).newInstance()
-			runProgram(program)
-		} getOrElse {
-			parser.showUsage
-		}
+//		parser.parse(args, Params()) map { params =>
+//			config = ConfigFactory.load(params.dataSetConf)
+//			val programName = params.programName
+//			val program = programs(programName).newInstance()
+//			runProgram(program)
+//		} getOrElse {
+//			parser.showUsage
+//		}
 	}
 
 	def runProgram(program: CoheelProgram with ProgramDescription): Unit = {

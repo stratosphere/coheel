@@ -1,6 +1,6 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import de.uni_potsdam.hpi.coheel.datastructures.{TrieBuilder, Trie}
+import de.uni_potsdam.hpi.coheel.datastructures.{TrieLike, TrieBuilder, Trie}
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.wiki.{WikiPage, TokenizerHelper}
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper.Token
@@ -30,7 +30,7 @@ class NerRocCurveProgram extends CoheelProgram {
 				val threshold = THRESHOLD
 				println(f"Working on threshold $threshold%.2f.")
 				TrieBuilder.buildThresholdTrie(threshold)
-				val thresholdTrie: Trie = TrieBuilder.thresholdTrie
+				val thresholdTrie: TrieLike = TrieBuilder.thresholdTrie
 
 				var tp = 0
 				var tn = 0
@@ -70,7 +70,7 @@ class NerRocCurveProgram extends CoheelProgram {
 
 object NerRocCurveProgram {
 
-	def determinePotentialSurfaces(wikiPage: WikiPage, trie: Trie): Set[String] =  {
+	def determinePotentialSurfaces(wikiPage: WikiPage, trie: TrieLike): Set[String] =  {
 		var potentialSurfaces = Set[String]()
 
 		val tokens = TokenizerHelper.tokenizeWithPositions(wikiPage.plainText).toArray

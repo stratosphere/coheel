@@ -1,6 +1,6 @@
 package de.uni_potsdam.hpi.coheel
 
-import de.uni_potsdam.hpi.coheel.datastructures.Trie
+import de.uni_potsdam.hpi.coheel.datastructures.{PatriciaTrieWrapper, TrieLike, Trie}
 import org.scalatest.FunSuite
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -8,8 +8,8 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class TrieTest extends FunSuite {
 
-	def newTrie(): Trie = {
-		val trie = new Trie()
+	def newTrie(): TrieLike = {
+		val trie = new PatriciaTrieWrapper()
 		trie
 	}
 

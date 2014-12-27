@@ -2,6 +2,7 @@ package de.uni_potsdam.hpi.coheel.debugging
 
 import de.uni_potsdam.hpi.coheel.datastructures.TrieBuilder
 import objectexplorer.MemoryMeasurer
+import org.apache.commons.collections4.trie.PatriciaTrie
 
 object ObjectSize {
 

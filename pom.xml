@@ -81,6 +81,12 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+			<version>4.0</version>
+		</dependency>
+		<!-- Memore measurement for debugging -->
+		<dependency>
 			<groupId>memory-measurer</groupId>
 			<artifactId>memory-measurer</artifactId>
 			<version>1.0</version>

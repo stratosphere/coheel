@@ -7,6 +7,8 @@ import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles
 import OutputFiles._
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
+import org.apache.commons.collections4.trie.PatriciaTrie
+import org.apache.flink.types.Nothing
 import org.apache.log4j.Logger
 
 import scala.io.Source
@@ -27,10 +29,10 @@ object TrieBuilder {
 	val log = Logger.getLogger(getClass)
 
 	// this contains all surfaces
-	var fullTrie: Trie = _
+	var fullTrie: TrieLike = _
 
 	// this contains only surfaces, above a certain percentage
-	var thresholdTrie: Trie = _
+	var thresholdTrie: TrieLike = _
 
 
 	/**
@@ -83,6 +85,7 @@ object TrieBuilder {
 
 	def buildFullTrie(): Unit = {
 		PerformanceTimer.startTimeFirst(s"FULL-TRIE")
+		fullTrie = new PatriciaTrieWrapper()
 		fullTrie = new Trie()
 
 		trieBuilderHelper("../src/test/resources/trie_performance", "Built full trie.") { line =>
