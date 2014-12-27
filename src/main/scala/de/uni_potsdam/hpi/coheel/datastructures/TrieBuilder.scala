@@ -3,6 +3,7 @@ package de.uni_potsdam.hpi.coheel.datastructures
 import java.io.File
 
 import de.uni_potsdam.hpi.coheel.PerformanceTimer
+import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles
 import OutputFiles._
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
@@ -84,7 +85,7 @@ object TrieBuilder {
 		PerformanceTimer.startTimeFirst(s"FULL-TRIE")
 		fullTrie = new Trie()
 
-		trieBuilderHelper(surfaceProbsPath, "Built full trie.") { line =>
+		trieBuilderHelper("../src/test/resources/trie_performance", "Built full trie.") { line =>
 			val surface = line.split('\t')(0)
 			val tokens = TokenizerHelper.tokenize(surface)
 			if (tokens.nonEmpty)
@@ -97,11 +98,8 @@ object TrieBuilder {
 	 * Helper function for printing the memory status.
 	 */
 	def printMemoryStatus(): Unit = {
-		val maxMem   = Runtime.getRuntime.maxMemory().toDouble / 1024 / 1024
-		val freeMem  = Runtime.getRuntime.freeMemory().toDouble / 1024 / 1024
-		val totalMem = Runtime.getRuntime.totalMemory().toDouble / 1024 / 1024
-		val actualMem = maxMem - (totalMem - freeMem)
-		log.info(f"Act. : $actualMem%.2f MB")
+		val actualMem = FreeMemory.get()
+		log.info(s"Free Memory: $actualMem MB")
 	}
 
 }

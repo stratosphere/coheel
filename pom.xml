@@ -80,12 +80,22 @@
 			<version>2.1.6</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>memory-measurer</groupId>
+			<artifactId>memory-measurer</artifactId>
+			<version>1.0</version>
+		</dependency>
 	</dependencies>
 	<repositories>
 		<repository>
 			<id>central</id>
 			<name>Central Repository</name>
 			<url>http://repo.maven.apache.org/maven2</url>
+		</repository>
+		<repository>
+			<id>project.local</id>
+			<name>project</name>
+			<url>file:${project.basedir}/lib</url>
 		</repository>
 		<!--<repository>-->
 			<!--<id>apache.snapshots</id>-->
@@ -112,6 +122,14 @@
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
+					<archive>
+						<manifestFile>
+							src/main/resources/META-INF/MANIFEST.MF
+						</manifestFile>
+						<manifest>
+							<mainClass>org.sample.App</mainClass>
+						</manifest>
+					</archive>
 				</configuration>
 			</plugin>
 			<!-- Plugin for building the jars -->

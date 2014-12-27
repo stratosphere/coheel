@@ -28,9 +28,6 @@ class NerRocCurveProgram extends CoheelProgram {
 			}
 			else {
 				val threshold = THRESHOLD
-				println(s"MAX  : ${Runtime.getRuntime.maxMemory()}")
-				println(s"FREE : ${Runtime.getRuntime.freeMemory()}")
-				println(s"TOTAL: ${Runtime.getRuntime.totalMemory()}")
 				println(f"Working on threshold $threshold%.2f.")
 				TrieBuilder.buildThresholdTrie(threshold)
 				val thresholdTrie: Trie = TrieBuilder.thresholdTrie
