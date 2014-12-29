@@ -85,22 +85,15 @@ object FlinkProgramRunner {
 	var config: Config = _
 
 	def main(args: Array[String]): Unit = {
-		val pt = new PatriciaTrie[Boolean]()
-		pt.put("angela", true)
-		println(pt.containsKey("ang"))
-		println(pt.containsKey("angela"))
-		println(pt.prefixMap("ang").isEmpty)
-		println(pt.prefixMap("xang").isEmpty)
-		println(pt.get("angela"))
 		// Parse the arguments
-//		parser.parse(args, Params()) map { params =>
-//			config = ConfigFactory.load(params.dataSetConf)
-//			val programName = params.programName
-//			val program = programs(programName).newInstance()
-//			runProgram(program)
-//		} getOrElse {
-//			parser.showUsage
-//		}
+		parser.parse(args, Params()) map { params =>
+			config = ConfigFactory.load(params.dataSetConf)
+			val programName = params.programName
+			val program = programs(programName).newInstance()
+			runProgram(program)
+		} getOrElse {
+			parser.showUsage
+		}
 	}
 
 	def runProgram(program: CoheelProgram with ProgramDescription): Unit = {

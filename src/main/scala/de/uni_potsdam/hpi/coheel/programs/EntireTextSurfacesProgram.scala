@@ -1,17 +1,21 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import de.uni_potsdam.hpi.coheel.datastructures.{Trie, TrieBuilder}
+import de.uni_potsdam.hpi.coheel.datastructures.{ConcurrentTreesWrapper, TrieLike, Trie}
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{EntireTextSurfaces, SurfaceAsLinkCount, EntireTextSurfaceCounts}
 import de.uni_potsdam.hpi.coheel.wiki.{WikiPage, TokenizerHelper}
-import org.apache.flink.api.common.functions.{RichFlatMapFunction, RichCrossFunction}
-import org.apache.flink.api.common.{Plan, ProgramDescription}
+import org.apache.flink.api.common.functions.RichFlatMapFunction
 import org.apache.flink.api.scala._
+import org.apache.flink.configuration.Configuration
 import org.apache.flink.util.Collector
 import org.apache.log4j.Logger
+import scala.collection.JavaConverters._
 
 import scala.collection.mutable
 
+object EntireTextSurfacesProgram {
+	val BROADCAST_SURFACES = "surfaces"
+}
 class EntireTextSurfacesProgram extends CoheelProgram {
 
 	@transient val log = Logger.getLogger(getClass)
@@ -30,37 +34,10 @@ class EntireTextSurfacesProgram extends CoheelProgram {
 				None
 		}
 
-		val entireTextSurfaces = surfaces.coGroup(wikiPages)
-			.where { surface => 1 }
-			.equalTo { wikiPage => 1}
-			.flatMap(
-				new RichFlatMapFunction[(Array[String], Array[WikiPage]), EntireTextSurfaces] {
-					override def flatMap(crossProduct: (Array[String], Array[WikiPage]), out: Collector[EntireTextSurfaces]): Unit = {
-						val surfacePartition = crossProduct._1.map(_.asInstanceOf[String])
-						val  wikiPages = crossProduct._2.map(_.asInstanceOf[WikiPage])
-						println(s"ENTIRETEXTSURFACES: Crossing ${surfacePartition.size} surfaces with ${wikiPages.size} wiki pages.")
-						var trie = new Trie()
-						surfacePartition.foreach { surface => trie.add(surface)}
-
-						wikiPages.foreach { wikiPage =>
-							val tokens = TokenizerHelper.tokenize(wikiPage.plainText)
-
-							val resultSurfaces = mutable.HashSet[String]()
-
-							// each word and its following words must be checked, if it is a surface
-							for (i <- 0 until tokens.size) {
-								resultSurfaces ++= trie.slidingContains(tokens, i).map {
-									containment => containment.mkString(" ")
-								}
-							}
-							resultSurfaces.toIterator.map { surface => EntireTextSurfaces(wikiPage.pageTitle, surface)}.foreach { record =>
-								out.collect(record)
-							}
-						}
-						trie = null
-					}
-				}
-			).name("Entire-Text-Surfaces-Along-With-Document")
+		val entireTextSurfaces = wikiPages
+			.flatMap(new FindEntireTextSurfacesFlatMap)
+			.withBroadcastSet(surfaces, EntireTextSurfacesProgram.BROADCAST_SURFACES)
+			.name("Entire-Text-Surfaces-Along-With-Document")
 
 		val surfaceDocumentCounts = env.readTextFile(surfaceDocumentCountsPath)
 
@@ -98,5 +75,29 @@ class EntireTextSurfacesProgram extends CoheelProgram {
 
 		entireTextSurfaces.writeAsTsv(entireTextSurfacesPath)
 		surfaceLinkProbs.writeAsTsv(surfaceLinkProbsPath)
+	}
+}
+class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[WikiPage, EntireTextSurfaces] {
+	var trie: TrieLike = _
+
+	var i = 0
+	override def open(params: Configuration): Unit = {
+		trie = new ConcurrentTreesWrapper
+		getRuntimeContext.getBroadcastVariable[String](EntireTextSurfacesProgram.BROADCAST_SURFACES).asScala.foreach { surface =>
+			trie.add(surface)
+		}
+	}
+	override def flatMap(wikiPage: WikiPage, out: Collector[EntireTextSurfaces]): Unit = {
+		println(s"ENTIRETEXTSURFACES: $i")
+		i += 1
+		findEntireTextSurfaces(wikiPage, trie).foreach(out.collect)
+	}
+
+	def findEntireTextSurfaces(wikiPage: WikiPage, trie: TrieLike): Iterator[EntireTextSurfaces] = {
+		val tokens = TokenizerHelper.transformToTokenized(wikiPage.plainText, false)
+
+		trie.asInstanceOf[ConcurrentTreesWrapper].rt.getKeysContainedIn(tokens).iterator().asScala.map { surface =>
+			EntireTextSurfaces(wikiPage.pageTitle, surface.toString)
+		}
 	}
 }

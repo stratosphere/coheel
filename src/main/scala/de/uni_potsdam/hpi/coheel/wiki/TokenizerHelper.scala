@@ -14,11 +14,15 @@ import scala.collection.mutable
  */
 object TokenizerHelper {
 
-	def transformToTokenized(s: String): String = {
-		val tokenized = tokenize(s, stemming = false).mkString(" ")
-//		if (s.nonEmpty && tokenized.isEmpty)
-//			throw new RuntimeException(s"'$s' gets tokenized to '$tokenized'.")
-		tokenized
+	def transformToTokenized(text: String, stemming: Boolean = true): String = {
+		val sb = new mutable.StringBuilder()
+		tokenizeHelper(text, stemming) { (charTermAttribute, _) =>
+			if (sb.isEmpty)
+				sb.append(charTermAttribute.toString)
+			else
+				sb.append(" " + charTermAttribute.toString)
+		}
+		sb.toString()
 	}
 
 	def tokenize(text: String, stemming: Boolean = true): Array[String] = {

@@ -36,12 +36,14 @@ class ConcurrentTreesWrapper extends TrieLike {
 	override def contains(tokens: Seq[String]): ContainsResult = {
 		val tokenString = tokens.mkString(" ")
 		val asEntry = rt.getValueForExactKey(tokenString) != null
-//		val asIntermediaNode = rt.getKeysStartingWith(tokenString).iterator().hasNext
-		ContainsResult(asEntry, false)
+		val asIntermediaNode = rt.getKeysStartingWith(tokenString).iterator().hasNext
+		ContainsResult(asEntry, asIntermediaNode)
 	}
 }
 
 class PatriciaTrieWrapper extends TrieLike {
+
+	private [datastructures] def foo(): Int = 1
 
 	val pt = new PatriciaTrie[java.lang.Boolean]()
 
@@ -51,9 +53,9 @@ class PatriciaTrieWrapper extends TrieLike {
 
 	override def contains(tokens: Seq[String]): ContainsResult = {
 		val tokenString = tokens.mkString(" ")
-//		val asIntermediateNode = !pt.prefixMap(tokenString).isEmpty
+		val asIntermediateNode = !pt.prefixMap(tokenString).isEmpty
 		val asEntry = pt.get(tokenString) != null
-		ContainsResult(asEntry, false)//asIntermediateNode)
+		ContainsResult(asEntry, asIntermediateNode)
 	}
 
 	def slidingContains(arr: Array[String], startIndex: Int): Seq[Seq[String]] = {
