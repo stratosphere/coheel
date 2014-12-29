@@ -19,7 +19,7 @@ object ObjectSize {
 			System.gc()
 		val before1 = FreeMemory.get()
 		TrieBuilder.buildFullTrie()
-		println(MemoryMeasurer.measureBytes(TrieBuilder.fullTrie) / 1024 / 1024)
+//		println(MemoryMeasurer.measureBytes(TrieBuilder.fullTrie) / 1024 / 1024)
 		for (i <- 1 to 10)
 			System.gc()
 		val after = FreeMemory.get()

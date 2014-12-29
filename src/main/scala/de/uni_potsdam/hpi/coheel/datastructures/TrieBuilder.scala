@@ -85,15 +85,27 @@ object TrieBuilder {
 
 	def buildFullTrie(): Unit = {
 		PerformanceTimer.startTimeFirst(s"FULL-TRIE")
-		fullTrie = new PatriciaTrieWrapper()
-		fullTrie = new Trie()
+//		fullTrie = new PatriciaTrieWrapper()
+//		fullTrie = new Trie()
+		fullTrie = new ConcurrentTreesWrapper()
 
-		trieBuilderHelper("../src/test/resources/trie_performance", "Built full trie.") { line =>
-			val surface = line.split('\t')(0)
-			val tokens = TokenizerHelper.tokenize(surface)
-			if (tokens.nonEmpty)
-				fullTrie.add(tokens)
+		val t1 = System.currentTimeMillis()
+		trieBuilderHelper("../src/test/resources/surfaces", "Built full trie.") { line =>
+//			val surface = line.split('\t')(0)
+			val tokens = line.split(' ')//TokenizerHelper.tokenize(surface)
+			if (tokens.nonEmpty) {
+				try {
+					fullTrie.add(tokens)
+				}
+				catch {
+					case e: Throwable =>
+						println(tokens)
+						println(line)
+				}
+			}
 		}
+		val t2 = System.currentTimeMillis()
+		println(t2 - t1)
 		PerformanceTimer.endTimeFirst(s"FULL-TRIE")
 	}
 

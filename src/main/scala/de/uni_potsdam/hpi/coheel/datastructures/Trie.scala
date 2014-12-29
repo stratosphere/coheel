@@ -1,5 +1,9 @@
 package de.uni_potsdam.hpi.coheel.datastructures
 
+import com.googlecode.concurrenttrees.radix.node.concrete.DefaultCharArrayNodeFactory
+import com.googlecode.concurrenttrees.radix.node.concrete.voidvalue.VoidValue
+import com.googlecode.concurrenttrees.radix.{ConcurrentRadixTree, RadixTree}
+import com.googlecode.concurrenttrees.radixinverted.ConcurrentInvertedRadixTree
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMap
 import org.apache.commons.collections4.trie.PatriciaTrie
 
@@ -12,6 +16,29 @@ trait TrieLike {
 	def contains(tokenString: String): ContainsResult = contains(tokenString.split(' '))
 	def slidingContains(arr: Array[String], startIndex: Int): Seq[Seq[String]]
 	def slidingContains[T](arr: Array[T], toString: T => String, startIndex: Int): Seq[Seq[T]]
+}
+
+class ConcurrentTreesWrapper extends TrieLike {
+
+	val rt = new ConcurrentInvertedRadixTree[VoidValue](new DefaultCharArrayNodeFactory)
+	override def add(tokens: Seq[String]): Unit = {
+		rt.put(tokens.mkString(" "), VoidValue.SINGLETON)
+	}
+
+	override def slidingContains(arr: Array[String], startIndex: Int): Seq[Seq[String]] = {
+		throw new RuntimeException("FOOBAR")
+	}
+
+	override def slidingContains[T](arr: Array[T], toString: (T) => String, startIndex: Int): Seq[Seq[T]] = {
+		throw new RuntimeException("FOOBAR")
+	}
+
+	override def contains(tokens: Seq[String]): ContainsResult = {
+		val tokenString = tokens.mkString(" ")
+		val asEntry = rt.getValueForExactKey(tokenString) != null
+//		val asIntermediaNode = rt.getKeysStartingWith(tokenString).iterator().hasNext
+		ContainsResult(asEntry, false)
+	}
 }
 
 class PatriciaTrieWrapper extends TrieLike {

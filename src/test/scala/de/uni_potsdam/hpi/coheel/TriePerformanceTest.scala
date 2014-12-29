@@ -2,7 +2,7 @@ package de.uni_potsdam.hpi.coheel
 
 import java.io.File
 
-import de.uni_potsdam.hpi.coheel.datastructures.{PatriciaTrieWrapper, Trie}
+import de.uni_potsdam.hpi.coheel.datastructures.{ConcurrentTreesWrapper, PatriciaTrieWrapper, Trie}
 import de.uni_potsdam.hpi.coheel.io.OutputFiles
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
 import org.scalatest.FunSuite
@@ -36,7 +36,7 @@ class TriePerformanceTest extends FunSuite {
 		(1 to ITERATIONS).foreach { i =>
 			for (i <- 1 to 2) System.gc()
 			println(i)
-			val trie = new PatriciaTrieWrapper()
+			val trie = new ConcurrentTreesWrapper()
 			if (i > WARMUP) {
 				PerformanceTimer.startTimeFirst(s"FULL-TRIE")
 				PerformanceTimer.startTimeFirst(s"FULL-TRIE ${i - WARMUP}")
