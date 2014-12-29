@@ -1,15 +1,17 @@
-package de.uni_potsdam.hpi.coheel
+package de.uni_potsdam.hpi.coheel.datastructures
 
-import de.uni_potsdam.hpi.coheel.datastructures.{PatriciaTrieWrapper, TrieLike, Trie}
-import org.scalatest.FunSuite
 import org.junit.runner.RunWith
+import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
+
+import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
 class TrieTest extends FunSuite {
 
 	def newTrie(): TrieLike = {
 		val trie = new PatriciaTrieWrapper()
+		trie.foo
 		trie
 	}
 
@@ -72,6 +74,21 @@ class TrieTest extends FunSuite {
 //		println(result2)
 		assert(result2.size === 1)
 		assert(result2.contains("merkel"))
+	}
+
+	test("get keysContainedIn for concurrent trees implementation") {
+		val trie = new ConcurrentTreesWrapper
+		trie.add("angela merkel")
+		trie.add("angela merkel is german")
+		trie.add("angela")
+		trie.add("merkel")
+
+		val expected1 = Seq("angela", "angela merkel", "angela merkel is german", "merkel")
+		val result1 = trie.rt.getKeysContainedIn("angela merkel is german").asScala.toList
+		println(result1)
+		expected1.foreach { expected =>
+			assert(result1.contains(expected))
+		}
 	}
 
 	test("sliding contains works as expected for arbitrary type") {
