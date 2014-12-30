@@ -6,6 +6,7 @@ import com.googlecode.concurrenttrees.radix.{ConcurrentRadixTree, RadixTree}
 import com.googlecode.concurrenttrees.radixinverted.ConcurrentInvertedRadixTree
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMap
 import org.apache.commons.collections4.trie.PatriciaTrie
+import scala.collection.JavaConverters._
 
 case class ContainsResult(asEntry: Boolean, asIntermediateNode: Boolean)
 
@@ -21,6 +22,10 @@ trait TrieLike {
 class ConcurrentTreesWrapper extends TrieLike {
 
 	val rt = new ConcurrentInvertedRadixTree[VoidValue](new DefaultCharArrayNodeFactory)
+
+	def getKeysContainedIn(document: String): Iterator[String] = {
+		rt.getKeysContainedIn(document).iterator().asScala.map(_.toString.trim)
+	}
 	override def add(tokens: Seq[String]): Unit = {
 		rt.put(" " + tokens.mkString(" ") + " ", VoidValue.SINGLETON)
 	}

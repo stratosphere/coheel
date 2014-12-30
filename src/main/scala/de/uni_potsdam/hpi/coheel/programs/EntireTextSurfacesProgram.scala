@@ -96,8 +96,10 @@ class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[WikiPage, Entire
 	def findEntireTextSurfaces(wikiPage: WikiPage, trie: TrieLike): Iterator[EntireTextSurfaces] = {
 		val tokens = TokenizerHelper.transformToTokenized(wikiPage.plainText, false)
 
-		trie.asInstanceOf[ConcurrentTreesWrapper].rt.getKeysContainedIn(tokens).iterator().asScala.map { surface =>
+		val entireTextSurfaces = trie.asInstanceOf[ConcurrentTreesWrapper].getKeysContainedIn(tokens).toSet
+
+		entireTextSurfaces.map { surface =>
 			EntireTextSurfaces(wikiPage.pageTitle, surface.toString)
-		}
+		}.toIterator
 	}
 }
