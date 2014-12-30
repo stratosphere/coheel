@@ -76,7 +76,7 @@ class TrieTest extends FunSuite {
 		assert(result2.contains("merkel"))
 	}
 
-	test("get keysContainedIn for concurrent trees implementation") {
+	ignore("get keysContainedIn for concurrent trees implementation") {
 		val trie = new ConcurrentTreesWrapper
 		trie.add("another one bites the dust")
 		trie.add("angela merkel")
