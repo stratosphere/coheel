@@ -22,7 +22,7 @@ class ConcurrentTreesWrapper extends TrieLike {
 
 	val rt = new ConcurrentInvertedRadixTree[VoidValue](new DefaultCharArrayNodeFactory)
 	override def add(tokens: Seq[String]): Unit = {
-		rt.put(tokens.mkString(" "), VoidValue.SINGLETON)
+		rt.put(" " + tokens.mkString(" ") + " ", VoidValue.SINGLETON)
 	}
 
 	override def slidingContains(arr: Array[String], startIndex: Int): Seq[Seq[String]] = {

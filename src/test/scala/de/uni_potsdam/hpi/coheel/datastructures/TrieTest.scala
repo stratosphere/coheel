@@ -78,6 +78,7 @@ class TrieTest extends FunSuite {
 
 	test("get keysContainedIn for concurrent trees implementation") {
 		val trie = new ConcurrentTreesWrapper
+		trie.add("another one bites the dust")
 		trie.add("angela merkel")
 		trie.add("angela merkel is german")
 		trie.add("angela")
