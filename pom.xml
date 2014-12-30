@@ -91,11 +91,11 @@
 			<version>2.4.0</version>
 		</dependency>
 		<!-- Memore measurement for debugging -->
-		<dependency>
-			<groupId>memory-measurer</groupId>
-			<artifactId>memory-measurer</artifactId>
-			<version>1.0</version>
-		</dependency>
+		<!--<dependency>-->
+			<!--<groupId>memory-measurer</groupId>-->
+			<!--<artifactId>memory-measurer</artifactId>-->
+			<!--<version>1.0</version>-->
+		<!--</dependency>-->
 	</dependencies>
 	<repositories>
 		<repository>
