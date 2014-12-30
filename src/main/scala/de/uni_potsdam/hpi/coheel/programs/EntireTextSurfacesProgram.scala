@@ -32,14 +32,14 @@ class EntireTextSurfacesProgram extends CoheelProgram {
 				Some(split(0))
 			else
 				None
-		}
+		}.name("Surfaces")
 
 		val entireTextSurfaces = wikiPages
 			.flatMap(new FindEntireTextSurfacesFlatMap)
 			.withBroadcastSet(surfaces, EntireTextSurfacesProgram.BROADCAST_SURFACES)
 			.name("Entire-Text-Surfaces-Along-With-Document")
 
-		val surfaceDocumentCounts = env.readTextFile(surfaceDocumentCountsPath)
+		val surfaceDocumentCounts = env.readTextFile(surfaceDocumentCountsPath).name("Raw-Surface-Document-Counts")
 
 		val entireTextSurfaceCounts = entireTextSurfaces
 			.groupBy { _.surface }
@@ -63,7 +63,7 @@ class EntireTextSurfacesProgram extends CoheelProgram {
 				case e: NumberFormatException =>
 					SurfaceAsLinkCount(split(0), 0)
 			}
-		}.join(entireTextSurfaceCounts)
+		}.name("Surface-Document-Counts").join(entireTextSurfaceCounts)
 			.where { _.surface }
 			.equalTo { _.surface }
 			.map { joinResult => joinResult match {
@@ -71,7 +71,7 @@ class EntireTextSurfacesProgram extends CoheelProgram {
 					(surfaceAsLinkCount.surface, entireTextSurfaceCount.count,
 						surfaceAsLinkCount.count.toDouble / entireTextSurfaceCount.count.toDouble)
 			}
-		}
+		}.name("Surface-Link-Probs")
 
 		entireTextSurfaces.writeAsTsv(entireTextSurfacesPath)
 		surfaceLinkProbs.writeAsTsv(surfaceLinkProbsPath)
