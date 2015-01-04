@@ -39,42 +39,42 @@ class EntireTextSurfacesProgram extends CoheelProgram {
 			.withBroadcastSet(surfaces, EntireTextSurfacesProgram.BROADCAST_SURFACES)
 			.name("Entire-Text-Surfaces-Along-With-Document")
 
-		val surfaceDocumentCounts = env.readTextFile(surfaceDocumentCountsPath).name("Raw-Surface-Document-Counts")
-
-		val entireTextSurfaceCounts = entireTextSurfaces
-			.groupBy { _.surface }
-			.reduceGroup { group =>
-				val surfaces = group.toList
-				EntireTextSurfaceCounts(surfaces.head.surface, surfaces.size)
-			}
-			.name("Entire-Text-Surface-Counts")
-
-		val surfaceLinkProbs = surfaceDocumentCounts.map { line =>
-			val split = line.split('\t')
-			// not clear, why lines without a count occur, but they do
-			try {
-				if (split.size < 2)
-					SurfaceAsLinkCount(split(0), 0)
-				else {
-					val (surface, count) = (split(0), split(1).toInt)
-					SurfaceAsLinkCount(TokenizerHelper.tokenize(surface).mkString(" "), count)
-				}
-			} catch {
-				case e: NumberFormatException =>
-					SurfaceAsLinkCount(split(0), 0)
-			}
-		}.name("Surface-Document-Counts").join(entireTextSurfaceCounts)
-			.where { _.surface }
-			.equalTo { _.surface }
-			.map { joinResult => joinResult match {
-				case (surfaceAsLinkCount, entireTextSurfaceCount) =>
-					(surfaceAsLinkCount.surface, entireTextSurfaceCount.count,
-						surfaceAsLinkCount.count.toDouble / entireTextSurfaceCount.count.toDouble)
-			}
-		}.name("Surface-Link-Probs")
+//		val surfaceDocumentCounts = env.readTextFile(surfaceDocumentCountsPath).name("Raw-Surface-Document-Counts")
+//
+//		val entireTextSurfaceCounts = entireTextSurfaces
+//			.groupBy { _.surface }
+//			.reduceGroup { group =>
+//				val surfaces = group.toList
+//				EntireTextSurfaceCounts(surfaces.head.surface, surfaces.size)
+//			}
+//			.name("Entire-Text-Surface-Counts")
+//
+//		val surfaceLinkProbs = surfaceDocumentCounts.map { line =>
+//			val split = line.split('\t')
+//			// not clear, why lines without a count occur, but they do
+//			try {
+//				if (split.size < 2)
+//					SurfaceAsLinkCount(split(0), 0)
+//				else {
+//					val (surface, count) = (split(0), split(1).toInt)
+//					SurfaceAsLinkCount(TokenizerHelper.tokenize(surface).mkString(" "), count)
+//				}
+//			} catch {
+//				case e: NumberFormatException =>
+//					SurfaceAsLinkCount(split(0), 0)
+//			}
+//		}.name("Surface-Document-Counts").join(entireTextSurfaceCounts)
+//			.where { _.surface }
+//			.equalTo { _.surface }
+//			.map { joinResult => joinResult match {
+//				case (surfaceAsLinkCount, entireTextSurfaceCount) =>
+//					(surfaceAsLinkCount.surface, entireTextSurfaceCount.count,
+//						surfaceAsLinkCount.count.toDouble / entireTextSurfaceCount.count.toDouble)
+//			}
+//		}.name("Surface-Link-Probs")
 
 		entireTextSurfaces.writeAsTsv(entireTextSurfacesPath)
-		surfaceLinkProbs.writeAsTsv(surfaceLinkProbsPath)
+//		surfaceLinkProbs.writeAsTsv(surfaceLinkProbsPath)
 	}
 }
 class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[WikiPage, EntireTextSurfaces] {
