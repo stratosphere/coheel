@@ -1,6 +1,6 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import de.uni_potsdam.hpi.coheel.datastructures.{TrieLike, TrieBuilder, Trie}
+import de.uni_potsdam.hpi.coheel.datastructures.{TrieLike, TrieBuilder, HashTrie}
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.wiki.{WikiPage, TokenizerHelper}
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper.Token

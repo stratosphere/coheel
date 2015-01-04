@@ -2,7 +2,7 @@ package de.uni_potsdam.hpi.coheel
 
 import java.io.File
 
-import de.uni_potsdam.hpi.coheel.datastructures.{ConcurrentTreesWrapper, PatriciaTrieWrapper, Trie}
+import de.uni_potsdam.hpi.coheel.datastructures.{ConcurrentTreesWrapper, PatriciaTrieWrapper, HashTrie}
 import de.uni_potsdam.hpi.coheel.io.OutputFiles
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
 import org.scalatest.FunSuite

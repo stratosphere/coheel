@@ -44,7 +44,7 @@
     <file url="file://$PROJECT_DIR$/src/main/resources/log4j.xml" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/scala/de/uni_potsdam/hpi/coheel/FlinkProgramRunner.scala" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/scala/de/uni_potsdam/hpi/coheel/PerformanceTimer.scala" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/src/main/scala/de/uni_potsdam/hpi/coheel/datastructures/Trie.scala" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/scala/de/uni_potsdam/hpi/coheel/datastructures/HashTrie.scala" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/scala/de/uni_potsdam/hpi/coheel/datastructures/TrieBuilder.scala" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/scala/de/uni_potsdam/hpi/coheel/debugging/FreeMemory.scala" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/scala/de/uni_potsdam/hpi/coheel/debugging/ObjectSize.scala" charset="UTF-8" />

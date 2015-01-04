@@ -1,6 +1,6 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import de.uni_potsdam.hpi.coheel.datastructures.{ConcurrentTreesWrapper, TrieLike, Trie}
+import de.uni_potsdam.hpi.coheel.datastructures.{ConcurrentTreesWrapper, TrieLike, HashTrie}
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{EntireTextSurfaces, SurfaceAsLinkCount, EntireTextSurfaceCounts}
 import de.uni_potsdam.hpi.coheel.wiki.{WikiPage, TokenizerHelper}
@@ -39,42 +39,42 @@ class EntireTextSurfacesProgram extends CoheelProgram {
 			.withBroadcastSet(surfaces, EntireTextSurfacesProgram.BROADCAST_SURFACES)
 			.name("Entire-Text-Surfaces-Along-With-Document")
 
-//		val surfaceDocumentCounts = env.readTextFile(surfaceDocumentCountsPath).name("Raw-Surface-Document-Counts")
-//
-//		val entireTextSurfaceCounts = entireTextSurfaces
-//			.groupBy { _.surface }
-//			.reduceGroup { group =>
-//				val surfaces = group.toList
-//				EntireTextSurfaceCounts(surfaces.head.surface, surfaces.size)
-//			}
-//			.name("Entire-Text-Surface-Counts")
-//
-//		val surfaceLinkProbs = surfaceDocumentCounts.map { line =>
-//			val split = line.split('\t')
-//			// not clear, why lines without a count occur, but they do
-//			try {
-//				if (split.size < 2)
-//					SurfaceAsLinkCount(split(0), 0)
-//				else {
-//					val (surface, count) = (split(0), split(1).toInt)
-//					SurfaceAsLinkCount(TokenizerHelper.tokenize(surface).mkString(" "), count)
-//				}
-//			} catch {
-//				case e: NumberFormatException =>
-//					SurfaceAsLinkCount(split(0), 0)
-//			}
-//		}.name("Surface-Document-Counts").join(entireTextSurfaceCounts)
-//			.where { _.surface }
-//			.equalTo { _.surface }
-//			.map { joinResult => joinResult match {
-//				case (surfaceAsLinkCount, entireTextSurfaceCount) =>
-//					(surfaceAsLinkCount.surface, entireTextSurfaceCount.count,
-//						surfaceAsLinkCount.count.toDouble / entireTextSurfaceCount.count.toDouble)
-//			}
-//		}.name("Surface-Link-Probs")
+		val surfaceDocumentCounts = env.readTextFile(surfaceDocumentCountsPath).name("Raw-Surface-Document-Counts")
+
+		val entireTextSurfaceCounts = entireTextSurfaces
+			.groupBy { _.surface }
+			.reduceGroup { group =>
+				val surfaces = group.toList
+				EntireTextSurfaceCounts(surfaces.head.surface, surfaces.size)
+			}
+			.name("Entire-Text-Surface-Counts")
+
+		val surfaceLinkProbs = surfaceDocumentCounts.map { line =>
+			val split = line.split('\t')
+			// not clear, why lines without a count occur, but they do
+			try {
+				if (split.size < 2)
+					SurfaceAsLinkCount(split(0), 0)
+				else {
+					val (surface, count) = (split(0), split(1).toInt)
+					SurfaceAsLinkCount(TokenizerHelper.tokenize(surface).mkString(" "), count)
+				}
+			} catch {
+				case e: NumberFormatException =>
+					SurfaceAsLinkCount(split(0), 0)
+			}
+		}.name("Surface-Document-Counts").join(entireTextSurfaceCounts)
+			.where { _.surface }
+			.equalTo { _.surface }
+			.map { joinResult => joinResult match {
+				case (surfaceAsLinkCount, entireTextSurfaceCount) =>
+					(surfaceAsLinkCount.surface, entireTextSurfaceCount.count,
+						surfaceAsLinkCount.count.toDouble / entireTextSurfaceCount.count.toDouble)
+			}
+		}.name("Surface-Link-Probs")
 
 		entireTextSurfaces.writeAsTsv(entireTextSurfacesPath)
-//		surfaceLinkProbs.writeAsTsv(surfaceLinkProbsPath)
+		surfaceLinkProbs.writeAsTsv(surfaceLinkProbsPath)
 	}
 }
 class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[WikiPage, EntireTextSurfaces] {
@@ -82,7 +82,7 @@ class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[WikiPage, Entire
 
 	var i = 0
 	override def open(params: Configuration): Unit = {
-		trie = new ConcurrentTreesWrapper
+		trie = new HashTrie
 		getRuntimeContext.getBroadcastVariable[String](EntireTextSurfacesProgram.BROADCAST_SURFACES).asScala.foreach { surface =>
 			trie.add(surface)
 		}
@@ -94,12 +94,23 @@ class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[WikiPage, Entire
 	}
 
 	def findEntireTextSurfaces(wikiPage: WikiPage, trie: TrieLike): Iterator[EntireTextSurfaces] = {
-		val tokens = TokenizerHelper.transformToTokenized(wikiPage.plainText, false)
+//		val tokens = TokenizerHelper.transformToTokenized(wikiPage.plainText, false)
+//
+//		val entireTextSurfaces = trie.asInstanceOf[ConcurrentTreesWrapper].getKeysContainedIn(tokens).toSet
+//
+//		entireTextSurfaces.map { surface =>
+//			EntireTextSurfaces(wikiPage.pageTitle, surface.toString)
+//		}.toIterator
 
-		val entireTextSurfaces = trie.asInstanceOf[ConcurrentTreesWrapper].getKeysContainedIn(tokens).toSet
+		val tokens = TokenizerHelper.tokenize(wikiPage.plainText, false)
+		val resultSurfaces = mutable.HashSet[String]()
 
-		entireTextSurfaces.map { surface =>
-			EntireTextSurfaces(wikiPage.pageTitle, surface.toString)
-		}.toIterator
+		// each word and its following words must be checked, if it is a surface
+		for (i <- 0 until tokens.size) {
+			resultSurfaces ++= trie.slidingContains(tokens, i).map {
+				containment => containment.mkString(" ")
+			}
+		}
+		resultSurfaces.toIterator.map { surface => EntireTextSurfaces(wikiPage.pageTitle, surface)}
 	}
 }

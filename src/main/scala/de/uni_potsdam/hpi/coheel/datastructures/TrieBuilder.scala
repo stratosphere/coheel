@@ -68,7 +68,7 @@ object TrieBuilder {
 			// clean up trie
 			for (i <- 1 to 5) System.gc()
 		}
-		thresholdTrie = new Trie()
+		thresholdTrie = new HashTrie()
 
 		trieBuilderHelper(surfaceLinkProbsPath, s"Built threshold trie with threshold $threshold.") { line =>
 			val split = line.split('\t')

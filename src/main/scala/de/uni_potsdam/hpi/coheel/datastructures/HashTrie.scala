@@ -94,7 +94,7 @@ class PatriciaTrieWrapper extends TrieLike {
 	}
 }
 
-case class Trie() extends TrieLike {
+case class HashTrie() extends TrieLike {
 
 	val rootNode = TrieNode()
 
