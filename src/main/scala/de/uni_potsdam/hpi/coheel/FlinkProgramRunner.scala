@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.scala._
 import org.apache.flink.client.program.ProgramInvocationException
+import org.apache.flink.configuration.{ConfigConstants, GlobalConfiguration}
 import org.apache.flink.runtime.fs.hdfs.DistributedFileSystem
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs
@@ -91,6 +92,8 @@ object FlinkProgramRunner {
 	var config: Config = _
 
 	def main(args: Array[String]): Unit = {
+		GlobalConfiguration.loadConfiguration("conf")
+
 		// Parse the arguments
 		parser.parse(args, Params()) map { params =>
 			config = ConfigFactory.load(params.dataSetConf)
@@ -108,6 +111,7 @@ object FlinkProgramRunner {
 		log.info("# " + StringUtils.rightPad(s"Dataset: ${config.getString("name")}", 136) + " #")
 		log.info("# " + StringUtils.rightPad(s"Base path: ${config.getString("base_path")}", 136) + " #")
 		log.info("# " + StringUtils.rightPad(s"Output folder: ${config.getString("output_files_dir")}", 136) + " #")
+
 
 		val processingTime = time {
 			val env = if (config.getString("type") == "file")
