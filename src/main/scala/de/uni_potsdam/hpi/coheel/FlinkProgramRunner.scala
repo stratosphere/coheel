@@ -62,7 +62,11 @@ object FlinkProgramRunner {
 	/**
 	 * Command line parameter configuration
 	 */
-	case class Params(dataSetConf: String = "chunk", programName: String = "main", doLogging: Boolean = false)
+	case class Params(dataSetConf: String = "chunk",
+	                  programName: String = "main",
+	                  doLogging: Boolean  = false,
+		              parallelism: Int    = 9)
+
 	val parser = new scopt.OptionParser[Params]("bin/run") {
 		head("CohEEL", "0.0.1")
 		opt[String]('d', "dataset") required() action { (x, c) =>
@@ -77,6 +81,8 @@ object FlinkProgramRunner {
 				failure("program must be one of the following: " + programs.keys.mkString(",")) }
 		opt[Unit]('l', "logging") action { case (_, c) =>
 			c.copy(doLogging = true) }
+		opt[Int]('p', "parallelism") action { (x, c) =>
+			c.copy(parallelism = x) } text "specifies the degree of parallelism for Flink"
 		note("some notes.\n")
 		help("help") text "prints this usage text"
 	}
@@ -90,13 +96,13 @@ object FlinkProgramRunner {
 			config = ConfigFactory.load(params.dataSetConf)
 			val programName = params.programName
 			val program = programs(programName).newInstance()
-			runProgram(program)
+			runProgram(program, params.parallelism)
 		} getOrElse {
 			parser.showUsage
 		}
 	}
 
-	def runProgram(program: CoheelProgram with ProgramDescription): Unit = {
+	def runProgram(program: CoheelProgram with ProgramDescription, parallelism: Int): Unit = {
 		log.info(StringUtils.repeat('#', 140))
 		log.info("# " + StringUtils.center(program.getDescription, 136) + " #")
 		log.info("# " + StringUtils.rightPad(s"Dataset: ${config.getString("name")}", 136) + " #")
@@ -107,7 +113,7 @@ object FlinkProgramRunner {
 			val env = if (config.getString("type") == "file")
 				ExecutionEnvironment.createLocalEnvironment(1)
 			else
-				ExecutionEnvironment.createRemoteEnvironment("tenemhead2", 6123, 9,
+				ExecutionEnvironment.createRemoteEnvironment("tenemhead2", 6123, parallelism,
 					"target/coheel_stratosphere-0.1-SNAPSHOT-jar-with-dependencies.jar")
 			program.buildProgram(env)
 			log.info("# " + StringUtils.rightPad(s"Degree of parallelism: ${env.getDegreeOfParallelism}", 136) + " #")
