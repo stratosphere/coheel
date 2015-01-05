@@ -1,6 +1,7 @@
 package de.uni_potsdam.hpi.coheel.programs
 
 import de.uni_potsdam.hpi.coheel.datastructures.{ConcurrentTreesWrapper, TrieLike, HashTrie}
+import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{EntireTextSurfaces, SurfaceAsLinkCount, EntireTextSurfaceCounts}
 import de.uni_potsdam.hpi.coheel.wiki.{WikiPage, TokenizerHelper}
@@ -83,9 +84,11 @@ class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[WikiPage, Entire
 	var i = 0
 	override def open(params: Configuration): Unit = {
 		trie = new HashTrie
+		println(s"Free memory, before: ${FreeMemory.get(true)} MB")
 		getRuntimeContext.getBroadcastVariable[String](EntireTextSurfacesProgram.BROADCAST_SURFACES).asScala.foreach { surface =>
 			trie.add(surface)
 		}
+		println(s"Free memory, after: ${FreeMemory.get(true)} MB")
 	}
 	override def flatMap(wikiPage: WikiPage, out: Collector[EntireTextSurfaces]): Unit = {
 		println(s"ENTIRETEXTSURFACES: $i")
