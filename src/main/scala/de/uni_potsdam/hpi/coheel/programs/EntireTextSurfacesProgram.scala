@@ -1,5 +1,7 @@
 package de.uni_potsdam.hpi.coheel.programs
 
+import java.util.Date
+
 import de.uni_potsdam.hpi.coheel.datastructures.{ConcurrentTreesWrapper, TrieLike, HashTrie}
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
@@ -92,7 +94,7 @@ class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[WikiPage, Entire
 		println(s"Free memory, after: ${FreeMemory.get(true)} MB")
 	}
 	override def flatMap(wikiPage: WikiPage, out: Collector[EntireTextSurfaces]): Unit = {
-		println(s"ENTIRETEXTSURFACES: $i")
+		println(s"${new Date()}: ENTIRETEXTSURFACES: $i")
 		i += 1
 		findEntireTextSurfaces(wikiPage, trie).foreach(out.collect)
 	}
