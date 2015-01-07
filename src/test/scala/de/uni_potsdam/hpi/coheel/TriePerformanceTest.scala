@@ -63,7 +63,7 @@ class TriePerformanceTest extends FunSuite {
 			println(s"Time for adding   : $addTime ms")
 			println(s"Time for checking : $checkTime ms")
 			println(s"Total time        : $totalTime ms")
-			println(s"Memory consumption: ${memoryWithTrie - memoryWithoutTrie} MB")
+			println(s"Memory consumption: ${memoryWithoutTrie - memoryWithTrie} MB")
 			println("=" * 80)
 		}
 	}
