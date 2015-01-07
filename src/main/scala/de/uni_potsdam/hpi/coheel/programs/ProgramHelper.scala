@@ -61,8 +61,7 @@ object ProgramHelper {
 
 	def filterNormalPages(wikiPages: DataSet[WikiPage]): DataSet[WikiPage] = {
 		wikiPages.filter { wikiPage =>
-			val result = !wikiPage.isDisambiguation && !wikiPage.isRedirect && !wikiPage.isList
-			result
+			wikiPage.isNormalPage
 		}.name("Filter-Normal-Pages")
 	}
 }

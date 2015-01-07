@@ -36,6 +36,10 @@ case class WikiPage(pageTitle: String,
 
 	val isRedirect: Boolean = this.redirect != ""
 	var source: String = _
+
+	def isNormalPage: Boolean = {
+		!isDisambiguation && !isRedirect && !isList
+	}
 }
 
 class WikiPageReader {
