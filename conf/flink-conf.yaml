@@ -1,14 +1,3 @@
-#jobmanager.heap.mb: 4096
-
-#taskmanager.heap.mb: 6144
-
-#taskmanager.memory.size: 3500
-
-taskmanager.numberOfTaskSlots: 1
-
-# The number of buffers for the network stack.
-#
-# taskmanager.network.numberOfBuffers: 2048
-
 taskmanager.heartbeat-interval: 10000
+
 jobmanager.max-heartbeat-delay-before-failure.sec: 90
