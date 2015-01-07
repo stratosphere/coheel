@@ -1,5 +1,8 @@
 #!/usr/bin/env /bin/bash
 
+# Exit on first failure
+set -e
+
 # Prepare the params with an '|' character in between, as Maven requires
 PARAMS=
 for i in "$@"; do
