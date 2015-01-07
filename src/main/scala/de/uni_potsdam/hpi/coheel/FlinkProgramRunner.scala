@@ -29,25 +29,7 @@ import scala.collection.JavaConverters._
 // Dump downloaded from http://dumps.wikimedia.org/enwiki/latest/
 object FlinkProgramRunner {
 
-	def downloadFile(fileName: String): InputStream = {
-		val p = new Path(s"hdfs://tenemhead2/home/stefan.bunk/data/$fileName")
-		val conf = new Configuration(true)
-		val hdfs = new org.apache.hadoop.hdfs.DistributedFileSystem(new InetSocketAddress("tenemhead2", 8020), conf)
-		val is = hdfs.open(new fs.Path(p.toUri))
-		is
-	}
-//	IOUtils.copy(downloadFile("wiki-0001.dump"), System.out)
-//	println(dfs.getWorkingDirectory)
-//	val x = new InputStreamReader(new DistributedFileSystem().open(p))
-//	System.exit(333)
-
 	val log = Logger.getLogger(getClass)
-
-//	val p1 = new Path("file:/src/test/resources/chunk_dump.wikirun")
-//	println(p1.makeQualified(new LocalFileSystem))
-//	val p2 = new Path("file:/home/knub/Repositories/coheel-stratosphere/src/test/resources/chunk_dump.wikirun")
-//	println(p2)
-//	System.exit(3)
 
 	/**
 	 * Runnable Flink programs.
@@ -67,7 +49,7 @@ object FlinkProgramRunner {
 	case class Params(dataSetConf: String = "chunk",
 	                  programName: String = "main",
 	                  doLogging: Boolean  = false,
-		              parallelism: Int    = 10)
+	                  parallelism: Int    = 10)
 
 	val parser = new scopt.OptionParser[Params]("bin/run") {
 		head("CohEEL", "0.0.1")
@@ -110,10 +92,10 @@ object FlinkProgramRunner {
 		log.info("# " + StringUtils.rightPad(s"Dataset: ${config.getString("name")}", 136) + " #")
 		log.info("# " + StringUtils.rightPad(s"Base path: ${config.getString("base_path")}", 136) + " #")
 		log.info("# " + StringUtils.rightPad(s"Output folder: ${config.getString("output_files_dir")}", 136) + " #")
-		log.info("# " + StringUtils.rightPad(s"Free Memory: ${FreeMemory.get(true)} MB", 136) + " #")
+		log.info("# " + StringUtils.rightPad(s"Free memory: ${FreeMemory.get(true)} MB", 136) + " #")
 
 
-		val processingTime = time {
+		time {
 			val env = if (config.getString("type") == "file") {
 				GlobalConfiguration.loadConfiguration("conf")
 				ExecutionEnvironment.createLocalEnvironment(1)
