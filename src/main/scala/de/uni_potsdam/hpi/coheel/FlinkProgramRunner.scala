@@ -67,7 +67,7 @@ object FlinkProgramRunner {
 	case class Params(dataSetConf: String = "chunk",
 	                  programName: String = "main",
 	                  doLogging: Boolean  = false,
-		              parallelism: Int    = 9)
+		              parallelism: Int    = 10)
 
 	val parser = new scopt.OptionParser[Params]("bin/run") {
 		head("CohEEL", "0.0.1")
@@ -93,6 +93,7 @@ object FlinkProgramRunner {
 	var config: Config = _
 
 	def main(args: Array[String]): Unit = {
+		GlobalConfiguration.loadConfiguration("conf")
 		// Parse the arguments
 		parser.parse(args, Params()) map { params =>
 			config = ConfigFactory.load(params.dataSetConf)
