@@ -87,7 +87,7 @@ object TrieBuilder {
 		PerformanceTimer.startTimeFirst(s"FULL-TRIE")
 //		fullTrie = new PatriciaTrieWrapper()
 //		fullTrie = new Trie()
-		fullTrie = if (trie != null) trie else new ConcurrentTreesWrapper()
+		fullTrie = if (trie != null) trie else new ConcurrentTreesTrie()
 
 		val t1 = System.currentTimeMillis()
 		trieBuilderHelper("../src/test/resources/surfaces", "Built full trie.") { line =>

@@ -2,7 +2,7 @@ package de.uni_potsdam.hpi.coheel.programs
 
 import java.util.Date
 
-import de.uni_potsdam.hpi.coheel.datastructures.{ConcurrentTreesWrapper, TrieLike, HashTrie}
+import de.uni_potsdam.hpi.coheel.datastructures.{ConcurrentTreesTrie, TrieLike, HashTrie}
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{EntireTextSurfaces, SurfaceAsLinkCount, EntireTextSurfaceCounts}

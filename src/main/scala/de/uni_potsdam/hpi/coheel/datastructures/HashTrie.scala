@@ -19,7 +19,7 @@ trait TrieLike {
 	def slidingContains[T](arr: Array[T], toString: T => String, startIndex: Int): Seq[Seq[T]]
 }
 
-class ConcurrentTreesWrapper extends TrieLike {
+class ConcurrentTreesTrie extends TrieLike {
 
 	val rt = new ConcurrentInvertedRadixTree[VoidValue](new DefaultCharArrayNodeFactory)
 
@@ -27,15 +27,15 @@ class ConcurrentTreesWrapper extends TrieLike {
 		rt.getKeysContainedIn(document).iterator().asScala.map(_.toString.trim)
 	}
 	override def add(tokens: Seq[String]): Unit = {
-		rt.put(" " + tokens.mkString(" ") + " ", VoidValue.SINGLETON)
+		rt.put(tokens.mkString(" ") + " ", VoidValue.SINGLETON)
 	}
 
 	override def slidingContains(arr: Array[String], startIndex: Int): Seq[Seq[String]] = {
-		throw new RuntimeException("FOOBAR")
+		???
 	}
 
 	override def slidingContains[T](arr: Array[T], toString: (T) => String, startIndex: Int): Seq[Seq[T]] = {
-		throw new RuntimeException("FOOBAR")
+		???
 	}
 
 	override def contains(tokens: Seq[String]): ContainsResult = {

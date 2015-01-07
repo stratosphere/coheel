@@ -2,7 +2,7 @@ package de.uni_potsdam.hpi.coheel
 
 import java.io.File
 
-import de.uni_potsdam.hpi.coheel.datastructures.{ConcurrentTreesWrapper, PatriciaTrieWrapper, HashTrie}
+import de.uni_potsdam.hpi.coheel.datastructures.{ConcurrentTreesTrie, PatriciaTrieWrapper, HashTrie}
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
 import org.scalatest.events.Event
@@ -41,7 +41,7 @@ class TriePerformanceTest extends FunSuite {
 		println()
 
 		println("=" * 80)
-		List(classOf[HashTrie], classOf[PatriciaTrieWrapper], classOf[ConcurrentTreesWrapper]).foreach { trieClass =>
+		List(classOf[HashTrie], classOf[PatriciaTrieWrapper], classOf[ConcurrentTreesTrie]).foreach { trieClass =>
 			val testName = trieClass.getSimpleName
 			PerformanceTimer.startTime(s"FULL-TRIE $testName")
 			PerformanceTimer.startTime(s"TRIE-ADDING $testName")
@@ -53,6 +53,10 @@ class TriePerformanceTest extends FunSuite {
 			PerformanceTimer.startTime(s"TRIE-CHECKING $testName")
 			tokenized.foreach { tokens =>
 				val contains = trie.contains(tokens)
+				if (!contains.asEntry) {
+					println(tok)
+
+				}
 				assert(contains.asEntry)
 			}
 			val checkTime = PerformanceTimer.endTime(s"TRIE-CHECKING $testName")
