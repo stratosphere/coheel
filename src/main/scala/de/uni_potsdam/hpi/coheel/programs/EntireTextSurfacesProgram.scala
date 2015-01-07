@@ -86,8 +86,8 @@ class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[WikiPage, Entire
 
 	var i = 0
 	override def open(params: Configuration): Unit = {
-//		trie = new HashTrie
-		trie = new ConcurrentTreesWrapper
+		trie = new HashTrie
+//		trie = new ConcurrentTreesWrapper
 		println(s"Free memory, before: ${FreeMemory.get(true)} MB")
 		getRuntimeContext.getBroadcastVariable[String](EntireTextSurfacesProgram.BROADCAST_SURFACES).asScala.foreach { surface =>
 			trie.add(surface)
@@ -105,23 +105,23 @@ class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[WikiPage, Entire
 	}
 
 	def findEntireTextSurfaces(wikiPage: WikiPage, trie: TrieLike): Iterator[EntireTextSurfaces] = {
-		val tokens = TokenizerHelper.transformToTokenized(wikiPage.plainText, false)
-
-		val entireTextSurfaces = trie.asInstanceOf[ConcurrentTreesWrapper].getKeysContainedIn(tokens).toSet
-
-		entireTextSurfaces.map { surface =>
-			EntireTextSurfaces(wikiPage.pageTitle, surface.toString)
-		}.toIterator
+//		val tokens = TokenizerHelper.transformToTokenized(wikiPage.plainText, false)
 //
-//		val tokens = TokenizerHelper.tokenize(wikiPage.plainText, false)
-//		val resultSurfaces = mutable.HashSet[String]()
+//		val entireTextSurfaces = trie.asInstanceOf[ConcurrentTreesWrapper].getKeysContainedIn(tokens).toSet
 //
-//		// each word and its following words must be checked, if it is a surface
-//		for (i <- 0 until tokens.size) {
-//			resultSurfaces ++= trie.slidingContains(tokens, i).map {
-//				containment => containment.mkString(" ")
-//			}
-//		}
-//		resultSurfaces.toIterator.map { surface => EntireTextSurfaces(wikiPage.pageTitle, surface)}
+//		entireTextSurfaces.map { surface =>
+//			EntireTextSurfaces(wikiPage.pageTitle, surface.toString)
+//		}.toIterator
+
+		val tokens = TokenizerHelper.tokenize(wikiPage.plainText, false)
+		val resultSurfaces = mutable.HashSet[String]()
+
+		// each word and its following words must be checked, if it is a surface
+		for (i <- 0 until tokens.size) {
+			resultSurfaces ++= trie.slidingContains(tokens, i).map {
+				containment => containment.mkString(" ")
+			}
+		}
+		resultSurfaces.toIterator.map { surface => EntireTextSurfaces(wikiPage.pageTitle, surface)}
 	}
 }
