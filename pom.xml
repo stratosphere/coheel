@@ -166,11 +166,19 @@
 				<configuration>
 					<launchers>
 						<launcher>
-							<id>Wikipedia Training Task</id>
+							<id>ProgramRunner</id>
 							<mainClass>de.uni_potsdam.hpi.coheel.FlinkProgramRunner</mainClass>
 							<jvmArgs>
 								<jvmArg>-Xms7g</jvmArg>
 								<jvmArg>-Xmx7g</jvmArg>
+							</jvmArgs>
+						</launcher>
+						<launcher>
+							<id>TriePerformanceTest</id>
+							<mainClass>de.uni_potsdam.hpi.coheel.TriePerformanceTest</mainClass>
+							<jvmArgs>
+								<jvmArg>-Xms10g</jvmArg>
+								<jvmArg>-Xmx10g</jvmArg>
 							</jvmArgs>
 						</launcher>
 					</launchers>

@@ -22,7 +22,7 @@ mvn compile > compile-output
 # .. then run the app
 echo "Running .."
 echo "--------------------------------------------------------------------------" | tee -a run-output
-mvn -q scala:run -DaddArgs="$PARAMS" | tee -a run-output
+mvn -q scala:run -Dlauncher=ProgramRunner -DaddArgs="$PARAMS" | tee -a run-output
 echo "--------------------------------------------------------------------------" | tee -a run-output
 # Display end time
 date --rfc-3339=seconds | tee -a run-output

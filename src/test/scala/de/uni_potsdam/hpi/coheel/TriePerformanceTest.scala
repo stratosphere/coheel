@@ -5,17 +5,19 @@ import java.io.File
 import de.uni_potsdam.hpi.coheel.datastructures.{ConcurrentTreesWrapper, PatriciaTrieWrapper, HashTrie}
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
-import org.scalatest.FunSuite
+import org.scalatest.events.Event
+import org.scalatest.{Reporter, Args, FunSuite}
 
 import scala.io.Source
 
-object TriePerformanceTest extends FunSuite {
+object TriePerformanceTest extends Reporter {
 	val TEST_NAME = "performance of the trie"
 
 	def main(args: Array[String]): Unit = {
-		this.runTest(TEST_NAME, null)
+		val testEnv = new TriePerformanceTest
+		testEnv.runTest(TEST_NAME, Args(this))
 	}
-
+	override def apply(event: Event): Unit = {  }
 }
 class TriePerformanceTest extends FunSuite {
 	import TriePerformanceTest._
