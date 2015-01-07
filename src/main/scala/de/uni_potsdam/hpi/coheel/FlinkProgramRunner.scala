@@ -93,7 +93,6 @@ object FlinkProgramRunner {
 	var config: Config = _
 
 	def main(args: Array[String]): Unit = {
-		GlobalConfiguration.loadConfiguration("conf")
 		// Parse the arguments
 		parser.parse(args, Params()) map { params =>
 			config = ConfigFactory.load(params.dataSetConf)
@@ -115,8 +114,10 @@ object FlinkProgramRunner {
 
 
 		val processingTime = time {
-			val env = if (config.getString("type") == "file")
+			val env = if (config.getString("type") == "file") {
+				GlobalConfiguration.loadConfiguration("conf")
 				ExecutionEnvironment.createLocalEnvironment(1)
+			}
 			else
 				ExecutionEnvironment.createRemoteEnvironment("tenemhead2", 6123, parallelism,
 					"target/coheel_stratosphere-0.1-SNAPSHOT-jar-with-dependencies.jar")
@@ -131,7 +132,7 @@ object FlinkProgramRunner {
 			} catch {
 				case e: ProgramInvocationException =>
 					if (e.getMessage.contains("canceled"))
-						println("Stopping .. Program has been cancelled.")
+						println("Stopping .. Program has been canceled.")
 			}
 //			PerformanceTimer.printTimerEvents()
 		} * 10.2 * 1024 /* full data dump size*/ / 42.7 /* test dump size */ / 60 /* in minutes */ / 60 /* in hours */
