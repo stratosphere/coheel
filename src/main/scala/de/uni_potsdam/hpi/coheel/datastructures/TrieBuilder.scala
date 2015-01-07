@@ -62,7 +62,7 @@ object TrieBuilder {
 	}
 
 	def buildThresholdTrie(threshold: Double): Unit = {
-		PerformanceTimer.startTimeFirst(s"THRESHOLD-TRIE $threshold")
+		PerformanceTimer.startTime(s"THRESHOLD-TRIE $threshold")
 		if (thresholdTrie != null) {
 			thresholdTrie = null
 			// clean up trie
@@ -80,14 +80,14 @@ object TrieBuilder {
 					thresholdTrie.add(tokens)
 			}
 		}
-		PerformanceTimer.endTimeFirst(s"THRESHOLD-TRIE $threshold")
+		PerformanceTimer.endTime(s"THRESHOLD-TRIE $threshold")
 	}
 
-	def buildFullTrie(): Unit = {
+	def buildFullTrie(trie: TrieLike = null): Unit = {
 		PerformanceTimer.startTimeFirst(s"FULL-TRIE")
 //		fullTrie = new PatriciaTrieWrapper()
 //		fullTrie = new Trie()
-		fullTrie = new ConcurrentTreesWrapper()
+		fullTrie = if (trie != null) trie else new ConcurrentTreesWrapper()
 
 		val t1 = System.currentTimeMillis()
 		trieBuilderHelper("../src/test/resources/surfaces", "Built full trie.") { line =>
