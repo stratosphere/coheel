@@ -125,7 +125,7 @@ class WikipediaTrainingProgram extends CoheelProgram {
 	 */
 	def buildLanguageModelPlan(wikiPages: DataSet[WikiPage]): Unit = {
 		val words = ProgramHelper.filterNormalPages(wikiPages) flatMap { wikiPage =>
-			val tokens = TokenizerHelper.tokenizeWithCounts(wikiPage.plainText).map { case (token, count) =>
+			val tokens = TokenizerHelper.tokenizeWithCounts(wikiPage.plainText, stemming = false).map { case (token, count) =>
 				WordInDocument(wikiPage.pageTitle, token, count)
 			}.toIterator
 			tokens

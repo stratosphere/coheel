@@ -15,12 +15,12 @@ class ClassificationProgram extends CoheelProgram {
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT).map { doc =>
-			TokenizerHelper.tokenize(doc, stemming = false)
+			TokenizerHelper.tokenize(doc)
 		}
-		val surfaceProbs = env.readTextFile(surfaceProbsPath).flatMap { line =>
+		val surfaces = env.readTextFile(surfaceProbsPath).flatMap { line =>
 			val split = line.split('\t')
 			if (split.size > 1) {
-				val tokens = TokenizerHelper.tokenize(split(0), stemming = false)
+				val tokens = TokenizerHelper.tokenize(split(0))
 				if (tokens.nonEmpty)
 					Some(SurfaceProbLink(tokens, split(1), split(2).toDouble))
 				else
@@ -29,7 +29,7 @@ class ClassificationProgram extends CoheelProgram {
 			else None
 		}
 
-		val result = documents.crossWithHuge(surfaceProbs).flatMap { value =>
+		val result = documents.crossWithHuge(surfaces).flatMap { value =>
 			val (text, link) = value
 			val surface = link.surface
 			if (text.containsSlice(surface))

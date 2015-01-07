@@ -114,7 +114,7 @@ class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[WikiPage, Entire
 //			EntireTextSurfaces(wikiPage.pageTitle, surface.toString)
 //		}.toIterator
 
-		val tokens = TokenizerHelper.tokenize(wikiPage.plainText, false)
+		val tokens = TokenizerHelper.tokenize(wikiPage.plainText)
 		val resultSurfaces = mutable.HashSet[String]()
 
 		// each word and its following words must be checked, if it is a surface

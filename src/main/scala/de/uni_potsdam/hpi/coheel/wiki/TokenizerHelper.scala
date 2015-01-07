@@ -25,7 +25,7 @@ object TokenizerHelper {
 		sb.toString()
 	}
 
-	def tokenize(text: String, stemming: Boolean = true): Array[String] = {
+	def tokenize(text: String, stemming: Boolean = false): Array[String] = {
 		val tokens = mutable.ArrayBuffer[String]()
 		tokenizeHelper(text, stemming) { (charTermAttribute, _) =>
 			tokens += charTermAttribute.toString
@@ -33,7 +33,7 @@ object TokenizerHelper {
 		tokens.toArray
 	}
 
-	def tokenizeWithCounts(text: String, stemming: Boolean = true): Map[String, Int] = {
+	def tokenizeWithCounts(text: String, stemming: Boolean = false): Map[String, Int] = {
 		val tokens = ListBuffer[String]()
 		tokenizeHelper(text, stemming) { (charTermAttribute, _) =>
 			tokens += charTermAttribute.toString
