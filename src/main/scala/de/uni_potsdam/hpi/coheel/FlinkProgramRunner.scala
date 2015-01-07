@@ -3,6 +3,7 @@ package de.uni_potsdam.hpi.coheel
 import java.io.{InputStream, InputStreamReader, File}
 import java.net.InetSocketAddress
 
+import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import org.apache.commons.collections4.trie.PatriciaTrie
 import org.apache.commons.io.{FileUtils, IOUtils}
 import org.apache.commons.lang3.StringUtils
@@ -92,8 +93,6 @@ object FlinkProgramRunner {
 	var config: Config = _
 
 	def main(args: Array[String]): Unit = {
-		GlobalConfiguration.loadConfiguration("conf")
-
 		// Parse the arguments
 		parser.parse(args, Params()) map { params =>
 			config = ConfigFactory.load(params.dataSetConf)
@@ -111,6 +110,7 @@ object FlinkProgramRunner {
 		log.info("# " + StringUtils.rightPad(s"Dataset: ${config.getString("name")}", 136) + " #")
 		log.info("# " + StringUtils.rightPad(s"Base path: ${config.getString("base_path")}", 136) + " #")
 		log.info("# " + StringUtils.rightPad(s"Output folder: ${config.getString("output_files_dir")}", 136) + " #")
+		log.info("# " + StringUtils.rightPad(s"Free Memory: ${FreeMemory.get(true)} MB", 136) + " #")
 
 
 		val processingTime = time {

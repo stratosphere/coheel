@@ -82,6 +82,7 @@ class EntireTextSurfacesProgram extends CoheelProgram {
 }
 class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[WikiPage, EntireTextSurfaces] {
 	var trie: TrieLike = _
+	var last1000 = new Date()
 
 	var i = 0
 	override def open(params: Configuration): Unit = {
@@ -94,7 +95,11 @@ class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[WikiPage, Entire
 		println(s"Free memory, after: ${FreeMemory.get(true)} MB")
 	}
 	override def flatMap(wikiPage: WikiPage, out: Collector[EntireTextSurfaces]): Unit = {
-		println(s"${new Date()}: ENTIRETEXTSURFACES: $i")
+		if (i % 1000 == 0) {
+			val new1000 = new Date()
+			val difference = new1000.getTime - last1000.getTime
+			println(s"${new Date()}: ENTIRETEXTSURFACES: $i, LAST 1000: $difference ms, FREE MEMORY: ${FreeMemory.get(true)} MB")
+		}
 		i += 1
 		findEntireTextSurfaces(wikiPage, trie).foreach(out.collect)
 	}
