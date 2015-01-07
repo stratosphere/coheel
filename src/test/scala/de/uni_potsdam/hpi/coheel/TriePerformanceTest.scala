@@ -11,18 +11,20 @@ import org.scalatest.{Reporter, Args, FunSuite}
 import scala.io.Source
 
 object TriePerformanceTest extends Reporter {
-	val TEST_NAME = "performance of the trie"
 
 	def main(args: Array[String]): Unit = {
 		val testEnv = new TriePerformanceTest
-		testEnv.runTest(TEST_NAME, Args(this))
+		testEnv.testPerformance()
 	}
 	override def apply(event: Event): Unit = {  }
 }
 class TriePerformanceTest extends FunSuite {
-	import TriePerformanceTest._
 
-	test(TEST_NAME) {
+	test("performance of the trie") {
+		testPerformance()
+	}
+
+	def testPerformance(): Unit = {
 		print("Setup    :")
 		val classLoader = getClass.getClassLoader
 		val surfacesFile = new File(classLoader.getResource("surfaces").getFile)

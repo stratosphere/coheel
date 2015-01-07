@@ -12,14 +12,3 @@ class WikiPageInputFormat extends DelimitedInputFormat[String] {
 	}
 
 }
-
-class Foo extends FileInputFormat[WikiPage] {
-	override def reachedEnd(): Boolean = {
-		true
-	}
-
-	override def nextRecord(reuse: WikiPage): WikiPage = {
-		stream
-		null
-	}
-}
