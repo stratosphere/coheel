@@ -135,9 +135,7 @@ object FlinkProgramRunner {
 						println("Stopping .. Program has been canceled.")
 			}
 //			PerformanceTimer.printTimerEvents()
-		} * 10.2 * 1024 /* full data dump size*/ / 42.7 /* test dump size */ / 60 /* in minutes */ / 60 /* in hours */
-		if (config.getBoolean("print_approximation"))
-			log.info(f"Approximately $processingTime%.2f hours on the full dump, one machine.")
+		}
 	}
 	def time[R](block: => R): Double = {
 		val start = System.nanoTime()
