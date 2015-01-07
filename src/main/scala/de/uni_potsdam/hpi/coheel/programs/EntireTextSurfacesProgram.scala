@@ -98,7 +98,8 @@ class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[WikiPage, Entire
 		if (i % 1000 == 0) {
 			val new1000 = new Date()
 			val difference = new1000.getTime - last1000.getTime
-			println(s"${new Date()}: ENTIRETEXTSURFACES: $i, LAST 1000: $difference ms, FREE MEMORY: ${FreeMemory.get(true)} MB")
+			println(s"${new Date()}: ENTIRETEXTSURFACES: $i, LAST 1000: $difference ms, FREE MEMORY: ${FreeMemory.get()} MB")
+			last1000 = new1000
 		}
 		i += 1
 		findEntireTextSurfaces(wikiPage, trie).foreach(out.collect)
