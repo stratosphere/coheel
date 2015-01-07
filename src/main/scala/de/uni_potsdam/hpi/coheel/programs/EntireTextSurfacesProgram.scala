@@ -89,9 +89,11 @@ class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[WikiPage, Entire
 		trie = new HashTrie
 //		trie = new ConcurrentTreesWrapper
 		println(s"Free memory, before: ${FreeMemory.get(true)} MB")
+		val d1 = new Date
 		getRuntimeContext.getBroadcastVariable[String](EntireTextSurfacesProgram.BROADCAST_SURFACES).asScala.foreach { surface =>
 			trie.add(surface)
 		}
+		println(s"Trie initialization took ${(new Date().getTime - d1.getTime) / 1000} s.")
 		println(s"Free memory, after: ${FreeMemory.get(true)} MB")
 	}
 	override def flatMap(wikiPage: WikiPage, out: Collector[EntireTextSurfaces]): Unit = {
