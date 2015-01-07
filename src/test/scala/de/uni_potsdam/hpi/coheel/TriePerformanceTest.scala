@@ -29,7 +29,7 @@ class TriePerformanceTest extends FunSuite {
 		val classLoader = getClass.getClassLoader
 		val surfacesFile = new File(classLoader.getResource("surfaces").getFile)
 		val lines = Source.fromFile(surfacesFile).getLines()
-		val tokenized = lines.flatMap { line =>
+		val tokenizedSurfaces = lines.flatMap { line =>
 			val tokens = TokenizerHelper.tokenize(line)
 			if (tokens.isEmpty)
 				None
@@ -37,7 +37,7 @@ class TriePerformanceTest extends FunSuite {
 				Some(tokens)
 		}.toArray
 		println(" Done.")
-		println(s"Test Case: Load ${tokenized.size} surfaces into the trie and then check each token for existence.")
+		println(s"Test Case: Load ${tokenizedSurfaces.size} surfaces into the trie and then check each token for existence.")
 		println()
 
 		println("=" * 80)
@@ -46,18 +46,17 @@ class TriePerformanceTest extends FunSuite {
 			PerformanceTimer.startTime(s"FULL-TRIE $testName")
 			PerformanceTimer.startTime(s"TRIE-ADDING $testName")
 			var trie = trieClass.newInstance()
-			tokenized.foreach { tokens =>
+			tokenizedSurfaces.foreach { tokens =>
 				trie.add(tokens)
 			}
 			val addTime = PerformanceTimer.endTime(s"TRIE-ADDING $testName")
 			PerformanceTimer.startTime(s"TRIE-CHECKING $testName")
-			tokenized.foreach { tokens =>
-				val contains = trie.contains(tokens)
+			tokenizedSurfaces.foreach { surfaceTokens =>
+				val contains = trie.contains(surfaceTokens)
 				if (!contains.asEntry) {
-					println(tok)
-
+					println(surfaceTokens)
+					throw new Exception(s"Token ${surfaceTokens.mkString(" ")} not contained.")
 				}
-				assert(contains.asEntry)
 			}
 			val checkTime = PerformanceTimer.endTime(s"TRIE-CHECKING $testName")
 			val totalTime = PerformanceTimer.endTime(s"FULL-TRIE $testName")
