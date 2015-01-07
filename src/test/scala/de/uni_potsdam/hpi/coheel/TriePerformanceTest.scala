@@ -33,7 +33,7 @@ class TriePerformanceTest extends FunSuite {
 				None
 			else
 				Some(tokens)
-		}
+		}.toArray
 		println(" Done.")
 		println(s"Test Case: Load ${tokenized.size} surfaces into the trie and then check each token for existence.")
 		println()
