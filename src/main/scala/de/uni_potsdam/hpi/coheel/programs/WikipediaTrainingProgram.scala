@@ -28,8 +28,8 @@ class WikipediaTrainingProgram extends CoheelProgram {
 		buildLanguageModelPlan(wikiPages)
 
 		wikiPages.map { wikiPage =>
-			(wikiPage.pageTitle, wikiPage.isDisambiguation, wikiPage.isList, wikiPage.isRedirect, wikiPage.ns, wikiPage.isNormalPage)
-		}.writeAsTsv(textDumpsPath)
+			(wikiPage.pageTitle, wikiPage.isDisambiguation, wikiPage.isList, wikiPage.isRedirect, wikiPage.ns, if (wikiPage.isNormalPage) "normal" else "special")
+		}.writeAsTsv(wikiPagesPath)
 	}
 
 	/**
