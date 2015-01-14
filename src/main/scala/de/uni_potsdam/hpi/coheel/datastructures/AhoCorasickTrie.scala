@@ -1,17 +1,23 @@
 package de.uni_potsdam.hpi.coheel.datastructures
 
-import org.ahocorasick.trie.Trie
+import org.arabidopsis.ahocorasick.AhoCorasick
 
 class AhoCorasickTrie extends TrieLike {
 
-	val trie: Trie = new Trie().onlyWholeWords()
+	val trie = new AhoCorasick
+
+	var alreadyPrepared = false
 
 	override def add(tokenString: String): Unit = {
-		trie.addKeyword(tokenString)
+		trie.add(tokenString)
 	}
 
 	override def contains(tokenString: String): ContainsResult = {
-		val result = trie.parseText(tokenString)
+		if (!alreadyPrepared) {
+			trie.prepare()
+			alreadyPrepared = true
+		}
+		val result = trie.completeSearch(tokenString, false, false)
 		ContainsResult(result.size > 0, false)
 	}
 

@@ -28,7 +28,7 @@ class TriePerformanceTest extends FunSuite {
 		print("Setup    :")
 		val classLoader = getClass.getClassLoader
 		val surfacesFile = new File(classLoader.getResource("surfaces").getFile)
-		val lines = Source.fromFile(surfacesFile).getLines().take(100000)
+		val lines = Source.fromFile(surfacesFile).getLines().take(1000000)
 		val memoryBeforeLines = FreeMemory.get(true, 10)
 		val tokenizedSurfaces = lines.flatMap { line =>
 			val tokens = TokenizerHelper.tokenize(line).mkString(" ")

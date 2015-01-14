@@ -101,6 +101,11 @@
 			<!--<artifactId>memory-measurer</artifactId>-->
 			<!--<version>1.0</version>-->
 		<!--</dependency>-->
+		<dependency>
+			<groupId>aho-corasick</groupId>
+			<artifactId>aho-corasick</artifactId>
+			<version>1.0</version>
+		</dependency>
 	</dependencies>
 	<repositories>
 		<repository>

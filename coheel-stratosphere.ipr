@@ -279,6 +279,17 @@
       <JAVADOC />
       <SOURCES />
     </library>
+    <library name="Maven: aho-corasick:aho-corasick:1.0">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/aho-corasick/aho-corasick/1.0/aho-corasick-1.0.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/aho-corasick/aho-corasick/1.0/aho-corasick-1.0-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/aho-corasick/aho-corasick/1.0/aho-corasick-1.0-sources.jar!/" />
+      </SOURCES>
+    </library>
     <library name="Maven: asm:asm:3.1">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/asm/asm/3.1/asm-3.1.jar!/" />
