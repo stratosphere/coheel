@@ -51,29 +51,31 @@ case class TrieNode() {
 
 	var isEntry = false
 
-	var children: Int2ReferenceMap[TrieNode] = _
+	var children: Map[Int, TrieNode] = _
+//	var children: Int2ReferenceMap[TrieNode] = _
+//	var children: Int2ReferenceMap[TrieNode] = _
 //	var children: TIntObjectHashMap[TrieNode] = _
 
 	def add(tokens: Seq[String]): Unit = {
 		if (children == null)
 //			children = new TIntObjectHashMap[TrieNode]()
-			children = new it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap[TrieNode]()
+			children = Map.empty
 		if (tokens.tail.isEmpty) {
 			children.get(tokens.head.hashCode) match {
-				case null =>
+				case None =>
 					val newNode = TrieNode()
 					newNode.isEntry = true
-					children.put(tokens.head.hashCode, newNode)
-				case trieNode => trieNode.isEntry = true
+					children += (tokens.head.hashCode -> newNode)
+				case Some(trieNode) => trieNode.isEntry = true
 			}
 		}
 		else {
 			children.get(tokens.head.hashCode) match {
-				case null =>
+				case None =>
 					val newNode = TrieNode()
 					newNode.add(tokens.tail)
-					children.put(tokens.head.hashCode, newNode)
-				case trieNode =>
+					children += (tokens.head.hashCode -> newNode)
+				case Some(trieNode) =>
 					trieNode.add(tokens.tail)
 			}
 		}
@@ -88,8 +90,8 @@ case class TrieNode() {
 			ContainsResult(false, false)
 		else {
 			children.get(tokens.head.hashCode) match {
-				case null => ContainsResult(false, false)
-				case trieNode => trieNode.contains(tokens.tail)
+				case None => ContainsResult(false, false)
+				case Some(trieNode) => trieNode.contains(tokens.tail)
 			}
 		}
 	}

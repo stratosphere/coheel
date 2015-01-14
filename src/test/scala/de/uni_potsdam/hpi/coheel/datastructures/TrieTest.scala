@@ -10,8 +10,7 @@ import scala.collection.JavaConverters._
 class TrieTest extends FunSuite {
 
 	def newTrie(): TrieLike = {
-		val trie = new PatriciaTrieWrapper()
-		trie.foo
+		val trie = new HashTrie
 		trie
 	}
 
