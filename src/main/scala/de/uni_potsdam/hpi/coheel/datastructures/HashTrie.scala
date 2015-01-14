@@ -39,7 +39,7 @@ class ConcurrentTreesTrie extends TrieLike {
 	}
 
 	override def contains(tokens: Seq[String]): ContainsResult = {
-		val tokenString = tokens.mkString(" ")
+		val tokenString = tokens.mkString(" ") + " "
 		val asEntry = rt.getValueForExactKey(tokenString) != null
 		val asIntermediaNode = rt.getKeysStartingWith(tokenString).iterator().hasNext
 		ContainsResult(asEntry, asIntermediaNode)
