@@ -44,7 +44,12 @@ class TriePerformanceTest extends FunSuite {
 		println()
 
 		println("=" * 80)
-		List(classOf[AhoCorasickTrie], classOf[HashTrie], classOf[PatriciaTrieWrapper], classOf[ConcurrentTreesTrie]).foreach { trieClass =>
+		List(
+//			, classOf[AhoCorasickTrie]
+			classOf[HashTrie]
+			, classOf[PatriciaTrieWrapper]
+			, classOf[ConcurrentTreesTrie]
+		).foreach { trieClass =>
 			val testName = trieClass.getSimpleName
 			PerformanceTimer.startTime(s"FULL-TRIE $testName")
 			PerformanceTimer.startTime(s"TRIE-ADDING $testName")
