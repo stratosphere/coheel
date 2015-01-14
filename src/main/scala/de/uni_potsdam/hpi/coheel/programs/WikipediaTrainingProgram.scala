@@ -24,8 +24,10 @@ class WikipediaTrainingProgram extends CoheelProgram {
 	 */
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val wikiPages = ProgramHelper.getWikiPages(env)
-		buildLinkPlans(wikiPages)
-		buildLanguageModelPlan(wikiPages)
+		if (!params.contains(ProgramParams.ONLY_WIKIPAGES)) {
+			buildLinkPlans(wikiPages)
+			buildLanguageModelPlan(wikiPages)
+		}
 
 		wikiPages.map { wikiPage =>
 			(wikiPage.pageTitle, wikiPage.isDisambiguation, wikiPage.isList, wikiPage.isRedirect, wikiPage.ns, if (wikiPage.isNormalPage) "normal" else "special")

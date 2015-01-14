@@ -49,7 +49,9 @@ object FlinkProgramRunner {
 	case class Params(dataSetConf: String = "chunk",
 	                  programName: String = "main",
 	                  doLogging: Boolean  = false,
-	                  parallelism: Int    = 10)
+	                  parallelism: Int    = 10,
+	                  programParams: Map[String, String] = Map()
+	                  )
 
 	val parser = new scopt.OptionParser[Params]("bin/run") {
 		head("CohEEL", "0.0.1")
@@ -67,7 +69,9 @@ object FlinkProgramRunner {
 			c.copy(doLogging = true) }
 		opt[Int]('p', "parallelism") action { (x, c) =>
 			c.copy(parallelism = x) } text "specifies the degree of parallelism for Flink"
-		note("some notes.\n")
+		opt[Unit]("X" + ProgramParams.ONLY_WIKIPAGES) action { (x, c) =>
+			c.copy(programParams = c.programParams + (ProgramParams.ONLY_WIKIPAGES -> "true"))
+		}
 		help("help") text "prints this usage text"
 	}
 
@@ -80,6 +84,7 @@ object FlinkProgramRunner {
 			config = ConfigFactory.load(params.dataSetConf)
 			val programName = params.programName
 			val program = programs(programName).newInstance()
+			program.setParams(params.programParams)
 			runProgram(program, params.parallelism)
 		} getOrElse {
 			parser.showUsage
@@ -90,9 +95,10 @@ object FlinkProgramRunner {
 		log.info(StringUtils.repeat('#', 140))
 		log.info("# " + StringUtils.center(program.getDescription, 136) + " #")
 		log.info("# " + StringUtils.rightPad(s"Dataset: ${config.getString("name")}", 136) + " #")
-		log.info("# " + StringUtils.rightPad(s"Base path: ${config.getString("base_path")}", 136) + " #")
-		log.info("# " + StringUtils.rightPad(s"Output folder: ${config.getString("output_files_dir")}", 136) + " #")
-		log.info("# " + StringUtils.rightPad(s"Free memory: ${FreeMemory.get(true)} MB", 136) + " #")
+		log.info("# " + StringUtils.rightPad(s"Base Path: ${config.getString("base_path")}", 136) + " #")
+		log.info("# " + StringUtils.rightPad(s"Output Folder: ${config.getString("output_files_dir")}", 136) + " #")
+		log.info("# " + StringUtils.rightPad(s"Free Memory: ${FreeMemory.get(true)} MB", 136) + " #")
+		log.info("# " + StringUtils.rightPad(s"Program Params: ${program.params}", 136) + " #")
 
 
 		time {
