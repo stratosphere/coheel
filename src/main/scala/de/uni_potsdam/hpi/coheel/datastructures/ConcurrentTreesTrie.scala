@@ -1,5 +1,12 @@
 package de.uni_potsdam.hpi.coheel.datastructures
 
+import com.googlecode.concurrenttrees.radix.node.concrete.DefaultCharArrayNodeFactory
+import com.googlecode.concurrenttrees.radix.node.concrete.voidvalue.VoidValue
+import com.googlecode.concurrenttrees.radix.{ConcurrentRadixTree, RadixTree}
+import com.googlecode.concurrenttrees.radixinverted.ConcurrentInvertedRadixTree
+
+import scala.collection.JavaConverters._
+
 class ConcurrentTreesTrie extends TrieLike {
 
 	val rt = new ConcurrentInvertedRadixTree[VoidValue](new DefaultCharArrayNodeFactory)

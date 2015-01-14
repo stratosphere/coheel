@@ -1,13 +1,6 @@
 package de.uni_potsdam.hpi.coheel.datastructures
 
-import com.googlecode.concurrenttrees.radix.node.concrete.DefaultCharArrayNodeFactory
-import com.googlecode.concurrenttrees.radix.node.concrete.voidvalue.VoidValue
-import com.googlecode.concurrenttrees.radix.{ConcurrentRadixTree, RadixTree}
-import com.googlecode.concurrenttrees.radixinverted.ConcurrentInvertedRadixTree
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMap
-import org.apache.commons.collections4.trie.PatriciaTrie
-import scala.collection.JavaConverters._
-
 case class ContainsResult(asEntry: Boolean, asIntermediateNode: Boolean)
 
 trait TrieLike {

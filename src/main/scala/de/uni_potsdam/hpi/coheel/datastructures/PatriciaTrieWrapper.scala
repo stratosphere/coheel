@@ -1,5 +1,9 @@
 package de.uni_potsdam.hpi.coheel.datastructures
 
+import org.apache.commons.collections4.trie.PatriciaTrie
+import scala.collection.JavaConverters._
+
+
 class PatriciaTrieWrapper extends TrieLike {
 
 	private [datastructures] def foo(): Int = 1
