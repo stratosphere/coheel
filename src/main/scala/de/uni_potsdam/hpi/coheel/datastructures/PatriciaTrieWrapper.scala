@@ -10,12 +10,12 @@ class PatriciaTrieWrapper extends TrieLike {
 
 	val pt = new PatriciaTrie[java.lang.Boolean]()
 
-	override def add(tokens: Seq[String]): Unit = {
-		pt.put(tokens.mkString(" "), true)
+	override def add(tokens: String): Unit = {
+		pt.put(tokens, true)
 	}
 
-	override def contains(tokens: Seq[String]): ContainsResult = {
-		val tokenString = tokens.mkString(" ")
+	override def contains(tokens: String): ContainsResult = {
+		val tokenString = tokens
 		val asIntermediateNode = !pt.prefixMap(tokenString).isEmpty
 		val asEntry = pt.get(tokenString) != null
 		ContainsResult(asEntry, asIntermediateNode)
@@ -28,7 +28,7 @@ class PatriciaTrieWrapper extends TrieLike {
 		var result = List[Seq[T]]()
 		// vector: immutable list structure with fast append
 		var currentCheck = Vector[T](arr(startIndex))
-		var containsResult = this.contains(currentCheck.map(toString))
+		var containsResult = this.contains(currentCheck.map(toString).mkString(" "))
 
 		var i = 1
 		// for each word, go so far until it is no intermediate node anymore
@@ -40,7 +40,7 @@ class PatriciaTrieWrapper extends TrieLike {
 			if (startIndex + i < arr.size) {
 				// append element to the end of the vector
 				currentCheck :+= arr(startIndex + i)
-				containsResult = this.contains(currentCheck.map(toString))
+				containsResult = this.contains(currentCheck.map(toString).mkString(" "))
 				i += 1
 			} else {
 				// if we reached the end of the text, we need to break manually

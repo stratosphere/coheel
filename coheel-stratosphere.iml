@@ -124,6 +124,7 @@
     <orderEntry type="library" name="Maven: xtc:rats-runtime:1.15.0" level="project" />
     <orderEntry type="library" name="Maven: de.fau.cs.osr.utils:utils:0.3.0" level="project" />
     <orderEntry type="library" name="Maven: net.sf.jopt-simple:jopt-simple:4.3" level="project" />
+    <orderEntry type="library" name="Maven: org.ahocorasick:ahocorasick:0.2.4" level="project" />
     <orderEntry type="library" name="Maven: it.unimi.dsi:fastutil:6.5.15" level="project" />
     <orderEntry type="library" name="Maven: org.apache.lucene:lucene-core:4.8.1" level="project" />
     <orderEntry type="library" name="Maven: org.apache.lucene:lucene-analyzers-common:4.8.1" level="project" />

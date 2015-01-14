@@ -1,31 +1,28 @@
 package de.uni_potsdam.hpi.coheel.datastructures
 
-import it.unimi.dsi.fastutil.ints.Int2ReferenceMap
 case class ContainsResult(asEntry: Boolean, asIntermediateNode: Boolean)
 
 trait TrieLike {
-	def add(tokens: Seq[String]): Unit
-	def add(tokenString: String): Unit = add(tokenString.split(' '))
-	def contains(tokens: Seq[String]): ContainsResult
-	def contains(tokenString: String): ContainsResult = contains(tokenString.split(' '))
+	def add(tokenString: String): Unit
+	def contains(tokenString: String): ContainsResult
 	def slidingContains(arr: Array[String], startIndex: Int): Seq[Seq[String]]
 	def slidingContains[T](arr: Array[T], toString: T => String, startIndex: Int): Seq[Seq[T]]
 }
 
 case class HashTrie() extends TrieLike {
 
-	val rootNode = TrieNode()
+	val rootNode = HashTrieNode()
 
-	def add(tokens: Seq[String]): Unit = {
+	def add(tokens: String): Unit = {
 		if (tokens.isEmpty)
 			throw new RuntimeException("Cannot add empty tokens.")
-		rootNode.add(tokens)
+		rootNode.add(tokens.split(' '))
 	}
 
-	def contains(tokens: Seq[String]): ContainsResult = {
+	def contains(tokens: String): ContainsResult = {
 		if (tokens.isEmpty)
 			throw new RuntimeException("Cannot add empty tokens.")
-		rootNode.contains(tokens)
+		rootNode.contains(tokens.split(' '))
 	}
 
 	/**
@@ -47,11 +44,11 @@ case class HashTrie() extends TrieLike {
 	}
 }
 
-case class TrieNode() {
+case class HashTrieNode() {
 
 	var isEntry = false
 
-	var children: Map[Int, TrieNode] = _
+	var children: Map[Int, HashTrieNode] = _
 //	var children: Int2ReferenceMap[TrieNode] = _
 //	var children: Int2ReferenceMap[TrieNode] = _
 //	var children: TIntObjectHashMap[TrieNode] = _
@@ -63,7 +60,7 @@ case class TrieNode() {
 		if (tokens.tail.isEmpty) {
 			children.get(tokens.head.hashCode) match {
 				case None =>
-					val newNode = TrieNode()
+					val newNode = HashTrieNode()
 					newNode.isEntry = true
 					children += (tokens.head.hashCode -> newNode)
 				case Some(trieNode) => trieNode.isEntry = true
@@ -72,7 +69,7 @@ case class TrieNode() {
 		else {
 			children.get(tokens.head.hashCode) match {
 				case None =>
-					val newNode = TrieNode()
+					val newNode = HashTrieNode()
 					newNode.add(tokens.tail)
 					children += (tokens.head.hashCode -> newNode)
 				case Some(trieNode) =>

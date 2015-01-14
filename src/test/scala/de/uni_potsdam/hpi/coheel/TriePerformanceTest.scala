@@ -2,7 +2,7 @@ package de.uni_potsdam.hpi.coheel
 
 import java.io.File
 
-import de.uni_potsdam.hpi.coheel.datastructures.{ConcurrentTreesTrie, PatriciaTrieWrapper, HashTrie}
+import de.uni_potsdam.hpi.coheel.datastructures.{AhoCorasickTrie, ConcurrentTreesTrie, PatriciaTrieWrapper, HashTrie}
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
 import org.scalatest.events.Event
@@ -28,10 +28,10 @@ class TriePerformanceTest extends FunSuite {
 		print("Setup    :")
 		val classLoader = getClass.getClassLoader
 		val surfacesFile = new File(classLoader.getResource("surfaces").getFile)
-		val lines = Source.fromFile(surfacesFile).getLines()
+		val lines = Source.fromFile(surfacesFile).getLines().take(100000)
 		val memoryBeforeLines = FreeMemory.get(true, 10)
 		val tokenizedSurfaces = lines.flatMap { line =>
-			val tokens = TokenizerHelper.tokenize(line)
+			val tokens = TokenizerHelper.tokenize(line).mkString(" ")
 			if (tokens.isEmpty)
 				None
 			else
@@ -39,12 +39,12 @@ class TriePerformanceTest extends FunSuite {
 		}.toArray
 		val memoryAfterLines = FreeMemory.get(true, 10)
 		println(" Done.")
-		println(s"Test Case: Load ${tokenizedSurfaces.size} surfaces into the trie and then check each token for existence." +
+		println(s"Test Case: Load ${tokenizedSurfaces.size} surfaces into the trie and then check each token for existence. " +
 			s"This uses ${memoryBeforeLines - memoryAfterLines} MB.")
 		println()
 
 		println("=" * 80)
-		List(classOf[HashTrie], classOf[PatriciaTrieWrapper], classOf[ConcurrentTreesTrie]).foreach { trieClass =>
+		List(classOf[AhoCorasickTrie], classOf[HashTrie], classOf[PatriciaTrieWrapper], classOf[ConcurrentTreesTrie]).foreach { trieClass =>
 			val testName = trieClass.getSimpleName
 			PerformanceTimer.startTime(s"FULL-TRIE $testName")
 			PerformanceTimer.startTime(s"TRIE-ADDING $testName")
@@ -58,7 +58,7 @@ class TriePerformanceTest extends FunSuite {
 				val contains = trie.contains(surfaceTokens)
 				if (!contains.asEntry) {
 					println(surfaceTokens)
-					throw new Exception(s"Token ${surfaceTokens.mkString(" ")} not contained.")
+					throw new Exception(s"Token $surfaceTokens not contained.")
 				}
 			}
 			val checkTime = PerformanceTimer.endTime(s"TRIE-CHECKING $testName")

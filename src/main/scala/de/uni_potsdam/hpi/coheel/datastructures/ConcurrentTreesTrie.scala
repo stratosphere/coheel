@@ -14,8 +14,8 @@ class ConcurrentTreesTrie extends TrieLike {
 	def getKeysContainedIn(document: String): Iterator[String] = {
 		rt.getKeysContainedIn(document).iterator().asScala.map(_.toString.trim)
 	}
-	override def add(tokens: Seq[String]): Unit = {
-		rt.put(tokens.mkString(" ") + " ", VoidValue.SINGLETON)
+	override def add(tokens: String): Unit = {
+		rt.put(tokens + " ", VoidValue.SINGLETON)
 	}
 
 	override def slidingContains(arr: Array[String], startIndex: Int): Seq[Seq[String]] = {
@@ -26,10 +26,10 @@ class ConcurrentTreesTrie extends TrieLike {
 		???
 	}
 
-	override def contains(tokens: Seq[String]): ContainsResult = {
-		val tokenString = tokens.mkString(" ") + " "
+	override def contains(tokens: String): ContainsResult = {
+		val tokenString = tokens + " "
 		val asEntry = rt.getValueForExactKey(tokenString) != null
-		val asIntermediaNode = rt.getKeysStartingWith(tokenString).iterator().hasNext
-		ContainsResult(asEntry, asIntermediaNode)
+//		val asIntermediaNode = rt.getKeysStartingWith(tokenString).iterator().hasNext
+		ContainsResult(asEntry, false)//asIntermediaNode)
 	}
 }

@@ -75,9 +75,7 @@ object TrieBuilder {
 			val surface = split(0)
 			val prob = split(2).toDouble
 			if (prob >= threshold) {
-				val tokens = surface.split(' ')
-				if (tokens.nonEmpty)
-					thresholdTrie.add(tokens)
+				thresholdTrie.add(surface)
 			}
 		}
 		PerformanceTimer.endTime(s"THRESHOLD-TRIE $threshold")
@@ -90,17 +88,14 @@ object TrieBuilder {
 		fullTrie = if (trie != null) trie else new ConcurrentTreesTrie()
 
 		val t1 = System.currentTimeMillis()
-		trieBuilderHelper("../src/test/resources/surfaces", "Built full trie.") { line =>
-//			val surface = line.split('\t')(0)
-			val tokens = line.split(' ')//TokenizerHelper.tokenize(surface)
-			if (tokens.nonEmpty) {
+		trieBuilderHelper("../src/test/resources/surfaces", "Built full trie.") { surface =>
+			if (surface.nonEmpty) {
 				try {
-					fullTrie.add(tokens)
+					fullTrie.add(surface)
 				}
 				catch {
 					case e: Throwable =>
-						println(tokens)
-						println(line)
+						println(surface)
 				}
 			}
 		}

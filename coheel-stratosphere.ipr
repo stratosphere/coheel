@@ -829,6 +829,17 @@
         <root url="jar://$MAVEN_REPOSITORY$/net/sf/jopt-simple/jopt-simple/4.3/jopt-simple-4.3-sources.jar!/" />
       </SOURCES>
     </library>
+    <library name="Maven: org.ahocorasick:ahocorasick:0.2.4">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/ahocorasick/ahocorasick/0.2.4/ahocorasick-0.2.4.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/org/ahocorasick/ahocorasick/0.2.4/ahocorasick-0.2.4-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/ahocorasick/ahocorasick/0.2.4/ahocorasick-0.2.4-sources.jar!/" />
+      </SOURCES>
+    </library>
     <library name="Maven: org.apache.avro:avro:1.7.6">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/org/apache/avro/avro/1.7.6/avro-1.7.6.jar!/" />
