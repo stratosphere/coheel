@@ -29,7 +29,8 @@ class EntireTextSurfacesProgram extends CoheelProgram {
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val wikiPages = ProgramHelper.filterNormalPages(ProgramHelper.getWikiPages(env))
-		val surfaces = env.readTextFile(surfaceProbsPath).flatMap(new RichFlatMapFunction[String, String] {
+		val surfaces = env.readTextFile(surfaceProbsPath)
+			.flatMap(new RichFlatMapFunction[String, String] {
 			override def open(params: Configuration): Unit = {
 				println(s"MEMORY: ${FreeMemory.get(true)} MB")
 			}

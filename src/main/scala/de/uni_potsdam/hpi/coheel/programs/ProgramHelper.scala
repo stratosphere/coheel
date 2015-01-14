@@ -41,7 +41,7 @@ object ProgramHelper {
 
 		input.mapPartition(new RichMapPartitionFunction[String, WikiPage] {
 			override def open(conf: Configuration): Unit = {
-				println(s"${new Date}: Starting Wiki-Page extraction with ${FreeMemory.get(true)} MB")
+				println(s"${new Date}: Starting wiki page extraction with ${FreeMemory.get(true)} MB")
 			}
 
 			override def mapPartition(linesIt: Iterable[String], out: Collector[WikiPage]): Unit = {

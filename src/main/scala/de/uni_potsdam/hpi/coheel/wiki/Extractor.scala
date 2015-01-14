@@ -1,7 +1,6 @@
 package de.uni_potsdam.hpi.coheel.wiki
 
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.Link
-import de.uni_potsdam.hpi.coheel.wiki.SwebleUtils.PlainTextConverter
 
 import scala.collection.immutable.Queue
 import scala.collection.mutable
@@ -48,7 +47,7 @@ class Extractor(wikiPage: WikiPage) {
 	 * @return The plain text of the wikipage.
 	 */
 	def extractPlainText(): String = {
-		val plainTextConverter = new PlainTextConverter(config)
+		val plainTextConverter = new PlainTextConverter(config, this)
 		val page = compiledWikiPage
 		plainTextConverter.go(page).asInstanceOf[String]
 	}
@@ -108,7 +107,7 @@ class Extractor(wikiPage: WikiPage) {
 		page
 	}
 
-	private def extractLinks(parentNode: NodeList): Seq[Link] = {
+	protected[wiki] def extractLinks(parentNode: NodeList): Seq[Link] = {
 		links = Vector()
 		nodeIterator(parentNode) { node =>
 			extractPotentialLink(node)
