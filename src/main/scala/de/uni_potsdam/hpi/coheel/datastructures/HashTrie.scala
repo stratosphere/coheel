@@ -48,27 +48,27 @@ case class HashTrieNode() {
 
 	var isEntry = false
 
-	var children: Map[String, HashTrieNode] = _
+	var children: Map[Int, HashTrieNode] = _
 
 	def add(tokens: Seq[String]): Unit = {
 		if (children == null)
 //			children = new TIntObjectHashMap[TrieNode]()
 			children = Map.empty
 		if (tokens.tail.isEmpty) {
-			children.get(tokens.head) match {
+			children.get(tokens.head.hashCode) match {
 				case None =>
 					val newNode = HashTrieNode()
 					newNode.isEntry = true
-					children += (tokens.head -> newNode)
+					children += (tokens.head.hashCode -> newNode)
 				case Some(trieNode) => trieNode.isEntry = true
 			}
 		}
 		else {
-			children.get(tokens.head) match {
+			children.get(tokens.head.hashCode) match {
 				case None =>
 					val newNode = HashTrieNode()
 					newNode.add(tokens.tail)
-					children += (tokens.head -> newNode)
+					children += (tokens.head.hashCode -> newNode)
 				case Some(trieNode) =>
 					trieNode.add(tokens.tail)
 			}
@@ -83,7 +83,7 @@ case class HashTrieNode() {
 		else if (children == null)
 			ContainsResult(false, false)
 		else {
-			children.get(tokens.head) match {
+			children.get(tokens.head.hashCode) match {
 				case None => ContainsResult(false, false)
 				case Some(trieNode) => trieNode.contains(tokens.tail)
 			}
