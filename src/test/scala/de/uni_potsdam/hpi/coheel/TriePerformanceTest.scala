@@ -29,6 +29,7 @@ class TriePerformanceTest extends FunSuite {
 		val classLoader = getClass.getClassLoader
 		val surfacesFile = new File(classLoader.getResource("surfaces").getFile)
 		val lines = Source.fromFile(surfacesFile).getLines()
+		val memoryBeforeLines = FreeMemory.get(true, 10)
 		val tokenizedSurfaces = lines.flatMap { line =>
 			val tokens = TokenizerHelper.tokenize(line)
 			if (tokens.isEmpty)
@@ -36,8 +37,10 @@ class TriePerformanceTest extends FunSuite {
 			else
 				Some(tokens)
 		}.toArray
+		val memoryAfterLines = FreeMemory.get(true, 10)
 		println(" Done.")
-		println(s"Test Case: Load ${tokenizedSurfaces.size} surfaces into the trie and then check each token for existence.")
+		println(s"Test Case: Load ${tokenizedSurfaces.size} surfaces into the trie and then check each token for existence." +
+			s"This uses ${memoryBeforeLines - memoryAfterLines} MB.")
 		println()
 
 		println("=" * 80)
