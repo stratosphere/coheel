@@ -2,7 +2,7 @@ package de.uni_potsdam.hpi.coheel.programs
 
 import java.util.Date
 
-import de.uni_potsdam.hpi.coheel.datastructures.{ConcurrentTreesTrie, TrieLike, HashTrie}
+import de.uni_potsdam.hpi.coheel.datastructures.{PatriciaTrieWrapper, ConcurrentTreesTrie, TrieLike, HashTrie}
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{EntireTextSurfaces, SurfaceAsLinkCount, EntireTextSurfaceCounts}
@@ -29,13 +29,16 @@ class EntireTextSurfacesProgram extends CoheelProgram {
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val wikiPages = ProgramHelper.filterNormalPages(ProgramHelper.getWikiPages(env))
-		val surfaces = env.readTextFile(surfaceProbsPath).flatMap { line =>
-			val split = line.split('\t')
-			if (split.size == 3)
-				Some(split(0))
-			else
-				None
-		}.name("Surfaces")
+		val surfaces = env.readTextFile(surfaceProbsPath).flatMap(new RichFlatMapFunction[String, String] {
+			override def open(params: Configuration): Unit = {
+				println(s"MEMORY: ${FreeMemory.get(true)} MB")
+			}
+			override def flatMap(line: String, out: Collector[String]): Unit = {
+				val split = line.split('\t')
+				if (split.size == 3)
+					out.collect(split(0))
+			}
+		}).name("Surfaces")
 
 		val entireTextSurfaces = wikiPages
 			.flatMap(new FindEntireTextSurfacesFlatMap)
