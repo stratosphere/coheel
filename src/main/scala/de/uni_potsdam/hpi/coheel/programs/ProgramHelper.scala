@@ -1,10 +1,13 @@
 package de.uni_potsdam.hpi.coheel.programs
 
 import java.lang.Iterable
+import java.util.Date
 
+import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.{IteratorReader, WikiPageInputFormat}
 import org.apache.flink.api.common.functions.RichMapPartitionFunction
 import org.apache.flink.api.scala._
+import org.apache.flink.configuration.Configuration
 import org.apache.flink.core.fs.Path
 import org.apache.flink.core.fs.local.LocalFileSystem
 import org.apache.flink.runtime.fs.hdfs.DistributedFileSystem
@@ -37,6 +40,10 @@ object ProgramHelper {
 		val input = env.readFile(new WikiPageInputFormat, wikipediaFilesPath)
 
 		input.mapPartition(new RichMapPartitionFunction[String, WikiPage] {
+			override def open(conf: Configuration): Unit = {
+				println(s"${new Date}: Starting Wiki-Page extraction with ${FreeMemory.get(true)} MB")
+			}
+
 			override def mapPartition(linesIt: Iterable[String], out: Collector[WikiPage]): Unit = {
 //				val fileContent = "<foo>" + linesIt.mkString("\n") + "</foo>"
 //				val reader = new StringReader(fileContent)
