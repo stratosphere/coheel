@@ -1,13 +1,10 @@
 package de.uni_potsdam.hpi.coheel.wiki
 
 import java.util
-import java.util.LinkedList
 import java.util.regex.Pattern
 import org.sweble.wikitext.engine.Page
-import org.sweble.wikitext.engine.PageTitle
 import org.sweble.wikitext.engine.utils.EntityReferences
 import org.sweble.wikitext.engine.utils.SimpleWikiConfiguration
-import org.sweble.wikitext.`lazy`.LinkTargetException
 import org.sweble.wikitext.`lazy`.encval.IllegalCodePoint
 import org.sweble.wikitext.`lazy`.parser._
 import org.sweble.wikitext.`lazy`.preprocessor.TagExtension
@@ -95,6 +92,10 @@ class PlainTextConverter(private val config: SimpleWikiConfiguration, private va
 		write(text.getContent)
 	}
 
+//	def visit(t: Heading) = {
+//		throw new Exception("INSIDE HEADING")
+//	}
+
 	def visit(w: Whitespace) {
 		write(" ")
 	}
@@ -138,6 +139,7 @@ class PlainTextConverter(private val config: SimpleWikiConfiguration, private va
 		val links = extractor.extractLinks(new NodeList(link))
 		links.headOption match {
 			case Some(link) =>
+//				write(">>>" + link.surface + "<<<")
 				write(link.surface)
 			case None =>
 		}
@@ -268,7 +270,7 @@ class PlainTextConverter(private val config: SimpleWikiConfiguration, private va
 	}
 
 	private def finishLine() {
-		sb.append(line.toString())
+		sb.append(line)
 		line.setLength(0)
 	}
 
@@ -304,12 +306,10 @@ class PlainTextConverter(private val config: SimpleWikiConfiguration, private va
 	}
 
 	private def write(s: String) {
-		if (s.isEmpty) {
+		if (s.isEmpty)
 			return
-		}
-		if (java.lang.Character.isSpaceChar(s.charAt(0))) {
+		if (java.lang.Character.isSpaceChar(s.charAt(0)))
 			wantSpace()
-		}
 		val words = ws.split(s)
 		var i = 0
 		while (i < words.length) {
@@ -319,9 +319,8 @@ class PlainTextConverter(private val config: SimpleWikiConfiguration, private va
 			}
 			i += 1
 		}
-		if (java.lang.Character.isSpaceChar(s.charAt(s.length - 1))) {
+		if (java.lang.Character.isSpaceChar(s.charAt(s.length - 1)))
 			wantSpace()
-		}
 	}
 
 	private def write(cs: Array[Char]) {
