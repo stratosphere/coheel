@@ -117,7 +117,7 @@ object FlinkProgramRunner {
 			log.info("Starting ..")
 //			FileUtils.writeStringToFile(new File("PLAN"), env.getExecutionPlan())
 			try {
-				val params = if (program.params.size > 0) " " + program.params.toString().replace("Map(", "Params(") else ""
+				val params = if (program.params.size > 0) " " + program.params.toString().replace("Map(", "params = (") else ""
 				env.execute(s"${program.getDescription} (dataset = ${config.getString("name")}$params)")
 			} catch {
 				case e: ProgramInvocationException =>
