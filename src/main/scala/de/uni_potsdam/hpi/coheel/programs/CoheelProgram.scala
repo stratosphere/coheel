@@ -7,8 +7,4 @@ abstract class CoheelProgram() extends ProgramDescription {
 
 	var params: Map[String, String] = _
 	def buildProgram(env: ExecutionEnvironment): Unit
-
-	def setParams(newParams: Map[String, String]): Unit = {
-		params = newParams
-	}
 }

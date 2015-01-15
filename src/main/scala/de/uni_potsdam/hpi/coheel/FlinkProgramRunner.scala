@@ -70,8 +70,9 @@ object FlinkProgramRunner {
 		opt[Int]('p', "parallelism") action { (x, c) =>
 			c.copy(parallelism = x) } text "specifies the degree of parallelism for Flink"
 		opt[Unit]("X" + ProgramParams.ONLY_WIKIPAGES) action { (x, c) =>
-			c.copy(programParams = c.programParams + (ProgramParams.ONLY_WIKIPAGES -> "true"))
-		}
+			c.copy(programParams = c.programParams + (ProgramParams.ONLY_WIKIPAGES -> "true")) }
+		opt[Unit]("X" + ProgramParams.ONLY_PLAINTEXTS) action { (x, c) =>
+			c.copy(programParams = c.programParams + (ProgramParams.ONLY_PLAINTEXTS -> "true")) }
 		help("help") text "prints this usage text"
 	}
 
@@ -84,7 +85,7 @@ object FlinkProgramRunner {
 			config = ConfigFactory.load(params.dataSetConf)
 			val programName = params.programName
 			val program = programs(programName).newInstance()
-			program.setParams(params.programParams)
+			program.params = params.programParams
 			runProgram(program, params.parallelism)
 		} getOrElse {
 			parser.showUsage
@@ -116,7 +117,8 @@ object FlinkProgramRunner {
 			log.info("Starting ..")
 //			FileUtils.writeStringToFile(new File("PLAN"), env.getExecutionPlan())
 			try {
-				env.execute(s"${program.getDescription} (dataset = ${config.getString("name")})")
+				val params = if (program.params.size > 0) " " + program.params.toString().replace("Map(", "Params(") else ""
+				env.execute(s"${program.getDescription} (dataset = ${config.getString("name")}$params)")
 			} catch {
 				case e: ProgramInvocationException =>
 					if (e.getMessage.contains("canceled"))
