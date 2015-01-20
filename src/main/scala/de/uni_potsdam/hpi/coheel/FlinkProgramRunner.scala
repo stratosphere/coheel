@@ -1,24 +1,15 @@
 package de.uni_potsdam.hpi.coheel
 
-import java.io.{InputStream, InputStreamReader, File}
-import java.net.InetSocketAddress
-
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
-import org.apache.commons.collections4.trie.PatriciaTrie
 import org.apache.commons.io.{FileUtils, IOUtils}
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.scala._
 import org.apache.flink.client.program.ProgramInvocationException
-import org.apache.flink.configuration.{ConfigConstants, GlobalConfiguration}
-import org.apache.flink.runtime.fs.hdfs.DistributedFileSystem
-import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs
-import org.apache.hadoop.fs.Path
+import org.apache.flink.configuration.GlobalConfiguration
 import org.apache.log4j.{Level, Logger}
 import com.typesafe.config.{Config, ConfigFactory}
 import de.uni_potsdam.hpi.coheel.programs._
-import scala.collection.JavaConverters._
 
 /**
  * Basic runner for several Flink programs.
