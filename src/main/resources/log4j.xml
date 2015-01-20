@@ -4,7 +4,7 @@
 	<appender name="Console" class="org.apache.log4j.ConsoleAppender">
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern"
-                   value="%d{d.M.Y-HH:mm} - %m%n" />
+                   value="%d{dd.MM.Y - HH:mm} - %m%n" />
         </layout>
 	</appender>
 	<logger name="org.apache.flink">

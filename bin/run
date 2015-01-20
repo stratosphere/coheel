@@ -1,7 +1,7 @@
 #!/usr/bin/env /bin/bash
 
-# Exit on first failure
-set -e
+# Remove old log files
+rm run-output package-output 2> /dev/null
 
 # Prepare the params with an '|' character in between, as Maven requires
 PARAMS=
@@ -12,17 +12,17 @@ done
 # Remove the leading '|'
 PARAMS="${PARAMS#"|"}"
 
-# Remove old log files
-rm run-output compile-output 2> /dev/null
-# Display start time
-date --rfc-3339=seconds | tee -a run-output
 # Compile first ..
-echo "Compiling .."
-mvn compile > compile-output
-# .. then run the app
-echo "Running .."
-echo "--------------------------------------------------------------------------" | tee -a run-output
-mvn -q scala:run -Dlauncher=ProgramRunner -DaddArgs="$PARAMS" | tee -a run-output
-echo "--------------------------------------------------------------------------" | tee -a run-output
-# Display end time
-date --rfc-3339=seconds | tee -a run-output
+echo -n "Packaging .."
+mvn package > package-output
+if [ $? -eq 0 ]; then
+	# .. then run the app
+	echo " Done."
+	echo "Running .."
+	echo "--------------------------------------------------------------------------" | tee -a run-output
+	mvn -q scala:run -Dlauncher=ProgramRunner -DaddArgs="$PARAMS" | tee -a run-output
+	echo "--------------------------------------------------------------------------" | tee -a run-output
+else
+	echo " Failed."
+	cat package-output
+fi
