@@ -1,0 +1,13 @@
+#!/usr/bin/env /bin/bash
+
+if [ "$#" -ne 1 ]; then
+	echo "Please pass exactly one file/directory to download."
+	exit 1
+fi
+
+rm ./cluster-output/$1.wiki 2> /dev/null
+
+$HADOOP_HOME/bin/hdfs dfs -copyToLocal hdfs://tenemhead2/home/stefan.bunk/test_results/$1.wiki . 2>&1 | grep --invert-match "NativeCodeLoader"
+cat ./$1.wiki/* | LC_ALL=C sort > ./$1.wiki.tmp
+rm -r ./$1.wiki
+mv ./$1.wiki.tmp ./cluster-output/$1.wiki
