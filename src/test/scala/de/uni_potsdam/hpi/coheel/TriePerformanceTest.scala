@@ -2,21 +2,78 @@ package de.uni_potsdam.hpi.coheel
 
 import java.io.File
 
-import de.uni_potsdam.hpi.coheel.datastructures.{AhoCorasickTrie, ConcurrentTreesTrie, PatriciaTrieWrapper, HashTrie}
+import de.uni_potsdam.hpi.coheel.datastructures._
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
-import org.scalatest.events.Event
-import org.scalatest.{Reporter, Args, FunSuite}
+import org.scalatest.FunSuite
+import scala.collection.mutable
 
 import scala.io.Source
 
-object TriePerformanceTest extends Reporter {
+object TriePerformanceTest {
+
+	type Histogram = mutable.Map[Int, Int]
 
 	def main(args: Array[String]): Unit = {
 		val testEnv = new TriePerformanceTest
-		testEnv.testPerformance()
+		val trie = new HashTrie()
+		print("Reading surfaces ..")
+		val surfaces = testEnv.readSurfaces(1000)
+		println(" Done.")
+		print("Loading into trie ..")
+		testEnv.loadIntoTrie(surfaces, trie)
+		println(" Done.")
+
+		val childrenQueue = mutable.Queue[(HashTrie, String, Int)]()
+
+		val edgesInLevel = mutable.Map[Int, Int]().withDefaultValue(0)
+		val levelHistogram = mutable.Map[Int, Histogram]()
+
+		case class CommonPrefix(prefix: String, count: Int)
+		implicit val ordering = Ordering.by[CommonPrefix, Int] { prefix => -prefix.count }
+		val levelPrefixes = mutable.Map[Int, mutable.PriorityQueue[CommonPrefix]]()
+
+		childrenQueue.enqueue((trie, "", 0))
+		while (childrenQueue.nonEmpty) {
+			val (current, strSoFar, level) = childrenQueue.dequeue()
+			val children = current.children
+
+			if (children != null) {
+				if (!levelHistogram.contains(level))
+					levelHistogram(level) = mutable.Map[Int, Int]().withDefaultValue(0)
+				levelHistogram(level)(children.size) += 1
+
+				if (!levelPrefixes.contains(level))
+					levelPrefixes(level) = mutable.PriorityQueue()
+				val prioQueue = levelPrefixes(level)
+				prioQueue += CommonPrefix(strSoFar, children.size)
+				if (prioQueue.size > 5)
+					prioQueue.dequeue()
+
+				edgesInLevel(level) += children.size
+
+				children.foreach { case (str, next) =>
+					childrenQueue.enqueue((next, strSoFar + " " + str, level + 1))
+				}
+			}
+		}
+		println(edgesInLevel.toList.sortBy(_._1))
+		println("HISTOGRAMS")
+		levelHistogram.toList.sortBy(_._1).foreach { case (level, histogram) =>
+			println(s"Level: $level")
+			histogram.toList.sortBy(_._1).foreach { case (size, count) =>
+				println(f"$size%10d: $count%10d")
+			}
+			println("-" * 100)
+		}
+		println("=" * 100)
+		println("LEVEL PREFIXES")
+		levelPrefixes.toList.sortBy(_._1).foreach { case (level, prioQueue) =>
+			println(level)
+			println(prioQueue)
+			println("-" * 100)
+		}
 	}
-	override def apply(event: Event): Unit = {  }
 }
 class TriePerformanceTest extends FunSuite {
 
@@ -49,9 +106,7 @@ class TriePerformanceTest extends FunSuite {
 			var trie = trieCreator.apply()
 			PerformanceTimer.startTime(s"FULL-TRIE $testName")
 			PerformanceTimer.startTime(s"TRIE-ADDING $testName")
-			tokenizedSurfaces.foreach { tokens =>
-				trie.add(tokens)
-			}
+			loadIntoTrie(tokenizedSurfaces, trie)
 			val addTime = PerformanceTimer.endTime(s"TRIE-ADDING $testName")
 			PerformanceTimer.startTime(s"TRIE-CHECKING $testName")
 			println(trie.findAllIn(wikiText).size)
@@ -71,10 +126,16 @@ class TriePerformanceTest extends FunSuite {
 	}
 
 
-	def readSurfaces(): Array[String] = {
+	def loadIntoTrie(tokenizedSurfaces: Array[String], trie: Trie): Unit = {
+		tokenizedSurfaces.foreach { tokens =>
+			trie.add(tokens)
+		}
+	}
+
+	def readSurfaces(nrLines: Int = Int.MaxValue): Array[String] = {
 		val classLoader = getClass.getClassLoader
 		val surfacesFile = new File(classLoader.getResource("surfaces").getFile)
-		val lines = Source.fromFile(surfacesFile).getLines().take(1000000)
+		val lines = Source.fromFile(surfacesFile).getLines().take(nrLines)
 		lines.flatMap { line =>
 			val tokens = TokenizerHelper.tokenize(line).mkString(" ")
 			if (tokens.isEmpty)
@@ -84,10 +145,10 @@ class TriePerformanceTest extends FunSuite {
 		}.toArray
 	}
 
-	def readWikiText(): String = {
+	def readWikiText(nrLines: Int = 1000): String = {
 		val classLoader = getClass.getClassLoader
 		val wikiFile = new File(classLoader.getResource("chunk/enwiki-latest-pages-articles1.xml-p000000010p000010000").getFile)
-		Source.fromFile(wikiFile).getLines().take(1000).mkString(" ")
+		Source.fromFile(wikiFile).getLines().take(nrLines).mkString(" ")
 	}
 }
 
