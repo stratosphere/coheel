@@ -26,26 +26,15 @@ class TriePerformanceTest extends FunSuite {
 
 	def testPerformance(): Unit = {
 		print("Setup    :")
-		val classLoader = getClass.getClassLoader
-		val surfacesFile = new File(classLoader.getResource("surfaces").getFile)
-		val lines = Source.fromFile(surfacesFile).getLines().take(1000000)
 		val memoryBeforeSurfaces = FreeMemory.get(true, 10)
-		val tokenizedSurfaces = lines.flatMap { line =>
-			val tokens = TokenizerHelper.tokenize(line).mkString(" ")
-			if (tokens.isEmpty)
-				None
-			else
-				Some(tokens)
-		}.toArray
+		val tokenizedSurfaces = readSurfaces()
 		val memoryAfterSurfaces = FreeMemory.get(true, 10)
-
-		val wikiFile = new File(classLoader.getResource("chunk/enwiki-latest-pages-articles1.xml-p000000010p000010000").getFile)
-		val wikiText = Source.fromFile(wikiFile).getLines().take(1000).mkString(" ")
+		val wikiText = readWikiText()
 		val memoryAfterWiki = FreeMemory.get(true, 10)
-
 		println(" Done.")
+
 		println(s"Test Case: Load ${tokenizedSurfaces.size} surfaces into the trie. " +
-			s"This uses ${memoryBeforeSurfaces - memoryAfterSurfaces} MB." +
+			s"This uses ${memoryBeforeSurfaces - memoryAfterSurfaces} MB. " +
 			s"Then find all occurrences in wiki page text. " +
 			s"This uses ${memoryAfterSurfaces - memoryAfterWiki} MB.")
 		println()
@@ -55,6 +44,7 @@ class TriePerformanceTest extends FunSuite {
 			("HashTrie with word-boundaries", () => new HashTrie())
 //			, ("HashTrie with char-boundaries", () => new HashTrie({ text => text.map(_.toString).toArray }))
 			, ("PatriciaTrie", () => new PatriciaTrieWrapper())
+//			, ("ConcurrentTrie", () => new ConcurrentTreesTrie())
 		).foreach { case (testName, trieCreator) =>
 			var trie = trieCreator.apply()
 			PerformanceTimer.startTime(s"FULL-TRIE $testName")
@@ -65,13 +55,6 @@ class TriePerformanceTest extends FunSuite {
 			val addTime = PerformanceTimer.endTime(s"TRIE-ADDING $testName")
 			PerformanceTimer.startTime(s"TRIE-CHECKING $testName")
 			println(trie.findAllIn(wikiText).size)
-//			tokenizedSurfaces.foreach { surfaceTokens =>
-//				val contains = trie.contains(surfaceTokens)
-//				if (!contains.asEntry) {
-//					println(surfaceTokens)
-//					throw new Exception(s"Token $surfaceTokens not contained.")
-//				}
-//			}
 			val checkTime = PerformanceTimer.endTime(s"TRIE-CHECKING $testName")
 			val totalTime = PerformanceTimer.endTime(s"FULL-TRIE $testName")
 			val memoryWithTrie = FreeMemory.get(true, 10)
@@ -85,6 +68,26 @@ class TriePerformanceTest extends FunSuite {
 			println(s"Memory consumption: ${memoryWithoutTrie - memoryWithTrie} MB")
 			println("=" * 80)
 		}
+	}
+
+
+	def readSurfaces(): Array[String] = {
+		val classLoader = getClass.getClassLoader
+		val surfacesFile = new File(classLoader.getResource("surfaces").getFile)
+		val lines = Source.fromFile(surfacesFile).getLines().take(1000000)
+		lines.flatMap { line =>
+			val tokens = TokenizerHelper.tokenize(line).mkString(" ")
+			if (tokens.isEmpty)
+				None
+			else
+				Some(tokens)
+		}.toArray
+	}
+
+	def readWikiText(): String = {
+		val classLoader = getClass.getClassLoader
+		val wikiFile = new File(classLoader.getResource("chunk/enwiki-latest-pages-articles1.xml-p000000010p000010000").getFile)
+		Source.fromFile(wikiFile).getLines().take(1000).mkString(" ")
 	}
 }
 
