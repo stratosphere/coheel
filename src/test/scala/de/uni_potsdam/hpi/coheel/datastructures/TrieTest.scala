@@ -9,15 +9,15 @@ import scala.collection.JavaConverters._
 @RunWith(classOf[JUnitRunner])
 class TrieTest extends FunSuite {
 
-	List(classOf[HashTrie], classOf[ConcurrentTreesTrie], classOf[PatriciaTrieWrapper]).foreach { trie =>
-		buildTests(trie)
-	}
+	buildTests(new HashTrie())
+	buildTests(new PatriciaTrieWrapper())
+	buildTests(new ConcurrentTreesTrie())
 
-	def buildTests[T <: Trie](trieClass: Class[T]): Unit = {
+	def buildTests[T <: Trie](trie: => Trie): Unit = {
 		def newTrie(): Trie = {
-			trieClass.newInstance()
+			trie
 		}
-		val name = trieClass.getSimpleName
+		val name = trie.getClass.getSimpleName
 
 		test(s"single word queries work for $name") {
 			val trie = newTrie()
@@ -67,11 +67,23 @@ class TrieTest extends FunSuite {
 			trie.add("merkel")
 
 			val testSentence = "angela merkel is german"
-			val result1 = trie.findAllIn(testSentence).toList
+			val result = trie.findAllIn(testSentence).toList
 			val expected1 = Seq("angela", "angela merkel", "angela merkel is german", "merkel")
 			expected1.foreach { expected =>
-				assert(result1.contains(expected))
+				assert(result.contains(expected))
 			}
+		}
+		test(s"findAllIn respects word boundaries for $name") {
+			val trie = newTrie()
+			trie.add("ang")
+			trie.add("angel")
+			trie.add("i")
+			trie.add("germ")
+			trie.add(" merkel")
+
+			val testSentence = "angela merkel is german"
+			val result = trie.findAllIn(testSentence).toList
+			assert(result.isEmpty)
 		}
 
 		//	test("sliding contains works as expected for arbitrary type") {

@@ -15,17 +15,17 @@ class ConcurrentTreesTrie extends Trie {
 		radixTrie.getKeysContainedIn(document).iterator().asScala.map(_.toString.trim)
 	}
 	override def add(tokens: String): Unit = {
-		radixTrie.put(tokens, VoidValue.SINGLETON)
+		radixTrie.put(" " + tokens + " ", VoidValue.SINGLETON)
 	}
 
 	override def contains(tokens: String): ContainsResult = {
-		val tokenString = tokens
+		val tokenString = " " + tokens + " "
 		val asEntry = radixTrie.getValueForExactKey(tokenString) != null
 		val asIntermediaNode = radixTrie.getKeysStartingWith(tokenString).iterator().hasNext
 		ContainsResult(asEntry, asIntermediaNode)
 	}
 
 	override def findAllIn(text: String): Iterable[String] = {
-		radixTrie.getKeysContainedIn(text).asScala.map(_.toString)
+		radixTrie.getKeysContainedIn(" " + text + " ").asScala.map(_.toString.trim)
 	}
 }
