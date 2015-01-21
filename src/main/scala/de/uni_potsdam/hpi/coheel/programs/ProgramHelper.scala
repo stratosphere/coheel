@@ -10,11 +10,11 @@ import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.core.fs.Path
 import org.apache.flink.core.fs.local.LocalFileSystem
-import org.apache.flink.runtime.fs.hdfs.DistributedFileSystem
 import de.uni_potsdam.hpi.coheel.wiki.{Extractor, WikiPage, WikiPageReader}
 import java.io._
 import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
 import org.apache.flink.util.Collector
+import org.apache.hadoop.hdfs.DistributedFileSystem
 import org.apache.log4j.Logger
 import scala.collection.JavaConverters._
 

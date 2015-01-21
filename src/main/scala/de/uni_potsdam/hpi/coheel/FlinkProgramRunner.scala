@@ -1,15 +1,15 @@
 package de.uni_potsdam.hpi.coheel
 
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
-import org.apache.commons.io.{FileUtils, IOUtils}
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.scala._
 import org.apache.flink.client.program.ProgramInvocationException
 import org.apache.flink.configuration.GlobalConfiguration
-import org.apache.log4j.{Level, Logger}
+import org.apache.log4j.Logger
 import com.typesafe.config.{Config, ConfigFactory}
 import de.uni_potsdam.hpi.coheel.programs._
+import scala.collection.immutable.ListMap
 
 /**
  * Basic runner for several Flink programs.
@@ -25,11 +25,11 @@ object FlinkProgramRunner {
 	/**
 	 * Runnable Flink programs.
 	 */
-	val programs = Map(
-		"main" -> classOf[WikipediaTrainingProgram]
+	val programs = ListMap(
+		"extract-main" -> classOf[WikipediaTrainingProgram]
+		, "extract-surface-link-prob" -> classOf[EntireTextSurfacesProgram]
+		, "surface-link-evaluation" -> classOf[NerRocCurveProgram]
 		, "classify" -> classOf[ClassificationProgram]
-		, "trie" -> classOf[EntireTextSurfacesProgram]
-		, "ner-roc" -> classOf[NerRocCurveProgram]
 		, "redirects" -> classOf[RedirectResolvingProgram]
 		, "large" -> classOf[LargeFileTestProgram]
 	)
@@ -55,14 +55,15 @@ object FlinkProgramRunner {
 			if (programs.contains(x))
 				success
 			else
-				failure("program must be one of the following: " + programs.keys.mkString(",")) }
+				failure("program must be one of the following: " + programs.keys.mkString(", ")) }
 		opt[Unit]('l', "logging") action { case (_, c) =>
 			c.copy(doLogging = true) }
 		opt[Int]('p', "parallelism") action { (x, c) =>
 			c.copy(parallelism = x) } text "specifies the degree of parallelism for Flink"
-		opt[Unit]("X" + ProgramParams.ONLY_WIKIPAGES) action { (x, c) =>
+		note("Parameters starting with X denote special parameters for certain programs:")
+		opt[Unit]("X" + ProgramParams.ONLY_WIKIPAGES) text "Only run wiki page extraction" action { (x, c) =>
 			c.copy(programParams = c.programParams + (ProgramParams.ONLY_WIKIPAGES -> "true")) }
-		opt[Unit]("X" + ProgramParams.ONLY_PLAINTEXTS) action { (x, c) =>
+		opt[Unit]("X" + ProgramParams.ONLY_PLAINTEXTS) text "Only extract plain texts of wiki pages" action { (x, c) =>
 			c.copy(programParams = c.programParams + (ProgramParams.ONLY_PLAINTEXTS -> "true")) }
 		help("help") text "prints this usage text"
 	}

@@ -2,6 +2,7 @@ package de.uni_potsdam.hpi.coheel.programs
 
 import java.util.Date
 
+import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
 import de.uni_potsdam.hpi.coheel.datastructures.{TrieLike, HashTrie}
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
@@ -22,9 +23,8 @@ object EntireTextSurfacesProgram {
 class EntireTextSurfacesProgram extends CoheelProgram {
 
 	@transient val log = Logger.getLogger(getClass)
-	// prepare the trie
-//	TrieBuilder.buildFullTrie()
-
+	lazy val fileType = FlinkProgramRunner.config.getString("type")
+	val subSurfaceFile =  if (fileType == "file") "" else "/1"
 	override def getDescription = "Wikipedia Extraction: Entire Text Surfaces"
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
@@ -35,7 +35,7 @@ class EntireTextSurfacesProgram extends CoheelProgram {
 			else
 				None
 		}
-		val surfaces = env.readTextFile(surfaceProbsPath)
+		val surfaces = env.readTextFile(surfaceProbsPath + subSurfaceFile)
 			.flatMap(new RichFlatMapFunction[String, String] {
 			override def open(params: Configuration): Unit = {
 				println(s"MEMORY: ${FreeMemory.get(true)} MB")
