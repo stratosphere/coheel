@@ -29,10 +29,10 @@ object TrieBuilder {
 	val log = Logger.getLogger(getClass)
 
 	// this contains all surfaces
-	var fullTrie: TrieLike = _
+	var fullTrie: Trie = _
 
 	// this contains only surfaces, above a certain percentage
-	var thresholdTrie: TrieLike = _
+	var thresholdTrie: Trie = _
 
 
 	/**
@@ -81,7 +81,7 @@ object TrieBuilder {
 		PerformanceTimer.endTime(s"THRESHOLD-TRIE $threshold")
 	}
 
-	def buildFullTrie(trie: TrieLike = null): Unit = {
+	def buildFullTrie(trie: Trie = null): Unit = {
 		PerformanceTimer.startTimeFirst(s"FULL-TRIE")
 //		fullTrie = new PatriciaTrieWrapper()
 //		fullTrie = new Trie()

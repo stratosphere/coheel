@@ -4,7 +4,7 @@ import org.apache.commons.collections4.trie.PatriciaTrie
 import scala.collection.JavaConverters._
 
 
-class PatriciaTrieWrapper extends TrieLike {
+class PatriciaTrieWrapper extends Trie {
 
 	private [datastructures] def foo(): Int = 1
 

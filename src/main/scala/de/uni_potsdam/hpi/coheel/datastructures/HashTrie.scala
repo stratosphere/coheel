@@ -2,14 +2,14 @@ package de.uni_potsdam.hpi.coheel.datastructures
 
 case class ContainsResult(asEntry: Boolean, asIntermediateNode: Boolean)
 
-trait TrieLike {
+trait Trie {
 	def add(tokenString: String): Unit
 	def contains(tokenString: String): ContainsResult
 	def slidingContains(arr: Array[String], startIndex: Int): Seq[Seq[String]]
 	def slidingContains[T](arr: Array[T], toString: T => String, startIndex: Int): Seq[Seq[T]]
 }
 
-case class HashTrie() extends TrieLike {
+case class HashTrie() extends Trie {
 
 	val rootNode = HashTrieNode()
 

@@ -7,7 +7,7 @@ import com.googlecode.concurrenttrees.radixinverted.ConcurrentInvertedRadixTree
 
 import scala.collection.JavaConverters._
 
-class ConcurrentTreesTrie extends TrieLike {
+class ConcurrentTreesTrie extends Trie {
 
 	val rt = new ConcurrentInvertedRadixTree[VoidValue](new DefaultCharArrayNodeFactory)
 

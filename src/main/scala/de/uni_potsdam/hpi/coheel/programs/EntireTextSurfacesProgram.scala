@@ -3,7 +3,7 @@ package de.uni_potsdam.hpi.coheel.programs
 import java.util.Date
 
 import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
-import de.uni_potsdam.hpi.coheel.datastructures.{TrieLike, HashTrie}
+import de.uni_potsdam.hpi.coheel.datastructures.{Trie, HashTrie}
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{EntireTextSurfaces, SurfaceAsLinkCount, EntireTextSurfaceCounts}
@@ -91,7 +91,7 @@ class EntireTextSurfacesProgram extends CoheelProgram {
 	}
 }
 class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[(String, String), EntireTextSurfaces] {
-	var trie: TrieLike = _
+	var trie: Trie = _
 	var last1000 = new Date()
 
 	var i = 0
@@ -117,7 +117,7 @@ class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[(String, String)
 		findEntireTextSurfaces(plainText, trie).foreach(out.collect)
 	}
 
-	def findEntireTextSurfaces(plainText: (String, String), trie: TrieLike): Iterator[EntireTextSurfaces] = {
+	def findEntireTextSurfaces(plainText: (String, String), trie: Trie): Iterator[EntireTextSurfaces] = {
 //		val tokens = TokenizerHelper.transformToTokenized(wikiPage.plainText, false)
 //
 //		val entireTextSurfaces = trie.asInstanceOf[ConcurrentTreesWrapper].getKeysContainedIn(tokens).toSet

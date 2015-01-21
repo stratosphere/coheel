@@ -9,7 +9,7 @@ import scala.collection.JavaConverters._
 @RunWith(classOf[JUnitRunner])
 class TrieTest extends FunSuite {
 
-	def newTrie(): TrieLike = {
+	def newTrie(): Trie = {
 		val trie = new HashTrie
 		trie
 	}

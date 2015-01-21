@@ -2,7 +2,7 @@ package de.uni_potsdam.hpi.coheel.datastructures
 
 import org.arabidopsis.ahocorasick.AhoCorasick
 
-class AhoCorasickTrie extends TrieLike {
+class AhoCorasickTrie extends Trie {
 
 	val trie = new AhoCorasick
 
