@@ -12,6 +12,11 @@ trait Trie {
 
 class HashTrie(splitter: String => Array[String] = { s => s.split(' ')}) extends Trie {
 
+	var isEntry = false
+	var isShortcut = false
+
+	var children: Map[String, HashTrie] = _
+
 	def add(tokens: String): Unit = {
 		if (tokens.isEmpty)
 			throw new RuntimeException("Cannot add empty tokens.")
@@ -21,21 +26,21 @@ class HashTrie(splitter: String => Array[String] = { s => s.split(' ')}) extends
 	def add(tokens: Seq[String]): Unit = {
 		if (children == null)
 			children = Map.empty
+		val tokenHead = tokens.head
 		if (tokens.tail.isEmpty) {
-			children.get(tokens.head.hashCode) match {
+			children.get(tokenHead) match {
 				case None =>
 					val newNode = new HashTrie()
 					newNode.isEntry = true
-					children += (tokens.head.hashCode -> newNode)
+					children += (tokenHead -> newNode)
 				case Some(trieNode) => trieNode.isEntry = true
 			}
-		}
-		else {
-			children.get(tokens.head.hashCode) match {
+		} else {
+			children.get(tokenHead) match {
 				case None =>
 					val newNode = new HashTrie()
 					newNode.add(tokens.tail)
-					children += (tokens.head.hashCode -> newNode)
+					children += (tokenHead -> newNode)
 				case Some(trieNode) =>
 					trieNode.add(tokens.tail)
 			}
@@ -48,10 +53,6 @@ class HashTrie(splitter: String => Array[String] = { s => s.split(' ')}) extends
 		contains(splitter(tokens))
 	}
 
-	var isEntry = false
-
-	var children: Map[Int, HashTrie] = _
-
 	def contains(tokens: Seq[String]): ContainsResult = {
 		// We found the correct node, now check if it is an entry
 		if (tokens.isEmpty)
@@ -60,7 +61,7 @@ class HashTrie(splitter: String => Array[String] = { s => s.split(' ')}) extends
 		else if (children == null)
 			ContainsResult(false, false)
 		else {
-			children.get(tokens.head.hashCode) match {
+			children.get(tokens.head) match {
 				case None => ContainsResult(false, false)
 				case Some(trieNode) => trieNode.contains(tokens.tail)
 			}
