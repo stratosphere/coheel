@@ -126,15 +126,8 @@ class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[(String, String)
 //			EntireTextSurfaces(wikiPage.pageTitle, surface.toString)
 //		}.toIterator
 
-		val tokens = plainText._2.split(' ')
-		val resultSurfaces = mutable.HashSet[String]()
+		val text = plainText._2
 
-		// each word and its following words must be checked, if it is a surface
-		for (i <- 0 until tokens.size) {
-			resultSurfaces ++= trie.slidingContains(tokens, i).map {
-				containment => containment.mkString(" ")
-			}
-		}
-		resultSurfaces.toIterator.map { surface => EntireTextSurfaces(plainText._1, surface)}
+		trie.findAllIn(text).toIterator.map { surface => EntireTextSurfaces(plainText._1, surface)}
 	}
 }

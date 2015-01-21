@@ -75,14 +75,14 @@ object NerRocCurveProgram {
 
 		val tokens = TokenizerHelper.tokenizeWithPositions(wikiPage.plainText).toArray
 
-		for (i <- 0 until tokens.size) {
-			val resultTokens = trie.slidingContains[Token](tokens, { token: Token => token.word }, i)
-			potentialSurfaces ++= resultTokens.map { containment =>
-				// extract the real world surfaces, by taking the whole string from the start of the first
-				// part to the end of the last part
-				wikiPage.plainText.substring(containment.head.startOffset, containment.last.endOffset)
-			}
-		}
+//		for (i <- 0 until tokens.size) {
+//			val resultTokens = trie.slidingContains[Token](tokens, { token: Token => token.word }, i)
+//			potentialSurfaces ++= resultTokens.map { containment =>
+//				// extract the real world surfaces, by taking the whole string from the start of the first
+//				// part to the end of the last part
+//				wikiPage.plainText.substring(containment.head.startOffset, containment.last.endOffset)
+//			}
+//		}
 		potentialSurfaces
 	}
 }

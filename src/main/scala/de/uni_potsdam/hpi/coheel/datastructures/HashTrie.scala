@@ -1,63 +1,31 @@
 package de.uni_potsdam.hpi.coheel.datastructures
 
+import scala.collection.mutable
+
 case class ContainsResult(asEntry: Boolean, asIntermediateNode: Boolean)
 
 trait Trie {
 	def add(tokenString: String): Unit
 	def contains(tokenString: String): ContainsResult
-	def slidingContains(arr: Array[String], startIndex: Int): Seq[Seq[String]]
-	def slidingContains[T](arr: Array[T], toString: T => String, startIndex: Int): Seq[Seq[T]]
+	def findAllIn(text: String): Iterable[String]
 }
 
 case class HashTrie() extends Trie {
 
-	val rootNode = HashTrieNode()
-
 	def add(tokens: String): Unit = {
 		if (tokens.isEmpty)
 			throw new RuntimeException("Cannot add empty tokens.")
-		rootNode.add(tokens.split(' '))
+		add(tokens.split(' '))
 	}
-
-	def contains(tokens: String): ContainsResult = {
-		if (tokens.isEmpty)
-			throw new RuntimeException("Cannot add empty tokens.")
-		rootNode.contains(tokens.split(' '))
-	}
-
-	/**
-	 * Returns all elements of the trie, starting from a certain offset and going as far as necessary.
-	 * @param arr The array to search in.
-	 * @param startIndex And the start index.
-	 * @return A list of the trie elements matching to the array starting from the start index.
-	 */
-	def slidingContains(arr: Array[String], startIndex: Int): Seq[Seq[String]] = {
-		rootNode.slidingContains(arr, startIndex)
-	}
-
-	/**
-	 * Same as slidingContains(Array[String], startIndex: Int), but works in arbitrary types.
-	 * Needs a conversion function form the type to a string.
-	 */
-	def slidingContains[T](arr: Array[T], toString: T => String, startIndex: Int): Seq[Seq[T]] = {
-		rootNode.slidingContains(arr, toString, startIndex)
-	}
-}
-
-case class HashTrieNode() {
-
-	var isEntry = false
-
-	var children: Map[Int, HashTrieNode] = _
 
 	def add(tokens: Seq[String]): Unit = {
 		if (children == null)
-//			children = new TIntObjectHashMap[TrieNode]()
+		//			children = new TIntObjectHashMap[TrieNode]()
 			children = Map.empty
 		if (tokens.tail.isEmpty) {
 			children.get(tokens.head.hashCode) match {
 				case None =>
-					val newNode = HashTrieNode()
+					val newNode = HashTrie()
 					newNode.isEntry = true
 					children += (tokens.head.hashCode -> newNode)
 				case Some(trieNode) => trieNode.isEntry = true
@@ -66,7 +34,7 @@ case class HashTrieNode() {
 		else {
 			children.get(tokens.head.hashCode) match {
 				case None =>
-					val newNode = HashTrieNode()
+					val newNode = HashTrie()
 					newNode.add(tokens.tail)
 					children += (tokens.head.hashCode -> newNode)
 				case Some(trieNode) =>
@@ -74,6 +42,16 @@ case class HashTrieNode() {
 			}
 		}
 	}
+
+	def contains(tokens: String): ContainsResult = {
+		if (tokens.isEmpty)
+			throw new RuntimeException("Cannot add empty tokens.")
+		contains(tokens.split(' '))
+	}
+
+	var isEntry = false
+
+	var children: Map[Int, HashTrie] = _
 
 	def contains(tokens: Seq[String]): ContainsResult = {
 		// We found the correct node, now check if it is an entry
@@ -90,7 +68,11 @@ case class HashTrieNode() {
 		}
 	}
 
-	def slidingContains[T](arr: Array[T], toString: T => String, startIndex: Int): Seq[Seq[T]] = {
+	/**
+	 * Same as slidingContains(Array[String], startIndex: Int), but works in arbitrary types.
+	 * Needs a conversion function form the type to a string.
+	 */
+	private def slidingContains[T](arr: Array[T], toString: T => String, startIndex: Int): Seq[Seq[T]] = {
 		var result = List[Seq[T]]()
 		// vector: immutable list structure with fast append
 		var currentCheck = Vector[T](arr(startIndex))
@@ -116,7 +98,26 @@ case class HashTrieNode() {
 		result
 	}
 
-	def slidingContains(arr: Array[String], startIndex: Int): Seq[Seq[String]] = {
+	/**
+	 * Returns all elements of the trie, starting from a certain offset and going as far as necessary.
+	 * @param arr The array to search in.
+	 * @param startIndex And the start index.
+	 * @return A list of the trie elements matching to the array starting from the start index.
+	 */
+	private def slidingContains(arr: Array[String], startIndex: Int): Seq[Seq[String]] = {
 		slidingContains[String](arr, { s => s }, startIndex)
+	}
+
+	override def findAllIn(text: String): Iterable[String] = {
+		val tokens = text.split(' ')
+		val resultSurfaces = mutable.HashSet[String]()
+
+		// each word and its following words must be checked, if it is a surface
+		for (i <- 0 until tokens.size) {
+			resultSurfaces ++= slidingContains(tokens, i).map {
+				containment => containment.mkString(" ")
+			}
+		}
+		resultSurfaces
 	}
 }

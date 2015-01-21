@@ -1,10 +1,11 @@
 package de.uni_potsdam.hpi.coheel.datastructures
 
 import org.arabidopsis.ahocorasick.AhoCorasick
+import scala.collection.JavaConverters._
 
 class AhoCorasickTrie extends Trie {
 
-	val trie = new AhoCorasick
+	val trie = new AhoCorasick()
 
 	var alreadyPrepared = false
 
@@ -17,11 +18,22 @@ class AhoCorasickTrie extends Trie {
 			trie.prepare()
 			alreadyPrepared = true
 		}
-		val result = trie.completeSearch(tokenString, false, false)
-		ContainsResult(result.size > 0, false)
+		val progressiveSearch = trie.progressiveSearch(tokenString).asScala
+		val asIntermediate = progressiveSearch.hasNext
+		val result = progressiveSearch.exists { result =>
+			result.getOutputs.asScala.map(_.asInstanceOf[String]).contains(tokenString)
+		}
+		ContainsResult(result, asIntermediate)
 	}
 
-	// not implemented
-	override def slidingContains(arr: Array[String], startIndex: Int): Seq[Seq[String]] = ???
-	override def slidingContains[T](arr: Array[T], toString: (T) => String, startIndex: Int): Seq[Seq[T]] = ???
+	override def findAllIn(text: String): Iterable[String] = {
+		if (!alreadyPrepared) {
+			trie.prepare()
+			alreadyPrepared = true
+		}
+		val res = trie.progressiveSearch(text).asScala.flatMap { result =>
+			result.getOutputs.asScala
+		}.map(_.asInstanceOf[String]).toList
+		res
+	}
 }
