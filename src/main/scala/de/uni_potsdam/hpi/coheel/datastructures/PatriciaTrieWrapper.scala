@@ -24,7 +24,7 @@ class PatriciaTrieWrapper extends Trie {
 	}
 
 	override def findAllIn(text: String): Iterable[String] = {
-		var result = Vector[String]()
+		var result = Set[String]()
 
 		val tokens = text.split(' ')
 		for (i <- 0 until tokens.size) {
@@ -35,7 +35,7 @@ class PatriciaTrieWrapper extends Trie {
 			var abort = false
 			while (!prefix.isEmpty && !abort) {
 				if (prefix.containsKey(currentToken))
-					result :+= currentToken
+					result += currentToken
 
 				if (i + j >= tokens.size) {
 					abort = true

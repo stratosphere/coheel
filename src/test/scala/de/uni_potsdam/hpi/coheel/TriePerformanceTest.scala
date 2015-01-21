@@ -64,7 +64,7 @@ class TriePerformanceTest extends FunSuite {
 			}
 			val addTime = PerformanceTimer.endTime(s"TRIE-ADDING $testName")
 			PerformanceTimer.startTime(s"TRIE-CHECKING $testName")
-			trie.findAllIn(wikiText)
+			println(trie.findAllIn(wikiText).size)
 //			tokenizedSurfaces.foreach { surfaceTokens =>
 //				val contains = trie.contains(surfaceTokens)
 //				if (!contains.asEntry) {
