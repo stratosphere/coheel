@@ -53,7 +53,7 @@ class TriePerformanceTest extends FunSuite {
 		println("=" * 80)
 		List(
 			("HashTrie with word-boundaries", () => new HashTrie())
-			, ("HashTrie with char-boundaries", () => new HashTrie({ text => text.map(_.toString).toArray }))
+//			, ("HashTrie with char-boundaries", () => new HashTrie({ text => text.map(_.toString).toArray }))
 			, ("PatriciaTrie", () => new PatriciaTrieWrapper())
 		).foreach { case (testName, trieCreator) =>
 			var trie = trieCreator.apply()

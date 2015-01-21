@@ -10,22 +10,21 @@ trait Trie {
 	def findAllIn(text: String): Iterable[String]
 }
 
-case class HashTrie() extends Trie {
+class HashTrie(splitter: String => Array[String] = { s => s.split(' ')}) extends Trie {
 
 	def add(tokens: String): Unit = {
 		if (tokens.isEmpty)
 			throw new RuntimeException("Cannot add empty tokens.")
-		add(tokens.split(' '))
+		add(splitter(tokens))
 	}
 
 	def add(tokens: Seq[String]): Unit = {
 		if (children == null)
-		//			children = new TIntObjectHashMap[TrieNode]()
 			children = Map.empty
 		if (tokens.tail.isEmpty) {
 			children.get(tokens.head.hashCode) match {
 				case None =>
-					val newNode = HashTrie()
+					val newNode = new HashTrie()
 					newNode.isEntry = true
 					children += (tokens.head.hashCode -> newNode)
 				case Some(trieNode) => trieNode.isEntry = true
@@ -34,7 +33,7 @@ case class HashTrie() extends Trie {
 		else {
 			children.get(tokens.head.hashCode) match {
 				case None =>
-					val newNode = HashTrie()
+					val newNode = new HashTrie()
 					newNode.add(tokens.tail)
 					children += (tokens.head.hashCode -> newNode)
 				case Some(trieNode) =>
@@ -46,7 +45,7 @@ case class HashTrie() extends Trie {
 	def contains(tokens: String): ContainsResult = {
 		if (tokens.isEmpty)
 			throw new RuntimeException("Cannot add empty tokens.")
-		contains(tokens.split(' '))
+		contains(splitter(tokens))
 	}
 
 	var isEntry = false
@@ -109,7 +108,7 @@ case class HashTrie() extends Trie {
 	}
 
 	override def findAllIn(text: String): Iterable[String] = {
-		val tokens = text.split(' ')
+		val tokens = splitter(text)
 		val resultSurfaces = mutable.HashSet[String]()
 
 		// each word and its following words must be checked, if it is a surface
