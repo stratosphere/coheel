@@ -15,6 +15,11 @@
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>de.hpi.fgis</groupId>
+			<artifactId>utilities</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 		<!-- Flink dependencies -->
 		<dependency>
 			<groupId>org.apache.flink</groupId>

@@ -88,13 +88,14 @@ class TriePerformanceTest extends FunSuite {
 	}
 
 	def testPerformance(): Unit = {
+		PerformanceTimer.startTime("READING")
 		print("Setup    :")
 		val memoryBeforeSurfaces = FreeMemory.get(true, 10)
 		val tokenizedSurfaces = readSurfaces()
 		val memoryAfterSurfaces = FreeMemory.get(true, 10)
 		val wikiText = readWikiText()
 		val memoryAfterWiki = FreeMemory.get(true, 10)
-		println(" Done.")
+		println(s" Done in ${PerformanceTimer.endTime("READING") / 1000} s.")
 
 		println(s"Test Case: Load ${tokenizedSurfaces.size} surfaces into the trie. " +
 			s"This uses ${memoryBeforeSurfaces - memoryAfterSurfaces} MB. " +
@@ -105,6 +106,7 @@ class TriePerformanceTest extends FunSuite {
 		println("=" * 80)
 		List(
 			("HashTrie with word-boundaries", () => new HashTrie())
+			, ("Toni's trie implementation", () => new TrieToni())
 //			, ("HashTrie with char-boundaries", () => new HashTrie({ text => text.map(_.toString).toArray }))
 //			, ("PatriciaTrie", () => new PatriciaTrieWrapper())
 //			, ("ConcurrentTrie", () => new ConcurrentTreesTrie())
@@ -118,9 +120,9 @@ class TriePerformanceTest extends FunSuite {
 			println(trie.findAllIn(wikiText).size)
 			val checkTime = PerformanceTimer.endTime(s"TRIE-CHECKING $testName")
 			val totalTime = PerformanceTimer.endTime(s"FULL-TRIE $testName")
-			val memoryWithTrie = FreeMemory.get(true, 10)
+			val memoryWithTrie = FreeMemory.get(true, 3)
 			trie = null
-			val memoryWithoutTrie = FreeMemory.get(true, 10)
+			val memoryWithoutTrie = FreeMemory.get(true, 3)
 
 			println(s"$testName")
 			println(s"Time for adding   : $addTime ms")

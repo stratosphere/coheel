@@ -12,6 +12,7 @@ class TrieTest extends FunSuite {
 	buildTests(new HashTrie())
 	buildTests(new PatriciaTrieWrapper())
 	buildTests(new ConcurrentTreesTrie())
+	buildTests(new TrieToni())
 
 	def buildTests[T <: Trie](trie: => Trie): Unit = {
 		def newTrie(): Trie = {
