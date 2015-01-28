@@ -18,8 +18,8 @@ object TriePerformanceTest {
 		val testEnv = new TriePerformanceTest
 		val trie = new HashTrie()
 		print("Reading surfaces ..")
-		val surfaces = testEnv.readSurfaces(1000)
-		println(" Done.")
+		val surfaces = testEnv.readSurfaces(10000)
+		println(s" ${surfaces.size} .. Done.")
 		print("Loading into trie ..")
 		testEnv.loadIntoTrie(surfaces, trie)
 		println(" Done.")
@@ -30,7 +30,6 @@ object TriePerformanceTest {
 		val levelHistogram = mutable.Map[Int, Histogram]()
 
 		case class CommonPrefix(prefix: String, count: Int)
-		implicit val ordering = Ordering.by[CommonPrefix, Int] { prefix => -prefix.count }
 		val levelPrefixes = mutable.Map[Int, mutable.PriorityQueue[CommonPrefix]]()
 
 		childrenQueue.enqueue((trie, "", 0))
@@ -44,21 +43,25 @@ object TriePerformanceTest {
 				levelHistogram(level)(children.size) += 1
 
 				if (!levelPrefixes.contains(level))
-					levelPrefixes(level) = mutable.PriorityQueue()
+					levelPrefixes(level) = mutable.PriorityQueue()(Ordering.by[CommonPrefix, Int] { prefix => -prefix.count })
 				val prioQueue = levelPrefixes(level)
 				prioQueue += CommonPrefix(strSoFar, children.size)
-				if (prioQueue.size > 5)
+				if (prioQueue.size > 20)
 					prioQueue.dequeue()
 
 				edgesInLevel(level) += children.size
 
+				val stringPrefix = if (strSoFar.isEmpty) "" else strSoFar + " "
+
 				children.foreach { case (str, next) =>
-					childrenQueue.enqueue((next, strSoFar + " " + str, level + 1))
+					childrenQueue.enqueue((next, stringPrefix + str, level + 1))
 				}
 			}
 		}
+		println("EDGES IN LEVEL")
 		println(edgesInLevel.toList.sortBy(_._1))
-		println("HISTOGRAMS")
+		println()
+		println("HISTOGRAMS OF CHILDREN SIZES")
 		levelHistogram.toList.sortBy(_._1).foreach { case (level, histogram) =>
 			println(s"Level: $level")
 			histogram.toList.sortBy(_._1).foreach { case (size, count) =>
@@ -67,10 +70,13 @@ object TriePerformanceTest {
 			println("-" * 100)
 		}
 		println("=" * 100)
+		println()
 		println("LEVEL PREFIXES")
 		levelPrefixes.toList.sortBy(_._1).foreach { case (level, prioQueue) =>
 			println(level)
-			println(prioQueue)
+			prioQueue.foreach { case CommonPrefix(s, i) =>
+				println(f"$s%50s: $i")
+			}
 			println("-" * 100)
 		}
 	}
@@ -100,7 +106,7 @@ class TriePerformanceTest extends FunSuite {
 		List(
 			("HashTrie with word-boundaries", () => new HashTrie())
 //			, ("HashTrie with char-boundaries", () => new HashTrie({ text => text.map(_.toString).toArray }))
-			, ("PatriciaTrie", () => new PatriciaTrieWrapper())
+//			, ("PatriciaTrie", () => new PatriciaTrieWrapper())
 //			, ("ConcurrentTrie", () => new ConcurrentTreesTrie())
 		).foreach { case (testName, trieCreator) =>
 			var trie = trieCreator.apply()

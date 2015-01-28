@@ -34,6 +34,7 @@ class EntireTextSurfacesProgram extends CoheelProgram {
 				Some((split(0), split(1)))
 			else
 				None
+
 		}
 		val surfaces = env.readTextFile(surfaceProbsPath + subSurfaceFile)
 			.flatMap(new RichFlatMapFunction[String, String] {
