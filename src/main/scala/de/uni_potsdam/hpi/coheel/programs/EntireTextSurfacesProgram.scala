@@ -24,7 +24,7 @@ class EntireTextSurfacesProgram extends CoheelProgram {
 
 	@transient val log = Logger.getLogger(getClass)
 	lazy val fileType = FlinkProgramRunner.config.getString("type")
-	val subSurfaceFile =  if (fileType == "file") "" else "/1"
+	val subSurfaceFile =  if (fileType == "file") "" else "/12"
 	override def getDescription = "Wikipedia Extraction: Entire Text Surfaces"
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
