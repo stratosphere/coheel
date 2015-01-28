@@ -7,3 +7,9 @@ Some output files do not have the correct format, i.e. in some rows the probabil
 Flink bug? -- Check again for 0.7 release.
 --------------------------------
 Aggregating on field positions is only possible on tuple data types.
+
+
+List-Link/Member-of-Link etc.
+
+Write out Absolute frequencies
+
