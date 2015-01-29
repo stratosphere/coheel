@@ -5,9 +5,9 @@ import scala.collection.mutable
 
 
 abstract class NewTrieNode {
-	def add(tokens: Array[String], i: Int): Unit
+	def add(tokens: Array[String], i: Int): NewTrieNode
 	def isEntry: Boolean
-	def isEntry_=(b: Boolean)
+	def isEntry_=(b: Boolean): Unit
 	def children = Map[String, NewTrieNode]()
 }
 
@@ -19,8 +19,10 @@ class MapNewTrieNode extends NewTrieNode {
 
 	override def children = childrenStore
 
-	def add(tokens: Array[String], i: Int): Unit = {
+	def add(tokens: Array[String], i: Int): NewTrieNode = {
 		val head = tokens(i)
+		val isLastToken = i == tokens.size - 1
+
 		val node = children.get(head) match {
 			case Some(existingNode) =>
 				existingNode
@@ -29,12 +31,16 @@ class MapNewTrieNode extends NewTrieNode {
 				childrenStore += head -> newNode
 				newNode
 		}
-		if (i != tokens.size - 1) {
-			node.add(tokens, i + 1)
-			childrenStore += (head -> node)
+		if (!isLastToken) {
+			val tmp = node.add(tokens, i + 1)
+			if (tmp != node)
+				childrenStore += (head -> node)
+			this
 		}
-		else
+		else {
 			node.isEntry = true
+			this
+		}
 	}
 
 
