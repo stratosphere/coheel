@@ -42,31 +42,35 @@ class TriePerformanceTest extends FunSuite {
 		println("=" * 80)
 		List(
 //			("HashTrie with word-boundaries", () => new HashTrie())
-			("New trie", () => new NewTrie())
-			, ("Toni's trie implementation", () => new TrieToni())
+			("Toni's trie implementation", () => new TrieToni())
+			, ("New trie", () => new NewTrie())
 //			, ("HashTrie with char-boundaries", () => new HashTrie({ text => text.map(_.toString).toArray }))
 //			, ("PatriciaTrie", () => new PatriciaTrieWrapper())
 //			, ("ConcurrentTrie", () => new ConcurrentTreesTrie())
 		).foreach { case (testName, trieCreator) =>
-			var trie = trieCreator.apply()
-			PerformanceTimer.startTime(s"FULL-TRIE $testName")
-			PerformanceTimer.startTime(s"TRIE-ADDING $testName")
-			loadIntoTrie(tokenizedSurfaces, trie)
-			val addTime = PerformanceTimer.endTime(s"TRIE-ADDING $testName")
-			PerformanceTimer.startTime(s"TRIE-CHECKING $testName")
-//			println(trie.findAllIn(wikiText).size)
-			val checkTime = PerformanceTimer.endTime(s"TRIE-CHECKING $testName")
-			val totalTime = PerformanceTimer.endTime(s"FULL-TRIE $testName")
-			val memoryWithTrie = FreeMemory.get(true, 3)
-			trie = null
-			val memoryWithoutTrie = FreeMemory.get(true, 3)
+			for (i <- 1 to 3) {
+				var trie = trieCreator.apply()
+				PerformanceTimer.startTime(s"FULL-TRIE $testName $i")
+				PerformanceTimer.startTime(s"TRIE-ADDING $testName $i")
+				loadIntoTrie(tokenizedSurfaces, trie)
+				val addTime = PerformanceTimer.endTime(s"TRIE-ADDING $testName $i")
+				PerformanceTimer.startTime(s"TRIE-CHECKING $testName $i")
+				//			println(trie.findAllIn(wikiText).size)
+				val checkTime = PerformanceTimer.endTime(s"TRIE-CHECKING $testName $i")
+				val totalTime = PerformanceTimer.endTime(s"FULL-TRIE $testName $i")
+				val memoryWithTrie = FreeMemory.get(true, 3)
+				trie = null
+				val memoryWithoutTrie = FreeMemory.get(true, 3)
 
-			println(s"$testName")
-			println(s"Time for adding   : $addTime ms")
-			println(s"Time for checking : $checkTime ms")
-			println(s"Total time        : $totalTime ms")
-			println(s"Memory consumption: ${memoryWithoutTrie - memoryWithTrie} MB")
-			println("=" * 80)
+				if (i == 3) {
+					println(s"$testName")
+					println(s"Time for adding   : $addTime ms")
+					println(s"Time for checking : $checkTime ms")
+					println(s"Total time        : $totalTime ms")
+					println(s"Memory consumption: ${memoryWithoutTrie - memoryWithTrie} MB")
+					println("=" * 80)
+				}
+			}
 		}
 	}
 
