@@ -1,6 +1,6 @@
 package de.uni_potsdam.hpi.coheel.datastructures
 
-import de.uni_potsdam.hpi.coheel.NewTrie
+import de.uni_potsdam.hpi.coheel.{NewTrie, NewTrieNode}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
