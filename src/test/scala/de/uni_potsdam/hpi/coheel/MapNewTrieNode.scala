@@ -3,9 +3,71 @@ package de.uni_potsdam.hpi.coheel
 import de.uni_potsdam.hpi.coheel.datastructures.{ContainsResult, Trie}
 import scala.collection.mutable
 
+
+abstract class NewTrieNode {
+	def add(tokens: Array[String], i: Int): Unit
+	def isEntry: Boolean
+	def isEntry_=(b: Boolean)
+	def children = Map[String, NewTrieNode]()
+}
+
+class MapNewTrieNode extends NewTrieNode {
+
+	var childrenStore = Map[String, NewTrieNode]()
+	var isEntry = false
+	var i: Int = 5
+
+	override def children = childrenStore
+
+	def add(tokens: Array[String], i: Int): Unit = {
+		val head = tokens(i)
+		val node = children.get(head) match {
+			case Some(existingNode) =>
+				existingNode
+			case None =>
+				val newNode = new MapNewTrieNode
+				childrenStore += head -> newNode
+				newNode
+		}
+		if (i != tokens.size - 1) {
+			node.add(tokens, i + 1)
+			childrenStore += (head -> node)
+		}
+		else
+			node.isEntry = true
+	}
+
+
+	def contains(tokens: Array[String]): ContainsResult = {
+		var node: NewTrieNode = this
+
+		var i = 0
+		while (i < tokens.size) {
+			node.children.get(tokens(i)) match {
+				case Some(nextNode) =>
+					node = nextNode
+				case None =>
+					return ContainsResult(false, false)
+			}
+			i += 1
+		}
+		ContainsResult(node.isEntry, true)
+		//		ContainsResult(true, true)
+	}
+}
+
+
+
+
+
+
+
+
+
+
 class NewTrie extends Trie {
 
-	val rootNode = new NewTrieNode
+	val rootNode = new MapNewTrieNode
 
 	override def add(tokenString: String): Unit = {
 		rootNode.add(tokenString.split(' '), 0)
@@ -68,101 +130,40 @@ class NewTrie extends Trie {
 		}
 		resultSurfaces
 	}
-}
-
-class NewTrieNode {
-
-	var children = Map[String, NewTrieNode]()
-	var isEntry = false
-	var i: Int = 5
-
-	def add(tokens: Array[String], i: Int): Unit = {
-		val head = tokens(i)
-		val node = children.get(head) match {
-			case Some(existingNode) =>
-				existingNode
-			case None =>
-				val newNode = new NewTrieNode
-				children += head -> newNode
-				newNode
-		}
-		if (i != tokens.size - 1) {
-			node.add(tokens, i + 1)
-			children += (head -> node)
-		}
-		else
-			node.isEntry = true
-	}
-
-//	override def findAllIn(text: String): Iterable[String] = {
-//		findAllIn(text.split(' '))
-//	}
-//	def findAllIn(tokens: Array[String]): Iterable[String] = {
-//		new Iterator[String] {
-//			var startIndex = 0
-//			var currentOffset = 0
-//			var hasNextCalled = false
-//
-//			override def hasNext: Boolean = {
-//				hasNextCalled = true
-//
-//			}
-//
-//			override def next(): String = {
-//				if (!hasNextCalled) {
-//					val resultHasNext = hasNext
-//					if (!resultHasNext)
-//						throw new Exception("No next element")
-//				}
-//				hasNextCalled = false
-//				var s = ""
-//				var i = 0
-//				while (i < currentOffset) {
-//					s += tokens(i) + " "
-//					i += 1
-//				}
-//				s.trim
-//			}
-//		}.toIterable
-//		var i = 0
-//		while (i < tokens.size) {
-//			var j
-//			i += 1
-//		}
-//	}
-
-	def contains(tokens: Array[String]): ContainsResult = {
-		var node = this
-
-		var i = 0
-		while (i < tokens.size) {
-			node.children.get(tokens(i)) match {
-				case Some(nextNode) =>
-					node = nextNode
-				case None =>
-					return ContainsResult(false, false)
-			}
-			i += 1
-		}
-		ContainsResult(node.isEntry, true)
-//		ContainsResult(true, true)
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	//	override def findAllIn(text: String): Iterable[String] = {
+	//		findAllIn(text.split(' '))
+	//	}
+	//	def findAllIn(tokens: Array[String]): Iterable[String] = {
+	//		new Iterator[String] {
+	//			var startIndex = 0
+	//			var currentOffset = 0
+	//			var hasNextCalled = false
+	//
+	//			override def hasNext: Boolean = {
+	//				hasNextCalled = true
+	//
+	//			}
+	//
+	//			override def next(): String = {
+	//				if (!hasNextCalled) {
+	//					val resultHasNext = hasNext
+	//					if (!resultHasNext)
+	//						throw new Exception("No next element")
+	//				}
+	//				hasNextCalled = false
+	//				var s = ""
+	//				var i = 0
+	//				while (i < currentOffset) {
+	//					s += tokens(i) + " "
+	//					i += 1
+	//				}
+	//				s.trim
+	//			}
+	//		}.toIterable
+	//		var i = 0
+	//		while (i < tokens.size) {
+	//			var j
+	//			i += 1
+	//		}
+	//	}
 }
