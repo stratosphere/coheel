@@ -1,10 +1,10 @@
 package de.uni_potsdam.hpi.coheel
 
-import java.io.File
+import java.io.{StringReader, FileReader, File}
 
 import de.uni_potsdam.hpi.coheel.datastructures._
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
-import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
+import de.uni_potsdam.hpi.coheel.wiki.{WikiPageReader, TokenizerHelper}
 import org.scalatest.FunSuite
 
 import scala.io.Source
@@ -27,9 +27,10 @@ class TriePerformanceTest extends FunSuite {
 		PerformanceTimer.startTime("READING")
 		print("Setup    :")
 		val memoryBeforeSurfaces = FreeMemory.get(true, 10)
-		val tokenizedSurfaces = readSurfaces(1000000)
+//		val tokenizedSurfaces = readSurfaces(1000000)
+		val tokenizedSurfaces = readSurfaces(10000)
 		val memoryAfterSurfaces = FreeMemory.get(true, 10)
-		val wikiText = readWikiText()
+		val wikiText = readWikiText(4)
 		val memoryAfterWiki = FreeMemory.get(true, 10)
 		println(s" Done in ${PerformanceTimer.endTime("READING") / 1000} s.")
 
@@ -41,8 +42,8 @@ class TriePerformanceTest extends FunSuite {
 
 		println("=" * 80)
 		List(
-//			("HashTrie with word-boundaries", () => new HashTrie())
-			("Toni's trie implementation", () => new TrieToni())
+			("HashTrie with word-boundaries", () => new HashTrie())
+			, ("Toni's trie implementation", () => new TrieToni())
 			, ("New trie", () => new NewTrie())
 //			, ("HashTrie with char-boundaries", () => new HashTrie({ text => text.map(_.toString).toArray }))
 //			, ("PatriciaTrie", () => new PatriciaTrieWrapper())
@@ -55,7 +56,7 @@ class TriePerformanceTest extends FunSuite {
 				loadIntoTrie(tokenizedSurfaces, trie)
 				val addTime = PerformanceTimer.endTime(s"TRIE-ADDING $testName $i")
 				PerformanceTimer.startTime(s"TRIE-CHECKING $testName $i")
-				//			println(trie.findAllIn(wikiText).size)
+				println(trie.findAllIn(wikiText).size)
 				val checkTime = PerformanceTimer.endTime(s"TRIE-CHECKING $testName $i")
 				val totalTime = PerformanceTimer.endTime(s"FULL-TRIE $testName $i")
 				val memoryWithTrie = FreeMemory.get(true, 3)
@@ -94,10 +95,13 @@ class TriePerformanceTest extends FunSuite {
 		}.toArray
 	}
 
-	def readWikiText(nrLines: Int = 1000): String = {
+	def readWikiText(nrPages: Int = 1000): String = {
 		val classLoader = getClass.getClassLoader
-		val wikiFile = new File(classLoader.getResource("chunk/enwiki-latest-pages-articles1.xml-p000000010p000010000").getFile)
-		Source.fromFile(wikiFile).getLines().take(nrLines).mkString(" ")
+		val reader = new WikiPageReader()
+		val fileContent = "<root>" +
+			Source.fromFile(classLoader.getResource("chunk/enwiki-latest-pages-articles1.xml-p000000010p000010000").getFile).getLines().mkString +
+			"</root>"
+		reader.xmlToWikiPages(new StringReader(fileContent)).take(nrPages).map(_.source).mkString(" ")
 	}
 }
 

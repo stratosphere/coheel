@@ -39,44 +39,53 @@ abstract class ZeroNewTrieNode extends NewTrieNode {
 		var newNode: NewTrieNode = if (isLastToken) EntryZeroNewTrieNode else NoEntryZeroNewTrieNode
 		if (!isLastToken)
 			newNode = newNode.add(tokens, i + 1)
-		val resultNode = new MapNewTrieNode(Map(head -> newNode))
+		val resultNode = new OneNewTrieNode(head, newNode)
+//		val resultNode = new MapNewTrieNode(Map(head -> newNode))
 		resultNode.nodeIsEntry = isEntry
 		resultNode
 	}
 
 	override def getChild(s: String): Option[NewTrieNode] = None
 }
-//class OneNewTrieNode(key: String, var value: NewTrieNode) extends NewTrieNode {
-//
-//	override def add(tokens: Array[String], i: Int): NewTrieNode = {
-//		val head = tokens(i)
-//		val isLastToken = i == tokens.size - 1
-//
-//		val node = if (head == key) {
-//			value
-//		} else {
-//			new TwoTrieNode(key, value, head, new ZeroNewTrieNode)
-//		}
-//		if (!isLastToken) {
-//			val tmp = node.add(tokens, i + 1)
-//			if (tmp != node)
-//				value = tmp
-//			this
-//		}
-//		else {
-//			node.isEntry = true
-//			this
-//		}
-//
-//	}
-//
-//	override def getChild(s: String): Option[NewTrieNode] = {
-//		if (s == key)
-//			Some(value)
-//		else
-//			None
-//	}
-//}
+class OneNewTrieNode(key: String, var value: NewTrieNode) extends NewTrieNode {
+
+	var nodeIsEntry: Boolean = false
+	override def isEntry: Boolean = nodeIsEntry
+
+	override def setIsEntry(b: Boolean): NewTrieNode = {
+		nodeIsEntry = b
+		this
+	}
+
+	override def add(tokens: Array[String], i: Int): NewTrieNode = {
+		val head = tokens(i)
+		val isLastToken = i == tokens.size - 1
+
+		val node = if (head == key) {
+			value
+		} else {
+			new MapNewTrieNode(Map(key -> value, head -> NoEntryZeroNewTrieNode))
+		}
+		if (!isLastToken) {
+			val tmp = node.add(tokens, i + 1)
+			if (tmp != node)
+				value = tmp
+			this
+		}
+		else {
+			node.setIsEntry(true)
+			this
+		}
+
+	}
+
+	override def getChild(s: String): Option[NewTrieNode] = {
+		if (s == key)
+			Some(value)
+		else
+			None
+	}
+}
 //
 //class TwoTrieNode(key1: String, value1: NewTrieNode, key2: String, value2: NewTrieNode) extends NewTrieNode {
 //

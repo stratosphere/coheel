@@ -28,6 +28,14 @@ class TrieTest extends FunSuite {
 			assert(trie.contains("angela").asEntry)
 		}
 
+		test(s"later add's in middle work for $name") {
+			val trie = newTrie()
+			trie.add("angela merkel")
+			trie.add("angela")
+			assert(trie.contains("angela").asEntry)
+			assert(trie.contains("angela merkel").asEntry)
+		}
+
 		test(s"multiple word queries work for $name") {
 			val trie = newTrie()
 			trie.add("angela merkel")
