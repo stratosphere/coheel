@@ -6,18 +6,94 @@ import scala.collection.mutable
 
 abstract class NewTrieNode {
 	def add(tokens: Array[String], i: Int): NewTrieNode
-	def isEntry: Boolean
-	def isEntry_=(b: Boolean): Unit
-	def children = Map[String, NewTrieNode]()
+	var isEntry = false
+
+	def getChild(s: String): Option[NewTrieNode]
 }
 
-class MapNewTrieNode extends NewTrieNode {
+object ZeroNewTrieNode extends NewTrieNode {
 
-	var childrenStore = Map[String, NewTrieNode]()
-	var isEntry = false
-	var i: Int = 5
+	override def add(tokens: Array[String], i: Int): NewTrieNode = {
+		val isLastToken = i == tokens.size - 1
+		val head = tokens(i)
+		var newNode: NewTrieNode = ZeroNewTrieNode
+		if (!isLastToken)
+			newNode = newNode.add(tokens, i + 1)
+		else
+			newNode.isEntry = true
+		val resultNode = new MapNewTrieNode(Map(head -> newNode))
+		resultNode.isEntry = isEntry
+		resultNode
+	}
 
-	override def children = childrenStore
+	override def getChild(s: String): Option[NewTrieNode] = None
+}
+//class OneNewTrieNode(key: String, var value: NewTrieNode) extends NewTrieNode {
+//
+//	override def add(tokens: Array[String], i: Int): NewTrieNode = {
+//		val head = tokens(i)
+//		val isLastToken = i == tokens.size - 1
+//
+//		val node = if (head == key) {
+//			value
+//		} else {
+//			new TwoTrieNode(key, value, head, new ZeroNewTrieNode)
+//		}
+//		if (!isLastToken) {
+//			val tmp = node.add(tokens, i + 1)
+//			if (tmp != node)
+//				value = tmp
+//			this
+//		}
+//		else {
+//			node.isEntry = true
+//			this
+//		}
+//
+//	}
+//
+//	override def getChild(s: String): Option[NewTrieNode] = {
+//		if (s == key)
+//			Some(value)
+//		else
+//			None
+//	}
+//}
+//
+//class TwoTrieNode(key1: String, value1: NewTrieNode, key2: String, value2: NewTrieNode) extends NewTrieNode {
+//
+//	override def add(tokens: Array[String], i: Int): NewTrieNode = {
+//		val head = tokens(i)
+//		val isLastToken = i == tokens.size - 1
+//
+//		val node = if (head == key1) {
+//			value1
+//		} else if (head == key2) {
+//			value2
+//		} else {
+//			new MapNewTrieNode(Map(key1 -> value1, key2 -> value2, head -> new ZeroNewTrieNode))
+//		}
+//		if (!isLastToken) {
+//			val tmp = node.add(tokens, i + 1)
+//			if (tmp != node)
+//				value = tmp
+//			this
+//		}
+//		else {
+//			node.isEntry = true
+//			this
+//		}
+//
+//	}
+//
+//	override def getChild(s: String): Option[NewTrieNode] = ???
+//}
+
+class MapNewTrieNode(var children: Map[String, NewTrieNode] = Map()) extends NewTrieNode {
+
+//	var i: Int = 5
+
+	override def getChild(s: String) = children.get(s)
 
 	def add(tokens: Array[String], i: Int): NewTrieNode = {
 		val head = tokens(i)
@@ -27,14 +103,14 @@ class MapNewTrieNode extends NewTrieNode {
 			case Some(existingNode) =>
 				existingNode
 			case None =>
-				val newNode = new MapNewTrieNode
-				childrenStore += head -> newNode
+				val newNode = ZeroNewTrieNode
+				children += head -> newNode
 				newNode
 		}
 		if (!isLastToken) {
 			val tmp = node.add(tokens, i + 1)
 			if (tmp != node)
-				childrenStore += (head -> node)
+				children += (head -> tmp)
 			this
 		}
 		else {
@@ -49,7 +125,7 @@ class MapNewTrieNode extends NewTrieNode {
 
 		var i = 0
 		while (i < tokens.size) {
-			node.children.get(tokens(i)) match {
+			node.getChild(tokens(i)) match {
 				case Some(nextNode) =>
 					node = nextNode
 				case None =>
@@ -58,8 +134,8 @@ class MapNewTrieNode extends NewTrieNode {
 			i += 1
 		}
 		ContainsResult(node.isEntry, true)
-		//		ContainsResult(true, true)
 	}
+
 }
 
 
