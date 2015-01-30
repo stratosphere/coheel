@@ -84,6 +84,22 @@ class TrieTest extends FunSuite {
 				assert(result.contains(expected))
 			}
 		}
+
+		test(s"regression findAllIn finds all occurrences for $name") {
+			val trie = newTrie()
+			trie.add("angela merkel")
+			trie.add("chancellor schroeder")
+			trie.add("chancellor angela merkel")
+
+			val testSentence = "chancellor angela merkel"
+			val result = trie.findAllIn(testSentence).toList
+			println(result)
+			assert (result.size === 2)
+//			expected1.foreach { expected =>
+//				assert(result.contains(expected))
+//			}
+		}
+
 		test(s"findAllIn respects word boundaries for $name") {
 			val trie = newTrie()
 			trie.add("ang")
