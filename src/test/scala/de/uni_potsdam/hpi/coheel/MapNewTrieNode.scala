@@ -6,23 +6,41 @@ import scala.collection.mutable
 
 abstract class NewTrieNode {
 	def add(tokens: Array[String], i: Int): NewTrieNode
-	var isEntry = false
+	def isEntry: Boolean
+	def setIsEntry(b: Boolean): NewTrieNode
 
 	def getChild(s: String): Option[NewTrieNode]
 }
 
-object ZeroNewTrieNode extends NewTrieNode {
+object EntryZeroNewTrieNode extends ZeroNewTrieNode {
+	override def isEntry = true
+	override def setIsEntry(b: Boolean): NewTrieNode = {
+		if (isEntry == b)
+			this
+		else
+			NoEntryZeroNewTrieNode
+	}
+}
+object NoEntryZeroNewTrieNode extends ZeroNewTrieNode {
+	def isEntry: Boolean = false
+	override def setIsEntry(b: Boolean): NewTrieNode = {
+		if (isEntry == b)
+			this
+		else
+			EntryZeroNewTrieNode
+	}
+}
+
+abstract class ZeroNewTrieNode extends NewTrieNode {
 
 	override def add(tokens: Array[String], i: Int): NewTrieNode = {
 		val isLastToken = i == tokens.size - 1
 		val head = tokens(i)
-		var newNode: NewTrieNode = ZeroNewTrieNode
+		var newNode: NewTrieNode = if (isLastToken) EntryZeroNewTrieNode else NoEntryZeroNewTrieNode
 		if (!isLastToken)
 			newNode = newNode.add(tokens, i + 1)
-		else
-			newNode.isEntry = true
 		val resultNode = new MapNewTrieNode(Map(head -> newNode))
-		resultNode.isEntry = isEntry
+		resultNode.nodeIsEntry = isEntry
 		resultNode
 	}
 
@@ -93,6 +111,14 @@ class MapNewTrieNode(var children: Map[String, NewTrieNode] = Map()) extends New
 
 //	var i: Int = 5
 
+	var nodeIsEntry: Boolean = false
+
+	override def isEntry: Boolean = nodeIsEntry
+	override def setIsEntry(b: Boolean): NewTrieNode = {
+		nodeIsEntry = b
+		this
+	}
+
 	override def getChild(s: String) = children.get(s)
 
 	def add(tokens: Array[String], i: Int): NewTrieNode = {
@@ -103,7 +129,7 @@ class MapNewTrieNode(var children: Map[String, NewTrieNode] = Map()) extends New
 			case Some(existingNode) =>
 				existingNode
 			case None =>
-				val newNode = ZeroNewTrieNode
+				val newNode = if (isLastToken) EntryZeroNewTrieNode else NoEntryZeroNewTrieNode
 				children += head -> newNode
 				newNode
 		}
@@ -114,7 +140,7 @@ class MapNewTrieNode(var children: Map[String, NewTrieNode] = Map()) extends New
 			this
 		}
 		else {
-			node.isEntry = true
+			node.setIsEntry(true)
 			this
 		}
 	}
