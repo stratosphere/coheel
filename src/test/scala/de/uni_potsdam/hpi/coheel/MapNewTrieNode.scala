@@ -61,22 +61,31 @@ class OneNewTrieNode(key: String, var value: NewTrieNode) extends NewTrieNode {
 		val head = tokens(i)
 		val isLastToken = i == tokens.size - 1
 
+		var newReturn: MapNewTrieNode = null
 		val node = if (head == key) {
 			value
 		} else {
-			new MapNewTrieNode(Map(key -> value, head -> NoEntryZeroNewTrieNode))
+			val newNode = NoEntryZeroNewTrieNode
+			newReturn = new MapNewTrieNode(mutable.Map(key -> value, head -> newNode))
+			newReturn.setIsEntry(isEntry)
+			newNode
 		}
 		if (!isLastToken) {
 			val tmp = node.add(tokens, i + 1)
-			if (tmp != node)
-				value = tmp
-			this
+			if (tmp != node) {
+				if (newReturn == null)
+					value = tmp
+				else
+					newReturn.children += head -> tmp
+			}
 		}
 		else {
 			node.setIsEntry(true)
-			this
 		}
-
+		if (newReturn == null)
+			this
+		else
+			newReturn
 	}
 
 	override def getChild(s: String): Option[NewTrieNode] = {
