@@ -249,10 +249,13 @@ class NewTrie extends Trie {
 		val resultSurfaces = mutable.HashSet[String]()
 
 		// each word and its following words must be checked, if it is a surface
-		for (i <- 0 until tokens.size) {
-			resultSurfaces ++= slidingContains(tokens, i).map {
+		var i = 0
+		while (i < tokens.size) {
+			val result = slidingContains(tokens, i).map {
 				containment => containment.mkString(" ")
 			}
+			resultSurfaces ++= result
+			i += 1
 		}
 		resultSurfaces
 	}

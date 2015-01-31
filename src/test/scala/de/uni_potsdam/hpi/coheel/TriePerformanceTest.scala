@@ -27,10 +27,9 @@ class TriePerformanceTest extends FunSuite {
 		PerformanceTimer.startTime("READING")
 		print("Setup    :")
 		val memoryBeforeSurfaces = FreeMemory.get(true, 10)
-//		val tokenizedSurfaces = readSurfaces(1000000)
 		val tokenizedSurfaces = readSurfaces(10000)
 		val memoryAfterSurfaces = FreeMemory.get(true, 10)
-		val wikiText = readWikiText(4)
+		val wikiText = readWikiText(60)
 		val memoryAfterWiki = FreeMemory.get(true, 10)
 		println(s" Done in ${PerformanceTimer.endTime("READING") / 1000} s.")
 
@@ -56,7 +55,12 @@ class TriePerformanceTest extends FunSuite {
 				loadIntoTrie(tokenizedSurfaces, trie)
 				val addTime = PerformanceTimer.endTime(s"TRIE-ADDING $testName $i")
 				PerformanceTimer.startTime(s"TRIE-CHECKING $testName $i")
-				println(trie.findAllIn(wikiText).size)
+				val result = trie.findAllIn(wikiText)
+				if (i == 3) {
+					println(result.size)
+//					println(result.toList.sorted)
+//					result.toList.sorted.foreach(println)
+				}
 				val checkTime = PerformanceTimer.endTime(s"TRIE-CHECKING $testName $i")
 				val totalTime = PerformanceTimer.endTime(s"FULL-TRIE $testName $i")
 				val memoryWithTrie = FreeMemory.get(true, 3)
