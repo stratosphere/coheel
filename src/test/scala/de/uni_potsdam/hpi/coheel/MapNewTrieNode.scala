@@ -125,7 +125,7 @@ class OneNewTrieNode(key: String, var value: NewTrieNode) extends NewTrieNode {
 //	override def getChild(s: String): Option[NewTrieNode] = ???
 //}
 
-class MapNewTrieNode(var children: Map[String, NewTrieNode] = Map()) extends NewTrieNode {
+class MapNewTrieNode(var children: mutable.Map[String, NewTrieNode] = mutable.Map()) extends NewTrieNode {
 
 //	var i: Int = 5
 
@@ -143,7 +143,7 @@ class MapNewTrieNode(var children: Map[String, NewTrieNode] = Map()) extends New
 		val head = tokens(i)
 		val isLastToken = i == tokens.size - 1
 
-		val node = children.get(head) match {
+		val node = getChild(head) match {
 			case Some(existingNode) =>
 				existingNode
 			case None =>
