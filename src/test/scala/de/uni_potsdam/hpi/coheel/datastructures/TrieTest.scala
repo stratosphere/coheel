@@ -36,6 +36,23 @@ class TrieTest extends FunSuite {
 			assert(trie.contains("angela merkel").asEntry)
 		}
 
+		test(s"add reuses existing nodes for $name") {
+			val trie = newTrie()
+			trie.add("angela merkel")
+			trie.add("angela dorothea")
+			val testSentence = "angela dorothea"
+			val result = trie.findAllIn(testSentence).toList
+			assert (result.size === 1)
+		}
+
+		test(s"contains handles spaces for $name") {
+			val trie = newTrie()
+			trie.add("angela")
+			val testSentence = "angela            merkel"
+			val result = trie.findAllIn(testSentence).toList
+			assert (result.size === 1)
+		}
+
 		test(s"multiple word queries work for $name") {
 			val trie = newTrie()
 			trie.add("angela merkel")

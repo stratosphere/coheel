@@ -65,7 +65,7 @@ class OneNewTrieNode(key: String, var value: NewTrieNode) extends NewTrieNode {
 		val node = if (head == key) {
 			value
 		} else {
-			val newNode = NoEntryZeroNewTrieNode
+			val newNode = if (isLastToken) EntryZeroNewTrieNode else NoEntryZeroNewTrieNode
 			newReturn = new MapNewTrieNode(mutable.Map(key -> value, head -> newNode))
 			newReturn.setIsEntry(isEntry)
 			newNode
@@ -78,9 +78,6 @@ class OneNewTrieNode(key: String, var value: NewTrieNode) extends NewTrieNode {
 				else
 					newReturn.children += head -> tmp
 			}
-		}
-		else {
-			node.setIsEntry(true)
 		}
 		if (newReturn == null)
 			this
@@ -221,6 +218,9 @@ class NewTrie extends Trie {
 			if (containsResult.asEntry)
 				result ::= currentCheck
 			// expand current window, if possible
+			while (startIndex + i < arr.size && arr(startIndex + i) == "") {
+				i += 1
+			}
 			if (startIndex + i < arr.size) {
 				// append element to the end of the vector
 				currentCheck :+= arr(startIndex + i)
