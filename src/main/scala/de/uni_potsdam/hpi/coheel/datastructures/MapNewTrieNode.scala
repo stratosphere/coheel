@@ -157,4 +157,75 @@ class NewTrie extends Trie with FindAllInContainsBased {
 		rootNode.contains(tokenString.split(' '))
 	}
 
+	override def findAllIn(text: String): Iterable[String] = {
+		findAllIn(text.split(' '))
+	}
+
+	def findAllIn(tokens: Array[String]): Iterable[String] = {
+		val it = new FindAllInIterator(rootNode, tokens)
+		it.toIterable
+	}
+
+}
+
+class FindAllInIterator(rootNode: MapNewTrieNode, tokens: Array[String]) extends Iterator[String] {
+	var startIndex = 0
+	var indexOffset = 0
+	var hasNextCalled = false
+	val tokenSize = tokens.size
+
+	def currentIndex = startIndex + indexOffset
+
+	var currentNode: NewTrieNode = rootNode
+	var lastReturnedNode: NewTrieNode = rootNode
+
+	override def hasNext: Boolean = {
+		hasNextCalled = true
+		var alreadyReturned = currentNode.isEntry
+//		println()
+//		println(s"Starting hasNext, $alreadyReturned")
+		while (alreadyReturned || !currentNode.isEntry) {
+			if (currentIndex >= tokenSize) {
+				startIndex += 1
+				indexOffset = 0
+				currentNode = rootNode
+//				println(s"Setting Index-Offset to $indexOffset, Start-Index to $startIndex")
+			}
+			if (currentIndex >= tokenSize && startIndex >= tokenSize - 1) {
+//				println("Returning false")
+				return false
+			}
+			alreadyReturned = false
+			currentNode.getChild(tokens(currentIndex)) match {
+				case Some(node) =>
+					currentNode = node
+					indexOffset += 1
+//					println(s"Increasing Index-Offset to $indexOffset")
+				case _ =>
+					currentNode = rootNode
+					startIndex += 1
+					indexOffset = 0
+//					println(s"Setting Index-Offset to $indexOffset, Start-Index to $startIndex")
+			}
+		}
+//		println("Returning true.")
+		true
+	}
+
+	override def next(): String = {
+		if (!hasNextCalled) {
+			val resultHasNext = hasNext
+			if (!resultHasNext)
+				throw new Exception("No next element")
+		}
+		hasNextCalled = false
+		var s = ""
+		var i = 0
+		while (i < indexOffset) {
+			s += tokens(startIndex + i) + " "
+			i += 1
+		}
+//		println(s"Returning >${s.trim}<")
+		s.trim
+	}
 }

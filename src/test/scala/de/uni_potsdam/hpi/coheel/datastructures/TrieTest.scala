@@ -9,10 +9,10 @@ import scala.collection.JavaConverters._
 @RunWith(classOf[JUnitRunner])
 class TrieTest extends FunSuite {
 
-	buildTests(new HashTrie())
+//	buildTests(new HashTrie())
 //	buildTests(new PatriciaTrieWrapper())
 //	buildTests(new ConcurrentTreesTrie())
-	buildTests(new TrieToni())
+//	buildTests(new TrieToni())
 	buildTests(new NewTrie())
 
 	def buildTests[T <: Trie](trie: => Trie): Unit = {
@@ -105,6 +105,7 @@ class TrieTest extends FunSuite {
 			val testSentence = "angela merkel is german"
 			val result = trie.findAllIn(testSentence).toList
 			val expected1 = Seq("angela", "angela merkel", "angela merkel is german", "merkel")
+			println(result)
 			expected1.foreach { expected =>
 				assert(result.contains(expected))
 			}
@@ -120,8 +121,6 @@ class TrieTest extends FunSuite {
 			val testSentence = "angela"
 			val result = trie.findAllIn(testSentence).toList
 			assert (result.size === 1)
-
-
 		}
 
 		test(s"findAllIn finds all occurrences of substrings for $name") {

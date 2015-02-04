@@ -27,9 +27,9 @@ class TriePerformanceTest extends FunSuite {
 		PerformanceTimer.startTime("READING")
 		print("Setup    :")
 		val memoryBeforeSurfaces = FreeMemory.get(true, 10)
-		val tokenizedSurfaces = readSurfaces()
+		val tokenizedSurfaces = readSurfaces(100)
 		val memoryAfterSurfaces = FreeMemory.get(true, 10)
-		val wikiText = readWikiText(100)
+		val wikiText = readWikiText(5)
 		val memoryAfterWiki = FreeMemory.get(true, 10)
 		println(s" Done in ${PerformanceTimer.endTime("READING") / 1000} s.")
 
@@ -40,10 +40,10 @@ class TriePerformanceTest extends FunSuite {
 		println()
 
 		println("=" * 80)
-		val RUNS = 3
+		val RUNS = 1
 		List(
 			("HashTrie with word-boundaries", () => new HashTrie())
-			, ("Toni's trie implementation", () => new TrieToni())
+//			, ("Toni's trie implementation", () => new TrieToni())
 			, ("New trie", () => new NewTrie())
 //			, ("HashTrie with char-boundaries", () => new HashTrie({ text => text.map(_.toString).toArray }))
 //			, ("PatriciaTrie", () => new PatriciaTrieWrapper())
