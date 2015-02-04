@@ -27,9 +27,9 @@ class TriePerformanceTest extends FunSuite {
 		PerformanceTimer.startTime("READING")
 		print("Setup    :")
 		val memoryBeforeSurfaces = FreeMemory.get(true, 10)
-		val tokenizedSurfaces = readSurfaces(10000)
+		val tokenizedSurfaces = readSurfaces(10000000)
 		val memoryAfterSurfaces = FreeMemory.get(true, 10)
-		val wikiText = readWikiText(60)
+		val wikiText = readWikiText(50)
 		val memoryAfterWiki = FreeMemory.get(true, 10)
 		println(s" Done in ${PerformanceTimer.endTime("READING") / 1000} s.")
 
@@ -40,6 +40,7 @@ class TriePerformanceTest extends FunSuite {
 		println()
 
 		println("=" * 80)
+		val RUNS = 1
 		List(
 			("HashTrie with word-boundaries", () => new HashTrie())
 			, ("Toni's trie implementation", () => new TrieToni())
@@ -48,7 +49,7 @@ class TriePerformanceTest extends FunSuite {
 //			, ("PatriciaTrie", () => new PatriciaTrieWrapper())
 //			, ("ConcurrentTrie", () => new ConcurrentTreesTrie())
 		).foreach { case (testName, trieCreator) =>
-			for (i <- 1 to 3) {
+			for (i <- 1 to RUNS) {
 				var trie = trieCreator.apply()
 				PerformanceTimer.startTime(s"FULL-TRIE $testName $i")
 				PerformanceTimer.startTime(s"TRIE-ADDING $testName $i")
@@ -56,7 +57,7 @@ class TriePerformanceTest extends FunSuite {
 				val addTime = PerformanceTimer.endTime(s"TRIE-ADDING $testName $i")
 				PerformanceTimer.startTime(s"TRIE-CHECKING $testName $i")
 				val result = trie.findAllIn(wikiText)
-				if (i == 3) {
+				if (i == RUNS) {
 					println(result.size)
 //					println(result.toList.sorted)
 //					result.toList.sorted.foreach(println)
@@ -67,7 +68,7 @@ class TriePerformanceTest extends FunSuite {
 				trie = null
 				val memoryWithoutTrie = FreeMemory.get(true, 3)
 
-				if (i == 3) {
+				if (i == RUNS) {
 					println(s"$testName")
 					println(s"Time for adding   : $addTime ms")
 					println(s"Time for checking : $checkTime ms")

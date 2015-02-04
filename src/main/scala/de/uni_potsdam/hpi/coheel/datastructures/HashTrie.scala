@@ -85,6 +85,9 @@ class HashTrie(splitter: String => Array[String] = { s => s.split(' ')}) extends
 			if (containsResult.asEntry)
 				result ::= currentCheck
 			// expand current window, if possible
+			while (startIndex + i < arr.size && arr(startIndex + i) == "") {
+				i += 1
+			}
 			if (startIndex + i < arr.size) {
 				// append element to the end of the vector
 				currentCheck :+= arr(startIndex + i)

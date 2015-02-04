@@ -13,8 +13,8 @@ class TrieTest extends FunSuite {
 //	buildTests(new HashTrie())
 //	buildTests(new PatriciaTrieWrapper())
 //	buildTests(new ConcurrentTreesTrie())
-//	buildTests(new TrieToni())
-	buildTests(new NewTrie())
+	buildTests(new TrieToni())
+//	buildTests(new NewTrie())
 
 	def buildTests[T <: Trie](trie: => Trie): Unit = {
 		def newTrie(): Trie = {
@@ -53,10 +53,19 @@ class TrieTest extends FunSuite {
 			assert (result.size === 1)
 		}
 
-		test(s"multiple word queries work for $name") {
+		test(s"multiple word queries #1 work for $name") {
 			val trie = newTrie()
 			trie.add("angela merkel")
 			assert(trie.contains("angela merkel").asEntry)
+		}
+
+		test(s"multiple word queries #2 work for $name") {
+			val trie = newTrie()
+			trie.add("angela merkel chancellor")
+			trie.add("angela merkel")
+			val testSentence = "angela merkel"
+			val result = trie.findAllIn(testSentence).toList
+			assert (result.size === 1)
 		}
 
 		test(s"distinction between contains-asEntry and contains-asIntermediateNode for $name") {

@@ -63,7 +63,7 @@ class OneNewTrieNode(key: String, var value: NewTrieNode) extends NewTrieNode {
 
 		var newReturn: MapNewTrieNode = null
 		val node = if (head == key) {
-			value
+			if (isLastToken) value.setIsEntry(true) else value
 		} else {
 			val newNode = if (isLastToken) EntryZeroNewTrieNode else NoEntryZeroNewTrieNode
 			newReturn = new MapNewTrieNode(mutable.Map(key -> value, head -> newNode))
