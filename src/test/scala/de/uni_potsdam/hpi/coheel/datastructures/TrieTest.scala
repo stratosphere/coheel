@@ -9,10 +9,10 @@ import scala.collection.JavaConverters._
 @RunWith(classOf[JUnitRunner])
 class TrieTest extends FunSuite {
 
-//	buildTests(new HashTrie())
+	buildTests(new HashTrie())
 //	buildTests(new PatriciaTrieWrapper())
 //	buildTests(new ConcurrentTreesTrie())
-//	buildTests(new TrieToni())
+	buildTests(new TrieToni())
 	buildTests(new NewTrie())
 
 	def buildTests[T <: Trie](trie: => Trie): Unit = {
@@ -44,9 +44,17 @@ class TrieTest extends FunSuite {
 			assert (result.size === 1)
 		}
 
-		test(s"contains handles spaces for $name") {
+		test(s"contains handles spaces #1 for $name") {
 			val trie = newTrie()
 			trie.add("angela")
+			val testSentence = "angela            merkel"
+			val result = trie.findAllIn(testSentence).toList
+			assert (result.size === 1)
+		}
+
+		test(s"contains handles spaces #2 for $name") {
+			val trie = newTrie()
+			trie.add("angela merkel")
 			val testSentence = "angela            merkel"
 			val result = trie.findAllIn(testSentence).toList
 			assert (result.size === 1)
@@ -105,7 +113,6 @@ class TrieTest extends FunSuite {
 			val testSentence = "angela merkel is german"
 			val result = trie.findAllIn(testSentence).toList
 			val expected1 = Seq("angela", "angela merkel", "angela merkel is german", "merkel")
-			println(result)
 			expected1.foreach { expected =>
 				assert(result.contains(expected))
 			}

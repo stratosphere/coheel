@@ -163,7 +163,7 @@ class NewTrie extends Trie with FindAllInContainsBased {
 
 	def findAllIn(tokens: Array[String]): Iterable[String] = {
 		val it = new FindAllInIterator(rootNode, tokens)
-		it.toIterable
+		it.toSet
 	}
 
 }
@@ -182,33 +182,28 @@ class FindAllInIterator(rootNode: MapNewTrieNode, tokens: Array[String]) extends
 	override def hasNext: Boolean = {
 		hasNextCalled = true
 		var alreadyReturned = currentNode.isEntry
-//		println()
-//		println(s"Starting hasNext, $alreadyReturned")
 		while (alreadyReturned || !currentNode.isEntry) {
+			alreadyReturned = false
 			if (currentIndex >= tokenSize) {
 				startIndex += 1
 				indexOffset = 0
 				currentNode = rootNode
-//				println(s"Setting Index-Offset to $indexOffset, Start-Index to $startIndex")
 			}
 			if (currentIndex >= tokenSize && startIndex >= tokenSize - 1) {
-//				println("Returning false")
 				return false
 			}
-			alreadyReturned = false
 			currentNode.getChild(tokens(currentIndex)) match {
 				case Some(node) =>
 					currentNode = node
 					indexOffset += 1
-//					println(s"Increasing Index-Offset to $indexOffset")
+					while (currentIndex < tokenSize && tokens(currentIndex).isEmpty)
+						indexOffset += 1
 				case _ =>
 					currentNode = rootNode
 					startIndex += 1
 					indexOffset = 0
-//					println(s"Setting Index-Offset to $indexOffset, Start-Index to $startIndex")
 			}
 		}
-//		println("Returning true.")
 		true
 	}
 
@@ -222,10 +217,11 @@ class FindAllInIterator(rootNode: MapNewTrieNode, tokens: Array[String]) extends
 		var s = ""
 		var i = 0
 		while (i < indexOffset) {
-			s += tokens(startIndex + i) + " "
+			val nextToken = tokens(startIndex + i)
+			if (nextToken.nonEmpty)
+				s += tokens(startIndex + i) + " "
 			i += 1
 		}
-//		println(s"Returning >${s.trim}<")
 		s.trim
 	}
 }
