@@ -28,15 +28,14 @@ class EntireTextSurfacesProgram extends CoheelProgram {
 	override def getDescription = "Wikipedia Extraction: Entire Text Surfaces"
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
-		val plainTexts = env.readTextFile(plainTextsPath).flatMap { line =>
+		val plainTexts = env.readTextFile(plainTextsPath).name("Plain-Texts").flatMap { line =>
 			val split = line.split('\t')
 			if (split.size == 2)
 				Some((split(0), split(1)))
 			else
 				None
-
-		}
-		val surfaces = env.readTextFile(surfaceProbsPath + subSurfaceFile)
+		}.name("Parsed Plain-Texts")
+		val surfaces = env.readTextFile(surfaceProbsPath + subSurfaceFile).name("Subset of Surfaces")
 			.flatMap(new RichFlatMapFunction[String, String] {
 			override def open(params: Configuration): Unit = {
 				println(s"MEMORY: ${FreeMemory.get(true)} MB")
@@ -46,7 +45,7 @@ class EntireTextSurfacesProgram extends CoheelProgram {
 				if (split.size == 3)
 					out.collect(split(0))
 			}
-		}).name("Surfaces")
+		}).name("Parsed Surfaces")
 
 		val entireTextSurfaces = plainTexts
 			.flatMap(new FindEntireTextSurfacesFlatMap)
