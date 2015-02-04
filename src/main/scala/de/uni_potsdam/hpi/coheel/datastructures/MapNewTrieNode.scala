@@ -145,7 +145,7 @@ class MapNewTrieNode(var children: mutable.Map[String, NewTrieNode] = mutable.Ma
 	}
 }
 
-class NewTrie extends Trie with FindAllInContainsBased {
+class NewTrie extends Trie { //with FindAllInContainsBased {
 
 	val rootNode = new MapNewTrieNode
 

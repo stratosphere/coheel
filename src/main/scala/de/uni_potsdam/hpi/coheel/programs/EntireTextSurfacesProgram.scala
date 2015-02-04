@@ -3,7 +3,7 @@ package de.uni_potsdam.hpi.coheel.programs
 import java.util.Date
 
 import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
-import de.uni_potsdam.hpi.coheel.datastructures.{Trie, HashTrie}
+import de.uni_potsdam.hpi.coheel.datastructures.{NewTrie, Trie, HashTrie}
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{EntireTextSurfaces, SurfaceAsLinkCount, EntireTextSurfaceCounts}
@@ -97,7 +97,7 @@ class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[(String, String)
 
 	var i = 0
 	override def open(params: Configuration): Unit = {
-		trie = new HashTrie
+		trie = new NewTrie
 //		trie = new ConcurrentTreesWrapper
 		println(s"Free memory, before: ${FreeMemory.get(true)} MB")
 		val d1 = new Date

@@ -42,7 +42,7 @@ class TriePerformanceTest extends FunSuite {
 		println()
 
 		println("=" * 80)
-		val RUNS = 1
+		val RUNS = 3
 		List(
 			("HashTrie with word-boundaries", () => new HashTrie())
 			, ("Toni's trie implementation", () => new TrieToni())
