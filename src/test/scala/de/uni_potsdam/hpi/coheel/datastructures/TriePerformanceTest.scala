@@ -1,10 +1,10 @@
-package de.uni_potsdam.hpi.coheel
+package de.uni_potsdam.hpi.coheel.datastructures
 
-import java.io.{StringReader, FileReader, File}
+import java.io.{File, StringReader}
 
-import de.uni_potsdam.hpi.coheel.datastructures._
+import de.uni_potsdam.hpi.coheel.PerformanceTimer
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
-import de.uni_potsdam.hpi.coheel.wiki.{WikiPageReader, TokenizerHelper}
+import de.uni_potsdam.hpi.coheel.wiki.{TokenizerHelper, WikiPageReader}
 import org.scalatest.FunSuite
 
 import scala.io.Source

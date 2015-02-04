@@ -1,7 +1,6 @@
-package de.uni_potsdam.hpi.coheel
+package de.uni_potsdam.hpi.coheel.datastructures
 
 import scala.collection.mutable
-import de.uni_potsdam.hpi.coheel.datastructures._
 
 object TrieAnalysis {
 

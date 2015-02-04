@@ -191,7 +191,7 @@
 						</launcher>
 						<launcher>
 							<id>TriePerformanceTest</id>
-							<mainClass>de.uni_potsdam.hpi.coheel.TriePerformanceTest</mainClass>
+							<mainClass>de.uni_potsdam.hpi.coheel.datastructures.TriePerformanceTest</mainClass>
 							<jvmArgs>
 								<jvmArg>-Xms10g</jvmArg>
 								<jvmArg>-Xmx10g</jvmArg>
