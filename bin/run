@@ -11,7 +11,7 @@ PARAMS="${PARAMS#"|"}"
 
 # Compile first ..
 echo -n "Packaging .."
-mvn package > target/package-output
+mvn package > target/package-output 2>$1
 if [ $? -eq 0 ]; then
 	# .. then run the app
 	echo " Done."
@@ -21,5 +21,4 @@ if [ $? -eq 0 ]; then
 	echo "--------------------------------------------------------------------------" | tee -a target/run-output
 else
 	echo " Failed."
-	cat package-output
 fi
