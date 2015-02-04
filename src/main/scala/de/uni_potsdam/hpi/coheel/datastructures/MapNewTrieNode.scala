@@ -39,13 +39,13 @@ abstract class ZeroNewTrieNode extends NewTrieNode {
 		if (!isLastToken)
 			newNode = newNode.add(tokens, i + 1)
 		val resultNode = new OneNewTrieNode(head, newNode)
-//		val resultNode = new MapNewTrieNode(Map(head -> newNode))
 		resultNode.nodeIsEntry = isEntry
 		resultNode
 	}
 
 	override def getChild(s: String): Option[NewTrieNode] = None
 }
+
 class OneNewTrieNode(key: String, var value: NewTrieNode) extends NewTrieNode {
 
 	var nodeIsEntry: Boolean = false
@@ -91,39 +91,8 @@ class OneNewTrieNode(key: String, var value: NewTrieNode) extends NewTrieNode {
 			None
 	}
 }
-//
-//class TwoTrieNode(key1: String, value1: NewTrieNode, key2: String, value2: NewTrieNode) extends NewTrieNode {
-//
-//	override def add(tokens: Array[String], i: Int): NewTrieNode = {
-//		val head = tokens(i)
-//		val isLastToken = i == tokens.size - 1
-//
-//		val node = if (head == key1) {
-//			value1
-//		} else if (head == key2) {
-//			value2
-//		} else {
-//			new MapNewTrieNode(Map(key1 -> value1, key2 -> value2, head -> new ZeroNewTrieNode))
-//		}
-//		if (!isLastToken) {
-//			val tmp = node.add(tokens, i + 1)
-//			if (tmp != node)
-//				value = tmp
-//			this
-//		}
-//		else {
-//			node.isEntry = true
-//			this
-//		}
-//
-//	}
-//
-//	override def getChild(s: String): Option[NewTrieNode] = ???
-//}
 
 class MapNewTrieNode(var children: mutable.Map[String, NewTrieNode] = mutable.Map()) extends NewTrieNode {
-
-//	var i: Int = 5
 
 	var nodeIsEntry: Boolean = false
 
@@ -159,7 +128,6 @@ class MapNewTrieNode(var children: mutable.Map[String, NewTrieNode] = mutable.Ma
 		}
 	}
 
-
 	def contains(tokens: Array[String]): ContainsResult = {
 		var node: NewTrieNode = this
 
@@ -175,112 +143,6 @@ class MapNewTrieNode(var children: mutable.Map[String, NewTrieNode] = mutable.Ma
 		}
 		ContainsResult(node.isEntry, true)
 	}
-
-}
-
-
-
-
-
-
-trait FindAllInContainsBased {
-
-	def contains(tokenString: String): ContainsResult
-
-	/**
-	 * Same as slidingContains(Array[String], startIndex: Int), but works in arbitrary types.
-	 * Needs a conversion function form the type to a string.
-	 */
-	private def slidingContains[T](arr: Array[T], toString: T => String, startIndex: Int): Seq[Seq[T]] = {
-		var result = List[Seq[T]]()
-		// vector: immutable list structure with fast append
-		var currentCheck = Vector[T](arr(startIndex))
-		var containsResult = this.contains(currentCheck.map(toString).mkString(" "))
-
-		var i = 1
-		// for each word, go so far until it is no intermediate node anymore
-		while (containsResult.asIntermediateNode) {
-			// if it is a entry, add to to result list
-			if (containsResult.asEntry)
-				result ::= currentCheck
-			// expand current window, if possible
-			while (startIndex + i < arr.size && arr(startIndex + i) == "") {
-				i += 1
-			}
-			if (startIndex + i < arr.size) {
-				// append element to the end of the vector
-				currentCheck :+= arr(startIndex + i)
-				containsResult = this.contains(currentCheck.map(toString).mkString(" "))
-				i += 1
-			} else {
-				// if we reached the end of the text, we need to break manually
-				containsResult = ContainsResult(false, false)
-			}
-		}
-		result
-	}
-
-	/**
-	 * Returns all elements of the trie, starting from a certain offset and going as far as necessary.
-	 * @param arr The array to search in.
-	 * @param startIndex And the start index.
-	 * @return A list of the trie elements matching to the array starting from the start index.
-	 */
-	private def slidingContains(arr: Array[String], startIndex: Int): Seq[Seq[String]] = {
-		slidingContains[String](arr, { s => s }, startIndex)
-	}
-
-	def findAllIn(text: String): Iterable[String] = {
-		val tokens = text.split(' ')
-		val resultSurfaces = mutable.HashSet[String]()
-
-		// each word and its following words must be checked, if it is a surface
-		var i = 0
-		while (i < tokens.size) {
-			val result = slidingContains(tokens, i).map {
-				containment => containment.mkString(" ")
-			}
-			resultSurfaces ++= result
-			i += 1
-		}
-		resultSurfaces
-	}
-	//	override def findAllIn(text: String): Iterable[String] = {
-	//		findAllIn(text.split(' '))
-	//	}
-	//	def findAllIn(tokens: Array[String]): Iterable[String] = {
-	//		new Iterator[String] {
-	//			var startIndex = 0
-	//			var currentOffset = 0
-	//			var hasNextCalled = false
-	//
-	//			override def hasNext: Boolean = {
-	//				hasNextCalled = true
-	//
-	//			}
-	//
-	//			override def next(): String = {
-	//				if (!hasNextCalled) {
-	//					val resultHasNext = hasNext
-	//					if (!resultHasNext)
-	//						throw new Exception("No next element")
-	//				}
-	//				hasNextCalled = false
-	//				var s = ""
-	//				var i = 0
-	//				while (i < currentOffset) {
-	//					s += tokens(i) + " "
-	//					i += 1
-	//				}
-	//				s.trim
-	//			}
-	//		}.toIterable
-	//		var i = 0
-	//		while (i < tokens.size) {
-	//			var j
-	//			i += 1
-	//		}
-	//	}
 }
 
 class NewTrie extends Trie with FindAllInContainsBased {
