@@ -1,6 +1,5 @@
 package de.uni_potsdam.hpi.coheel.datastructures
 
-import de.uni_potsdam.hpi.coheel.{NewTrie, MapNewTrieNode}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -10,11 +9,11 @@ import scala.collection.JavaConverters._
 @RunWith(classOf[JUnitRunner])
 class TrieTest extends FunSuite {
 
-//	buildTests(new HashTrie())
+	buildTests(new HashTrie())
 //	buildTests(new PatriciaTrieWrapper())
 //	buildTests(new ConcurrentTreesTrie())
 	buildTests(new TrieToni())
-//	buildTests(new NewTrie())
+	buildTests(new NewTrie())
 
 	def buildTests[T <: Trie](trie: => Trie): Unit = {
 		def newTrie(): Trie = {
@@ -133,7 +132,6 @@ class TrieTest extends FunSuite {
 
 			val testSentence = "chancellor angela merkel"
 			val result = trie.findAllIn(testSentence).toList
-			println(result)
 			assert (result.size === 2)
 		}
 

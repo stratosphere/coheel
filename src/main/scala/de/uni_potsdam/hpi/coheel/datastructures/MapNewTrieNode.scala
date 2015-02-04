@@ -1,6 +1,5 @@
-package de.uni_potsdam.hpi.coheel
+package de.uni_potsdam.hpi.coheel.datastructures
 
-import de.uni_potsdam.hpi.coheel.datastructures.{ContainsResult, Trie}
 import scala.collection.mutable
 
 
@@ -184,22 +183,9 @@ class MapNewTrieNode(var children: mutable.Map[String, NewTrieNode] = mutable.Ma
 
 
 
+trait FindAllInContainsBased {
 
-
-
-
-class NewTrie extends Trie {
-
-	val rootNode = new MapNewTrieNode
-
-	override def add(tokenString: String): Unit = {
-		rootNode.add(tokenString.split(' '), 0)
-	}
-
-	override def contains(tokenString: String): ContainsResult = {
-		rootNode.contains(tokenString.split(' '))
-	}
-
+	def contains(tokenString: String): ContainsResult
 
 	/**
 	 * Same as slidingContains(Array[String], startIndex: Int), but works in arbitrary types.
@@ -244,7 +230,7 @@ class NewTrie extends Trie {
 		slidingContains[String](arr, { s => s }, startIndex)
 	}
 
-	override def findAllIn(text: String): Iterable[String] = {
+	def findAllIn(text: String): Iterable[String] = {
 		val tokens = text.split(' ')
 		val resultSurfaces = mutable.HashSet[String]()
 
@@ -295,4 +281,18 @@ class NewTrie extends Trie {
 	//			i += 1
 	//		}
 	//	}
+}
+
+class NewTrie extends Trie with FindAllInContainsBased {
+
+	val rootNode = new MapNewTrieNode
+
+	override def add(tokenString: String): Unit = {
+		rootNode.add(tokenString.split(' '), 0)
+	}
+
+	override def contains(tokenString: String): ContainsResult = {
+		rootNode.contains(tokenString.split(' '))
+	}
+
 }
