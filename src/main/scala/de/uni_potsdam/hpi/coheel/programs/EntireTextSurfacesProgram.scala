@@ -8,15 +8,12 @@ import de.uni_potsdam.hpi.coheel.datastructures.{NewTrie, Trie, HashTrie}
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{EntireTextSurfaces, SurfaceAsLinkCount, EntireTextSurfaceCounts}
-import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
 import org.apache.flink.api.common.functions.{BroadcastVariableInitializer, RichFlatMapFunction}
 import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.util.Collector
 import org.apache.log4j.Logger
 import scala.collection.JavaConverters._
-
-import scala.collection.mutable
 
 object EntireTextSurfacesProgram {
 	val BROADCAST_SURFACES = "surfaces"
@@ -73,7 +70,7 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 					SurfaceAsLinkCount(split(0), 0)
 				else {
 					val (surface, count) = (split(0), split(1).toInt)
-					SurfaceAsLinkCount(TokenizerHelper.transformToTokenized(surface), count)
+					SurfaceAsLinkCount(surface, count)
 				}
 			} catch {
 				case e: NumberFormatException =>
@@ -94,12 +91,12 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 	}
 }
 class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[(String, String), EntireTextSurfaces] {
-	var trie: Trie = _
+	var trie: NewTrie = _
 	var last1000 = new Date()
 
-	class TrieBroadcastInitializer extends BroadcastVariableInitializer[String, Trie] {
+	class TrieBroadcastInitializer extends BroadcastVariableInitializer[String, NewTrie] {
 
-		override def initializeBroadcastVariable(surfaces: Iterable[String]): Trie = {
+		override def initializeBroadcastVariable(surfaces: Iterable[String]): NewTrie = {
 			val trieFromBroadcast = new NewTrie
 			surfaces.asScala.foreach { surface =>
 				trieFromBroadcast.add(surface)
@@ -127,7 +124,7 @@ class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[(String, String)
 		findEntireTextSurfaces(plainText, trie).foreach(out.collect)
 	}
 
-	def findEntireTextSurfaces(plainText: (String, String), trie: Trie): Iterator[EntireTextSurfaces] = {
+	def findEntireTextSurfaces(plainText: (String, String), trie: NewTrie): Iterator[EntireTextSurfaces] = {
 		val text = plainText._2
 		trie.findAllIn(text).toIterator.map { surface => EntireTextSurfaces(plainText._1, surface)}
 	}

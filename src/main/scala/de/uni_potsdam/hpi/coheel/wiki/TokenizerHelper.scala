@@ -14,7 +14,9 @@ import scala.collection.mutable
  */
 object TokenizerHelper {
 
-	def transformToTokenized(text: String, stemming: Boolean = true): String = {
+	val STEMMING_DEFAULT = true
+
+	def transformToTokenized(text: String, stemming: Boolean = STEMMING_DEFAULT): String = {
 		val sb = new mutable.StringBuilder()
 		tokenizeHelper(text, stemming) { (charTermAttribute, _) =>
 			if (sb.isEmpty)
@@ -25,7 +27,7 @@ object TokenizerHelper {
 		sb.toString()
 	}
 
-	def tokenize(text: String, stemming: Boolean = false): Array[String] = {
+	def tokenize(text: String, stemming: Boolean = STEMMING_DEFAULT): Array[String] = {
 		val tokens = mutable.ArrayBuffer[String]()
 		tokenizeHelper(text, stemming) { (charTermAttribute, _) =>
 			tokens += charTermAttribute.toString
@@ -33,7 +35,7 @@ object TokenizerHelper {
 		tokens.toArray
 	}
 
-	def tokenizeWithCounts(text: String, stemming: Boolean = false): Map[String, Int] = {
+	def tokenizeWithCounts(text: String, stemming: Boolean = STEMMING_DEFAULT): Map[String, Int] = {
 		val tokens = ListBuffer[String]()
 		tokenizeHelper(text, stemming) { (charTermAttribute, _) =>
 			tokens += charTermAttribute.toString
@@ -41,17 +43,7 @@ object TokenizerHelper {
 		tokens.groupBy { word => word }.mapValues(_.size)
 	}
 
-//	case class Token(word: String, startOffset: Int, endOffset: Int)
-//	def tokenizeWithPositions(text: String, stemming: Boolean = true): List[Token] = {
-//		val tokens = ListBuffer[Token]()
-//		tokenizeHelper(text, stemming) { (charTermAttribute, offsetAttribute) =>
-//			tokens += Token(charTermAttribute.toString, offsetAttribute.startOffset(), offsetAttribute.endOffset())
-//		}
-//		tokens.result()
-//	}
-
 	private def tokenizeHelper(text: String, stemming: Boolean)(tokenHandler: (CharTermAttribute, OffsetAttribute) => Unit): Unit = {
-//		val analyzer = new EnglishAnalyzer(Version.LUCENE_48)
 		val analyzer = new StandardAnalyzer(Version.LUCENE_48, CharArraySet.EMPTY_SET)
 		// implemented following this guide:
 		// http://stackoverflow.com/questions/6334692/how-to-use-a-lucene-analyzer-to-tokenize-a-string
