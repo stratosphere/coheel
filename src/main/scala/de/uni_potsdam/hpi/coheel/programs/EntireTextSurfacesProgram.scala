@@ -23,11 +23,11 @@ object EntireTextSurfacesProgram {
 }
 class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 
-	val params = 1 to 4
 
 	@transient val log = Logger.getLogger(getClass)
 	lazy val fileType = FlinkProgramRunner.config.getString("type")
 	private val subSurfaceFile =  if (fileType == "file") "" else "/12"
+	val params = if (fileType == "file") List(1) else 1 to 10
 	override def getDescription = "Wikipedia Extraction: Entire Text Surfaces"
 
 	override def buildProgram(env: ExecutionEnvironment, param: Int): Unit = {

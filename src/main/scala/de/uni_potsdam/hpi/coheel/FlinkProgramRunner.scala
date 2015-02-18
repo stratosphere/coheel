@@ -5,7 +5,7 @@ import java.io.File
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import org.apache.commons.io.FileUtils
 import org.apache.commons.lang3.StringUtils
-import org.apache.flink.api.common.ProgramDescription
+import org.apache.flink.api.common.{ExecutionConfig, ProgramDescription}
 import org.apache.flink.api.scala._
 import org.apache.flink.client.program.ProgramInvocationException
 import org.apache.flink.configuration.GlobalConfiguration
