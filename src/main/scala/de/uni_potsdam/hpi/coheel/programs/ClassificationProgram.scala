@@ -9,7 +9,7 @@ import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import scala.collection.mutable
 
-class ClassificationProgram extends CoheelProgram {
+class ClassificationProgram extends NoParamCoheelProgram {
 
 	override def getDescription: String = "CohEEL Classification"
 

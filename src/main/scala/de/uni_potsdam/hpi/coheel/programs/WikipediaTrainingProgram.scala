@@ -8,7 +8,7 @@ import scala.collection.mutable
 import DataClasses._
 import org.apache.log4j.Logger
 
-class WikipediaTrainingProgram extends CoheelProgram {
+class WikipediaTrainingProgram extends NoParamCoheelProgram {
 
 	@transient val log: Logger = Logger.getLogger(this.getClass)
 
@@ -24,17 +24,17 @@ class WikipediaTrainingProgram extends CoheelProgram {
 	 */
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val wikiPages = ProgramHelper.getWikiPages(env)
-		if (!params.contains(ProgramParams.ONLY_WIKIPAGES) && !params.contains(ProgramParams.ONLY_PLAINTEXTS)) {
+		if (!configurationParams.contains(ConfigurationParams.ONLY_WIKIPAGES) && !configurationParams.contains(ConfigurationParams.ONLY_PLAINTEXTS)) {
 			buildLinkPlans(wikiPages)
 			buildLanguageModelPlan(wikiPages)
 		}
 
-		if (params.contains(ProgramParams.ONLY_WIKIPAGES)) {
+		if (configurationParams.contains(ConfigurationParams.ONLY_WIKIPAGES)) {
 			wikiPages.map { wikiPage =>
 				(wikiPage.pageTitle, wikiPage.isDisambiguation, wikiPage.isList, wikiPage.isRedirect, wikiPage.ns, if (wikiPage.isNormalPage) "normal" else "special")
 			}.writeAsTsv(wikiPagesPath)
 		}
-		if (params.contains(ProgramParams.ONLY_PLAINTEXTS)) {
+		if (configurationParams.contains(ConfigurationParams.ONLY_PLAINTEXTS)) {
 			wikiPages.map { wikiPage =>
 				(wikiPage.pageTitle, TokenizerHelper.tokenize(wikiPage.plainText).mkString(" "))
 			}.writeAsTsv(plainTextsPath)

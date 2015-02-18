@@ -1,5 +1,6 @@
 package de.uni_potsdam.hpi.coheel.programs
 
+import java.lang.Iterable
 import java.util.Date
 
 import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
@@ -8,7 +9,7 @@ import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{EntireTextSurfaces, SurfaceAsLinkCount, EntireTextSurfaceCounts}
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
-import org.apache.flink.api.common.functions.RichFlatMapFunction
+import org.apache.flink.api.common.functions.{BroadcastVariableInitializer, RichFlatMapFunction}
 import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.util.Collector
@@ -20,14 +21,16 @@ import scala.collection.mutable
 object EntireTextSurfacesProgram {
 	val BROADCAST_SURFACES = "surfaces"
 }
-class EntireTextSurfacesProgram extends CoheelProgram {
+class EntireTextSurfacesProgram extends CoheelProgram[Int] {
+
+	val params = 1 to 4
 
 	@transient val log = Logger.getLogger(getClass)
 	lazy val fileType = FlinkProgramRunner.config.getString("type")
-	val subSurfaceFile =  if (fileType == "file") "" else "/12"
+	private val subSurfaceFile =  if (fileType == "file") "" else "/12"
 	override def getDescription = "Wikipedia Extraction: Entire Text Surfaces"
 
-	override def buildProgram(env: ExecutionEnvironment): Unit = {
+	override def buildProgram(env: ExecutionEnvironment, param: Int): Unit = {
 		val plainTexts = env.readTextFile(plainTextsPath).name("Plain-Texts").flatMap { line =>
 			val split = line.split('\t')
 			if (split.size == 2)
@@ -35,7 +38,8 @@ class EntireTextSurfacesProgram extends CoheelProgram {
 			else
 				None
 		}.name("Parsed Plain-Texts")
-		val surfaces = env.readTextFile(surfaceProbsPath + subSurfaceFile).name("Subset of Surfaces")
+
+		val surfaces = env.readTextFile(surfaceProbsPath + s"/$param").name("Subset of Surfaces")
 			.flatMap(new RichFlatMapFunction[String, String] {
 			override def open(params: Configuration): Unit = {
 				println(s"MEMORY: ${FreeMemory.get(true)} MB")
@@ -86,23 +90,30 @@ class EntireTextSurfacesProgram extends CoheelProgram {
 			}
 		}.name("Surface-Link-Probs")
 
-		entireTextSurfaces.writeAsTsv(entireTextSurfacesPath)
-		surfaceLinkProbs.writeAsTsv(surfaceLinkProbsPath)
+		entireTextSurfaces.writeAsTsv(entireTextSurfacesPath + s"/$param-it")
+		surfaceLinkProbs.writeAsTsv(surfaceLinkProbsPath + s"/$param-it")
 	}
 }
 class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[(String, String), EntireTextSurfaces] {
 	var trie: Trie = _
 	var last1000 = new Date()
 
+	class TrieBroadcastInitializer extends BroadcastVariableInitializer[String, Trie] {
+
+		override def initializeBroadcastVariable(surfaces: Iterable[String]): Trie = {
+			val trieFromBroadcast = new NewTrie
+			surfaces.asScala.foreach { surface =>
+				trieFromBroadcast.add(surface)
+			}
+			trieFromBroadcast
+		}
+	}
+
 	var i = 0
 	override def open(params: Configuration): Unit = {
-		trie = new NewTrie
-//		trie = new ConcurrentTreesWrapper
 		println(s"Free memory, before: ${FreeMemory.get(true)} MB")
 		val d1 = new Date
-		getRuntimeContext.getBroadcastVariable[String](EntireTextSurfacesProgram.BROADCAST_SURFACES).asScala.foreach { surface =>
-			trie.add(surface)
-		}
+		trie = getRuntimeContext.getBroadcastVariableWithInitializer(EntireTextSurfacesProgram.BROADCAST_SURFACES, new TrieBroadcastInitializer)
 		println(s"Trie initialization took ${(new Date().getTime - d1.getTime) / 1000} s.")
 		println(s"Free memory, after: ${FreeMemory.get(true)} MB")
 	}
@@ -118,16 +129,7 @@ class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[(String, String)
 	}
 
 	def findEntireTextSurfaces(plainText: (String, String), trie: Trie): Iterator[EntireTextSurfaces] = {
-//		val tokens = TokenizerHelper.transformToTokenized(wikiPage.plainText, false)
-//
-//		val entireTextSurfaces = trie.asInstanceOf[ConcurrentTreesWrapper].getKeysContainedIn(tokens).toSet
-//
-//		entireTextSurfaces.map { surface =>
-//			EntireTextSurfaces(wikiPage.pageTitle, surface.toString)
-//		}.toIterator
-
 		val text = plainText._2
-
 		trie.findAllIn(text).toIterator.map { surface => EntireTextSurfaces(plainText._1, surface)}
 	}
 }

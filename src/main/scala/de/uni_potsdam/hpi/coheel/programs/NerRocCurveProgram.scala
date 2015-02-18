@@ -7,7 +7,7 @@ import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper.Token
 import org.apache.flink.api.scala._
 import org.apache.log4j.Logger
 
-class NerRocCurveProgram extends CoheelProgram {
+class NerRocCurveProgram extends NoParamCoheelProgram {
 
 	val THRESHOLD = 0.5
 

@@ -5,7 +5,7 @@ import org.apache.flink.api.scala._
 import org.apache.flink.core.fs.FileSystem
 import org.apache.flink.shaded.com.google.common.io.FileWriteMode
 
-class LargeFileTestProgram extends CoheelProgram {
+class LargeFileTestProgram extends NoParamCoheelProgram {
 
 	override def getDescription = "Large file test"
 
