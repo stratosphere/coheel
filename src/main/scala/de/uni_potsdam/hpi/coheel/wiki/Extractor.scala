@@ -11,7 +11,7 @@ import de.fau.cs.osr.ptk.common.ast.{ContentNode, Text, AstNode, NodeList}
 import org.sweble.wikitext.`lazy`.parser.{Bold, Paragraph, InternalLink}
 
 
-class Extractor(wikiPage: WikiPage) {
+class Extractor(wikiPage: WikiPage, surfaceRepr: String => String) {
 
 	val config = new SimpleWikiConfiguration(
 		"classpath:/org/sweble/wikitext/engine/SimpleWikiConfiguration.xml")
@@ -29,7 +29,7 @@ class Extractor(wikiPage: WikiPage) {
 	var links: Seq[Link] = _
 
 	def extractAllLinks(filterEmptySurfaceRepr: Boolean = true): Seq[Link] = {
-		val allLinks =  (extractLinks() ++ extractAlternativeNames())
+		val allLinks =  extractLinks() ++ extractAlternativeNames()
 		if (filterEmptySurfaceRepr)
 			allLinks.filter { link => link.surfaceRepr.nonEmpty }
 		else
@@ -82,7 +82,7 @@ class Extractor(wikiPage: WikiPage) {
 					boldWords = boldWords.enqueue(text)
 			case _ =>
 		}
-		boldWords.map { word => Link(word, TokenizerHelper.transformToTokenized(word), wikiPage.pageTitle, wikiPage.pageTitle) }
+		boldWords.map { word => Link(word, surfaceRepr(word), wikiPage.pageTitle, wikiPage.pageTitle) }
 	}
 
 	// Private helper function to extract breadth-first search in the node tree
@@ -226,6 +226,6 @@ class Extractor(wikiPage: WikiPage) {
 	 * Translates an internal link to an link, that can be exposed to the user.
 	 */
 	private def toLink(link: LinkWithNode): Option[Link] = {
-		Some(Link(link.text, TokenizerHelper.transformToTokenized(link.text), wikiPage.pageTitle, link.destination))
+		Some(Link(link.text, surfaceRepr(link.text), wikiPage.pageTitle, link.destination))
 	}
 }

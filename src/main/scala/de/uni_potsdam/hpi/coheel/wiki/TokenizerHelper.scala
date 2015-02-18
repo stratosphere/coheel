@@ -41,14 +41,14 @@ object TokenizerHelper {
 		tokens.groupBy { word => word }.mapValues(_.size)
 	}
 
-	case class Token(word: String, startOffset: Int, endOffset: Int)
-	def tokenizeWithPositions(text: String, stemming: Boolean = true): List[Token] = {
-		val tokens = ListBuffer[Token]()
-		tokenizeHelper(text, stemming) { (charTermAttribute, offsetAttribute) =>
-			tokens += Token(charTermAttribute.toString, offsetAttribute.startOffset(), offsetAttribute.endOffset())
-		}
-		tokens.result()
-	}
+//	case class Token(word: String, startOffset: Int, endOffset: Int)
+//	def tokenizeWithPositions(text: String, stemming: Boolean = true): List[Token] = {
+//		val tokens = ListBuffer[Token]()
+//		tokenizeHelper(text, stemming) { (charTermAttribute, offsetAttribute) =>
+//			tokens += Token(charTermAttribute.toString, offsetAttribute.startOffset(), offsetAttribute.endOffset())
+//		}
+//		tokens.result()
+//	}
 
 	private def tokenizeHelper(text: String, stemming: Boolean)(tokenHandler: (CharTermAttribute, OffsetAttribute) => Unit): Unit = {
 //		val analyzer = new EnglishAnalyzer(Version.LUCENE_48)

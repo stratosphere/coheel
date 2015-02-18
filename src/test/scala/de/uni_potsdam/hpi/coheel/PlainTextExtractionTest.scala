@@ -10,7 +10,7 @@ import scala.io.Source
 @RunWith(classOf[JUnitRunner])
 class PlainTextExtractionTest extends FunSuite {
 
-	def fixture() = new Extractor(wikiPage)
+	def fixture() = new Extractor(wikiPage, s => s)
 
 	lazy val wikiPage = {
 		val source = getClass.getResource("/manual_test_files/wikipedia_Kilobyte.xml")

@@ -110,6 +110,7 @@ object FlinkProgramRunner {
 			log.info("Starting ..")
 			try {
 				program.params.foreach { param =>
+					log.info(s"Current parameter: $param")
 					program.buildProgram(env, param)
 					FileUtils.writeStringToFile(new File("PLAN"), env.getExecutionPlan())
 					val paramsString = if (program.configurationParams.size > 0)

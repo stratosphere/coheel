@@ -10,7 +10,7 @@ import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.core.fs.Path
 import org.apache.flink.core.fs.local.LocalFileSystem
-import de.uni_potsdam.hpi.coheel.wiki.{Extractor, WikiPage, WikiPageReader}
+import de.uni_potsdam.hpi.coheel.wiki.{TokenizerHelper, Extractor, WikiPage, WikiPageReader}
 import java.io._
 import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
 import org.apache.flink.util.Collector
@@ -24,11 +24,7 @@ import scala.collection.JavaConverters._
 object ProgramHelper {
 
 	val log = Logger.getLogger(getClass)
-
-
-	lazy val fileType = FlinkProgramRunner.config.getString("type")
 	lazy val dumpFile = new Path(FlinkProgramRunner.config.getString("base_path"))
-	val fileSystem = if (fileType == "file") new LocalFileSystem else new DistributedFileSystem
 	lazy val wikipediaFilesPath = if (dumpFile.isAbsolute) dumpFile.toUri.toString
 	                              else dumpFile.makeQualified(new LocalFileSystem).toUri.toString
 
@@ -45,8 +41,6 @@ object ProgramHelper {
 			}
 
 			override def mapPartition(linesIt: Iterable[String], out: Collector[WikiPage]): Unit = {
-//				val fileContent = "<foo>" + linesIt.mkString("\n") + "</foo>"
-//				val reader = new StringReader(fileContent)
 				val reader = new IteratorReader(List("<foo>").iterator ++ linesIt.iterator.asScala ++ List("</foo>").iterator)
 				val wikiPages = new WikiPageReader().xmlToWikiPages(reader)
 				val filteredWikiPages = wikiPages.filter { page =>
@@ -55,7 +49,7 @@ object ProgramHelper {
 				}
 				filteredWikiPages.foreach { wikiPage =>
 					try {
-						val extractor = new Extractor(wikiPage)
+						val extractor = new Extractor(wikiPage, s => TokenizerHelper.transformToTokenized(s) )
 						val links = extractor.extractAllLinks()
 						val plainText = extractor.extractPlainText()
 						wikiPage.source = ""

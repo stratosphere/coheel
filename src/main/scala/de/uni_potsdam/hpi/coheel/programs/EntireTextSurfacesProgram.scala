@@ -26,7 +26,6 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 
 	@transient val log = Logger.getLogger(getClass)
 	lazy val fileType = FlinkProgramRunner.config.getString("type")
-	private val subSurfaceFile =  if (fileType == "file") "" else "/12"
 	val params = if (fileType == "file") List(1) else 1 to 10
 	override def getDescription = "Wikipedia Extraction: Entire Text Surfaces"
 
@@ -74,7 +73,7 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 					SurfaceAsLinkCount(split(0), 0)
 				else {
 					val (surface, count) = (split(0), split(1).toInt)
-					SurfaceAsLinkCount(TokenizerHelper.tokenize(surface).mkString(" "), count)
+					SurfaceAsLinkCount(TokenizerHelper.transformToTokenized(surface), count)
 				}
 			} catch {
 				case e: NumberFormatException =>

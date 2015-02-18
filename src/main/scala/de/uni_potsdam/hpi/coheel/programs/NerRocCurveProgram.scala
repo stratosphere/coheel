@@ -3,7 +3,6 @@ package de.uni_potsdam.hpi.coheel.programs
 import de.uni_potsdam.hpi.coheel.datastructures.{Trie, TrieBuilder, HashTrie}
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.wiki.{WikiPage, TokenizerHelper}
-import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper.Token
 import org.apache.flink.api.scala._
 import org.apache.log4j.Logger
 
@@ -73,7 +72,7 @@ object NerRocCurveProgram {
 	def determinePotentialSurfaces(wikiPage: WikiPage, trie: Trie): Set[String] =  {
 		var potentialSurfaces = Set[String]()
 
-		val tokens = TokenizerHelper.tokenizeWithPositions(wikiPage.plainText).toArray
+//		val tokens = TokenizerHelper.tokenizeWithPositions(wikiPage.plainText).toArray
 
 //		for (i <- 0 until tokens.size) {
 //			val resultTokens = trie.slidingContains[Token](tokens, { token: Token => token.word }, i)

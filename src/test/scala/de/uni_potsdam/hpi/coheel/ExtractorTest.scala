@@ -10,7 +10,7 @@ import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 @RunWith(classOf[JUnitRunner])
 class ExtractorTest extends FunSuite {
 
-	def fixture() = new Extractor(wikiPage)
+	def fixture() = new Extractor(wikiPage, s => s)
 
 	lazy val wikiPage = {
 		val source = getClass.getResource("/manual_test_files/wikipedia_Kilobyte.xml")
@@ -99,7 +99,7 @@ class ExtractorTest extends FunSuite {
 		val source = getClass.getResource("/manual_test_files/infinite_loop.xml")
 		val xml = Source.fromFile(source.toURI, "UTF-8").mkString
 		val wikiPage = new WikiPageReader().xmlToWikiPages(xml).next()
-		val linkExtractor = new Extractor(wikiPage)
+		val linkExtractor = new Extractor(wikiPage, s => s)
 		linkExtractor.extractLinks()
 	}
 
