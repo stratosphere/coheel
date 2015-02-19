@@ -36,7 +36,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 		}
 		if (configurationParams.contains(ConfigurationParams.ONLY_PLAINTEXTS)) {
 			wikiPages.map { wikiPage =>
-				(wikiPage.pageTitle, TokenizerHelper.transformToTokenized(wikiPage.plainText))
+				(wikiPage.pageTitle, if (wikiPage.plainText.isEmpty) " " else TokenizerHelper.transformToTokenized(wikiPage.plainText))
 			}.writeAsTsv(plainTextsPath)
 		}
 	}
@@ -58,17 +58,18 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 		// counts in how many documents a surface occurs
 		val surfaceDocumentCounts = groupedByLinkText
 			.reduceGroup { linksWithSameText =>
-				var text: String = null
+				var surfaceRepr: String = null
 				// Count each link on one source page only once, i.e. if a surface occurs twice on a page
 				// it is only counted once.
 				val distinctDocuments = mutable.HashSet[String]()
-				linksWithSameText.foreach { linkWithText =>
-					if (text == null)
-						text = linkWithText.surfaceRepr
+				val list = linksWithSameText.toList
+				list.foreach { linkWithText =>
+					if (surfaceRepr == null)
+						surfaceRepr = linkWithText.surfaceRepr
 					distinctDocuments += linkWithText.source
 				}
 				val count = distinctDocuments.size
-				(text, count)
+				(surfaceRepr, list.head.surface, count)
 			}
 
 		// count how often a surface occurs
