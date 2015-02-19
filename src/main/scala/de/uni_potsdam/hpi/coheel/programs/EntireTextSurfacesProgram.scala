@@ -4,8 +4,9 @@ import java.lang.Iterable
 import java.util.Date
 
 import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
-import de.uni_potsdam.hpi.coheel.datastructures.{NewTrie, Trie, HashTrie}
+import de.uni_potsdam.hpi.coheel.datastructures.NewTrie
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
+import de.uni_potsdam.hpi.coheel.io.OutputFiles
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{EntireTextSurfaces, SurfaceAsLinkCount, EntireTextSurfaceCounts}
 import org.apache.flink.api.common.functions.{BroadcastVariableInitializer, RichFlatMapFunction}
@@ -27,6 +28,7 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 	override def getDescription = "Wikipedia Extraction: Entire Text Surfaces"
 
 	override def buildProgram(env: ExecutionEnvironment, param: Int): Unit = {
+//		val plainTexts = env.readCsvFile[(String, String)](plainTextsPath, OutputFiles.LINE_DELIMITER, OutputFiles.ROW_DELIMITER).name("Parsed Plain-Texts")
 		val plainTexts = env.readTextFile(plainTextsPath).name("Plain-Texts").flatMap { line =>
 			val split = line.split('\t')
 			if (split.size == 2)
@@ -35,7 +37,7 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 				None
 		}.name("Parsed Plain-Texts")
 
-		val surfaces = env.readTextFile(surfaceProbsPath + s"/$param").name("Subset of Surfaces")
+		val surfaces = env.readTextFile(surfaceDocumentCountsPath + s"/$param").name("Subset of Surfaces")
 			.flatMap(new RichFlatMapFunction[String, String] {
 			override def open(params: Configuration): Unit = {
 				println(s"MEMORY: ${FreeMemory.get(true)} MB")
@@ -66,14 +68,16 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 			val split = line.split('\t')
 			// not clear, why lines without a count occur, but they do
 			try {
-				if (split.size < 2)
+				if (split.size < 3)
 					SurfaceAsLinkCount(split(0), 0)
 				else {
-					val (surface, count) = (split(0), split(1).toInt)
+					val (surface, count) = (split(0), split(2).toInt)
 					SurfaceAsLinkCount(surface, count)
 				}
 			} catch {
 				case e: NumberFormatException =>
+					println(e)
+					println(line)
 					SurfaceAsLinkCount(split(0), 0)
 			}
 		}.name("Surface-Document-Counts").join(entireTextSurfaceCounts)
