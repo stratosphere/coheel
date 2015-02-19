@@ -29,7 +29,7 @@ class Extractor(wikiPage: WikiPage, surfaceRepr: String => String) {
 	var links: Seq[Link] = _
 
 	def extractAllLinks(filterEmptySurfaceRepr: Boolean = true): Seq[Link] = {
-		val allLinks =  extractLinks() ++ extractAlternativeNames()
+		val allLinks = extractLinks() // TODO: ++ extractAlternativeNames()
 		if (filterEmptySurfaceRepr)
 			allLinks.filter { link => link.surfaceRepr.nonEmpty }
 		else
