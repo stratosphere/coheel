@@ -16,17 +16,23 @@
 						Note: This file is based on the Kilobyte page, but contains some manually added hard cases for the parser.
 						Regression suite:
 
-                        Empty texts with categories:
-                        [[Category:History of the Democratic Republic of the Congo| ]] this link is not counted because its a category
+						Handles line breaks:
+						[[Emir
+						Abdelkader]]
 
+						Empty texts with categories:
+						[[Category:History of the Democratic Republic of the Congo| ]] this link is not counted because its a category
 
-                        ''[[Anno Domini]]''
+						Link in Quotes
+						''[[Anno Domini]]''
 
+						Link in Files
+						[[File:KingsCollegeChapel.jpg|thumb|[[King's College, Cambridge|King's College]], one of the constituent [[colleges of the University of Cambridge]]]]
 
-                        Handle links with quotes:
-                        [[Common law#Alternatives to common law systems|&quot;Alternatives to common law systems&quot;]] below.
-                        [[&quot;ABC&quot; (song)]]
-                        [[Quotation mark|&quot;]]
+						Handle links with quotes:
+						[[Common law#Alternatives to common law systems|&quot;Alternatives to common law systems&quot;]] below.
+						[[&quot;ABC&quot; (song)]]
+						[[Quotation mark|&quot;]]
 
 						Wrong Category type: leading colon
 						[[:Category:Information Units]]
