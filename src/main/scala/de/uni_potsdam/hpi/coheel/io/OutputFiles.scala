@@ -4,6 +4,7 @@ import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
 import org.apache.flink.api.java.operators.DataSink
 import org.apache.flink.api.scala._
 import org.apache.flink.core.fs.FileSystem
+import scala.language.implicitConversions
 
 object OutputFiles {
 	lazy val currentPath = FlinkProgramRunner.config.getString("output_files_dir")
@@ -27,11 +28,14 @@ object OutputFiles {
 	implicit def toOutputFiles(dataSet: DataSet[_]): OutputFiles = {
 		new OutputFiles(dataSet)
 	}
+
+	val LINE_DELIMITER = "\n"
+	val ROW_DELIMITER  = '\t'
 }
 
 class OutputFiles(dataSet: DataSet[_]) {
 
 	def writeAsTsv(path: String): DataSink[_] = {
-		dataSet.writeAsCsv(path, "\n", "\t", FileSystem.WriteMode.OVERWRITE)
+		dataSet.writeAsCsv(path, OutputFiles.LINE_DELIMITER, OutputFiles.ROW_DELIMITER.toString, FileSystem.WriteMode.OVERWRITE)
 	}
 }
