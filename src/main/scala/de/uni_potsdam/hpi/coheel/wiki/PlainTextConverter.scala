@@ -14,13 +14,13 @@ import org.sweble.wikitext.`lazy`.preprocessor.TemplateParameter
 import org.sweble.wikitext.`lazy`.preprocessor.XmlComment
 import org.sweble.wikitext.`lazy`.utils.XmlCharRef
 import org.sweble.wikitext.`lazy`.utils.XmlEntityRef
-import de.fau.cs.osr.ptk.common.Visitor
+import de.fau.cs.osr.ptk.common.{AstVisitor, Visitor}
 import de.fau.cs.osr.ptk.common.ast.AstNode
 import de.fau.cs.osr.ptk.common.ast.NodeList
 import de.fau.cs.osr.ptk.common.ast.Text
 import de.fau.cs.osr.utils.StringUtils
 
-class PlainTextConverter(private val config: SimpleWikiConfiguration, private val extractor: Extractor) extends Visitor {
+class PlainTextConverter(private val config: SimpleWikiConfiguration, private val extractor: Extractor) extends AstVisitor {
 
 	private val enumerateSections = true
 	private val wrapCol = Int.MaxValue
@@ -62,6 +62,10 @@ class PlainTextConverter(private val config: SimpleWikiConfiguration, private va
 
 	def visit(n: AstNode) = {
 		iterate(n)
+	}
+
+	def visit(i: ImageLink): Unit = {
+		iterate(i)
 	}
 
 	def visit(n: NodeList) {
@@ -229,9 +233,6 @@ class PlainTextConverter(private val config: SimpleWikiConfiguration, private va
 	def visit(n: ItemizationItem) {
 		iterate(n.getContent)
 		newline(1)
-	}
-
-	def visit(n: ImageLink) {
 	}
 
 	def visit(n: IllegalCodePoint) {

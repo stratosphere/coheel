@@ -23,8 +23,17 @@ class ExtractorTest extends FunSuite {
 		extractor.extractAllLinks(filterEmptySurfaceRepr = false)
 	}
 
-	test("Check links inside of ''") {
+	test("check links inside of ''") {
 		assert(links.exists { link => link.surface == "Anno Domini" && link.destination == "Anno Domini" })
+	}
+
+	test("find links inside files") {
+		assert(links.exists { link => link.surface == "colleges of the University of Cambridge" })
+		assert(links.exists { link => link.surface == "King's College" })
+	}
+
+	test("handles line breaks in links") {
+		assert(links.exists { link => link.surface == "Emir Abdelkader" })
 	}
 
 	test("remove quotes around links") {
@@ -86,12 +95,12 @@ class ExtractorTest extends FunSuite {
 	}
 
 	test("all links are found (currently, we cannot find links in refs)") {
-		assert(links.size === 60 /* hand-counted :) */)
+		assert(links.size === 63 /* hand-counted :) */)
 	}
 
 	test("just print links") {
 		links.foreach { link =>
-//			println(String.format("%80s||%s", link.surface, link.destination))
+			println(String.format("%80s||%s", link.surface, link.destination))
 		}
 	}
 

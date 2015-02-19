@@ -207,6 +207,7 @@ class Extractor(wikiPage: WikiPage, surfaceRepr: String => String) {
 		link.text = link.text.trim
 		while (link.text.startsWith("\"") && link.text.endsWith("\"") && link.text.size > 1)
 			link.text = link.text.drop(1).dropRight(1)
+		link.text = link.text.replace("\r\n", " ").replace('\n', ' ')
 		Some(link)
 	}
 

@@ -18,19 +18,22 @@ class PlainTextExtractionTest extends FunSuite {
 		new WikiPageReader().xmlToWikiPages(xml).next()
 	}
 
-	test("contains extra paragraphs") {
-		val t1 = System.currentTimeMillis()
+	test("print plaintext") {
+		println(fixture().extractPlainText())
+
+	}
+	test("contains file captions") {
 		val plainText = fixture().extractPlainText()
-		val t2 = System.currentTimeMillis()
-		println(plainText)
+		assert(plainText.contains("University of Cambridge"))
+	}
+
+	test("contains extra paragraphs") {
+		val plainText = fixture().extractPlainText()
 		assert(plainText.contains("Empty texts with categories"))
 	}
 
 	test("contains broken links correctly") {
-		val t1 = System.currentTimeMillis()
 		val plainText = fixture().extractPlainText()
-		val t2 = System.currentTimeMillis()
-		println(plainText)
 		assert(plainText.contains("Bilateral relations of Bosnia and Herzegovina"))
 
 	}
