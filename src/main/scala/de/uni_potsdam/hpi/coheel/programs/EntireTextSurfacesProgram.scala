@@ -21,7 +21,6 @@ object EntireTextSurfacesProgram {
 }
 class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 
-
 	@transient val log = Logger.getLogger(getClass)
 	lazy val fileType = FlinkProgramRunner.config.getString("type")
 	val params = if (fileType == "file") List(1) else 1 to 10
@@ -39,9 +38,7 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 
 		val surfaces = env.readTextFile(surfaceDocumentCountsPath + s"/$param").name("Subset of Surfaces")
 			.flatMap(new RichFlatMapFunction[String, String] {
-			override def open(params: Configuration): Unit = {
-				println(s"MEMORY: ${FreeMemory.get(true)} MB")
-			}
+			override def open(params: Configuration): Unit = { }
 			override def flatMap(line: String, out: Collector[String]): Unit = {
 				val split = line.split('\t')
 				if (split.size == 3)
@@ -96,7 +93,8 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 }
 class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[(String, String), EntireTextSurfaces] {
 	var trie: NewTrie = _
-	var last1000 = new Date()
+	var lastChunk = new Date()
+	def log = Logger.getLogger(getClass)
 
 	class TrieBroadcastInitializer extends BroadcastVariableInitializer[String, NewTrie] {
 
@@ -109,20 +107,21 @@ class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[(String, String)
 		}
 	}
 
-	var i = 0
 	override def open(params: Configuration): Unit = {
-		println(s"Free memory, before: ${FreeMemory.get(true)} MB")
+		log.info(s"Building trie with ${FreeMemory.get(true)} MB")
 		val d1 = new Date
 		trie = getRuntimeContext.getBroadcastVariableWithInitializer(EntireTextSurfacesProgram.BROADCAST_SURFACES, new TrieBroadcastInitializer)
-		println(s"Trie initialization took ${(new Date().getTime - d1.getTime) / 1000} s.")
-		println(s"Free memory, after: ${FreeMemory.get(true)} MB")
+		log.info(s"Finished trie initialization in ${(new Date().getTime - d1.getTime) / 1000} s")
+		log.info(s"${FreeMemory.get(true)} MB of memory remaining")
 	}
+	var i = 0
+	val OUTPUT_EVERY = 1000
 	override def flatMap(plainText: (String, String), out: Collector[EntireTextSurfaces]): Unit = {
-		if (i % 1000 == 0) {
-			val new1000 = new Date()
-			val difference = new1000.getTime - last1000.getTime
-			println(s"${new Date()}: ENTIRETEXTSURFACES: $i, LAST 1000: $difference ms, FREE MEMORY: ${FreeMemory.get()} MB")
-			last1000 = new1000
+		if (i % OUTPUT_EVERY == 0) {
+			val nextChunk = new Date()
+			val difference = nextChunk.getTime - lastChunk.getTime
+			log.info(f"EntireTextSurfaces update: Finished $i%6s, last $OUTPUT_EVERY took $difference%7s ms, remaining memory: ${FreeMemory.get()}%5s MB")
+			lastChunk = nextChunk
 		}
 		i += 1
 		findEntireTextSurfaces(plainText, trie).foreach(out.collect)
