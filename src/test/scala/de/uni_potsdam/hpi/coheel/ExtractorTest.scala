@@ -41,7 +41,7 @@ class ExtractorTest extends FunSuite {
 		assert(links.exists { _.surface == "\"ABC\" (song)" })
 		assert(links.exists { _.surface == "\"" })
 	}
-	test("parsing bold text at beginning of article") {
+	ignore("parsing bold text at beginning of article") {
 		assert(links.exists { _.surface == "Aldrovandia phalacra" })
 		assert(links.exists { _.surface == "Hawaiian halosaurid" })
 	}
@@ -95,7 +95,8 @@ class ExtractorTest extends FunSuite {
 	}
 
 	test("all links are found (currently, we cannot find links in refs)") {
-		assert(links.size === 63 /* hand-counted :) */)
+		// add +2 when using bold text extraction
+		assert(links.size === 61 /* hand-counted :) */)
 	}
 
 	test("just print links") {
