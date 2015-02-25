@@ -4,11 +4,11 @@ import scala.collection.mutable
 
 
 abstract class NewTrieNode {
-	def add(tokens: Array[String], i: Int): NewTrieNode
+	def add(tokens: Array[String], i: Int, tokenProb: Float): NewTrieNode
 	def isEntry: Boolean
 	def setIsEntry(b: Boolean): NewTrieNode
 
-	def getChild(s: String): Option[NewTrieNode]
+	def getChild(s: String): Option[(Float, NewTrieNode)]
 }
 
 object EntryZeroNewTrieNode extends ZeroNewTrieNode {
@@ -32,21 +32,22 @@ object NoEntryZeroNewTrieNode extends ZeroNewTrieNode {
 
 abstract class ZeroNewTrieNode extends NewTrieNode {
 
-	override def add(tokens: Array[String], i: Int): NewTrieNode = {
+	override def add(tokens: Array[String], i: Int, tokenProb: Float): NewTrieNode = {
 		val isLastToken = i == tokens.size - 1
+		val newNodeProb = if (isLastToken) tokenProb else Float.NaN
 		val head = tokens(i)
 		var newNode: NewTrieNode = if (isLastToken) EntryZeroNewTrieNode else NoEntryZeroNewTrieNode
 		if (!isLastToken)
-			newNode = newNode.add(tokens, i + 1)
-		val resultNode = new OneNewTrieNode(head, newNode)
+			newNode = newNode.add(tokens, i + 1, tokenProb)
+		val resultNode = new OneNewTrieNode(head, newNode, newNodeProb)
 		resultNode.nodeIsEntry = isEntry
 		resultNode
 	}
 
-	override def getChild(s: String): Option[NewTrieNode] = None
+	override def getChild(s: String): Option[(Float, NewTrieNode)] = None
 }
 
-class OneNewTrieNode(key: String, var value: NewTrieNode) extends NewTrieNode {
+class OneNewTrieNode(val key: String, var value: NewTrieNode, val prob: Float) extends NewTrieNode {
 
 	var nodeIsEntry: Boolean = false
 	override def isEntry: Boolean = nodeIsEntry
@@ -56,26 +57,28 @@ class OneNewTrieNode(key: String, var value: NewTrieNode) extends NewTrieNode {
 		this
 	}
 
-	override def add(tokens: Array[String], i: Int): NewTrieNode = {
+	override def add(tokens: Array[String], i: Int, tokenProb: Float): NewTrieNode = {
 		val head = tokens(i)
 		val isLastToken = i == tokens.size - 1
+		var newNodeProb = if (isLastToken) tokenProb else Float.NaN
 
 		var newReturn: MapNewTrieNode = null
 		val node = if (head == key) {
+			newNodeProb = prob
 			if (isLastToken) value.setIsEntry(true) else value
 		} else {
 			val newNode = if (isLastToken) EntryZeroNewTrieNode else NoEntryZeroNewTrieNode
-			newReturn = new MapNewTrieNode(mutable.Map(key -> value, head -> newNode))
+			newReturn = new MapNewTrieNode(mutable.Map(key -> (prob, value), head -> (newNodeProb, newNode)))
 			newReturn.setIsEntry(isEntry)
 			newNode
 		}
 		if (!isLastToken) {
-			val tmp = node.add(tokens, i + 1)
+			val tmp = node.add(tokens, i + 1, tokenProb)
 			if (tmp != node) {
 				if (newReturn == null)
 					value = tmp
 				else
-					newReturn.children += head -> tmp
+					newReturn.children += head -> (newNodeProb, tmp)
 			}
 		}
 		if (newReturn == null)
@@ -84,15 +87,15 @@ class OneNewTrieNode(key: String, var value: NewTrieNode) extends NewTrieNode {
 			newReturn
 	}
 
-	override def getChild(s: String): Option[NewTrieNode] = {
+	override def getChild(s: String): Option[(Float, NewTrieNode)] = {
 		if (s == key)
-			Some(value)
+			Some(prob, value)
 		else
 			None
 	}
 }
 
-class MapNewTrieNode(var children: mutable.Map[String, NewTrieNode] = mutable.Map()) extends NewTrieNode {
+class MapNewTrieNode(var children: mutable.Map[String, (Float, NewTrieNode)] = mutable.Map()) extends NewTrieNode {
 
 	var nodeIsEntry: Boolean = false
 
@@ -104,22 +107,24 @@ class MapNewTrieNode(var children: mutable.Map[String, NewTrieNode] = mutable.Ma
 
 	override def getChild(s: String) = children.get(s)
 
-	def add(tokens: Array[String], i: Int): NewTrieNode = {
+	def add(tokens: Array[String], i: Int, tokenProb: Float): NewTrieNode = {
 		val head = tokens(i)
 		val isLastToken = i == tokens.size - 1
+		var newNodeProb = if (isLastToken) tokenProb else Float.NaN
 
 		val node = getChild(head) match {
-			case Some(existingNode) =>
+			case Some((prob, existingNode)) =>
+				newNodeProb = prob
 				existingNode
 			case None =>
 				val newNode = if (isLastToken) EntryZeroNewTrieNode else NoEntryZeroNewTrieNode
-				children += head -> newNode
+				children += head -> (newNodeProb, newNode)
 				newNode
 		}
 		if (!isLastToken) {
-			val tmp = node.add(tokens, i + 1)
+			val tmp = node.add(tokens, i + 1, tokenProb)
 			if (tmp != node)
-				children += (head -> tmp)
+				children += (head -> (newNodeProb, tmp))
 			this
 		}
 		else {
@@ -130,18 +135,20 @@ class MapNewTrieNode(var children: mutable.Map[String, NewTrieNode] = mutable.Ma
 
 	def contains(tokens: Array[String]): ContainsResult = {
 		var node: NewTrieNode = this
+		var nodeProb: Float = Float.NaN
 
 		var i = 0
 		while (i < tokens.size) {
 			node.getChild(tokens(i)) match {
-				case Some(nextNode) =>
+				case Some((prob, nextNode)) =>
 					node = nextNode
+					nodeProb = prob
 				case None =>
-					return ContainsResult(false, false)
+					return ContainsResult(false, false, Float.NaN)
 			}
 			i += 1
 		}
-		ContainsResult(node.isEntry, true)
+		ContainsResult(node.isEntry, true, nodeProb)
 	}
 }
 
@@ -149,8 +156,8 @@ class NewTrie extends Trie {
 
 	val rootNode = new MapNewTrieNode
 
-	override def add(tokenString: String): Unit = {
-		rootNode.add(tokenString.split(' '), 0)
+	override def add(tokenString: String, tokenProb: Float): Unit = {
+		rootNode.add(tokenString.split(' '), 0, tokenProb)
 	}
 
 	override def contains(tokenString: String): ContainsResult = {
@@ -164,6 +171,28 @@ class NewTrie extends Trie {
 	def findAllIn(tokens: Array[String]): Iterable[String] = {
 		val it = new FindAllInIterator(rootNode, tokens)
 		it.toSet
+	}
+
+	override def toString: String = {
+		val nodeStack = mutable.Stack[(Int, String, NewTrieNode, Float)]()
+		nodeStack.push((0, "", rootNode, Float.NaN))
+
+		val sb = new mutable.StringBuilder()
+
+		while (nodeStack.nonEmpty) {
+			val (level, text, node, prob) = nodeStack.pop()
+			sb.append(" " * (level * 4) + s"--$prob--> $text\n")
+			node match {
+				case m: MapNewTrieNode =>
+					m.children.toList.sortBy(_._1).foreach { case (nextText, (nextProb, nextNode)) =>
+						nodeStack.push((level + 1, nextText, nextNode, nextProb))
+					}
+				case o: OneNewTrieNode =>
+					nodeStack.push((level + 1, o.key, o.value, o.prob))
+				case z: ZeroNewTrieNode =>
+			}
+		}
+		sb.toString()
 	}
 
 }
@@ -193,7 +222,7 @@ class FindAllInIterator(rootNode: MapNewTrieNode, tokens: Array[String]) extends
 				return false
 			}
 			currentNode.getChild(tokens(currentIndex)) match {
-				case Some(node) =>
+				case Some((prob, node)) =>
 					currentNode = node
 					indexOffset += 1
 					while (currentIndex < tokenSize && tokens(currentIndex).isEmpty)

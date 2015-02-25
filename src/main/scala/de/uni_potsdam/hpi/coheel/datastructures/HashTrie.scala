@@ -1,11 +1,10 @@
 package de.uni_potsdam.hpi.coheel.datastructures
 
-import scala.collection.mutable
-
-case class ContainsResult(asEntry: Boolean, asIntermediateNode: Boolean)
+case class ContainsResult(asEntry: Boolean, asIntermediateNode: Boolean, prob: Float = Float.NaN)
 
 trait Trie {
-	def add(tokenString: String): Unit
+	def add(tokenString: String, prob: Float): Unit = add(tokenString)
+	def add(tokenString: String): Unit = add(tokenString, Float.NaN)
 	def contains(tokenString: String): ContainsResult
 	def findAllIn(text: String): Iterable[String]
 }
@@ -17,7 +16,7 @@ class HashTrie(splitter: String => Array[String] = { s => s.split(' ')}) extends
 
 	var children: Map[String, HashTrie] = _
 
-	def add(tokens: String): Unit = {
+	override def add(tokens: String): Unit = {
 		if (tokens.isEmpty)
 			throw new RuntimeException("Cannot add empty tokens.")
 		add(splitter(tokens))
@@ -56,13 +55,13 @@ class HashTrie(splitter: String => Array[String] = { s => s.split(' ')}) extends
 	def contains(tokens: Seq[String]): ContainsResult = {
 		// We found the correct node, now check if it is an entry
 		if (tokens.isEmpty)
-			ContainsResult(isEntry, true)
+			ContainsResult(isEntry, true, Float.NaN)
 		// We reached an early end in the tree (no child node, even though we have more tokens to process)
 		else if (children == null)
-			ContainsResult(false, false)
+			ContainsResult(false, false, Float.NaN)
 		else {
 			children.get(tokens.head) match {
-				case None => ContainsResult(false, false)
+				case None => ContainsResult(false, false, Float.NaN)
 				case Some(trieNode) => trieNode.contains(tokens.tail)
 			}
 		}

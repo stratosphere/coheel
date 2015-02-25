@@ -9,8 +9,8 @@ import scala.collection.JavaConverters._
 @RunWith(classOf[JUnitRunner])
 class TrieTest extends FunSuite {
 
-	buildTests(new HashTrie())
-//	buildTests(new TrieToni())
+//	buildTests(new HashTrie())
+	buildTests(new TrieToni())
 	buildTests(new NewTrie())
 
 	def buildTests[T <: Trie](trie: => Trie): Unit = {
@@ -19,10 +19,32 @@ class TrieTest extends FunSuite {
 		}
 		val name = trie.getClass.getSimpleName
 
+		def assertProb(condition: Boolean): Unit = {
+			if (name == "NewTrie")
+				assert(condition)
+		}
+
+		test(s"print a trie for $name") {
+			val trie = newTrie()
+			trie.add("angela", 0.1f)
+			trie.add("angela merkel chancellor", 0.2f)
+			trie.add("angela merkel german", 0.3f)
+			trie.add("another test", 0.4f)
+			trie.add("angela chancellor", 0.5f)
+			assertProb(trie.contains("angela").prob == 0.1f)
+			assertProb(trie.contains("angela merkel chancellor").prob == 0.2f)
+			assertProb(trie.contains("angela merkel german").prob == 0.3f)
+			assertProb(java.lang.Float.isNaN(trie.contains("angela merkel").prob))
+			assertProb(trie.contains("another test").prob == 0.4f)
+			assertProb(trie.contains("angela chancellor").prob == 0.5f)
+			println(trie)
+		}
+
 		test(s"single word queries work for $name") {
 			val trie = newTrie()
-			trie.add("angela")
+			trie.add("angela", 0.5f)
 			assert(trie.contains("angela").asEntry)
+			assertProb(trie.contains("angela").prob == 0.5f)
 		}
 
 		test(s"later add's in middle work for $name") {

@@ -39,7 +39,7 @@ class NerRocCurveProgram extends NoParamCoheelProgram {
 				partition.foreach { wikiPage =>
 					i += 1
 					// determine the actual surfaces, from the real wikipedia article
-					val actualSurfaces = wikiPage.links.map { link => link.surfaceRepr}.toSet
+					val actualSurfaces = wikiPage.links.map { link => link.surfaceRepr }.toSet
 
 					// determine potential surfaces, i.e. the surfaces that the NER would return for the current
 					// threshold
