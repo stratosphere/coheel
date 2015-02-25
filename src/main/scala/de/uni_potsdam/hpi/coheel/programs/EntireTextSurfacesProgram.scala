@@ -6,7 +6,6 @@ import java.util.Date
 import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
 import de.uni_potsdam.hpi.coheel.datastructures.NewTrie
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
-import de.uni_potsdam.hpi.coheel.io.OutputFiles
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{EntireTextSurfaces, SurfaceAsLinkCount, EntireTextSurfaceCounts}
 import org.apache.flink.api.common.functions.{BroadcastVariableInitializer, RichFlatMapFunction}
@@ -21,9 +20,7 @@ object EntireTextSurfacesProgram {
 }
 class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 
-	@transient val log = Logger.getLogger(getClass)
-	lazy val fileType = FlinkProgramRunner.config.getString("type")
-	val params = if (fileType == "file") List(-1) else 1 to 10
+	val params = if (runsOffline()) List(-1) else 1 to 10
 	override def getDescription = "Wikipedia Extraction: Entire Text Surfaces"
 
 	override def buildProgram(env: ExecutionEnvironment, param: Int): Unit = {
@@ -36,7 +33,7 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 				None
 		}.name("Parsed Plain-Texts")
 
-		val currentFile = if (param == -1) "" else s"/$param"
+		val currentFile = if (runsOffline()) "" else s"/$param"
 		val surfaces = env.readTextFile(surfaceDocumentCountsPath + currentFile).name("Subset of Surfaces")
 			.flatMap(new RichFlatMapFunction[String, String] {
 			override def open(params: Configuration): Unit = { }
@@ -88,7 +85,7 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 			}
 		}.name("Surface-Link-Probs")
 
-		val currentOutputFile = if (param == -1) "" else s"/$param-it"
+		val currentOutputFile = if (runsOffline()) "" else s"/$param-it"
 		entireTextSurfaces.writeAsTsv(entireTextSurfacesPath + currentOutputFile)
 		surfaceLinkProbs.writeAsTsv(surfaceLinkProbsPath + currentOutputFile)
 	}

@@ -8,8 +8,6 @@ import org.apache.log4j.Logger
 
 class NerRocCurveProgram extends CoheelProgram[Int] {
 
-	@transient val log: Logger = Logger.getLogger(this.getClass)
-
 	override def getDescription = "Determining the ROC curve for the NER threshold."
 
 	override val params: Seq[Int] = List(1)

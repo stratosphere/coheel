@@ -8,8 +8,6 @@ import org.apache.log4j.Logger
 
 class RedirectResolvingProgram extends NoParamCoheelProgram {
 
-	@transient val log = Logger.getLogger(getClass)
-
 	override def getDescription = "Resolving redirects"
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {

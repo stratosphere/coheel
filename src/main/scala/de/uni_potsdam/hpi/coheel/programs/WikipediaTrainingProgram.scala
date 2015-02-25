@@ -10,8 +10,6 @@ import org.apache.log4j.Logger
 
 class WikipediaTrainingProgram extends NoParamCoheelProgram {
 
-	@transient val log: Logger = Logger.getLogger(this.getClass)
-
 	override def getDescription = "Wikipedia Extraction"
 
 	/**
