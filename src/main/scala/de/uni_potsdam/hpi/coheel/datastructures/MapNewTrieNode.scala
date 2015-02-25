@@ -47,7 +47,7 @@ abstract class ZeroNewTrieNode extends NewTrieNode {
 	override def getChild(s: String): Option[(Float, NewTrieNode)] = None
 }
 
-class OneNewTrieNode(val key: String, var value: NewTrieNode, val prob: Float) extends NewTrieNode {
+class OneNewTrieNode(val key: String, var value: NewTrieNode, var prob: Float) extends NewTrieNode {
 
 	var nodeIsEntry: Boolean = false
 	override def isEntry: Boolean = nodeIsEntry
@@ -65,7 +65,10 @@ class OneNewTrieNode(val key: String, var value: NewTrieNode, val prob: Float) e
 		var newReturn: MapNewTrieNode = null
 		val node = if (head == key) {
 			newNodeProb = prob
-			if (isLastToken) value.setIsEntry(true) else value
+			if (isLastToken) {
+				prob = tokenProb
+				value.setIsEntry(true)
+			} else value
 		} else {
 			val newNode = if (isLastToken) EntryZeroNewTrieNode else NoEntryZeroNewTrieNode
 			newReturn = new MapNewTrieNode(mutable.Map(key -> (prob, value), head -> (newNodeProb, newNode)))
@@ -114,7 +117,11 @@ class MapNewTrieNode(var children: mutable.Map[String, (Float, NewTrieNode)] = m
 
 		val node = getChild(head) match {
 			case Some((prob, existingNode)) =>
-				newNodeProb = prob
+				if (isLastToken) {
+					children += head -> (tokenProb, existingNode)
+				} else {
+					newNodeProb = prob
+				}
 				existingNode
 			case None =>
 				val newNode = if (isLastToken) EntryZeroNewTrieNode else NoEntryZeroNewTrieNode

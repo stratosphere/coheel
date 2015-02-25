@@ -37,7 +37,6 @@ class TrieTest extends FunSuite {
 			assertProb(java.lang.Float.isNaN(trie.contains("angela merkel").prob))
 			assertProb(trie.contains("another test").prob == 0.4f)
 			assertProb(trie.contains("angela chancellor").prob == 0.5f)
-			println(trie)
 		}
 
 		test(s"single word queries work for $name") {
@@ -49,10 +48,12 @@ class TrieTest extends FunSuite {
 
 		test(s"later add's in middle work for $name") {
 			val trie = newTrie()
-			trie.add("angela merkel")
-			trie.add("angela")
+			trie.add("angela merkel", 0.1f)
+			trie.add("angela", 0.2f)
 			assert(trie.contains("angela").asEntry)
 			assert(trie.contains("angela merkel").asEntry)
+			assertProb(trie.contains("angela").prob == 0.2f)
+			assertProb(trie.contains("angela merkel").prob == 0.1f)
 		}
 
 		test(s"add reuses existing nodes for $name") {
@@ -61,7 +62,7 @@ class TrieTest extends FunSuite {
 			trie.add("angela dorothea")
 			val testSentence = "angela dorothea"
 			val result = trie.findAllIn(testSentence).toList
-			assert (result.size === 1)
+			assert(result.size === 1)
 		}
 
 		test(s"contains handles spaces #1 for $name") {
@@ -69,7 +70,7 @@ class TrieTest extends FunSuite {
 			trie.add("angela")
 			val testSentence = "angela            merkel"
 			val result = trie.findAllIn(testSentence).toList
-			assert (result.size === 1)
+			assert(result.size === 1)
 		}
 
 		test(s"contains handles spaces #2 for $name") {
@@ -82,26 +83,33 @@ class TrieTest extends FunSuite {
 
 		test(s"multiple word queries #1 work for $name") {
 			val trie = newTrie()
-			trie.add("angela merkel")
+			trie.add("angela merkel", 0.5f)
 			assert(trie.contains("angela merkel").asEntry)
+			assertProb(trie.contains("angela merkel").prob == 0.5f)
 		}
 
 		test(s"multiple word queries #2 work for $name") {
 			val trie = newTrie()
-			trie.add("angela merkel chancellor")
-			trie.add("angela merkel")
+			trie.add("angela merkel chancellor", 0.5f)
+			trie.add("angela merkel", 0.4f)
+			println(trie)
 			val testSentence = "angela merkel"
 			val result = trie.findAllIn(testSentence).toList
-			assert (result.size === 1)
+			assert(result.size === 1)
+			assertProb(trie.contains("angela merkel").prob == 0.4f)
+			assertProb(trie.contains("angela merkel chancellor").prob == 0.5f)
 		}
 
 		test(s"distinction between contains-asEntry and contains-asIntermediateNode for $name") {
 			val trie = newTrie()
-			trie.add("angela dorothea merkel")
+			trie.add("angela dorothea merkel", 0.5f)
 
 			assert(trie.contains("angela").asIntermediateNode)
+			assertProb(java.lang.Float.isNaN(trie.contains("angela").prob))
 			assert(trie.contains("angela dorothea").asIntermediateNode)
+			assertProb(java.lang.Float.isNaN(trie.contains("angela dorothea").prob))
 			assert(trie.contains("angela dorothea merkel").asIntermediateNode)
+			assertProb(trie.contains("angela dorothea merkel").prob == 0.5f)
 
 			assert(!trie.contains("angela").asEntry)
 			assert(!trie.contains("angela dorothea").asEntry)
@@ -116,19 +124,22 @@ class TrieTest extends FunSuite {
 
 		test(s"multiple adds do not cause harm for $name") {
 			val trie = newTrie()
-			trie.add("angela merkel")
-			trie.add("angela merkel")
-			trie.add("angela merkel")
+			trie.add("angela merkel", 0.5f)
+			assertProb(trie.contains("angela merkel").prob == 0.5f)
+			trie.add("angela merkel", 0.4f)
+			assertProb(trie.contains("angela merkel").prob == 0.4f)
+			trie.add("angela merkel", 0.3f)
+			assertProb(trie.contains("angela merkel").prob == 0.3f)
 			assert(!trie.contains("angela").asEntry)
 			assert(trie.contains("angela merkel").asEntry)
 		}
 
 		test(s"findAllIn finds all occurrences for $name") {
 			val trie = newTrie()
-			trie.add("angela merkel")
-			trie.add("angela merkel is german")
-			trie.add("angela")
-			trie.add("merkel")
+			trie.add("angela merkel", 0.5f)
+			trie.add("angela merkel is german", 0.4f)
+			trie.add("angela", 0.3f)
+			trie.add("merkel", 0.2f)
 
 			val testSentence = "angela merkel is german"
 			val result = trie.findAllIn(testSentence).toList
@@ -142,12 +153,13 @@ class TrieTest extends FunSuite {
 			val trie = newTrie()
 
 			trie.add("angela merkel")
-			trie.add("angela")
+			trie.add("angela", 0.5f)
 			trie.add("angela dorothea merkel")
 
 			val testSentence = "angela"
 			val result = trie.findAllIn(testSentence).toList
-			assert (result.size === 1)
+			assert(result.size === 1)
+			assertProb(trie.contains("angela").prob == 0.5f)
 		}
 
 		test(s"findAllIn finds all occurrences of substrings for $name") {
@@ -158,7 +170,7 @@ class TrieTest extends FunSuite {
 
 			val testSentence = "chancellor angela merkel"
 			val result = trie.findAllIn(testSentence).toList
-			assert (result.size === 2)
+			assert(result.size === 2)
 		}
 
 		test(s"findAllIn respects word boundaries for $name") {
@@ -189,9 +201,11 @@ class TrieTest extends FunSuite {
 
 		test(s"branching works at every level for $name") {
 			val trie = newTrie()
-			trie.add("angela dorothea merkel")
-			trie.add("angela dorothea kanzler")
+			trie.add("angela dorothea merkel", 0.5f)
+			trie.add("angela dorothea kanzler", 0.4f)
 			assert(!trie.contains("dorothea").asEntry)
+			assertProb(trie.contains("angela dorothea merkel").prob == 0.5f)
+			assertProb(trie.contains("angela dorothea kanzler").prob == 0.4f)
 			assert(!trie.contains("angela dorothea").asEntry)
 			assert(trie.contains("angela dorothea merkel").asEntry)
 		}
