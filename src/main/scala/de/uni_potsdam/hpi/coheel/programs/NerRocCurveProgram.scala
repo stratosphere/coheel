@@ -12,8 +12,6 @@ class NerRocCurveProgram extends NoParamCoheelProgram {
 
 	@transient val log: Logger = Logger.getLogger(this.getClass)
 
-	TrieBuilder.buildFullTrie()
-
 	override def getDescription = "Determining the ROC curve for the NER threshold."
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {

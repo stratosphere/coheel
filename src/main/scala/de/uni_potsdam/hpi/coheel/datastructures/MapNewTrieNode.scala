@@ -176,8 +176,14 @@ class NewTrie extends Trie {
 	}
 
 	def findAllIn(tokens: Array[String]): Iterator[String] = {
-		new FindAllInIterator(rootNode, tokens)
-//		it.toSet
+		new FindAllInIterator(rootNode, tokens, { (s: String, p: Float ) => s })
+	}
+
+	def findAllInWithProbs(text: String): Iterator[(String, Float)] = {
+		findAllInWithProbs(text.split(' '))
+	}
+	def findAllInWithProbs(tokens: Array[String]): Iterator[(String, Float)] = {
+		new FindAllInIterator(rootNode, tokens, { (s: String, p: Float) => (s, p) })
 	}
 
 	override def toString: String = {
@@ -204,7 +210,7 @@ class NewTrie extends Trie {
 
 }
 
-class FindAllInIterator(rootNode: MapNewTrieNode, tokens: Array[String]) extends Iterator[String] {
+class FindAllInIterator[T](rootNode: MapNewTrieNode, tokens: Array[String], fun: (String, Float) => T) extends Iterator[T] {
 
 	val alreadySeen = mutable.Set[String]()
 	var startIndex = 0
@@ -213,6 +219,8 @@ class FindAllInIterator(rootNode: MapNewTrieNode, tokens: Array[String]) extends
 	val tokenSize = tokens.size
 
 	def currentIndex = startIndex + indexOffset
+
+	var currentProb = Float.NaN
 
 	var currentNode: NewTrieNode = rootNode
 	var lastReturnedNode: NewTrieNode = rootNode
@@ -233,6 +241,7 @@ class FindAllInIterator(rootNode: MapNewTrieNode, tokens: Array[String]) extends
 			currentNode.getChild(tokens(currentIndex)) match {
 				case Some((prob, node)) =>
 					currentNode = node
+					currentProb = prob
 					indexOffset += 1
 					while (currentIndex < tokenSize && tokens(currentIndex).isEmpty)
 						indexOffset += 1
@@ -245,7 +254,7 @@ class FindAllInIterator(rootNode: MapNewTrieNode, tokens: Array[String]) extends
 		true
 	}
 
-	override def next(): String = {
+	override def next(): T = {
 		if (!hasNextCalled) {
 			val resultHasNext = hasNext
 			if (!resultHasNext)
@@ -254,7 +263,7 @@ class FindAllInIterator(rootNode: MapNewTrieNode, tokens: Array[String]) extends
 		hasNextCalled = false
 		val res = buildCurrentTokenString()
 		alreadySeen += res
-		res
+		fun(res, currentProb)
 	}
 
 	private def buildCurrentTokenString(): String = {

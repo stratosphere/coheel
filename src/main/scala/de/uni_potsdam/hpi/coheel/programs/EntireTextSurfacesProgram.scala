@@ -129,6 +129,6 @@ class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[(String, String)
 
 	def findEntireTextSurfaces(plainText: (String, String), trie: NewTrie): Iterator[EntireTextSurfaces] = {
 		val text = plainText._2
-		trie.findAllIn(text).toIterator.map { surface => EntireTextSurfaces(plainText._1, surface)}
+		trie.findAllIn(text).map { surface => EntireTextSurfaces(plainText._1, surface)}
 	}
 }

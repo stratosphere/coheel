@@ -222,5 +222,20 @@ class TrieTest extends FunSuite {
 			trie.add("ab cd ef gh ij kl")
 			assert(trie.contains("ab cd ef gh ij kl").asEntry)
 		}
+
+		test(s"findAllInWithProbs with $name") {
+			newTrie() match {
+				case trie: NewTrie =>
+					trie.add("angela merkel", 0.1f)
+					trie.add("test1", 0.2f)
+					trie.add("test2", 0.3f)
+
+					val testSentence = "This is a test1 with angela merkel and test2"
+					val res = trie.findAllInWithProbs(testSentence)
+					println(res.toList)
+				case _ =>
+			}
+
+		}
 	}
 }
