@@ -12,6 +12,21 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Maven: org.apache.flink:flink-scala:0.8.1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.flink:flink-core:0.8.1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.flink:flink-shaded:0.8.1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.flink:flink-java:0.8.1" level="project" />
+    <orderEntry type="library" name="Maven: com.twitter:chill-avro_2.10:0.5.1" level="project" />
+    <orderEntry type="library" name="Maven: com.twitter:chill-bijection_2.10:0.5.1" level="project" />
+    <orderEntry type="library" name="Maven: com.twitter:bijection-core_2.10:0.7.0" level="project" />
+    <orderEntry type="library" name="Maven: com.twitter:bijection-avro_2.10:0.7.0" level="project" />
+    <orderEntry type="library" name="Maven: com.twitter:chill-protobuf:0.5.1" level="project" />
+    <orderEntry type="library" name="Maven: com.twitter:chill-thrift:0.5.1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.thrift:libthrift:0.6.1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-mapreduce-client-core:2.2.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.flink:flink-compiler:0.8.1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.flink:flink-clients:0.8.1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.flink:flink-runtime:0.8.1" level="project" />
     <orderEntry type="library" name="Maven: de.hpi.fgis:utilities:0.0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:15.0" level="project" />
     <orderEntry type="library" name="Maven: com.carrotsearch:hppc:0.6.0" level="project" />

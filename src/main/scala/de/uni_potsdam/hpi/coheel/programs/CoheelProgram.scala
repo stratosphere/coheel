@@ -1,26 +1,21 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
-import de.uni_potsdam.hpi.coheel.wiki.WikiPage
-import org.apache.flink.api.common.ProgramDescription
-import org.apache.flink.api.scala.{DataSet, ExecutionEnvironment}
-import org.apache.log4j.Logger
 import java.lang.Iterable
-import java.util.Date
 
-import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
+import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
 import de.uni_potsdam.hpi.coheel.io.{IteratorReader, WikiPageInputFormat}
-import org.apache.flink.api.common.functions.RichMapPartitionFunction
-import org.apache.flink.api.scala._
+import de.uni_potsdam.hpi.coheel.programs.DataClasses.SurfaceAsLinkCount
+import de.uni_potsdam.hpi.coheel.wiki.{Extractor, TokenizerHelper, WikiPage, WikiPageReader}
+import org.apache.flink.api.common.ProgramDescription
+import org.apache.flink.api.common.functions.{RichFlatMapFunction, RichMapPartitionFunction}
+import org.apache.flink.api.scala.{DataSet, ExecutionEnvironment, _}
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.core.fs.Path
 import org.apache.flink.core.fs.local.LocalFileSystem
-import de.uni_potsdam.hpi.coheel.wiki.{TokenizerHelper, Extractor, WikiPage, WikiPageReader}
-import java.io._
-import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
 import org.apache.flink.util.Collector
-import org.apache.hadoop.hdfs.DistributedFileSystem
 import org.apache.log4j.Logger
+import de.uni_potsdam.hpi.coheel.io.OutputFiles._
+
 import scala.collection.JavaConverters._
 
 abstract class CoheelProgram[T]() extends ProgramDescription {
@@ -78,6 +73,46 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 		}.name("Filter-Normal-Pages")
 	}
 
+	def getPlainTexts(): DataSet[(String, String)] = {
+		environment.readTextFile(plainTextsPath).name("Plain-Texts").flatMap { line =>
+			val split = line.split('\t')
+			if (split.size == 2)
+				Some((split(0), split(1)))
+			else
+				None
+		}.name("Parsed Plain-Texts")
+	}
+	def getSurfaces(subFile: String = ""): DataSet[String] = {
+		environment.readTextFile(surfaceDocumentCountsPath + subFile).name("Subset of Surfaces")
+			.flatMap(new RichFlatMapFunction[String, String] {
+			override def open(params: Configuration): Unit = { }
+			override def flatMap(line: String, out: Collector[String]): Unit = {
+				val split = line.split('\t')
+				if (split.size == 3)
+					out.collect(split(0))
+			}
+		}).name("Parsed Surfaces")
+	}
+
+	def getSurfaceDocumentCounts(): DataSet[SurfaceAsLinkCount] = {
+		environment.readTextFile(surfaceDocumentCountsPath).name("Raw-Surface-Document-Counts").map { line =>
+			val split = line.split('\t')
+			// not clear, why lines without a count occur, but they do
+			try {
+				if (split.size < 3)
+					SurfaceAsLinkCount(split(0), 0)
+				else {
+					val (surface, count) = (split(0), split(2).toInt)
+					SurfaceAsLinkCount(surface, count)
+				}
+			} catch {
+				case e: NumberFormatException =>
+					println(e)
+					println(line)
+					SurfaceAsLinkCount(split(0), 0)
+			}
+		}.name("Surface-Document-Counts")
+	}
 
 	def runsOffline(): Boolean = {
 		val fileType = FlinkProgramRunner.config.getString("type")

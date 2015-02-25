@@ -25,31 +25,17 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 
 	override def buildProgram(env: ExecutionEnvironment, param: Int): Unit = {
 //		val plainTexts = env.readCsvFile[(String, String)](plainTextsPath, OutputFiles.LINE_DELIMITER, OutputFiles.ROW_DELIMITER).name("Parsed Plain-Texts")
-		val plainTexts = env.readTextFile(plainTextsPath).name("Plain-Texts").flatMap { line =>
-			val split = line.split('\t')
-			if (split.size == 2)
-				Some((split(0), split(1)))
-			else
-				None
-		}.name("Parsed Plain-Texts")
+		val plainTexts = getPlainTexts()
 
 		val currentFile = if (runsOffline()) "" else s"/$param"
-		val surfaces = env.readTextFile(surfaceDocumentCountsPath + currentFile).name("Subset of Surfaces")
-			.flatMap(new RichFlatMapFunction[String, String] {
-			override def open(params: Configuration): Unit = { }
-			override def flatMap(line: String, out: Collector[String]): Unit = {
-				val split = line.split('\t')
-				if (split.size == 3)
-					out.collect(split(0))
-			}
-		}).name("Parsed Surfaces")
+		val surfaces = getSurfaces(currentFile)
 
 		val entireTextSurfaces = plainTexts
 			.flatMap(new FindEntireTextSurfacesFlatMap)
 			.withBroadcastSet(surfaces, EntireTextSurfacesProgram.BROADCAST_SURFACES)
 			.name("Entire-Text-Surfaces-Along-With-Document")
 
-		val surfaceDocumentCounts = env.readTextFile(surfaceDocumentCountsPath).name("Raw-Surface-Document-Counts")
+		val surfaceDocumentCounts = getSurfaceDocumentCounts()
 
 		val entireTextSurfaceCounts = entireTextSurfaces
 			.groupBy { _.surface }
@@ -59,23 +45,7 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 			}
 			.name("Entire-Text-Surface-Counts")
 
-		val surfaceLinkProbs = surfaceDocumentCounts.map { line =>
-			val split = line.split('\t')
-			// not clear, why lines without a count occur, but they do
-			try {
-				if (split.size < 3)
-					SurfaceAsLinkCount(split(0), 0)
-				else {
-					val (surface, count) = (split(0), split(2).toInt)
-					SurfaceAsLinkCount(surface, count)
-				}
-			} catch {
-				case e: NumberFormatException =>
-					println(e)
-					println(line)
-					SurfaceAsLinkCount(split(0), 0)
-			}
-		}.name("Surface-Document-Counts").join(entireTextSurfaceCounts)
+		val surfaceLinkProbs = surfaceDocumentCounts.join(entireTextSurfaceCounts)
 			.where { _.surface }
 			.equalTo { _.surface }
 			.map { joinResult => joinResult match {
