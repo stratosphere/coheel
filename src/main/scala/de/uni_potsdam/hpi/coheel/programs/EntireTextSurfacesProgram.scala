@@ -1,19 +1,16 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import java.lang.Iterable
 import java.util.Date
 
-import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
 import de.uni_potsdam.hpi.coheel.datastructures.NewTrie
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
-import de.uni_potsdam.hpi.coheel.programs.DataClasses.{EntireTextSurfaces, SurfaceAsLinkCount, EntireTextSurfaceCounts}
-import org.apache.flink.api.common.functions.{BroadcastVariableInitializer, RichFlatMapFunction}
+import de.uni_potsdam.hpi.coheel.programs.DataClasses.{EntireTextSurfaces, EntireTextSurfaceCounts}
+import org.apache.flink.api.common.functions.RichFlatMapFunction
 import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.util.Collector
 import org.apache.log4j.Logger
-import scala.collection.JavaConverters._
 
 object EntireTextSurfacesProgram {
 	val BROADCAST_SURFACES = "surfaces"
@@ -55,26 +52,14 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 			}
 		}.name("Surface-Link-Probs")
 
-		val currentOutputFile = if (runsOffline()) "" else s"/$param-it"
-		entireTextSurfaces.writeAsTsv(entireTextSurfacesPath + currentOutputFile)
-		surfaceLinkProbs.writeAsTsv(surfaceLinkProbsPath + currentOutputFile)
+		entireTextSurfaces.writeAsTsv(entireTextSurfacesPath + currentFile)
+		surfaceLinkProbs.writeAsTsv(surfaceLinkProbsPath + currentFile)
 	}
 }
 class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[(String, String), EntireTextSurfaces] {
 	var trie: NewTrie = _
 	var lastChunk = new Date()
 	def log = Logger.getLogger(getClass)
-
-	class TrieBroadcastInitializer extends BroadcastVariableInitializer[String, NewTrie] {
-
-		override def initializeBroadcastVariable(surfaces: Iterable[String]): NewTrie = {
-			val trieFromBroadcast = new NewTrie
-			surfaces.asScala.foreach { surface =>
-				trieFromBroadcast.add(surface)
-			}
-			trieFromBroadcast
-		}
-	}
 
 	override def open(params: Configuration): Unit = {
 		log.info(s"Building trie with ${FreeMemory.get(true)} MB")

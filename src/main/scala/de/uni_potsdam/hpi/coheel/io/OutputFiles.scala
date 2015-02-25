@@ -21,7 +21,7 @@ object OutputFiles {
 	lazy val surfaceDocumentCountsPath   = s"$location://${currentPath}surface-document-counts.wiki"
 	lazy val entireTextSurfacesPath      = s"$location://${currentPath}entire-text-surfaces.wiki"
 	lazy val surfaceLinkProbsPath        = s"$location://${currentPath}surface-link-probs.wiki"
-	lazy val nerRocCurvePath             = s"$location://${currentPath}ner-roc-curve.wiki"
+	lazy val surfaceEvaluationPath       = s"$location://${currentPath}surface-evaluation.wiki"
 
 	lazy val classificationPath          = s"$location://${currentPath}classification.wiki"
 
