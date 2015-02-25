@@ -2,7 +2,7 @@ package de.uni_potsdam.hpi.coheel.programs
 
 import de.uni_potsdam.hpi.coheel.datastructures.Trie
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
-import de.uni_potsdam.hpi.coheel.wiki.{WikiPage, TokenizerHelper}
+import de.uni_potsdam.hpi.coheel.wiki.WikiPage
 import org.apache.flink.api.scala._
 import org.apache.log4j.Logger
 
@@ -13,7 +13,7 @@ class NerRocCurveProgram extends CoheelProgram[Int] {
 	override val params: Seq[Int] = List(1)
 
 	override def buildProgram(env: ExecutionEnvironment, param: Int): Unit = {
-		val wikiPages = ProgramHelper.filterNormalPages(ProgramHelper.getWikiPages(env))
+		val wikiPages = filterNormalPages(getWikiPages())
 
 		val rocValues = wikiPages.mapPartition { partitionIt =>
 			val partition = partitionIt.toList

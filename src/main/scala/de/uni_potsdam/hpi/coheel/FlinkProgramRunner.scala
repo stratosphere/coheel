@@ -110,14 +110,16 @@ object FlinkProgramRunner {
 			log.info("Starting ..")
 			try {
 				program.params.foreach { param =>
-					log.info(s"Current parameter: $param")
-					program.buildProgram(env, param)
+					if (param != null)
+						log.info(s"Current parameter: $param")
+					program.makeProgram(env, param)
 					FileUtils.writeStringToFile(new File("PLAN"), env.getExecutionPlan())
-					val paramsString = if (program.configurationParams.size > 0)
+					val configurationString = if (program.configurationParams.size > 0)
 						" " + program.configurationParams.toString().replace("Map(", "configuration-params = (")
 					else
 						""
-					env.execute(s"${program.getDescription} (dataset = ${config.getString("name")} current-param = $param$paramsString)")
+					val paramsString = if (param == null) "" else s" current-param = $param"
+					env.execute(s"${program.getDescription} (dataset = ${config.getString("name")}$paramsString$configurationString)")
 				}
 			} catch {
 				case e: ProgramInvocationException =>

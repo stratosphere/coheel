@@ -21,7 +21,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 	 * @param env Flink execution environment.
 	 */
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
-		val wikiPages = ProgramHelper.getWikiPages(env)
+		val wikiPages = getWikiPages()
 		if (!configurationParams.contains(ConfigurationParams.ONLY_WIKIPAGES) && !configurationParams.contains(ConfigurationParams.ONLY_PLAINTEXTS)) {
 			buildLinkPlans(wikiPages)
 			buildLanguageModelPlan(wikiPages)
@@ -132,7 +132,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 	 * Builds the plan who creates the language model for a given entity.
 	 */
 	def buildLanguageModelPlan(wikiPages: DataSet[WikiPage]): Unit = {
-		val words = ProgramHelper.filterNormalPages(wikiPages) flatMap { wikiPage =>
+		val words = filterNormalPages(wikiPages) flatMap { wikiPage =>
 			val tokens = TokenizerHelper.tokenizeWithCounts(wikiPage.plainText, stemming = false).map { case (token, count) =>
 				WordInDocument(wikiPage.pageTitle, token, count)
 			}.toIterator
