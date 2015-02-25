@@ -49,7 +49,7 @@ trait FindAllInContainsBased {
 		slidingContains[String](arr, { s => s }, startIndex)
 	}
 
-	def findAllIn(text: String): Iterable[String] = {
+	def findAllIn(text: String): Iterator[String] = {
 		val tokens = text.split(' ')
 		val resultSurfaces = mutable.HashSet[String]()
 
@@ -62,6 +62,6 @@ trait FindAllInContainsBased {
 			resultSurfaces ++= result
 			i += 1
 		}
-		resultSurfaces
+		resultSurfaces.iterator
 	}
 }

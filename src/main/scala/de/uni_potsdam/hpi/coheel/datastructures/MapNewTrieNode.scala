@@ -171,13 +171,13 @@ class NewTrie extends Trie {
 		rootNode.contains(tokenString.split(' '))
 	}
 
-	override def findAllIn(text: String): Iterable[String] = {
+	override def findAllIn(text: String): Iterator[String] = {
 		findAllIn(text.split(' '))
 	}
 
-	def findAllIn(tokens: Array[String]): Iterable[String] = {
-		val it = new FindAllInIterator(rootNode, tokens)
-		it.toSet
+	def findAllIn(tokens: Array[String]): Iterator[String] = {
+		new FindAllInIterator(rootNode, tokens)
+//		it.toSet
 	}
 
 	override def toString: String = {
@@ -205,6 +205,8 @@ class NewTrie extends Trie {
 }
 
 class FindAllInIterator(rootNode: MapNewTrieNode, tokens: Array[String]) extends Iterator[String] {
+
+	val alreadySeen = mutable.Set[String]()
 	var startIndex = 0
 	var indexOffset = 0
 	var hasNextCalled = false
@@ -218,7 +220,7 @@ class FindAllInIterator(rootNode: MapNewTrieNode, tokens: Array[String]) extends
 	override def hasNext: Boolean = {
 		hasNextCalled = true
 		var alreadyReturned = currentNode.isEntry
-		while (alreadyReturned || !currentNode.isEntry) {
+		while (alreadyReturned || !currentNode.isEntry || alreadySeen.contains(buildCurrentTokenString())) {
 			alreadyReturned = false
 			if (currentIndex >= tokenSize) {
 				startIndex += 1
@@ -250,6 +252,12 @@ class FindAllInIterator(rootNode: MapNewTrieNode, tokens: Array[String]) extends
 				throw new Exception("No next element")
 		}
 		hasNextCalled = false
+		val res = buildCurrentTokenString()
+		alreadySeen += res
+		res
+	}
+
+	private def buildCurrentTokenString(): String = {
 		var s = ""
 		var i = 0
 		while (i < indexOffset) {
@@ -259,5 +267,6 @@ class FindAllInIterator(rootNode: MapNewTrieNode, tokens: Array[String]) extends
 			i += 1
 		}
 		s.trim
+
 	}
 }

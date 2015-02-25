@@ -92,12 +92,19 @@ class TrieTest extends FunSuite {
 			val trie = newTrie()
 			trie.add("angela merkel chancellor", 0.5f)
 			trie.add("angela merkel", 0.4f)
-			println(trie)
 			val testSentence = "angela merkel"
 			val result = trie.findAllIn(testSentence).toList
 			assert(result.size === 1)
 			assertProb(trie.contains("angela merkel").prob == 0.4f)
 			assertProb(trie.contains("angela merkel chancellor").prob == 0.5f)
+		}
+
+		test(s"multiple occurrences work for $name") {
+			val trie = newTrie()
+			trie.add("angela")
+			val testSentence = "angela angela"
+			val result = trie.findAllIn(testSentence).toList
+			assert(result.size === 1)
 		}
 
 		test(s"distinction between contains-asEntry and contains-asIntermediateNode for $name") {

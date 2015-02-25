@@ -26,14 +26,13 @@ class AhoCorasickTrie extends Trie {
 		ContainsResult(result, asIntermediate)
 	}
 
-	override def findAllIn(text: String): Iterable[String] = {
+	override def findAllIn(text: String): Iterator[String] = {
 		if (!alreadyPrepared) {
 			trie.prepare()
 			alreadyPrepared = true
 		}
-		val res = trie.progressiveSearch(text).asScala.flatMap { result =>
+		trie.progressiveSearch(text).asScala.flatMap { result =>
 			result.getOutputs.asScala
-		}.map(_.asInstanceOf[String]).toList
-		res
+		}.map(_.asInstanceOf[String])
 	}
 }

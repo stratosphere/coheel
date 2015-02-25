@@ -25,7 +25,7 @@ class ConcurrentTreesTrie extends Trie {
 		ContainsResult(asEntry, asIntermediaNode)
 	}
 
-	override def findAllIn(text: String): Iterable[String] = {
-		radixTrie.getKeysContainedIn(" " + text + " ").asScala.map(_.toString.trim)
+	override def findAllIn(text: String): Iterator[String] = {
+		radixTrie.getKeysContainedIn(" " + text + " ").asScala.map(_.toString.trim).toIterator
 	}
 }

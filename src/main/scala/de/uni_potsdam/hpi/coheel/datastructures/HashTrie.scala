@@ -6,7 +6,7 @@ trait Trie {
 	def add(tokenString: String, prob: Float): Unit = add(tokenString)
 	def add(tokenString: String): Unit = add(tokenString, Float.NaN)
 	def contains(tokenString: String): ContainsResult
-	def findAllIn(text: String): Iterable[String]
+	def findAllIn(text: String): Iterator[String]
 }
 
 class HashTrie(splitter: String => Array[String] = { s => s.split(' ')}) extends Trie with FindAllInContainsBased {

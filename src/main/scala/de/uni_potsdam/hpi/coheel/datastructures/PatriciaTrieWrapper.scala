@@ -23,7 +23,7 @@ class PatriciaTrieWrapper extends Trie {
 		}
 	}
 
-	override def findAllIn(text: String): Iterable[String] = {
+	override def findAllIn(text: String): Iterator[String] = {
 		var result = Set[String]()
 
 		val tokens = text.split(' ')
@@ -46,7 +46,7 @@ class PatriciaTrieWrapper extends Trie {
 				}
 			}
 		}
-		result
+		result.iterator
 	}
 
 //	def slidingContains(arr: Array[String], startIndex: Int): Seq[Seq[String]] = {
