@@ -23,7 +23,7 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 
 	@transient val log = Logger.getLogger(getClass)
 	lazy val fileType = FlinkProgramRunner.config.getString("type")
-	val params = if (fileType == "file") List(1) else 1 to 10
+	val params = if (fileType == "file") List(-1) else 1 to 10
 	override def getDescription = "Wikipedia Extraction: Entire Text Surfaces"
 
 	override def buildProgram(env: ExecutionEnvironment, param: Int): Unit = {
@@ -36,7 +36,8 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 				None
 		}.name("Parsed Plain-Texts")
 
-		val surfaces = env.readTextFile(surfaceDocumentCountsPath + s"/$param").name("Subset of Surfaces")
+		val currentFile = if (param == -1) "" else s"/$param"
+		val surfaces = env.readTextFile(surfaceDocumentCountsPath + currentFile).name("Subset of Surfaces")
 			.flatMap(new RichFlatMapFunction[String, String] {
 			override def open(params: Configuration): Unit = { }
 			override def flatMap(line: String, out: Collector[String]): Unit = {
@@ -87,8 +88,9 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 			}
 		}.name("Surface-Link-Probs")
 
-		entireTextSurfaces.writeAsTsv(entireTextSurfacesPath + s"/$param-it")
-		surfaceLinkProbs.writeAsTsv(surfaceLinkProbsPath + s"/$param-it")
+		val currentOutputFile = if (param == -1) "" else s"/$param-it"
+		entireTextSurfaces.writeAsTsv(entireTextSurfacesPath + currentOutputFile)
+		surfaceLinkProbs.writeAsTsv(surfaceLinkProbsPath + currentOutputFile)
 	}
 }
 class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[(String, String), EntireTextSurfaces] {
