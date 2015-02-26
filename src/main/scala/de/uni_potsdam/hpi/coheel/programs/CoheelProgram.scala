@@ -26,9 +26,13 @@ object CoheelProgram {
 	}
 
 }
+
+object CoheelLogger {
+	val log: Logger = Logger.getLogger(getClass)
+}
 abstract class CoheelProgram[T]() extends ProgramDescription {
 
-	@transient val log = Logger.getLogger(getClass)
+	import CoheelLogger._
 	lazy val dumpFile = new Path(FlinkProgramRunner.config.getString("base_path"))
 	lazy val wikipediaFilesPath = if (dumpFile.isAbsolute) dumpFile.toUri.toString
 	else dumpFile.makeQualified(new LocalFileSystem).toUri.toString
