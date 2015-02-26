@@ -35,7 +35,7 @@ class SurfaceEvaluationProgram extends CoheelProgram[Int] {
 	}
 }
 
-case class Evaluation(threshold: Float, actualSurfaces: Int, potentialSurfaces: Int, tp: Int, fp: Int, subsetFp: Int, fn: Int) {
+case class Evaluation(threshold: String, actualSurfaces: Int, potentialSurfaces: Int, tp: Int, fp: Int, subsetFp: Int, fn: Int) {
 	override def toString: String = {
 		s"Evaluation(threshold=$threshold,actualSurfaces=$actualSurfaces,potentialSurfaces=$potentialSurfaces,tp=$tp,fp=$fp,subsetFp=$subsetFp,fn=$fn)"
 	}
@@ -88,7 +88,7 @@ class SurfaceEvaluationFlatMap extends RichFlatMapFunction[WikiPage, (String, Ev
 //			if (fn.size >= 1) {
 //				throw new Exception(s"${wikiPage.pageTitle} has false negatives: $fn.")
 //			}
-			out.collect(wikiPage.pageTitle, Evaluation(threshold, actualSurfaces.size, potentialSurfaces.size, tp.size, fp.size, subsetFp.size, fn.size))
+			out.collect(wikiPage.pageTitle, Evaluation(f"$threshold.1f", actualSurfaces.size, potentialSurfaces.size, tp.size, fp.size, subsetFp.size, fn.size))
 		}
 	}
 }
