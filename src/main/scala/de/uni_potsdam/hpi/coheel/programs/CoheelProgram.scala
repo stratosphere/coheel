@@ -67,8 +67,8 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 							plainText, links.toArray, wikiPage.isDisambiguation, wikiPage.isList))
 					} catch {
 						case e: Throwable =>
-							println(s"${e.getClass.getSimpleName} in ${wikiPage.pageTitle}, ${e.getMessage}, ${e.getStackTraceString}")
-							None
+							log.warn(s"Discarding ${wikiPage.pageTitle} because of ${e.getClass.getSimpleName} (${e.getMessage})")
+							log.warn(e.getStackTraceString)
 					}
 				}
 			}
@@ -98,29 +98,33 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 				val split = line.split('\t')
 				if (split.size == 3)
 					out.collect(split(0))
-				else
-					throw new Exception(s"Line length mismatch in >>$line<<")
+				else {
+					log.warn(s"Discarding '${split.deep}' because split size not correct")
+					log.warn(line)
+				}
 
 			}
 		}).name("Parsed Surfaces")
 	}
 
 	def getSurfaceDocumentCounts(): DataSet[SurfaceAsLinkCount] = {
-		environment.readTextFile(surfaceDocumentCountsPath).name("Raw-Surface-Document-Counts").map { line =>
+		environment.readTextFile(surfaceDocumentCountsPath).name("Raw-Surface-Document-Counts").flatMap { line =>
 			val split = line.split('\t')
 			// not clear, why lines without a count occur, but they do
 			try {
-				if (split.size < 3)
-					SurfaceAsLinkCount(split(0), 0)
-				else {
+				if (split.size != 3) {
+					log.warn(s"Discarding '${split.deep}' because split size not correct")
+					log.warn(line)
+					None
+				} else {
 					val (surface, count) = (split(0), split(2).toInt)
-					SurfaceAsLinkCount(surface, count)
+					Some(SurfaceAsLinkCount(surface, count))
 				}
 			} catch {
 				case e: NumberFormatException =>
-					println(e)
-					println(line)
-					SurfaceAsLinkCount(split(0), 0)
+					log.warn(s"Discarding '${split(0)}' because of ${e.getClass.getSimpleName}")
+					log.warn(line)
+					None
 			}
 		}.name("Surface-Document-Counts")
 	}

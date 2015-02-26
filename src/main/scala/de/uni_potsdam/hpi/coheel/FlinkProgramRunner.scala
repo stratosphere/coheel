@@ -126,7 +126,6 @@ object FlinkProgramRunner {
 					if (e.getMessage.contains("canceled"))
 						println("Stopping .. Program has been canceled.")
 			}
-//			PerformanceTimer.printTimerEvents()
 		}
 	}
 	def time[R](block: => R): Double = {
