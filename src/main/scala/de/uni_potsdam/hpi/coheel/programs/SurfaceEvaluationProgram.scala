@@ -61,7 +61,7 @@ class SurfaceEvaluationFlatMap extends RichFlatMapFunction[WikiPage, (String, Ev
 			println(potentialSurfacesWithProbs.toList)
 		}
 
-		(.0f to .9f by .1f).foreach { threshold =>
+		(0.0f to 0.95f by 0.05f).foreach { threshold =>
 			potentialSurfacesWithProbs = potentialSurfacesWithProbs.filter(_._2 >= threshold)
 			val potentialSurfaces = potentialSurfacesWithProbs.map { surface =>
 				surface._1.split(' ').toSeq
@@ -88,7 +88,7 @@ class SurfaceEvaluationFlatMap extends RichFlatMapFunction[WikiPage, (String, Ev
 //			if (fn.size >= 1) {
 //				throw new Exception(s"${wikiPage.pageTitle} has false negatives: $fn.")
 //			}
-			out.collect(wikiPage.pageTitle, Evaluation(f"$threshold.1f", actualSurfaces.size, potentialSurfaces.size, tp.size, fp.size, subsetFp.size, fn.size))
+			out.collect(wikiPage.pageTitle, Evaluation(f"$threshold%.2f", actualSurfaces.size, potentialSurfaces.size, tp.size, fp.size, subsetFp.size, fn.size))
 		}
 	}
 }
