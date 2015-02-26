@@ -10,7 +10,7 @@ import scala.collection.JavaConverters._
 class TrieTest extends FunSuite {
 
 //	buildTests(new HashTrie())
-	buildTests(new TrieToni())
+//	buildTests(new TrieToni())
 	buildTests(new NewTrie())
 
 	def buildTests[T <: Trie](trie: => Trie): Unit = {

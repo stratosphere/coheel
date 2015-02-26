@@ -69,7 +69,7 @@ class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[(String, String)
 		log.info(s"${FreeMemory.get(true)} MB of memory remaining")
 	}
 	var i = 0
-	val OUTPUT_EVERY = 1000
+	val OUTPUT_EVERY = if (CoheelProgram.runsOffline()) 1000 else 10000
 	override def flatMap(plainText: (String, String), out: Collector[EntireTextSurfaces]): Unit = {
 		if (i % OUTPUT_EVERY == 0) {
 			val nextChunk = new Date()

@@ -18,6 +18,14 @@ import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 
 import scala.collection.JavaConverters._
 
+object CoheelProgram {
+
+	def runsOffline(): Boolean = {
+		val fileType = FlinkProgramRunner.config.getString("type")
+		fileType == "file"
+	}
+
+}
 abstract class CoheelProgram[T]() extends ProgramDescription {
 
 	@transient val log = Logger.getLogger(getClass)
@@ -90,6 +98,9 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 				val split = line.split('\t')
 				if (split.size == 3)
 					out.collect(split(0))
+				else
+					throw new Exception(s"Line length mismatch in >>$line<<")
+
 			}
 		}).name("Parsed Surfaces")
 	}
@@ -115,8 +126,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 	}
 
 	def runsOffline(): Boolean = {
-		val fileType = FlinkProgramRunner.config.getString("type")
-		fileType == "file"
+		CoheelProgram.runsOffline()
 	}
 }
 

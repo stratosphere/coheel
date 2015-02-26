@@ -51,32 +51,36 @@ class SurfaceEvaluationFlatMap extends RichFlatMapFunction[WikiPage, (String, Ev
 		}.toSet
 
 		// determine potential surfaces, i.e. the surfaces that the NER would return
-		val potentialSurfaces = trie.findAllInWithProbs(TokenizerHelper.transformToTokenized(wikiPage.plainText)).map { surface =>
-			surface._1.split(' ').toSeq
-		}.toSet
+		var potentialSurfacesWithProbs = trie.findAllInWithProbs(TokenizerHelper.transformToTokenized(wikiPage.plainText))
 
-		// TPs are those surfaces, which are actually in the text and our system would return it
-		val tp = actualSurfaces.intersect(potentialSurfaces)
-		// FPs are those surfaces, which are returned but are not actually surfaces
-		val fp = potentialSurfaces.diff(actualSurfaces)
+		Seq(0.0).foreach { threshold =>
+			potentialSurfacesWithProbs = potentialSurfacesWithProbs.filter(_._2 >= threshold || true)
+			val potentialSurfaces = potentialSurfacesWithProbs.map { surface =>
+				surface._1.split(' ').toSeq
+			}.toSet
+			// TPs are those surfaces, which are actually in the text and our system would return it
+			val tp = actualSurfaces.intersect(potentialSurfaces)
+			// FPs are those surfaces, which are returned but are not actually surfaces
+			val fp = potentialSurfaces.diff(actualSurfaces)
 
-		val subsetFp = fp.filter { fpSurface =>
-			tp.find { tpSurface =>
-				tpSurface.containsSlice(fpSurface)
-			} match {
-				case Some(superSurface) =>
-//					println(s"'${wikiPage.pageTitle}': Found $superSurface for $fpSurface.")
-					true
-				case None =>
-					false
+			val subsetFp = fp.filter { fpSurface =>
+				tp.find { tpSurface =>
+					tpSurface.containsSlice(fpSurface)
+				} match {
+					case Some(superSurface) =>
+						//					println(s"'${wikiPage.pageTitle}': Found $superSurface for $fpSurface.")
+						true
+					case None =>
+						false
+				}
 			}
-		}
 
-		// FN are those surfaces, which are actual surfaces, but are not returned
-		val fn = actualSurfaces.diff(potentialSurfaces)
-		if (fn.size >= 1) {
-			throw new Exception(s"${wikiPage.pageTitle} has false negatives: $fn.")
+			// FN are those surfaces, which are actual surfaces, but are not returned
+			val fn = actualSurfaces.diff(potentialSurfaces)
+			if (fn.size >= 1) {
+				throw new Exception(s"${wikiPage.pageTitle} has false negatives: $fn.")
+			}
+			out.collect(wikiPage.pageTitle, Evaluation(0.0f, actualSurfaces.size, potentialSurfaces.size, tp.size, fp.size, subsetFp.size, fn.size))
 		}
-		out.collect(wikiPage.pageTitle, Evaluation(0.0f, actualSurfaces.size, potentialSurfaces.size, tp.size, fp.size, subsetFp.size, fn.size))
 	}
 }
