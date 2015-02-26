@@ -97,7 +97,6 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 	def getSurfaces(subFile: String = ""): DataSet[String] = {
 		environment.readTextFile(surfaceDocumentCountsPath + subFile).name("Subset of Surfaces")
 			.flatMap(new RichFlatMapFunction[String, String] {
-			override def open(params: Configuration): Unit = { }
 			override def flatMap(line: String, out: Collector[String]): Unit = {
 				val split = line.split('\t')
 				if (split.size == 3)
@@ -109,6 +108,21 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 
 			}
 		}).name("Parsed Surfaces")
+	}
+	def getSurfaceLinkProbs(subFile: String = ""): DataSet[(String, Float)] = {
+		environment.readTextFile(surfaceLinkProbsPath + subFile).name("Subset of Surfaces with Probabilities")
+			.flatMap(new RichFlatMapFunction[String, (String, Float)] {
+			override def flatMap(line: String, out: Collector[(String, Float)]): Unit = {
+				val split = line.split('\t')
+				if (split.size == 3)
+					out.collect((split(0), split(2).toFloat))
+				else {
+					log.warn(s"Discarding '${split.deep}' because split size not correct")
+					log.warn(line)
+				}
+
+			}
+		}).name("Parsed Surfaces with Probabilities")
 	}
 
 	def getSurfaceDocumentCounts(): DataSet[SurfaceAsLinkCount] = {

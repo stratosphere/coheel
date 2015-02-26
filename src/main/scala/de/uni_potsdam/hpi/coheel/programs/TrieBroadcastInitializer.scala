@@ -16,3 +16,13 @@ class TrieBroadcastInitializer extends BroadcastVariableInitializer[String, NewT
 	}
 }
 
+class TrieWithProbBroadcastInitializer extends BroadcastVariableInitializer[(String, Float), NewTrie] {
+
+	override def initializeBroadcastVariable(surfaces: Iterable[(String, Float)]): NewTrie = {
+		val trieFromBroadcast = new NewTrie
+		surfaces.asScala.foreach { case (surface, tokenProb) =>
+			trieFromBroadcast.add(surface, tokenProb)
+		}
+		trieFromBroadcast
+	}
+}

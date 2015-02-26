@@ -19,30 +19,34 @@ class SurfaceEvaluationProgram extends CoheelProgram[Int] {
 
 	override def getDescription = "Surface Evaluation"
 
-	val params = if (runsOffline()) List(-1) else 1 to 10
+	val params = if (runsOffline()) List(-1) else 1 to 1
 
 	override def buildProgram(env: ExecutionEnvironment, param: Int): Unit = {
 		val currentFile = if (runsOffline()) "" else s"/$param"
-		val surfaces = getSurfaces(currentFile)
+		val surfaceLinkProbs = getSurfaceLinkProbs(currentFile)
 		val plainTexts = getWikiPages()
 
 		val rocValues = plainTexts
 			.flatMap(new SurfaceEvaluationFlatMap)
-			.withBroadcastSet(surfaces, EntireTextSurfacesProgram.BROADCAST_SURFACES)
+			.withBroadcastSet(surfaceLinkProbs, EntireTextSurfacesProgram.BROADCAST_SURFACES)
 		.name("Entire-Text-Surfaces-Along-With-Document")
 
 		rocValues.writeAsTsv(surfaceEvaluationPath)
 	}
 }
 
-case class Evaluation(threshold: Float, actualSurfaces: Int, potentialSurfaces: Int, tp: Int, fp: Int, subsetFp: Int, fn: Int)
+case class Evaluation(threshold: Float, actualSurfaces: Int, potentialSurfaces: Int, tp: Int, fp: Int, subsetFp: Int, fn: Int) {
+	override def toString: String = {
+		s"Evaluation(threshold=$threshold,actualSurfaces=$actualSurfaces,potentialSurfaces=$potentialSurfaces,tp=$tp,fp=$fp,subsetFp=$subsetFp,fn=$fn)"
+	}
+}
 
 class SurfaceEvaluationFlatMap extends RichFlatMapFunction[WikiPage, (String, Evaluation)] {
 
 	var trie: NewTrie = _
 
 	override def open(params: Configuration): Unit = {
-		trie = getRuntimeContext.getBroadcastVariableWithInitializer(EntireTextSurfacesProgram.BROADCAST_SURFACES, new TrieBroadcastInitializer)
+		trie = getRuntimeContext.getBroadcastVariableWithInitializer(EntireTextSurfacesProgram.BROADCAST_SURFACES, new TrieWithProbBroadcastInitializer)
 	}
 	override def flatMap(wikiPage: WikiPage, out: Collector[(String, Evaluation)]): Unit = {
 		// determine the actual surfaces, from the real wikipedia article
@@ -51,10 +55,14 @@ class SurfaceEvaluationFlatMap extends RichFlatMapFunction[WikiPage, (String, Ev
 		}.toSet
 
 		// determine potential surfaces, i.e. the surfaces that the NER would return
-		var potentialSurfacesWithProbs = trie.findAllInWithProbs(TokenizerHelper.transformToTokenized(wikiPage.plainText))
+		var potentialSurfacesWithProbs = trie.findAllInWithProbs(TokenizerHelper.transformToTokenized(wikiPage.plainText)).toSeq
 
-		Seq(0.0).foreach { threshold =>
-			potentialSurfacesWithProbs = potentialSurfacesWithProbs.filter(_._2 >= threshold || true)
+		if (wikiPage.pageTitle == "My test article") {
+			println(potentialSurfacesWithProbs.toList)
+		}
+
+		(.0f to .9f by .1f).foreach { threshold =>
+			potentialSurfacesWithProbs = potentialSurfacesWithProbs.filter(_._2 >= threshold)
 			val potentialSurfaces = potentialSurfacesWithProbs.map { surface =>
 				surface._1.split(' ').toSeq
 			}.toSet
@@ -68,7 +76,7 @@ class SurfaceEvaluationFlatMap extends RichFlatMapFunction[WikiPage, (String, Ev
 					tpSurface.containsSlice(fpSurface)
 				} match {
 					case Some(superSurface) =>
-						//					println(s"'${wikiPage.pageTitle}': Found $superSurface for $fpSurface.")
+//						println(s"'${wikiPage.pageTitle}': Found $superSurface for $fpSurface.")
 						true
 					case None =>
 						false
@@ -77,10 +85,10 @@ class SurfaceEvaluationFlatMap extends RichFlatMapFunction[WikiPage, (String, Ev
 
 			// FN are those surfaces, which are actual surfaces, but are not returned
 			val fn = actualSurfaces.diff(potentialSurfaces)
-			if (fn.size >= 1) {
-				throw new Exception(s"${wikiPage.pageTitle} has false negatives: $fn.")
-			}
-			out.collect(wikiPage.pageTitle, Evaluation(0.0f, actualSurfaces.size, potentialSurfaces.size, tp.size, fp.size, subsetFp.size, fn.size))
+//			if (fn.size >= 1) {
+//				throw new Exception(s"${wikiPage.pageTitle} has false negatives: $fn.")
+//			}
+			out.collect(wikiPage.pageTitle, Evaluation(threshold, actualSurfaces.size, potentialSurfaces.size, tp.size, fp.size, subsetFp.size, fn.size))
 		}
 	}
 }

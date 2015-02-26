@@ -37,8 +37,8 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 		val entireTextSurfaceCounts = entireTextSurfaces
 			.groupBy { _.surface }
 			.reduceGroup { group =>
-				val surfaces = group.toList
-				EntireTextSurfaceCounts(surfaces.head.surface, surfaces.size)
+				val head = group.next().surface
+				EntireTextSurfaceCounts(head, group.size + 1)
 			}
 			.name("Entire-Text-Surface-Counts")
 
