@@ -2,6 +2,7 @@ package de.uni_potsdam.hpi.coheel.programs
 
 import java.util.Date
 
+import de.uni_potsdam.hpi.coheel.{Timer, PerformanceTimer}
 import de.uni_potsdam.hpi.coheel.datastructures.NewTrie
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
@@ -26,12 +27,12 @@ class SurfaceEvaluationProgram extends CoheelProgram[Int] {
 		val surfaceLinkProbs = getSurfaceLinkProbs(currentFile)
 		val plainTexts = getWikiPages()
 
-		val rocValues = plainTexts
+		val surfaceEvaluation = plainTexts
 			.flatMap(new SurfaceEvaluationFlatMap)
 			.withBroadcastSet(surfaceLinkProbs, EntireTextSurfacesProgram.BROADCAST_SURFACES)
 		.name("Entire-Text-Surfaces-Along-With-Document")
 
-		rocValues.writeAsTsv(surfaceEvaluationPath)
+		surfaceEvaluation.writeAsTsv(surfaceEvaluationPath)
 	}
 }
 
@@ -55,23 +56,33 @@ class SurfaceEvaluationFlatMap extends RichFlatMapFunction[WikiPage, (String, Ev
 		}.toSet
 
 		// determine potential surfaces, i.e. the surfaces that the NER would return
+		Timer.start("FINDALL IN TRIE")
 		var potentialSurfacesWithProbs = trie.findAllInWithProbs(TokenizerHelper.transformToTokenized(wikiPage.plainText)).toSeq
+		Timer.end("FINDALL IN TRIE")
 
 		if (wikiPage.pageTitle == "My test article") {
 			println(potentialSurfacesWithProbs.toList)
 		}
 
 		(0.0f to 0.95f by 0.05f).foreach { threshold =>
+			Timer.start("FILTER DOWN")
 			potentialSurfacesWithProbs = potentialSurfacesWithProbs.filter(_._2 >= threshold)
 			val potentialSurfaces = potentialSurfacesWithProbs.map { surface =>
 				surface._1.split(' ').toSeq
 			}.toSet
+			Timer.end("FILTER DOWN")
+
+			Timer.start("TP")
 			// TPs are those surfaces, which are actually in the text and our system would return it
 			val tp = actualSurfaces.intersect(potentialSurfaces)
+			Timer.end("TP")
 			// FPs are those surfaces, which are returned but are not actually surfaces
+			Timer.start("FP")
 			val fp = potentialSurfaces.diff(actualSurfaces)
+			Timer.end("FP")
 
-			val subsetFp = fp.filter { fpSurface =>
+			Timer.start("SUBSET FP")
+			val subsetFp = fp.count { fpSurface =>
 				tp.find { tpSurface =>
 					tpSurface.containsSlice(fpSurface)
 				} match {
@@ -82,13 +93,20 @@ class SurfaceEvaluationFlatMap extends RichFlatMapFunction[WikiPage, (String, Ev
 						false
 				}
 			}
+			Timer.end("SUBSET FP")
 
+			Timer.start("FN")
 			// FN are those surfaces, which are actual surfaces, but are not returned
 			val fn = actualSurfaces.diff(potentialSurfaces)
 //			if (fn.size >= 1) {
 //				throw new Exception(s"${wikiPage.pageTitle} has false negatives: $fn.")
 //			}
-			out.collect(wikiPage.pageTitle, Evaluation(f"$threshold%.2f", actualSurfaces.size, potentialSurfaces.size, tp.size, fp.size, subsetFp.size, fn.size))
+			Timer.end("FN")
+			out.collect(wikiPage.pageTitle, Evaluation(f"$threshold%.2f", actualSurfaces.size, potentialSurfaces.size, tp.size, fp.size, subsetFp, fn.size))
 		}
+	}
+
+	override def close(): Unit = {
+		Timer.printAll()
 	}
 }

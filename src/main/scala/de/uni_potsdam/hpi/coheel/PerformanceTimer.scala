@@ -30,7 +30,7 @@ object PerformanceTimer {
 			case Some((start, end)) =>
 				if (end == 0) {
 					val newEnd = getTimeInMs
-					timers += (event ->(start, newEnd))
+					timers += (event -> (start, newEnd))
 					newEnd - start
 				} else
 					throw new Exception("Timer already finished.")
