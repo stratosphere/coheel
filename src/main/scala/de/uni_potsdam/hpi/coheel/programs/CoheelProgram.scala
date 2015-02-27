@@ -32,7 +32,6 @@ object CoheelProgram {
 }
 abstract class CoheelProgram[T]() extends ProgramDescription {
 
-	import CoheelProgram._
 	import CoheelLogger._
 	lazy val dumpFile = new Path(FlinkProgramRunner.config.getString("base_path"))
 	lazy val wikipediaFilesPath = if (dumpFile.isAbsolute) dumpFile.toUri.toString
@@ -154,7 +153,6 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 	def runsOffline(): Boolean = {
 		CoheelProgram.runsOffline()
 	}
-	val LINK_SPLITTER = CoheelProgram.LINK_SPLITTER
 }
 
 abstract class NoParamCoheelProgram extends CoheelProgram[Void] {
