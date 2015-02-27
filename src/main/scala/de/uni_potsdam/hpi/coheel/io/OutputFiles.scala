@@ -7,23 +7,25 @@ import org.apache.flink.core.fs.FileSystem
 import scala.language.implicitConversions
 
 object OutputFiles {
-	lazy val currentPath = FlinkProgramRunner.config.getString("output_files_dir")
+	lazy val outputPath = FlinkProgramRunner.config.getString("output_files_dir")
 	lazy val location = FlinkProgramRunner.config.getString("type")
 
-	lazy val surfaceProbsPath            = s"$location://${currentPath}surface-probs.wiki"
-	lazy val contextLinkProbsPath        = s"$location://${currentPath}context-link-probs.wiki"
-	lazy val languageModelProbsPath      = s"$location://${currentPath}language-model-probs.wiki"
-	lazy val documentWordCountsPath      = s"$location://${currentPath}document-word-counts.wiki"
-	lazy val redirectPath                = s"$location://${currentPath}redirects.wiki"
-	lazy val resolvedRedirectsPath       = s"$location://${currentPath}resolved-redirects.wiki"
-	lazy val wikiPagesPath               = s"$location://${currentPath}wiki-pages.wiki"
-	lazy val plainTextsPath              = s"$location://${currentPath}plain-texts.wiki"
-	lazy val surfaceDocumentCountsPath   = s"$location://${currentPath}surface-document-counts.wiki"
-	lazy val entireTextSurfacesPath      = s"$location://${currentPath}entire-text-surfaces.wiki"
-	lazy val surfaceLinkProbsPath        = s"$location://${currentPath}surface-link-probs.wiki"
-	lazy val surfaceEvaluationPath       = s"$location://${currentPath}surface-evaluation.wiki"
+	lazy val surfaceProbsPath            = s"$location://${outputPath}surface-probs.wiki"
+	lazy val contextLinkProbsPath        = s"$location://${outputPath}context-link-probs.wiki"
+	lazy val languageModelProbsPath      = s"$location://${outputPath}language-model-probs.wiki"
+	lazy val documentWordCountsPath      = s"$location://${outputPath}document-word-counts.wiki"
+	lazy val redirectPath                = s"$location://${outputPath}redirects.wiki"
+	lazy val resolvedRedirectsPath       = s"$location://${outputPath}resolved-redirects.wiki"
+	lazy val wikiPagesPath               = s"$location://${outputPath}wiki-pages.wiki"
+	lazy val plainTextsPath              = s"$location://${outputPath}plain-texts.wiki"
+	lazy val surfaceDocumentCountsPath   = s"$location://${outputPath}surface-document-counts.wiki"
+	lazy val entireTextSurfacesPath      = s"$location://${outputPath}entire-text-surfaces.wiki"
+	lazy val surfaceLinkProbsPath        = s"$location://${outputPath}surface-link-probs.wiki"
 
-	lazy val classificationPath          = s"$location://${currentPath}classification.wiki"
+	lazy val surfaceEvaluationPath       = s"$location://${outputPath}surface-evaluation.wiki"
+	lazy val surfaceEvaluationPerDocPath = s"$location://${outputPath}surface-evaluation-per-document.wiki"
+
+	lazy val classificationPath          = s"$location://${outputPath}classification.wiki"
 
 	implicit def toOutputFiles(dataSet: DataSet[_]): OutputFiles = {
 		new OutputFiles(dataSet)

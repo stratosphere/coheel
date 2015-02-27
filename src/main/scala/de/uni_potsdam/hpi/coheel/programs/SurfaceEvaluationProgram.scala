@@ -26,12 +26,33 @@ class SurfaceEvaluationProgram extends CoheelProgram[Int] {
 		val surfaceLinkProbs = getSurfaceLinkProbs(currentFile)
 		val plainTexts = getPlainTexts()
 
-		val surfaceEvaluation = plainTexts
+		val surfaceEvaluationPerDocument = plainTexts
 			.flatMap(new SurfaceEvaluationFlatMap)
 			.withBroadcastSet(surfaceLinkProbs, EntireTextSurfacesProgram.BROADCAST_SURFACES)
 		.name("Entire-Text-Surfaces-Along-With-Document")
 
-		surfaceEvaluation.writeAsTsv(surfaceEvaluationPath)
+		val surfaceEvaluation = surfaceEvaluationPerDocument.map(_._2)
+			.groupBy { evaluation=>
+				evaluation.threshold
+			}
+			.reduce { (eval1, eval2) =>
+				Evaluation(
+					eval1.threshold,
+					eval1.actualSurfaces + eval2.actualSurfaces,
+					eval1.potentialSurfaces + eval2.potentialSurfaces,
+					eval1.tp + eval2.tp,
+					eval1.fp + eval2.fp,
+					eval1.subsetFp + eval2.subsetFp,
+					eval1.fn + eval2.fn
+				)
+			}
+			.map { evaluation =>
+				import evaluation._
+				(threshold, tp, fp, fn, tp.toDouble / (tp.toDouble + fp.toDouble), tp.toDouble / (tp.toDouble + fn.toDouble))
+			}
+
+		surfaceEvaluationPerDocument.writeAsTsv(surfaceEvaluationPerDocPath + currentFile)
+		surfaceEvaluation.writeAsTsv(surfaceEvaluationPath + currentFile)
 	}
 }
 
@@ -40,6 +61,7 @@ case class Evaluation(threshold: String, actualSurfaces: Int, potentialSurfaces:
 		s"Evaluation(threshold=$threshold,actualSurfaces=$actualSurfaces,potentialSurfaces=$potentialSurfaces,tp=$tp,fp=$fp,subsetFp=$subsetFp,fn=$fn)"
 	}
 }
+
 
 class SurfaceEvaluationFlatMap extends RichFlatMapFunction[Plaintext, (String, Evaluation)] {
 
@@ -63,7 +85,8 @@ class SurfaceEvaluationFlatMap extends RichFlatMapFunction[Plaintext, (String, E
 			println(potentialSurfacesWithProbs.toList)
 		}
 
-		(0.0f to 0.95f by 0.05f).foreach { threshold =>
+		val subSetCheck = mutable.Map[Seq[String], Boolean]()
+		(0.05f to 0.95f by 0.05f).foreach { threshold =>
 			Timer.start("FILTER DOWN")
 			potentialSurfacesWithProbs = potentialSurfacesWithProbs.filter(_._2 >= threshold)
 			Timer.end("FILTER DOWN")
@@ -82,14 +105,13 @@ class SurfaceEvaluationFlatMap extends RichFlatMapFunction[Plaintext, (String, E
 
 			Timer.start("SUBSET FP")
 			val subsetFp = fp.count { fpSurface =>
-				tp.find { tpSurface =>
-					tpSurface.containsSlice(fpSurface)
-				} match {
-					case Some(superSurface) =>
-//						println(s"'${wikiPage.pageTitle}': Found $superSurface for $fpSurface.")
-						true
+				subSetCheck.get(fpSurface) match {
+					case Some(result) =>
+						result
 					case None =>
-						false
+						val res = extractSubsetFp(actualSurfaces, fpSurface)
+						subSetCheck(fpSurface) = res
+						res
 				}
 			}
 			Timer.end("SUBSET FP")
@@ -99,6 +121,12 @@ class SurfaceEvaluationFlatMap extends RichFlatMapFunction[Plaintext, (String, E
 			val fn = actualSurfaces.diff(potentialSurfaces)
 			Timer.end("FN")
 			out.collect(plainText.pageTitle, Evaluation(f"$threshold%.2f", actualSurfaces.size, potentialSurfaces.size, tp.size, fp.size, subsetFp, fn.size))
+		}
+	}
+
+	def extractSubsetFp(tp: Set[Seq[String]], fpSurface: Seq[String]): Boolean = {
+		tp.exists { tpSurface =>
+			tpSurface.containsSlice(fpSurface)
 		}
 	}
 
