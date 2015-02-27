@@ -28,10 +28,14 @@ object DataClasses {
 	case class EntireTextSurfaceCounts(surface: String, count: Int)
 	case class SurfaceAsLinkCount(surface: String, count: Int)
 
+	// Surface Evaluation
+	case class Plaintext(pageTitle: String, plainText: String, linkString: String)
+
 	// Redirect resolving
 	case class ContextLink(from: String, origTo: String, to: String, prob: Double)
 	case class Redirect(from: String, to: String)
 
 	// For classification
 	case class SurfaceProbLink(surface: Array[String], destination: String, prob: Double)
+
 }

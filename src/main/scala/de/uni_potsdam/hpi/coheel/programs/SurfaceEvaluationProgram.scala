@@ -1,16 +1,15 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import java.util.Date
-
-import de.uni_potsdam.hpi.coheel.{Timer, PerformanceTimer}
+import de.uni_potsdam.hpi.coheel.Timer
 import de.uni_potsdam.hpi.coheel.datastructures.NewTrie
-import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
+import de.uni_potsdam.hpi.coheel.programs.DataClasses.Plaintext
 import de.uni_potsdam.hpi.coheel.wiki.{TokenizerHelper, WikiPage}
-import org.apache.flink.api.common.functions.{RichFlatMapFunction, RichMapFunction}
+import org.apache.flink.api.common.functions.RichFlatMapFunction
 import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.util.Collector
+import scala.collection.mutable
 
 
 object SurfaceEvaluationProgram {
@@ -25,7 +24,7 @@ class SurfaceEvaluationProgram extends CoheelProgram[Int] {
 	override def buildProgram(env: ExecutionEnvironment, param: Int): Unit = {
 		val currentFile = if (runsOffline()) "" else s"/$param"
 		val surfaceLinkProbs = getSurfaceLinkProbs(currentFile)
-		val plainTexts = getWikiPages()
+		val plainTexts = getPlainTexts()
 
 		val surfaceEvaluation = plainTexts
 			.flatMap(new SurfaceEvaluationFlatMap)
@@ -42,35 +41,35 @@ case class Evaluation(threshold: String, actualSurfaces: Int, potentialSurfaces:
 	}
 }
 
-class SurfaceEvaluationFlatMap extends RichFlatMapFunction[WikiPage, (String, Evaluation)] {
+class SurfaceEvaluationFlatMap extends RichFlatMapFunction[Plaintext, (String, Evaluation)] {
 
 	var trie: NewTrie = _
 
 	override def open(params: Configuration): Unit = {
 		trie = getRuntimeContext.getBroadcastVariableWithInitializer(EntireTextSurfacesProgram.BROADCAST_SURFACES, new TrieWithProbBroadcastInitializer)
 	}
-	override def flatMap(wikiPage: WikiPage, out: Collector[(String, Evaluation)]): Unit = {
+	override def flatMap(plainText: Plaintext, out: Collector[(String, Evaluation)]): Unit = {
 		// determine the actual surfaces, from the real wikipedia article
-		val actualSurfaces = wikiPage.links.map { link =>
-			link.surfaceRepr.split(' ').toSeq
-		}.toSet
+		val actualSurfaces = plainText.linkString.split(CoheelProgram.LINK_SPLITTER).map(_.split(" ").toSeq).toSet
 
 		// determine potential surfaces, i.e. the surfaces that the NER would return
 		Timer.start("FINDALL IN TRIE")
-		var potentialSurfacesWithProbs = trie.findAllInWithProbs(TokenizerHelper.transformToTokenized(wikiPage.plainText)).toSeq
+		var potentialSurfacesWithProbs = trie.findAllInWithProbs(plainText.plainText)
+			.map { case (surface, prob) => (surface.split(' ').toSeq, prob) }
+			.to[mutable.MutableList]
 		Timer.end("FINDALL IN TRIE")
 
-		if (wikiPage.pageTitle == "My test article") {
+		if (plainText.pageTitle == "My test article") {
 			println(potentialSurfacesWithProbs.toList)
 		}
 
 		(0.0f to 0.95f by 0.05f).foreach { threshold =>
 			Timer.start("FILTER DOWN")
 			potentialSurfacesWithProbs = potentialSurfacesWithProbs.filter(_._2 >= threshold)
-			val potentialSurfaces = potentialSurfacesWithProbs.map { surface =>
-				surface._1.split(' ').toSeq
-			}.toSet
 			Timer.end("FILTER DOWN")
+			Timer.start("BUILD SET")
+			val potentialSurfaces = potentialSurfacesWithProbs.map(_._1).toSet
+			Timer.end("BUILD SET")
 
 			Timer.start("TP")
 			// TPs are those surfaces, which are actually in the text and our system would return it
@@ -98,11 +97,8 @@ class SurfaceEvaluationFlatMap extends RichFlatMapFunction[WikiPage, (String, Ev
 			Timer.start("FN")
 			// FN are those surfaces, which are actual surfaces, but are not returned
 			val fn = actualSurfaces.diff(potentialSurfaces)
-//			if (fn.size >= 1) {
-//				throw new Exception(s"${wikiPage.pageTitle} has false negatives: $fn.")
-//			}
 			Timer.end("FN")
-			out.collect(wikiPage.pageTitle, Evaluation(f"$threshold%.2f", actualSurfaces.size, potentialSurfaces.size, tp.size, fp.size, subsetFp, fn.size))
+			out.collect(plainText.pageTitle, Evaluation(f"$threshold%.2f", actualSurfaces.size, potentialSurfaces.size, tp.size, fp.size, subsetFp, fn.size))
 		}
 	}
 

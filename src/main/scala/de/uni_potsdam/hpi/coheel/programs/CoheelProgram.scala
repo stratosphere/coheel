@@ -4,7 +4,7 @@ import java.lang.Iterable
 
 import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
 import de.uni_potsdam.hpi.coheel.io.{IteratorReader, WikiPageInputFormat}
-import de.uni_potsdam.hpi.coheel.programs.DataClasses.SurfaceAsLinkCount
+import de.uni_potsdam.hpi.coheel.programs.DataClasses.{Plaintext, SurfaceAsLinkCount}
 import de.uni_potsdam.hpi.coheel.wiki.{Extractor, TokenizerHelper, WikiPage, WikiPageReader}
 import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.common.functions.{RichFlatMapFunction, RichMapPartitionFunction}
@@ -18,6 +18,9 @@ import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 
 import scala.collection.JavaConverters._
 
+object CoheelLogger {
+	val log: Logger = Logger.getLogger(getClass)
+}
 object CoheelProgram {
 
 	def runsOffline(): Boolean = {
@@ -25,13 +28,11 @@ object CoheelProgram {
 		fileType == "file"
 	}
 
-}
-
-object CoheelLogger {
-	val log: Logger = Logger.getLogger(getClass)
+	val LINK_SPLITTER = "\0"
 }
 abstract class CoheelProgram[T]() extends ProgramDescription {
 
+	import CoheelProgram._
 	import CoheelLogger._
 	lazy val dumpFile = new Path(FlinkProgramRunner.config.getString("base_path"))
 	lazy val wikipediaFilesPath = if (dumpFile.isAbsolute) dumpFile.toUri.toString
@@ -85,11 +86,14 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 		}.name("Filter-Normal-Pages")
 	}
 
-	def getPlainTexts(): DataSet[(String, String)] = {
+	def getPlainTexts(): DataSet[Plaintext] = {
 		environment.readTextFile(plainTextsPath).name("Plain-Texts").flatMap { line =>
 			val split = line.split('\t')
+			// TODO: Change, once we only have plaintext files with 3 entries
 			if (split.size == 2)
-				Some((split(0), split(1)))
+				Some(Plaintext(split(0), split(1), "\0"))
+			else if (split.size == 3)
+				Some(Plaintext(split(0), split(1), split(2)))
 			else
 				None
 		}.name("Parsed Plain-Texts")
@@ -150,6 +154,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 	def runsOffline(): Boolean = {
 		CoheelProgram.runsOffline()
 	}
+	val LINK_SPLITTER = CoheelProgram.LINK_SPLITTER
 }
 
 abstract class NoParamCoheelProgram extends CoheelProgram[Void] {

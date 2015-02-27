@@ -36,6 +36,7 @@ object PerformanceTimer {
 					throw new Exception("Timer already finished.")
 		}
 	}
+
 	def endTimeLast(event: String): Long = {
 		timers.get(event) match {
 			case None =>

@@ -5,7 +5,7 @@ import java.util.Date
 import de.uni_potsdam.hpi.coheel.datastructures.NewTrie
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
-import de.uni_potsdam.hpi.coheel.programs.DataClasses.{EntireTextSurfaces, EntireTextSurfaceCounts}
+import de.uni_potsdam.hpi.coheel.programs.DataClasses.{Plaintext, EntireTextSurfaces, EntireTextSurfaceCounts}
 import org.apache.flink.api.common.functions.RichFlatMapFunction
 import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
@@ -56,7 +56,7 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 		surfaceLinkProbs.writeAsTsv(surfaceLinkProbsPath + currentFile)
 	}
 }
-class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[(String, String), EntireTextSurfaces] {
+class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[Plaintext, EntireTextSurfaces] {
 	var trie: NewTrie = _
 	var lastChunk = new Date()
 	def log = Logger.getLogger(getClass)
@@ -70,7 +70,7 @@ class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[(String, String)
 	}
 	var i = 0
 	val OUTPUT_EVERY = if (CoheelProgram.runsOffline()) 1000 else 10000
-	override def flatMap(plainText: (String, String), out: Collector[EntireTextSurfaces]): Unit = {
+	override def flatMap(plainText: Plaintext, out: Collector[EntireTextSurfaces]): Unit = {
 		if (i % OUTPUT_EVERY == 0) {
 			val nextChunk = new Date()
 			val difference = nextChunk.getTime - lastChunk.getTime
@@ -81,8 +81,8 @@ class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[(String, String)
 		findEntireTextSurfaces(plainText, trie).foreach(out.collect)
 	}
 
-	def findEntireTextSurfaces(plainText: (String, String), trie: NewTrie): Iterator[EntireTextSurfaces] = {
-		val text = plainText._2
-		trie.findAllIn(text).map { surface => EntireTextSurfaces(plainText._1, surface)}
+	def findEntireTextSurfaces(plainText: Plaintext, trie: NewTrie): Iterator[EntireTextSurfaces] = {
+		val text = plainText.plainText
+		trie.findAllIn(text).map { surface => EntireTextSurfaces(plainText.pageTitle, surface)}
 	}
 }

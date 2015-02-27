@@ -34,7 +34,11 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 		}
 		if (configurationParams.contains(ConfigurationParams.ONLY_PLAINTEXTS)) {
 			wikiPages.map { wikiPage =>
-				(wikiPage.pageTitle, if (wikiPage.plainText.isEmpty) " " else TokenizerHelper.transformToTokenized(wikiPage.plainText))
+				(
+					wikiPage.pageTitle,
+					if (wikiPage.plainText.isEmpty) " " else TokenizerHelper.transformToTokenized(wikiPage.plainText),
+					if (wikiPage.links.isEmpty) LINK_SPLITTER else wikiPage.links.map(_.surfaceRepr).mkString(LINK_SPLITTER)
+				)
 			}.writeAsTsv(plainTextsPath)
 		}
 	}
