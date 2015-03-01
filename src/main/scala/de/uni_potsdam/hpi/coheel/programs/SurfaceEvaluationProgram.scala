@@ -29,7 +29,7 @@ class SurfaceEvaluationProgram extends CoheelProgram[Int] {
 		val surfaceEvaluationPerDocument = plainTexts
 			.flatMap(new SurfaceEvaluationFlatMap)
 			.withBroadcastSet(surfaceLinkProbs, EntireTextSurfacesProgram.BROADCAST_SURFACES)
-		.name("Entire-Text-Surfaces-Along-With-Document")
+		.name("Surface-Evaluation-Per-Document")
 
 		val surfaceEvaluation = surfaceEvaluationPerDocument.map(_._2)
 			.groupBy { evaluation=>
@@ -45,11 +45,11 @@ class SurfaceEvaluationProgram extends CoheelProgram[Int] {
 					eval1.subsetFp + eval2.subsetFp,
 					eval1.fn + eval2.fn
 				)
-			}
+			}.name("Aggregated-Raw-Surface-Evaluation")
 			.map { evaluation =>
 				import evaluation._
 				(threshold, tp, fp, fn, tp.toDouble / (tp.toDouble + fp.toDouble), tp.toDouble / (tp.toDouble + fn.toDouble))
-			}
+			}.name("Surface-Evaluation")
 
 		surfaceEvaluationPerDocument.writeAsTsv(surfaceEvaluationPerDocPath + currentFile)
 		surfaceEvaluation.writeAsTsv(surfaceEvaluationPath + currentFile)
