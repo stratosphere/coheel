@@ -60,20 +60,21 @@ class SurfaceEvaluationProgram extends CoheelProgram[Int] {
 
 
 	private def aggregateEvaluations(evaluations: DataSet[Evaluation]): DataSet[Evaluation] = {
-		evaluations.groupBy { evaluation =>
-			evaluation.threshold
-		}
-			.reduce { (eval1, eval2) =>
-			Evaluation(
-				eval1.threshold,
-				eval1.actualSurfaces + eval2.actualSurfaces,
-				eval1.potentialSurfaces + eval2.potentialSurfaces,
-				eval1.tp + eval2.tp,
-				eval1.fp + eval2.fp,
-				eval1.subsetFp + eval2.subsetFp,
-				eval1.fn + eval2.fn
-			)
-		}
+		evaluations
+//		evaluations.groupBy { evaluation =>
+//			evaluation.threshold
+//		}
+//			.reduce { (eval1, eval2) =>
+//			Evaluation(
+//				eval1.threshold,
+//				eval1.actualSurfaces + eval2.actualSurfaces,
+//				eval1.potentialSurfaces + eval2.potentialSurfaces,
+//				eval1.tp + eval2.tp,
+//				eval1.fp + eval2.fp,
+//				eval1.subsetFp + eval2.subsetFp,
+//				eval1.fn + eval2.fn
+//			)
+//		}
 	}
 }
 
