@@ -19,9 +19,19 @@ class SurfaceEvaluationProgram extends CoheelProgram[Int] {
 
 	override def getDescription = "Surface Evaluation"
 
-	val params = if (runsOffline()) List(-1) else 1 to 1
+	val SUBSET_NUMBER = 10
+	val SPECIAL_CASE_NUMBER = -1
+
+	val params = if (runsOffline()) Seq(0) else (1 to SUBSET_NUMBER) :+ SPECIAL_CASE_NUMBER
 
 	override def buildProgram(env: ExecutionEnvironment, param: Int): Unit = {
+		if (param == SPECIAL_CASE_NUMBER)
+			summarizeEvaluation()
+		else
+			runEvaluationOnSubset(param)
+	}
+
+	def runEvaluationOnSubset(param: Int): Unit = {
 		val currentFile = if (runsOffline()) "" else s"/$param"
 		val surfaceLinkProbs = getSurfaceLinkProbs(currentFile)
 		val plainTexts = getPlainTexts()
@@ -29,36 +39,57 @@ class SurfaceEvaluationProgram extends CoheelProgram[Int] {
 		val surfaceEvaluationPerDocument = plainTexts
 			.flatMap(new SurfaceEvaluationFlatMap)
 			.withBroadcastSet(surfaceLinkProbs, EntireTextSurfacesProgram.BROADCAST_SURFACES)
-		.name("Surface-Evaluation-Per-Document")
+			.name("Surface-Evaluation-Per-Document")
 
-		val surfaceEvaluation = surfaceEvaluationPerDocument.map(_._2)
-			.groupBy { evaluation=>
-				evaluation.threshold
-			}
+		val evaluations = surfaceEvaluationPerDocument.map(_._2)
+		val surfaceEvaluationPerSubset = aggregateEvaluations(evaluations).name("Surface-Evaluation-Per-Subset")
+
+		surfaceEvaluationPerDocument.writeAsTsv(surfaceEvaluationPerDocumentPath + currentFile)
+		surfaceEvaluationPerSubset.writeAsTsv(surfaceEvaluationPerSubsetPath + currentFile)
+	}
+
+	def summarizeEvaluation(): Unit = {
+		val evaluations = environment.readCsvFile[Evaluation](surfaceEvaluationPerSubsetPath, "\n", '\t')
+
+		val finalSurfaceEvaluation = aggregateEvaluations(evaluations).map { evaluation =>
+			import evaluation._
+			(evaluation.toString, precision(), precisionWithoutSubsetFps(), recall())
+		}
+		finalSurfaceEvaluation.writeAsTsv(surfaceEvaluationPath)
+	}
+
+
+	private def aggregateEvaluations(evaluations: DataSet[Evaluation]): DataSet[Evaluation] = {
+		evaluations.groupBy { evaluation =>
+			evaluation.threshold
+		}
 			.reduce { (eval1, eval2) =>
-				Evaluation(
-					eval1.threshold,
-					eval1.actualSurfaces + eval2.actualSurfaces,
-					eval1.potentialSurfaces + eval2.potentialSurfaces,
-					eval1.tp + eval2.tp,
-					eval1.fp + eval2.fp,
-					eval1.subsetFp + eval2.subsetFp,
-					eval1.fn + eval2.fn
-				)
-			}.name("Aggregated-Raw-Surface-Evaluation")
-			.map { evaluation =>
-				import evaluation._
-				(threshold, tp, fp, fn, tp.toDouble / (tp.toDouble + fp.toDouble), tp.toDouble / (tp.toDouble + fn.toDouble))
-			}.name("Surface-Evaluation")
-
-		surfaceEvaluationPerDocument.writeAsTsv(surfaceEvaluationPerDocPath + currentFile)
-		surfaceEvaluation.writeAsTsv(surfaceEvaluationPath + currentFile)
+			Evaluation(
+				eval1.threshold,
+				eval1.actualSurfaces + eval2.actualSurfaces,
+				eval1.potentialSurfaces + eval2.potentialSurfaces,
+				eval1.tp + eval2.tp,
+				eval1.fp + eval2.fp,
+				eval1.subsetFp + eval2.subsetFp,
+				eval1.fn + eval2.fn
+			)
+		}
 	}
 }
 
 case class Evaluation(threshold: String, actualSurfaces: Int, potentialSurfaces: Int, tp: Int, fp: Int, subsetFp: Int, fn: Int) {
 	override def toString: String = {
 		s"Evaluation(threshold=$threshold,actualSurfaces=$actualSurfaces,potentialSurfaces=$potentialSurfaces,tp=$tp,fp=$fp,subsetFp=$subsetFp,fn=$fn)"
+	}
+
+	def precision(): Double = {
+		tp.toDouble / (tp.toDouble + fp.toDouble)
+	}
+	def precisionWithoutSubsetFps(): Double = {
+		tp.toDouble / (tp.toDouble + fp.toDouble - subsetFp)
+	}
+	def recall(): Double = {
+		tp.toDouble / (tp.toDouble + fn.toDouble)
 	}
 }
 
