@@ -119,7 +119,8 @@ object FlinkProgramRunner {
 					else
 						""
 					val paramsString = if (param == null) "" else s" current-param = $param"
-					env.execute(s"${program.getDescription} (dataset = ${config.getString("name")}$paramsString$configurationString)")
+					val result = env.execute(s"${program.getDescription} (dataset = ${config.getString("name")}$paramsString$configurationString)")
+					log.info(s"Net runtime: ${result.getNetRuntime} ms")
 				}
 			} catch {
 				case e: ProgramInvocationException =>

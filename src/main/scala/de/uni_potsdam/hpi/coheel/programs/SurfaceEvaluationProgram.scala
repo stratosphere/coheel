@@ -65,7 +65,7 @@ class SurfaceEvaluationProgram extends CoheelProgram[Int] {
 		evaluations.groupBy { evaluation =>
 			evaluation.threshold
 		}
-			.reduce { (eval1, eval2) =>
+		.reduce { (eval1, eval2) =>
 			Evaluation(
 				eval1.threshold,
 				eval1.actualSurfaces + eval2.actualSurfaces,
