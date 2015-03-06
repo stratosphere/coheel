@@ -29,7 +29,7 @@ class ClassificationProgram extends NoParamCoheelProgram {
 				List()
 		}
 
-		result.writeAsTsv(classificationPath)
+		result.writeAsTsv(pageRankPath)
 	}
 
 }

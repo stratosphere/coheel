@@ -28,6 +28,8 @@ object OutputFiles {
 
 	lazy val classificationPath               = s"$location://${outputPath}classification.wiki"
 
+	lazy val pageRankPath                     = s"$location://${outputPath}page-rank.wiki"
+
 	implicit def toOutputFiles(dataSet: DataSet[_]): OutputFiles = {
 		new OutputFiles(dataSet)
 	}

@@ -1,45 +1,43 @@
 package de.uni_potsdam.hpi.coheel.programs
 
 import org.apache.flink.api.java.aggregation.Aggregations
-import org.apache.flink.api.scala.{DataSet, ExecutionEnvironment}
+import org.apache.flink.api.scala.ExecutionEnvironment
 import org.apache.flink.util.Collector
 import org.apache.flink.api.scala._
+import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 
 
-case class Page(id: Long, rank: Double)
-case class Adjacency(id: Long, neighbors: Array[Long])
+case class Page(id: String, rank: Double)
+case class Adjacency(id: String, neighbours: Array[String])
 
 class PageRankProgram extends NoParamCoheelProgram {
 
 	override def getDescription: String = "PageRank for Articles"
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
-//		val contextLinks = getContextLinks()
-//		val sum = contextLinks.aggregate(Aggregations.SUM, "prob")
-//
-//		sum.print()
 
-		val NUM_VERTICES = 3
-		val NUM_ITERATIONS = 1000
+		val NUM_VERTICES = 342596
 		val THRESHOLD = 0.0001 / NUM_VERTICES
 		val INITIAL_RANK = 1.0 / NUM_VERTICES
-		val RANDOM_JUMP = 0.05
-		val DAMPENING_FACTOR = 1 - RANDOM_JUMP * NUM_VERTICES
 
-		val rawLines : DataSet[String] = env.fromElements(
-			"1 2 3",
-			"2 1",
-			"3 1 2")
+		val NUM_ITERATIONS = 100
+		val DAMPENING_FACTOR = 0.85
+		val RANDOM_JUMP = (1.0 - DAMPENING_FACTOR) / NUM_VERTICES
 
-		val adjacency = rawLines.map { str =>
-			val elements = str.split(' ')
-			val id = elements(0).toLong
-			val neighbors = elements.slice(1, elements.length).map(_.toLong)
-			Adjacency(id, neighbors)
-		}
+		val contextLinks = getContextLinks()
 
-		val initialRanks : DataSet[Page] = adjacency.flatMap { (adj, out: Collector[Page]) =>
-			val targets = adj.neighbors
+//		contextLinks.aggregate(Aggregations.SUM, "prob").print()
+//		contextLinks.groupBy("to").reduceGroup { _ => (1, 1) }.aggregate(Aggregations.SUM, 0).print()
+
+		val adjacency = contextLinks
+			.groupBy("to")
+			.reduceGroup { contextLinks =>
+				val contextLinkArray = contextLinks.toArray
+				Adjacency(contextLinkArray.head.from, contextLinkArray.map(_.to))
+			}
+
+		val initialRanks = adjacency.flatMap { (adj, out: Collector[Page]) =>
+			val targets = adj.neighbours
 			val rankPerTarget = INITIAL_RANK * DAMPENING_FACTOR / targets.length
 
 			// dampend fraction to targets
@@ -52,16 +50,18 @@ class PageRankProgram extends NoParamCoheelProgram {
 		}
 			.groupBy("id").sum("rank")
 
+		initialRanks.aggregate(Aggregations.SUM, "rank").print()
+
 		val initialDeltas = initialRanks.map { page =>
 			Page(page.id, page.rank - INITIAL_RANK)
 		}
 
-		val iteration = initialRanks.iterateDelta(initialDeltas, 100, Array(0)) { (solutionSet, workset) =>
+		val pageRank = initialRanks.iterateDelta(initialDeltas, NUM_ITERATIONS, Array("id")) { (solutionSet, workset) =>
 			val deltas = workset.join(adjacency)
 				.where("id")
 				.equalTo("id")
 				.apply { (lastDeltas, adj, out: Collector[Page]) =>
-					val targets = adj.neighbors
+					val targets = adj.neighbours
 					val deltaPerTarget =
 						DAMPENING_FACTOR * lastDeltas.rank / targets.length
 
@@ -82,7 +82,9 @@ class PageRankProgram extends NoParamCoheelProgram {
 			(rankUpdates, deltas)
 		}
 
-		iteration.print()
+		pageRank.writeAsTsv(pageRankPath)
+
+		pageRank.aggregate(Aggregations.SUM, "rank").print()
 	}
 
 }
