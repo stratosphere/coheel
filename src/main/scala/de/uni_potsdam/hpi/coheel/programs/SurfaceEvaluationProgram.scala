@@ -12,6 +12,29 @@ import org.apache.flink.util.Collector
 import scala.collection.mutable
 
 
+/**
+ * Basic evaluation class, which counts relevant evaluation numbers for a document/a set of documents.
+ * @param threshold Threshold, formatted as a string to contain the desired number of fractional digits
+ */
+case class Evaluation(threshold: String, actualSurfaces: Int, potentialSurfaces: Int, tp: Int, fp: Int, subsetFp: Int, fn: Int) {
+	override def toString: String = {
+		s"Evaluation(threshold=$threshold,actualSurfaces=$actualSurfaces,potentialSurfaces=$potentialSurfaces,tp=$tp,fp=$fp,subsetFp=$subsetFp,fn=$fn)"
+	}
+
+	def precision(): Double = {
+		tp.toDouble / (tp.toDouble + fp.toDouble)
+	}
+	def precisionWithoutSubsetFps(): Double = {
+		tp.toDouble / (tp.toDouble + fp.toDouble - subsetFp)
+	}
+	def recall(): Double = {
+		tp.toDouble / (tp.toDouble + fn.toDouble)
+	}
+	def f1(): Double = {
+		2 * precision() * recall() / (precision() + recall())
+	}
+}
+
 object SurfaceEvaluationProgram {
 	val BROADCAST_SURFACES = "surfaces"
 }
@@ -79,26 +102,6 @@ class SurfaceEvaluationProgram extends CoheelProgram[Int] {
 	}
 }
 
-case class Evaluation(threshold: String, actualSurfaces: Int, potentialSurfaces: Int, tp: Int, fp: Int, subsetFp: Int, fn: Int) {
-	override def toString: String = {
-		s"Evaluation(threshold=$threshold,actualSurfaces=$actualSurfaces,potentialSurfaces=$potentialSurfaces,tp=$tp,fp=$fp,subsetFp=$subsetFp,fn=$fn)"
-	}
-
-	def precision(): Double = {
-		tp.toDouble / (tp.toDouble + fp.toDouble)
-	}
-	def precisionWithoutSubsetFps(): Double = {
-		tp.toDouble / (tp.toDouble + fp.toDouble - subsetFp)
-	}
-	def recall(): Double = {
-		tp.toDouble / (tp.toDouble + fn.toDouble)
-	}
-	def f1(): Double = {
-		2 * precision() * recall() / (precision() + recall())
-	}
-}
-
-
 class SurfaceEvaluationFlatMap extends RichFlatMapFunction[Plaintext, (String, Evaluation)] {
 
 	var trie: NewTrie = _
@@ -115,6 +118,7 @@ class SurfaceEvaluationFlatMap extends RichFlatMapFunction[Plaintext, (String, E
 		var potentialSurfacesWithProbs = trie.findAllInWithProbs(plainText.plainText)
 			.map { case (surface, prob) => (surface.split(' ').toSeq, prob) }
 			.to[mutable.MutableList]
+		val potentialPositives = actualSurfaces.intersect(potentialSurfacesWithProbs.map(_._1).toSet)
 		Timer.end("FINDALL IN TRIE")
 
 		if (plainText.pageTitle == "My test article") {
@@ -122,7 +126,7 @@ class SurfaceEvaluationFlatMap extends RichFlatMapFunction[Plaintext, (String, E
 		}
 
 		val subSetCheck = mutable.Map[Seq[String], Boolean]()
-		(0.05f to 0.95f by 0.05f).foreach { threshold =>
+		(0.05f to 1.00f by 0.05f).foreach { threshold =>
 			Timer.start("FILTER DOWN")
 			potentialSurfacesWithProbs = potentialSurfacesWithProbs.filter(_._2 >= threshold)
 			Timer.end("FILTER DOWN")
@@ -154,7 +158,7 @@ class SurfaceEvaluationFlatMap extends RichFlatMapFunction[Plaintext, (String, E
 
 			Timer.start("FN")
 			// FN are those surfaces, which are actual surfaces, but are not returned
-			val fn = actualSurfaces.diff(potentialSurfaces)
+			val fn = potentialPositives.diff(potentialSurfaces)
 			Timer.end("FN")
 			out.collect(plainText.pageTitle, Evaluation(f"$threshold%.2f", actualSurfaces.size, potentialSurfaces.size, tp.size, fp.size, subsetFp, fn.size))
 		}
