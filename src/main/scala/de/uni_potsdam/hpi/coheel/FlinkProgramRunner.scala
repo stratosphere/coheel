@@ -34,7 +34,7 @@ object FlinkProgramRunner {
 		, "surface-evaluation" -> classOf[SurfaceEvaluationProgram]
 		, "classification" -> classOf[ClassificationProgram]
 		, "redirects" -> classOf[RedirectResolvingProgram]
-		, "large" -> classOf[LargeFileTestProgram]
+		, "page-rank" -> classOf[PageRankProgram]
 	)
 
 	/**

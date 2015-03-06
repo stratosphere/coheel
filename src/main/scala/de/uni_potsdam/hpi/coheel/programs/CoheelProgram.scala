@@ -4,12 +4,11 @@ import java.lang.Iterable
 
 import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
 import de.uni_potsdam.hpi.coheel.io.{IteratorReader, WikiPageInputFormat}
-import de.uni_potsdam.hpi.coheel.programs.DataClasses.{SurfaceProb, Plaintext, SurfaceAsLinkCount}
+import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import de.uni_potsdam.hpi.coheel.wiki.{Extractor, TokenizerHelper, WikiPage, WikiPageReader}
 import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.common.functions.{RichFlatMapFunction, RichMapPartitionFunction}
 import org.apache.flink.api.scala.{DataSet, ExecutionEnvironment, _}
-import org.apache.flink.configuration.Configuration
 import org.apache.flink.core.fs.Path
 import org.apache.flink.core.fs.local.LocalFileSystem
 import org.apache.flink.util.Collector
@@ -167,6 +166,13 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 					None
 			}
 			else None
+		}
+	}
+
+	def getContextLinks(): DataSet[ContextLink] = {
+		environment.readTextFile(contextLinkProbsPath).map { line =>
+			val split = line.split('\t')
+			ContextLink(split(0), split(1), split(2).toDouble)
 		}
 	}
 

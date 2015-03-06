@@ -22,6 +22,7 @@ object DataClasses {
 	case class SurfaceLinkCounts(surface: String, destination: String, count: Int)
 	case class LinkCounts(source: String, count: Int)
 	case class ContextLinkCounts(source: String, destination: String, count: Int)
+	case class ContextLink(from: String, to: String, prob: Double)
 
 	// NER
 	case class EntireTextSurfaces(pageTitle: String, surface: String)
@@ -32,10 +33,9 @@ object DataClasses {
 	case class Plaintext(pageTitle: String, plainText: String, linkString: String)
 
 	// Redirect resolving
-	case class ContextLink(from: String, origTo: String, to: String, prob: Double)
+	case class ContextLinkWithOrig(from: String, origTo: String, to: String, prob: Double)
 	case class Redirect(from: String, to: String)
 
-	// For classification
+	// Classification
 	case class SurfaceProb(surface: Array[String], destination: String, prob: Double)
-
 }
