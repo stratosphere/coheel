@@ -55,7 +55,7 @@ class SurfaceEvaluationProgram extends CoheelProgram[Int] {
 
 		val finalSurfaceEvaluation = aggregateEvaluations(evaluations).map { evaluation =>
 			import evaluation._
-			(evaluation.toString, precision(), precisionWithoutSubsetFps(), recall())
+			(evaluation.threshold, precision(), precisionWithoutSubsetFps(), recall(), f1())
 		}
 		finalSurfaceEvaluation.writeAsTsv(surfaceEvaluationPath)
 	}
@@ -92,6 +92,9 @@ case class Evaluation(threshold: String, actualSurfaces: Int, potentialSurfaces:
 	}
 	def recall(): Double = {
 		tp.toDouble / (tp.toDouble + fn.toDouble)
+	}
+	def f1(): Double = {
+		2 * precision() * recall() / (precision() + recall())
 	}
 }
 
