@@ -19,9 +19,10 @@ class PageRankProgram extends NoParamCoheelProgram {
 //
 //		sum.print()
 
-
 		val NUM_VERTICES = 3
 		val NUM_ITERATIONS = 1000
+		val THRESHOLD = 0.0001 / NUM_VERTICES
+		val INITIAL_RANK = 1.0 / NUM_VERTICES
 		val RANDOM_JUMP = 0.05
 		val DAMPENING_FACTOR = 1 - RANDOM_JUMP * NUM_VERTICES
 
@@ -37,26 +38,48 @@ class PageRankProgram extends NoParamCoheelProgram {
 			Adjacency(id, neighbors)
 		}
 
-		val initialRanks : DataSet[Page] = adjacency.map { adj => Page(adj.id, 1.0 / NUM_VERTICES) }
+		val initialRanks : DataSet[Page] = adjacency.flatMap { (adj, out: Collector[Page]) =>
+			val targets = adj.neighbors
+			val rankPerTarget = INITIAL_RANK * DAMPENING_FACTOR / targets.length
 
-		val iteration = initialRanks.iterate(NUM_ITERATIONS) { pages =>
-			val rankContributions = pages.join(adjacency)
+			// dampend fraction to targets
+			for (target <- targets) {
+				out.collect(Page(target, rankPerTarget))
+			}
+
+			// random jump to self
+			out.collect(Page(adj.id, RANDOM_JUMP));
+		}
+			.groupBy("id").sum("rank")
+
+		val initialDeltas = initialRanks.map { page =>
+			Page(page.id, page.rank - INITIAL_RANK)
+		}
+
+		val iteration = initialRanks.iterateDelta(initialDeltas, 100, Array(0)) { (solutionSet, workset) =>
+			val deltas = workset.join(adjacency)
 				.where("id")
-				.equalTo("id") { (page, adj, out: Collector[Page]) => {
-					val rankPerTarget = DAMPENING_FACTOR * page.rank / adj.neighbors.length
+				.equalTo("id")
+				.apply { (lastDeltas, adj, out: Collector[Page]) =>
+					val targets = adj.neighbors
+					val deltaPerTarget =
+						DAMPENING_FACTOR * lastDeltas.rank / targets.length
 
-					// send random jump to self
-					out.collect(Page(page.id, RANDOM_JUMP))
-
-					// partial rank to each neighbor
-					for (neighbor <- adj.neighbors) {
-						out.collect(Page(neighbor, rankPerTarget))
+					for (target <- targets) {
+						out.collect(Page(target, deltaPerTarget))
 					}
 				}
-			}
-			rankContributions
-				.groupBy("id")
-				.reduce((a, b) => Page(a.id, a.rank + b.rank))
+				.groupBy("id").sum("rank")
+				.filter { page => Math.abs(page.rank) > THRESHOLD }
+
+			val rankUpdates = solutionSet.join(deltas)
+				.where("id")
+				.equalTo("id")
+				.apply { (current, delta) =>
+					Page(current.id, current.rank + delta.rank)
+				}
+
+			(rankUpdates, deltas)
 		}
 
 		iteration.print()
