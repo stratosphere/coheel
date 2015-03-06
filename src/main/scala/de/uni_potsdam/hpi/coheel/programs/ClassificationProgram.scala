@@ -15,27 +15,16 @@ class ClassificationProgram extends NoParamCoheelProgram {
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT).map { doc =>
-			// TODO: CHECK TOKENIZATION FUNCTION / STEMMING
 			TokenizerHelper.tokenize(doc)
 		}
-		val surfaces = env.readTextFile(surfaceProbsPath).flatMap { line =>
-			val split = line.split('\t')
-			if (split.size > 1) {
-				// TODO: CHECK TOKENIZATION FUNCTION / STEMMING
-				val tokens = TokenizerHelper.tokenize(split(0))
-				if (tokens.nonEmpty)
-					Some(SurfaceProbLink(tokens, split(1), split(2).toDouble))
-				else
-					None
-			}
-			else None
-		}
+
+		val surfaces = getSurfaceProbs(0.8)
 
 		val result = documents.crossWithHuge(surfaces).flatMap { value =>
-			val (text, link) = value
-			val surface = link.surface
+			val (text, surfaceProb) = value
+			val surface = surfaceProb.surface
 			if (text.containsSlice(surface))
-				List((surface.mkString(" "), link.destination, link.prob))
+				List((surface.mkString(" "), surfaceProb.destination, surfaceProb.prob))
 			else
 				List()
 		}

@@ -36,6 +36,6 @@ object DataClasses {
 	case class Redirect(from: String, to: String)
 
 	// For classification
-	case class SurfaceProbLink(surface: Array[String], destination: String, prob: Double)
+	case class SurfaceProb(surface: Array[String], destination: String, prob: Double)
 
 }

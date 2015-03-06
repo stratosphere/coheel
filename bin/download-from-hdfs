@@ -8,6 +8,9 @@ fi
 
 rm ./cluster-output/$1.wiki 2> /dev/null
 
+set -e
+set -o pipefail
+
 $HADOOP_HOME/bin/hdfs dfs -copyToLocal hdfs://tenemhead2/home/stefan.bunk/$1/$2.wiki . 2>&1 | grep --invert-match "NativeCodeLoader"
 echo "Downloaded."
 cat ./$2.wiki/* | LC_ALL=C sort > ./$2.wiki.tmp

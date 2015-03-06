@@ -4,7 +4,7 @@ import java.lang.Iterable
 
 import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
 import de.uni_potsdam.hpi.coheel.io.{IteratorReader, WikiPageInputFormat}
-import de.uni_potsdam.hpi.coheel.programs.DataClasses.{Plaintext, SurfaceAsLinkCount}
+import de.uni_potsdam.hpi.coheel.programs.DataClasses.{SurfaceProb, Plaintext, SurfaceAsLinkCount}
 import de.uni_potsdam.hpi.coheel.wiki.{Extractor, TokenizerHelper, WikiPage, WikiPageReader}
 import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.common.functions.{RichFlatMapFunction, RichMapPartitionFunction}
@@ -148,6 +148,26 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 					None
 			}
 		}.name("Surface-Document-Counts")
+	}
+
+
+	def getSurfaceProbs(threshold: Double = 0.0): DataSet[SurfaceProb] = {
+		environment.readTextFile(surfaceProbsPath).flatMap { line =>
+			val split = line.split('\t')
+			if (split.size > 1) {
+				val tokens = TokenizerHelper.tokenize(split(0))
+				if (tokens.nonEmpty) {
+					val prob = split(2).toDouble
+					if (prob > threshold)
+						Some(SurfaceProb(tokens, split(1), prob))
+					else
+						None
+				}
+				else
+					None
+			}
+			else None
+		}
 	}
 
 	def runsOffline(): Boolean = {

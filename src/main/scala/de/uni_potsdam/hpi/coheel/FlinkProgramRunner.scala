@@ -32,7 +32,7 @@ object FlinkProgramRunner {
 		"extract-main" -> classOf[WikipediaTrainingProgram]
 		, "entire-text-surfaces" -> classOf[EntireTextSurfacesProgram]
 		, "surface-evaluation" -> classOf[SurfaceEvaluationProgram]
-		, "classify" -> classOf[ClassificationProgram]
+		, "classification" -> classOf[ClassificationProgram]
 		, "redirects" -> classOf[RedirectResolvingProgram]
 		, "large" -> classOf[LargeFileTestProgram]
 	)
@@ -120,7 +120,7 @@ object FlinkProgramRunner {
 						""
 					val paramsString = if (param == null) "" else s" current-param = $param"
 					val result = env.execute(s"${program.getDescription} (dataset = ${config.getString("name")}$paramsString$configurationString)")
-					log.info(s"Net runtime: ${result.getNetRuntime} ms")
+					log.info(s"Net runtime: ${result.getNetRuntime / 1000} s")
 				}
 			} catch {
 				case e: ProgramInvocationException =>
