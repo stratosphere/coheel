@@ -1,15 +1,4 @@
-After the ROC curve works, a next step could be to build an easy classifier (naive bayes) for the candidate classification, and try to run this for an example text.
-Including the loss matrix and so on.
----------------------------------
-Remove wiktionary links.
---------------------------------
-Some output files do not have the correct format, i.e. in some rows the probabilities are missing.
-Flink bug? -- Check again for 0.7 release.
---------------------------------
-Aggregating on field positions is only possible on tuple data types.
+Fix infobox link recognition.
 
-
-List-Link/Member-of-Link etc.
-
-Write out Absolute frequencies
-
+Calculate prominence scores and context probabilities.
+Determine position, where a surface occurs.

@@ -28,6 +28,7 @@ class Extractor(wikiPage: WikiPage, surfaceRepr: String => String) {
 	val compiledWikiPage = getCompiledWikiPage(wikiPage)
 	var links: Seq[Link] = _
 
+
 	def extractAllLinks(filterEmptySurfaceRepr: Boolean = true): Seq[Link] = {
 		val allLinks = extractLinks() // TODO: ++ extractAlternativeNames()
 		if (filterEmptySurfaceRepr)
@@ -38,6 +39,7 @@ class Extractor(wikiPage: WikiPage, surfaceRepr: String => String) {
 
 	def extractLinks(): Seq[Link] = {
 		val rootNode = compiledWikiPage
+//		println(compiledWikiPage.toString)
 		val links = extractLinks(rootNode)
 		links
 	}
@@ -87,12 +89,19 @@ class Extractor(wikiPage: WikiPage, surfaceRepr: String => String) {
 
 	// Private helper function to extract breadth-first search in the node tree
 	private def nodeIterator(startNode: WtNode)(nodeHandlerFunction: WtNode => Unit): Unit = {
-		val nodeQueue = mutable.Queue[WtNode](startNode)
-		while (nodeQueue.nonEmpty) {
-			val node = nodeQueue.dequeue()
+		val nodeStack = mutable.Stack[WtNode](startNode)
+		while (nodeStack.nonEmpty) {
+			val node = nodeStack.pop()
 			if (node != null) {
 				nodeHandlerFunction(node)
-				nodeQueue.enqueue(node.iterator().toList: _*)
+//				node match {
+//					case txt: WtText =>
+//						val text = txt.getContent.trim
+//						if (text.nonEmpty)
+//							println(txt.getContent)
+//					case _ =>
+//				}
+				nodeStack.pushAll(node.iterator().toList.reverse)
 			}
 		}
 	}
@@ -119,13 +128,13 @@ class Extractor(wikiPage: WikiPage, surfaceRepr: String => String) {
 		val link: Option[LinkWithNode] = Some(new LinkWithNode(node))
 		link
 			.flatMap(filterNonLinks)
-//			.flatMap(debugPrintAllLinks)
 			.flatMap(filterImages)
 			.flatMap(filterFiles)
 			.flatMap(filterCategories)
 			.flatMap(removeAnchorLinks)
 			.flatMap(trimWhitespace)
 			.flatMap(filterExternalLinks)
+//			.flatMap(debugPrintAllLinks)
 			.flatMap(toLink)
 			.foreach { link =>
 				links = links :+ link
