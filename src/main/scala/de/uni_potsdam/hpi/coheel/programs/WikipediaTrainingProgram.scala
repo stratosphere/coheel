@@ -71,7 +71,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 					distinctDocuments += linkWithText.source
 				}
 				val count = distinctDocuments.size
-				(surfaceRepr, list.head.surface, count)
+				(surfaceRepr, list.minBy(_.surface).surface, count)
 			}
 
 		// count how often a surface occurs

@@ -24,6 +24,12 @@
     <orderEntry type="library" name="Maven: org.sweble.wikitext:swc-parser-lazy:2.0.0" level="project" />
     <orderEntry type="library" name="Maven: de.fau.cs.osr.ptk:ptk-common:2.0.0" level="project" />
     <orderEntry type="library" name="Maven: de.fau.cs.osr.utils:utils:2.0.0" level="project" />
+    <orderEntry type="library" name="Maven: org.sweble.wikitext:swc-engine:2.0.0" level="project" />
+    <orderEntry type="library" name="Maven: com.sun.xml.bind:jaxb-impl:2.2.5" level="project" />
+    <orderEntry type="library" name="Maven: org.jsoup:jsoup:1.6.3" level="project" />
+    <orderEntry type="library" name="Maven: org.sweble.wikitext:swc-parser-lazy:2.0.0" level="project" />
+    <orderEntry type="library" name="Maven: de.fau.cs.osr.ptk:ptk-common:2.0.0" level="project" />
+    <orderEntry type="library" name="Maven: de.fau.cs.osr.utils:utils:2.0.0" level="project" />
     <orderEntry type="library" name="Maven: de.hpi.fgis:utilities:0.0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:15.0" level="project" />
     <orderEntry type="library" name="Maven: com.carrotsearch:hppc:0.6.0" level="project" />
