@@ -22,7 +22,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 	 */
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val wikiPages = getWikiPages()
-		if (!configurationParams.contains(ConfigurationParams.ONLY_WIKIPAGES) && !configurationParams.contains(ConfigurationParams.ONLY_PLAINTEXTS)) {
+		if (!configurationParams.contains(ConfigurationParams.ONLY_WIKIPAGES) && !configurationParams.contains(ConfigurationParams.NO_PLAINTEXTS)) {
 			buildLinkPlans(wikiPages)
 			buildLanguageModelPlan(wikiPages)
 		}
@@ -32,7 +32,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 				(wikiPage.pageTitle, wikiPage.isDisambiguation, wikiPage.isList, wikiPage.isRedirect, wikiPage.ns, if (wikiPage.isNormalPage) "normal" else "special")
 			}.writeAsTsv(wikiPagesPath)
 		}
-		if (configurationParams.contains(ConfigurationParams.ONLY_PLAINTEXTS)) {
+		if (!configurationParams.contains(ConfigurationParams.NO_PLAINTEXTS)) {
 			wikiPages.map { wikiPage =>
 				(
 					wikiPage.pageTitle,

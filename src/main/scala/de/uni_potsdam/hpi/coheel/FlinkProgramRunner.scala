@@ -66,8 +66,8 @@ object FlinkProgramRunner {
 		note("Parameters starting with X denote special parameters for certain programs:")
 		opt[Unit]("X" + ConfigurationParams.ONLY_WIKIPAGES) text "Only run wiki page extraction" action { (x, c) =>
 			c.copy(configurationParams = c.configurationParams + (ConfigurationParams.ONLY_WIKIPAGES -> "true")) }
-		opt[Unit]("X" + ConfigurationParams.ONLY_PLAINTEXTS) text "Only extract plain texts of wiki pages" action { (x, c) =>
-			c.copy(configurationParams = c.configurationParams + (ConfigurationParams.ONLY_PLAINTEXTS -> "true")) }
+		opt[Unit]("X" + ConfigurationParams.NO_PLAINTEXTS) text "Do not extract plain texts of wiki pages" action { (x, c) =>
+			c.copy(configurationParams = c.configurationParams + (ConfigurationParams.NO_PLAINTEXTS -> "true")) }
 		help("help") text "prints this usage text"
 	}
 
