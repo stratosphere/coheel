@@ -1,28 +1,28 @@
 package de.uni_potsdam.hpi.coheel.wiki
 
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.Link
+import org.sweble.wikitext.engine.nodes.EngPage
+import org.sweble.wikitext.engine.utils.DefaultConfigEnWp
+import org.sweble.wikitext.parser.nodes._
 
 import scala.collection.immutable.Queue
 import scala.collection.mutable
 import org.sweble.wikitext.engine._
 import scala.collection.JavaConversions._
-import org.sweble.wikitext.engine.utils.SimpleWikiConfiguration
-import de.fau.cs.osr.ptk.common.ast.{ContentNode, Text, AstNode, NodeList}
-import org.sweble.wikitext.`lazy`.parser.{Bold, Paragraph, InternalLink}
+
 
 
 class Extractor(wikiPage: WikiPage, surfaceRepr: String => String) {
 
-	val config = new SimpleWikiConfiguration(
-		"classpath:/org/sweble/wikitext/engine/SimpleWikiConfiguration.xml")
+	val config = DefaultConfigEnWp.generate()
 	/**
 	 * Internal class for processing a possible link.
 	 * @param node The XML node.
 	 * @param text The link's text.
 	 * @param destination The link's destination.
 	 */
-	protected case class LinkWithNode(node: AstNode, var text: String, var destination: String) {
-		def this(node: AstNode) = this(node, null, null)
+	protected case class LinkWithNode(node: WtNode, var text: String, var destination: String) {
+		def this(node: WtNode) = this(node, null, null)
 	}
 
 	val compiledWikiPage = getCompiledWikiPage(wikiPage)
@@ -37,7 +37,7 @@ class Extractor(wikiPage: WikiPage, surfaceRepr: String => String) {
 	}
 
 	def extractLinks(): Seq[Link] = {
-		val rootNode = compiledWikiPage.getContent
+		val rootNode = compiledWikiPage
 		val links = extractLinks(rootNode)
 		links
 	}
@@ -60,10 +60,10 @@ class Extractor(wikiPage: WikiPage, surfaceRepr: String => String) {
 	def extractAlternativeNames(): Queue[Link] = {
 		// The minimum number of characters for the first paragraph
 		val MIN_PARAGRAPH_LENGTH = 20
-		val rootNode = compiledWikiPage.getContent
+		val rootNode = compiledWikiPage
 
 		nodeIterator(rootNode) {
-			case paragraph: Paragraph =>
+			case paragraph: WtParagraph =>
 				val paragraphText = getText(paragraph)
 				if (paragraphText.length > MIN_PARAGRAPH_LENGTH) {
 					return extractBoldWordsFrom(paragraph)
@@ -73,10 +73,10 @@ class Extractor(wikiPage: WikiPage, surfaceRepr: String => String) {
 		Queue()
 	}
 
-	private def extractBoldWordsFrom(paragraph: Paragraph): Queue[Link] = {
+	private def extractBoldWordsFrom(paragraph: WtParagraph): Queue[Link] = {
 		var boldWords = Queue[String]()
 		nodeIterator(paragraph) {
-			case bold: Bold =>
+			case bold: WtBold =>
 				val text = getText(bold).trim
 				if (text.nonEmpty) // TODO: Check why texts can be empty
 					boldWords = boldWords.enqueue(text)
@@ -86,8 +86,8 @@ class Extractor(wikiPage: WikiPage, surfaceRepr: String => String) {
 	}
 
 	// Private helper function to extract breadth-first search in the node tree
-	private def nodeIterator(startNode: AstNode)(nodeHandlerFunction: AstNode => Unit): Unit = {
-		val nodeQueue = mutable.Queue[AstNode](startNode)
+	private def nodeIterator(startNode: WtNode)(nodeHandlerFunction: WtNode => Unit): Unit = {
+		val nodeQueue = mutable.Queue[WtNode](startNode)
 		while (nodeQueue.nonEmpty) {
 			val node = nodeQueue.dequeue()
 			if (node != null) {
@@ -97,8 +97,8 @@ class Extractor(wikiPage: WikiPage, surfaceRepr: String => String) {
 		}
 	}
 
-	private def getCompiledWikiPage(wikiPage: WikiPage): Page = {
-		val compiler = new Compiler(config)
+	private def getCompiledWikiPage(wikiPage: WikiPage): EngPage = {
+		val compiler = new WtEngineImpl(config)
 		val pageTitle = PageTitle.make(config, wikiPage.pageTitle)
 		val pageId = new PageId(pageTitle, 0)
 
@@ -107,7 +107,7 @@ class Extractor(wikiPage: WikiPage, surfaceRepr: String => String) {
 		page
 	}
 
-	protected[wiki] def extractLinks(parentNode: NodeList): Seq[Link] = {
+	protected[wiki] def extractLinks(parentNode: WtNode): Seq[Link] = {
 		links = Vector()
 		nodeIterator(parentNode) { node =>
 			extractPotentialLink(node)
@@ -115,7 +115,7 @@ class Extractor(wikiPage: WikiPage, surfaceRepr: String => String) {
 		links
 	}
 
-	private def extractPotentialLink(node: AstNode): Unit = {
+	private def extractPotentialLink(node: WtNode): Unit = {
 		val link: Option[LinkWithNode] = Some(new LinkWithNode(node))
 		link
 			.flatMap(filterNonLinks)
@@ -132,11 +132,11 @@ class Extractor(wikiPage: WikiPage, surfaceRepr: String => String) {
 			}
 	}
 
-	private def getText(link: ContentNode): String = {
-		link.getContent.flatMap {
-			case textNode: Text =>
+	private def getText(link: WtContentNode): String = {
+		link.iterator().flatMap {
+			case textNode: WtText =>
 				Some(textNode.getContent)
-			case otherNode: ContentNode =>
+			case otherNode: WtContentNode =>
 				Some(getText(otherNode))
 			case _ => None
 		}.mkString("")
@@ -147,11 +147,11 @@ class Extractor(wikiPage: WikiPage, surfaceRepr: String => String) {
 	 * @return Some(link), if it is a internal link, None otherwise.
 	 */
 	private def filterNonLinks(link: LinkWithNode): Option[LinkWithNode] = {
-		if (!link.node.isInstanceOf[InternalLink])
+		if (!link.node.isInstanceOf[WtInternalLink])
 			None
 		else {
-			val linkNode = link.node.asInstanceOf[InternalLink]
-			link.destination = linkNode.getTarget
+			val linkNode = link.node.asInstanceOf[WtInternalLink]
+			link.destination = linkNode.getTarget.getAsString
 			link.text = getText(linkNode.getTitle)
 			Some(link)
 		}

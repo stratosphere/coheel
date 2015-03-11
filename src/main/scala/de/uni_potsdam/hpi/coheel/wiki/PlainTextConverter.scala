@@ -2,27 +2,15 @@ package de.uni_potsdam.hpi.coheel.wiki
 
 import java.util
 import java.util.regex.Pattern
-import org.sweble.wikitext.engine.Page
-import org.sweble.wikitext.engine.utils.EntityReferences
-import org.sweble.wikitext.engine.utils.SimpleWikiConfiguration
-import org.sweble.wikitext.`lazy`.encval.IllegalCodePoint
-import org.sweble.wikitext.`lazy`.parser._
-import org.sweble.wikitext.`lazy`.preprocessor.TagExtension
-import org.sweble.wikitext.`lazy`.preprocessor.Template
-import org.sweble.wikitext.`lazy`.preprocessor.TemplateArgument
-import org.sweble.wikitext.`lazy`.preprocessor.TemplateParameter
-import org.sweble.wikitext.`lazy`.preprocessor.XmlComment
-import org.sweble.wikitext.`lazy`.utils.XmlCharRef
-import org.sweble.wikitext.`lazy`.utils.XmlEntityRef
-import de.fau.cs.osr.ptk.common.{AstVisitor, Visitor}
+import de.fau.cs.osr.ptk.common.AstVisitor
 import de.fau.cs.osr.ptk.common.ast.AstNode
-import de.fau.cs.osr.ptk.common.ast.NodeList
-import de.fau.cs.osr.ptk.common.ast.Text
 import de.fau.cs.osr.utils.StringUtils
+import org.sweble.wikitext.engine.config.WikiConfig
+import org.sweble.wikitext.parser.nodes.WtNodeList.WtNodeListImpl
+import org.sweble.wikitext.parser.nodes._
 
-class PlainTextConverter(private val config: SimpleWikiConfiguration, private val extractor: Extractor) extends AstVisitor {
+class PlainTextConverter(private val config: WikiConfig, private val extractor: Extractor) extends AstVisitor[WtNode] {
 
-	private val enumerateSections = true
 	private val wrapCol = Int.MaxValue
 
 	private val ws = Pattern.compile("\\s+")
@@ -43,7 +31,7 @@ class PlainTextConverter(private val config: SimpleWikiConfiguration, private va
 
 	private var sections: util.LinkedList[Integer] = _
 
-	protected override def before(node: AstNode): Boolean = {
+	protected override def before(node: WtNode): Boolean = {
 		sb = new StringBuilder()
 		line = new StringBuilder()
 		extLinkNum = 1
@@ -55,44 +43,40 @@ class PlainTextConverter(private val config: SimpleWikiConfiguration, private va
 		super.before(node)
 	}
 
-	protected override def after(node: AstNode, result: AnyRef): AnyRef = {
+	protected override def after(node: WtNode, result: AnyRef): AnyRef = {
 		finishLine()
 		sb.toString()
 	}
 
-	def visit(n: AstNode) = {
+	def visit(n: WtNode) = {
 		iterate(n)
 	}
 
-	def visit(i: ImageLink): Unit = {
+	def visit(i: WtImageLink): Unit = {
 		iterate(i)
 	}
 
-	def visit(n: NodeList) {
+	def visit(n: WtNodeList) {
 		iterate(n)
 	}
 
-	def visit(p: Page) {
-		iterate(p.getContent)
-	}
-
-	def visit(t: Table) {
+	def visit(t: WtTable) {
 		iterate(t.getBody)
 	}
 
-	def visit(tr: TableRow) {
+	def visit(tr: WtTableRow) {
 		iterate(tr.getBody)
 	}
 
-	def visit(tc: TableCell) {
+	def visit(tc: WtTableCell) {
 		iterate(tc.getBody)
 	}
 
-	def visit(tc: TableCaption) {
+	def visit(tc: WtTableCaption) {
 		iterate(tc.getBody)
 	}
 
-	def visit(text: Text) {
+	def visit(text: WtText) {
 		write(text.getContent)
 	}
 
@@ -100,24 +84,24 @@ class PlainTextConverter(private val config: SimpleWikiConfiguration, private va
 //		throw new Exception("INSIDE HEADING")
 //	}
 
-	def visit(w: Whitespace) {
+	def visit(w: WtWhitespace) {
 		write(" ")
 	}
 
-	def visit(b: Bold) {
-		iterate(b.getContent)
+	def visit(b: WtBold) {
+		iterate(b)
 	}
 
-	def visit(i: Italics) {
-		iterate(i.getContent)
+	def visit(i: WtItalics) {
+		iterate(i)
 	}
 
-	def visit(cr: XmlCharRef) {
+	def visit(cr: WtXmlCharRef) {
 		write(java.lang.Character.toChars(cr.getCodePoint))
 	}
 
-	def visit(er: XmlEntityRef) {
-		val ch = EntityReferences.resolve(er.getName)
+	def visit(er: WtXmlEntityRef) {
+		val ch = er.getResolved
 		if (ch == null) {
 			write('&')
 			write(er.getName)
@@ -127,20 +111,20 @@ class PlainTextConverter(private val config: SimpleWikiConfiguration, private va
 		}
 	}
 
-	def visit(url: Url) {
+	def visit(url: WtUrl) {
 		write(url.getProtocol)
 		write(':')
 		write(url.getPath)
 	}
 
-	def visit(link: ExternalLink) {
+	def visit(link: WtExternalLink) {
 		write('[')
 		iterate(link.getTitle)
 		write(']')
 	}
 
-	def visit(link: InternalLink) {
-		val links = extractor.extractLinks(new NodeList(link))
+	def visit(internalLink: WtInternalLink) {
+		val links = extractor.extractLinks(internalLink)
 		links.headOption match {
 			case Some(link) =>
 //				write(">>>" + link.surface + "<<<")
@@ -165,42 +149,33 @@ class PlainTextConverter(private val config: SimpleWikiConfiguration, private va
 //		write(link.getPostfix)
 	}
 
-	def visit(s: Section) {
+	def visit(s: WtSection) {
 		finishLine()
 		val saveSb = sb
 		val saveNoWrap = noWrap
 		sb = new StringBuilder()
 		noWrap = true
-		iterate(s.getTitle)
+		iterate(s.getHeading)
 		finishLine()
-		var title = sb.toString().trim()
+		var title = sb.toString.trim()
 		sb = saveSb
 		if (s.getLevel >= 1) {
-			while (sections.size > s.getLevel) {
-				sections.removeLast()
+			while (sections.size > s.getLevel) { sections.removeLast() }
+			while (sections.size < s.getLevel) { sections.add(1) }
+			val sb2 = new StringBuilder()
+			for (i <- 0 until sections.size) {
+				sb2.append(sections.get(i))
+				sb2.append('.')
 			}
-			while (sections.size < s.getLevel) {
-				sections.add(1)
-			}
-			if (enumerateSections) {
-				val sb2 = new StringBuilder()
-				for (i <- 0 until sections.size) {
-					if (i < 1) {
-						//continue
-					}
-					sb2.append(sections.get(i))
-					sb2.append('.')
-				}
-				if (sb2.length > 0) {
-					sb2.append(' ')
-				}
-				sb2.append(title)
-				title = sb2.toString()
-			}
+			if (sb2.length > 0) { sb2.append(' ') }
+			sb2.append(title)
+			title = sb2.toString
 		}
-		newline(1)
+		newline(2)
 		write(title)
 		newline(1)
+		write(StringUtils.strrep('-', title.length))
+		newline(2)
 		noWrap = saveNoWrap
 		iterate(s.getBody)
 		while (sections.size > s.getLevel) {
@@ -209,16 +184,16 @@ class PlainTextConverter(private val config: SimpleWikiConfiguration, private va
 		sections.add(sections.removeLast() + 1)
 	}
 
-	def visit(p: Paragraph) {
-		iterate(p.getContent)
+	def visit(p: WtParagraph) {
+		iterate(p)
 		newline(1)
 	}
 
-	def visit(hr: HorizontalRule) {
+	def visit(hr: WtHorizontalRule) {
 		newline(1)
 	}
 
-	def visit(e: XmlElement) {
+	def visit(e: WtXmlElement) {
 		if (e.getName.equalsIgnoreCase("br")) {
 			newline(1)
 		} else {
@@ -226,35 +201,21 @@ class PlainTextConverter(private val config: SimpleWikiConfiguration, private va
 		}
 	}
 
-	def visit(n: Itemization) {
-		iterate(n.getContent)
+	def visit(n: WtListItem) {
+		iterate(n)
 	}
 
-	def visit(n: ItemizationItem) {
-		iterate(n.getContent)
-		newline(1)
-	}
+	def visit(n: WtIllegalCodePoint) { }
 
-	def visit(n: IllegalCodePoint) {
-	}
+	def visit(n: WtXmlComment) { }
 
-	def visit(n: XmlComment) {
-	}
+	def visit(n: WtTemplate) { }
 
-	def visit(n: Template) {
-	}
+	def visit(n: WtTemplateArgument) { }
 
-	def visit(n: TemplateArgument) {
-	}
+	def visit(n: WtTemplateParameter) { }
 
-	def visit(n: TemplateParameter) {
-	}
-
-	def visit(n: TagExtension) {
-	}
-
-	def visit(n: MagicWord) {
-	}
+	def visit(n: WtTagExtension) { }
 
 	private def newline(num: Int) {
 		if (pastBod) {
