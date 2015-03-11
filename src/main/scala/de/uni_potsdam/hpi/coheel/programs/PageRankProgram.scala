@@ -16,7 +16,7 @@ class PageRankProgram extends NoParamCoheelProgram {
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 
-		val NUM_VERTICES = 342596
+		val NUM_VERTICES = 342561
 		val THRESHOLD = 0.0001 / NUM_VERTICES
 		val INITIAL_RANK = 1.0 / NUM_VERTICES
 
@@ -79,8 +79,10 @@ class PageRankProgram extends NoParamCoheelProgram {
 					Page(current.id, current.rank + delta.rank)
 				}
 
+
 			(rankUpdates, deltas)
 		}
+
 
 		pageRank.writeAsTsv(pageRankPath)
 
