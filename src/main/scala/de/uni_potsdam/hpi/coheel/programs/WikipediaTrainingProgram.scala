@@ -25,13 +25,6 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 		if (!configurationParams.contains(ConfigurationParams.ONLY_WIKIPAGES)) {
 			buildLinkPlans(wikiPages)
 			buildLanguageModelPlan(wikiPages)
-			wikiPages.map { wikiPage =>
-				(
-					wikiPage.pageTitle,
-					if (wikiPage.plainText.isEmpty) " " else TokenizerHelper.tokenize(wikiPage.plainText).mkString(" "),
-					if (wikiPage.links.isEmpty) CoheelProgram.LINK_SPLITTER else wikiPage.links.map(_.surfaceRepr).mkString(CoheelProgram.LINK_SPLITTER)
-				)
-			}.writeAsTsv(plainTextsPath)
 		} else {
 			wikiPages.map { wikiPage =>
 				(wikiPage.pageTitle, wikiPage.isDisambiguation, wikiPage.isList, wikiPage.isRedirect, wikiPage.ns, if (wikiPage.isNormalPage) "normal" else "special")
@@ -132,8 +125,27 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 	 * Builds the plan who creates the language model for a given entity.
 	 */
 	def buildLanguageModelPlan(wikiPages: DataSet[WikiPage]): Unit = {
-		val words = filterNormalPages(wikiPages) flatMap { wikiPage =>
-			val tokens = TokenizerHelper.tokenize(wikiPage.plainText)
+		val plainTexts = filterNormalPages(wikiPages).map { wikiPage =>
+			(wikiPage, TokenizerHelper.tokenize(wikiPage.plainText))
+		}
+		plainTexts.map { plainTexts =>
+			val (wikiPage, plainTextTokens) = plainTexts
+			val plainText =  if (wikiPage.plainText.isEmpty)
+				" "
+			else
+				plainTextTokens.mkString(" ")
+
+			val links = if (wikiPage.links.isEmpty)
+				CoheelProgram.LINK_SPLITTER
+			else
+				wikiPage.links.map(_.surfaceRepr).mkString(CoheelProgram.LINK_SPLITTER)
+
+			(wikiPage.pageTitle, plainText, links)
+		}.writeAsTsv(plainTextsPath)
+
+		val words = plainTexts.flatMap { plainTexts =>
+			val (wikiPage, plainTextTokens) = plainTexts
+			val tokens = plainTextTokens
 				.groupBy { word => word }
 				.mapValues(_.size)
 				.map { case (token, count) =>
