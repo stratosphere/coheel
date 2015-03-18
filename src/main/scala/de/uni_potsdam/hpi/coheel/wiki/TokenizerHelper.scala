@@ -16,21 +16,9 @@ object TokenizerHelper {
 
 	val STEMMING_DEFAULT = true
 
-	def transformToTokenized(text: String, stemming: Boolean = STEMMING_DEFAULT): String = {
-//		tokenize(text, stemming).mkString(" ")
-		val sb = new mutable.StringBuilder()
-		tokenizeHelper(text, stemming) { (charTermAttribute, _, _, _) =>
-			if (sb.isEmpty)
-				sb.append(charTermAttribute.toString)
-			else
-				sb.append(" " + charTermAttribute.toString)
-		}
-		sb.toString()
-	}
-
-	def tokenize(text: String, stemming: Boolean = STEMMING_DEFAULT): Array[String] = {
+	def tokenize(text: String): Array[String] = {
 		val tokens = mutable.ArrayBuffer[String]()
-		tokenizeHelper(text, stemming) { (charTermAttribute, _, _, _) =>
+		tokenizeHelper(text, STEMMING_DEFAULT) { (charTermAttribute, _, _, _) =>
 			tokens += charTermAttribute.toString
 		}
 		tokens.toArray

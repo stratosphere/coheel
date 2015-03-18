@@ -28,7 +28,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 			wikiPages.map { wikiPage =>
 				(
 					wikiPage.pageTitle,
-					if (wikiPage.plainText.isEmpty) " " else TokenizerHelper.transformToTokenized(wikiPage.plainText),
+					if (wikiPage.plainText.isEmpty) " " else TokenizerHelper.tokenize(wikiPage.plainText).mkString(" "),
 					if (wikiPage.links.isEmpty) CoheelProgram.LINK_SPLITTER else wikiPage.links.map(_.surfaceRepr).mkString(CoheelProgram.LINK_SPLITTER)
 				)
 			}.writeAsTsv(plainTextsPath)

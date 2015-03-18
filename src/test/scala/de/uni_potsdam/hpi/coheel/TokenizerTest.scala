@@ -14,9 +14,9 @@ class TokenizerTest extends FunSuite {
 	test("Test tokenizer") {
 		println("Raw text")
 		println(text)
-		println("Tokenized text, no stemming")
-		println(TokenizerHelper.tokenize(text, stemming = false).mkString(" "))
+//		println("Tokenized text, no stemming")
+//		println(TokenizerHelper.tokenize(text, stemming = false).mkString(" "))
 		println("Tokenized text, with stemming")
-		println(TokenizerHelper.tokenize(text, stemming = true).mkString(" "))
+		println(TokenizerHelper.tokenize(text).mkString(" "))
 	}
 }
