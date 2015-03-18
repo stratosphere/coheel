@@ -9,7 +9,11 @@ import org.sweble.wikitext.engine.config.WikiConfig
 import org.sweble.wikitext.parser.nodes.WtNodeList.WtNodeListImpl
 import org.sweble.wikitext.parser.nodes._
 
-class PlainTextConverter(private val config: WikiConfig, private val extractor: Extractor) extends AstVisitor[WtNode] {
+/**
+ * PlainTextConverter.
+ * Copied from Sweble's example code, and adapted to our needs.
+ */
+class PlainTextConverter(private val extractor: Extractor) extends AstVisitor[WtNode] {
 
 	private val wrapCol = Int.MaxValue
 
@@ -18,8 +22,6 @@ class PlainTextConverter(private val config: WikiConfig, private val extractor: 
 	private var sb: StringBuilder = _
 
 	private var line: StringBuilder = _
-
-	private var extLinkNum: Int = _
 
 	private var pastBod: Boolean = _
 
@@ -34,7 +36,6 @@ class PlainTextConverter(private val config: WikiConfig, private val extractor: 
 	protected override def before(node: WtNode): Boolean = {
 		sb = new StringBuilder()
 		line = new StringBuilder()
-		extLinkNum = 1
 		pastBod = false
 		needNewlines = 0
 		needSpace = false
@@ -79,10 +80,6 @@ class PlainTextConverter(private val config: WikiConfig, private val extractor: 
 	def visit(text: WtText) {
 		write(text.getContent)
 	}
-
-//	def visit(t: Heading) = {
-//		throw new Exception("INSIDE HEADING")
-//	}
 
 	def visit(w: WtWhitespace) {
 		write(" ")
@@ -131,22 +128,6 @@ class PlainTextConverter(private val config: WikiConfig, private val extractor: 
 				write(link.surface)
 			case None =>
 		}
-		// OLD CODE
-//		try {
-//			val page = PageTitle.make(config, link.getTarget)
-//			if (page.getNamespace == config.getNamespace("Category")) {
-//				return
-//			}
-//		} catch {
-//			case e: LinkTargetException =>
-//		}
-//		write(link.getPrefix)
-//		if (link.getTitle.getContent == null || link.getTitle.getContent.isEmpty) {
-//			write(link.getTarget)
-//		} else {
-//			iterate(link.getTitle)
-//		}
-//		write(link.getPostfix)
 	}
 
 	def visit(s: WtSection) {
@@ -160,14 +141,20 @@ class PlainTextConverter(private val config: WikiConfig, private val extractor: 
 		var title = sb.toString.trim()
 		sb = saveSb
 		if (s.getLevel >= 1) {
-			while (sections.size > s.getLevel) { sections.removeLast() }
-			while (sections.size < s.getLevel) { sections.add(1) }
+			while (sections.size > s.getLevel) {
+				sections.removeLast()
+			}
+			while (sections.size < s.getLevel) {
+				sections.add(1)
+			}
 			val sb2 = new StringBuilder()
 			for (i <- 0 until sections.size) {
 				sb2.append(sections.get(i))
 				sb2.append('.')
 			}
-			if (sb2.length > 0) { sb2.append(' ') }
+			if (sb2.length > 0) {
+				sb2.append(' ')
+			}
 			sb2.append(title)
 			title = sb2.toString
 		}
@@ -205,17 +192,17 @@ class PlainTextConverter(private val config: WikiConfig, private val extractor: 
 		iterate(n)
 	}
 
-	def visit(n: WtIllegalCodePoint) { }
+	def visit(n: WtIllegalCodePoint) {}
 
-	def visit(n: WtXmlComment) { }
+	def visit(n: WtXmlComment) {}
 
-	def visit(n: WtTemplate) { }
+	def visit(n: WtTemplate) {}
 
-	def visit(n: WtTemplateArgument) { }
+	def visit(n: WtTemplateArgument) {}
 
-	def visit(n: WtTemplateParameter) { }
+	def visit(n: WtTemplateParameter) {}
 
-	def visit(n: WtTagExtension) { }
+	def visit(n: WtTagExtension) {}
 
 	private def newline(num: Int) {
 		if (pastBod) {
