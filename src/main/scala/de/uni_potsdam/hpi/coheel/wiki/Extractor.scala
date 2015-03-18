@@ -5,12 +5,11 @@ import org.sweble.wikitext.engine.nodes.EngPage
 import org.sweble.wikitext.engine.utils.DefaultConfigEnWp
 import org.sweble.wikitext.parser.nodes._
 
+import scala.StringBuilder
 import scala.collection.immutable.Queue
 import scala.collection.mutable
 import org.sweble.wikitext.engine._
 import scala.collection.JavaConversions._
-
-
 
 class Extractor(wikiPage: WikiPage, surfaceRepr: String => String) {
 
@@ -87,22 +86,53 @@ class Extractor(wikiPage: WikiPage, surfaceRepr: String => String) {
 		boldWords.map { word => Link(word, surfaceRepr(word), wikiPage.pageTitle, wikiPage.pageTitle) }
 	}
 
-	// Private helper function to extract breadth-first search in the node tree
+	// Private helper function to do depth-first search in the node tree
 	private def nodeIterator(startNode: WtNode)(nodeHandlerFunction: WtNode => Unit): Unit = {
-		val nodeStack = mutable.Stack[WtNode](startNode)
+		/**
+		 * Stores information for the depth-first search of the document AST.
+		 * @param node The node to handle.
+		 * @param insideTemplate Whether or not the current node is a sub-node of a template.
+		 *                       Important because template parameters need an recursive invocation
+		 *                       of the parser, because they are not parsed by default.
+		 */
+		case class StackItem(node: WtNode, insideTemplate: Boolean)
+		val nodeStack = mutable.Stack[StackItem](StackItem(startNode, false))
+
+		/**
+		 * Aggregate all text inside templates for performance reasons.
+		 * This way, only one recursive Extractor instance is need, instead of one
+		 * per template parameter.
+		 * TODO: Think about whether this is better dealt with by a heuristic, e.g.
+		 * only parse parameters with wiki markup or with a mininum length.
+		 * The current situation somehow breaks the context, because template
+		 * parameters are at the end.
+		 */
+		val aggregatedTemplateSource = new StringBuilder()
 		while (nodeStack.nonEmpty) {
-			val node = nodeStack.pop()
+			val StackItem(node, insideTemplate) = nodeStack.pop()
 			if (node != null) {
 				nodeHandlerFunction(node)
-//				node match {
-//					case txt: WtText =>
-//						val text = txt.getContent.trim
-//						if (text.nonEmpty)
-//							println(txt.getContent)
-//					case _ =>
-//				}
-				nodeStack.pushAll(node.iterator().toList.reverse)
+				node match {
+					case t: WtTemplate =>
+						nodeStack.pushAll(node.iterator().toList.reverse.map(StackItem(_, true)))
+					case txt: WtText if insideTemplate =>
+						val source = txt.getContent.trim
+						aggregatedTemplateSource.append(source)
+						// To links between two overlapping template parameters, we introduce
+						// a splitter, which must not be inside a link.
+						aggregatedTemplateSource.append(s"\n$TEMPLATE_SEPARATOR\n")
+					case _ =>
+						nodeStack.pushAll(node.iterator().toList.reverse.map(StackItem(_, insideTemplate)))
+				}
 			}
+		}
+
+		// Now call the extractor recursively, to get the links inside templates.
+		val sourceString = aggregatedTemplateSource.toString()
+		if (sourceString.nonEmpty) {
+			val templatePage = WikiPage.fromSource(wikiPage.pageTitle, sourceString)
+			val newExtractor = new Extractor(templatePage, surfaceRepr)
+			newExtractor.nodeIterator(newExtractor.compiledWikiPage)(nodeHandlerFunction)
 		}
 	}
 
@@ -116,6 +146,7 @@ class Extractor(wikiPage: WikiPage, surfaceRepr: String => String) {
 		page
 	}
 
+	val TEMPLATE_SEPARATOR = "#####"
 	protected[wiki] def extractLinks(parentNode: WtNode): Seq[Link] = {
 		links = Vector()
 		nodeIterator(parentNode) { node =>
@@ -131,6 +162,7 @@ class Extractor(wikiPage: WikiPage, surfaceRepr: String => String) {
 			.flatMap(filterImages)
 			.flatMap(filterFiles)
 			.flatMap(filterCategories)
+			.flatMap(filterTemplateSeparator)
 			.flatMap(removeAnchorLinks)
 			.flatMap(trimWhitespace)
 			.flatMap(filterExternalLinks)
@@ -149,6 +181,13 @@ class Extractor(wikiPage: WikiPage, surfaceRepr: String => String) {
 				Some(getText(otherNode))
 			case _ => None
 		}.mkString("")
+	}
+
+	private def filterTemplateSeparator(link: LinkWithNode): Option[LinkWithNode] = {
+		if (link.text.contains(TEMPLATE_SEPARATOR))
+			None
+		else
+			Some(link)
 	}
 
 	/**

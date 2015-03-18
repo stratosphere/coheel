@@ -27,6 +27,11 @@ class ExtractorTest extends FunSuite {
 		assert(links.exists { link => link.surface == "Anno Domini" && link.destination == "Anno Domini" })
 	}
 
+	test("find links inside templates") {
+		assert(links.exists { link => link.surface == "A Cappella Records" })
+		assert(links.exists { link => link.surface == "A Different Drum" })
+	}
+
 	test("find links inside files") {
 		assert(links.exists { link => link.surface == "colleges of the University of Cambridge" })
 		assert(links.exists { link => link.surface == "King's College" })
@@ -94,9 +99,9 @@ class ExtractorTest extends FunSuite {
 		})
 	}
 
-	test("all links are found (currently, we cannot find links in refs)") {
+	test("all links are found") {
 		// add +2 when using bold text extraction
-		assert(links.size === 61 /* hand-counted :) */)
+		assert(links.size === 63 /* hand-counted :) */)
 	}
 
 	test("just print links") {

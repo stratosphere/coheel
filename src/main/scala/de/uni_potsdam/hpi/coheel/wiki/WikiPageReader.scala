@@ -42,6 +42,18 @@ case class WikiPage(pageTitle: String,
 	}
 }
 
+object WikiPage {
+
+	/**
+	 * Builds a wiki page from the given title and wiki markup source.
+	 */
+	def fromSource(pageTitle:String, source: String): WikiPage = {
+		val wp = WikiPage(pageTitle, 0, "", "", Array(), false, false)
+		wp.source = source
+		wp
+	}
+}
+
 class WikiPageReader {
 
 	val log = Logger.getLogger(getClass)

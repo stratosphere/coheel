@@ -1,4 +1,6 @@
-Fix infobox link recognition.
+Fix infobox link recognition. Also for plaintexts!!!
 
+Smaller resolution in first percentages of surfaces. Also display, how many are actually filtered.
 Calculate prominence scores and context probabilities.
 Determine position, where a surface occurs.
+Look for library for random walk.
