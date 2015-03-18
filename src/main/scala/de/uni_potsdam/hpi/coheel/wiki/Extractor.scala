@@ -48,7 +48,7 @@ class Extractor(wikiPage: WikiPage, surfaceRepr: String => String) {
 	 * @return The plain text of the wikipage.
 	 */
 	def extractPlainText(): String = {
-		val plainTextConverter = new PlainTextConverter(config, this)
+		val plainTextConverter = new PlainTextConverter(this)
 		val page = compiledWikiPage
 		plainTextConverter.go(page).asInstanceOf[String]
 	}

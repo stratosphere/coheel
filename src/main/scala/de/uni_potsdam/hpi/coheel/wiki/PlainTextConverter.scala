@@ -158,11 +158,8 @@ class PlainTextConverter(private val extractor: Extractor) extends AstVisitor[Wt
 			sb2.append(title)
 			title = sb2.toString
 		}
-		newline(2)
 		write(title)
-		newline(1)
 		write(StringUtils.strrep('-', title.length))
-		newline(2)
 		noWrap = saveNoWrap
 		iterate(s.getBody)
 		while (sections.size > s.getLevel) {
@@ -173,19 +170,10 @@ class PlainTextConverter(private val extractor: Extractor) extends AstVisitor[Wt
 
 	def visit(p: WtParagraph) {
 		iterate(p)
-		newline(1)
-	}
-
-	def visit(hr: WtHorizontalRule) {
-		newline(1)
 	}
 
 	def visit(e: WtXmlElement) {
-		if (e.getName.equalsIgnoreCase("br")) {
-			newline(1)
-		} else {
-			iterate(e.getBody)
-		}
+		iterate(e.getBody)
 	}
 
 	def visit(n: WtListItem) {
@@ -203,14 +191,6 @@ class PlainTextConverter(private val extractor: Extractor) extends AstVisitor[Wt
 	def visit(n: WtTemplateParameter) {}
 
 	def visit(n: WtTagExtension) {}
-
-	private def newline(num: Int) {
-		if (pastBod) {
-			if (num > needNewlines) {
-				needNewlines = num
-			}
-		}
-	}
 
 	private def wantSpace() {
 		if (pastBod) {
