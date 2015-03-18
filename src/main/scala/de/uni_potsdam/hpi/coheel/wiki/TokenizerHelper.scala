@@ -1,12 +1,12 @@
 package de.uni_potsdam.hpi.coheel.wiki
 
-import org.apache.lucene.analysis.en.{PorterStemFilter, EnglishAnalyzer}
-import org.apache.lucene.analysis.standard.StandardAnalyzer
+import java.io.StringReader
+
+import org.apache.lucene.analysis.en.PorterStemFilter
+import org.apache.lucene.analysis.tokenattributes.{CharTermAttribute, FlagsAttribute, OffsetAttribute, TypeAttribute}
 import org.apache.lucene.analysis.util.CharArraySet
 import org.apache.lucene.util.Version
-import java.io.StringReader
-import scala.collection.mutable.ListBuffer
-import org.apache.lucene.analysis.tokenattributes.{OffsetAttribute, CharTermAttribute}
+
 import scala.collection.mutable
 
 /**
@@ -17,8 +17,9 @@ object TokenizerHelper {
 	val STEMMING_DEFAULT = true
 
 	def transformToTokenized(text: String, stemming: Boolean = STEMMING_DEFAULT): String = {
+//		tokenize(text, stemming).mkString(" ")
 		val sb = new mutable.StringBuilder()
-		tokenizeHelper(text, stemming) { (charTermAttribute, _) =>
+		tokenizeHelper(text, stemming) { (charTermAttribute, _, _, _) =>
 			if (sb.isEmpty)
 				sb.append(charTermAttribute.toString)
 			else
@@ -29,22 +30,16 @@ object TokenizerHelper {
 
 	def tokenize(text: String, stemming: Boolean = STEMMING_DEFAULT): Array[String] = {
 		val tokens = mutable.ArrayBuffer[String]()
-		tokenizeHelper(text, stemming) { (charTermAttribute, _) =>
+		tokenizeHelper(text, stemming) { (charTermAttribute, _, _, _) =>
 			tokens += charTermAttribute.toString
 		}
 		tokens.toArray
 	}
 
-	def tokenizeWithCounts(text: String, stemming: Boolean = STEMMING_DEFAULT): Map[String, Int] = {
-		val tokens = ListBuffer[String]()
-		tokenizeHelper(text, stemming) { (charTermAttribute, _) =>
-			tokens += charTermAttribute.toString
-		}
-		tokens.groupBy { word => word }.mapValues(_.size)
-	}
+	type TokenHandler = (CharTermAttribute, OffsetAttribute, TypeAttribute, FlagsAttribute) => Unit
 
-	private def tokenizeHelper(text: String, stemming: Boolean)(tokenHandler: (CharTermAttribute, OffsetAttribute) => Unit): Unit = {
-		val analyzer = new StandardAnalyzer(Version.LUCENE_48, CharArraySet.EMPTY_SET)
+	private def tokenizeHelper(text: String, stemming: Boolean)(tokenHandler: TokenHandler): Unit = {
+		val analyzer = new WikipediaAnalyzer(Version.LUCENE_48, CharArraySet.EMPTY_SET)
 		// implemented following this guide:
 		// http://stackoverflow.com/questions/6334692/how-to-use-a-lucene-analyzer-to-tokenize-a-string
 		val tokenStream = if (stemming)
@@ -56,11 +51,14 @@ object TokenizerHelper {
 
 		val charTermAttribute = tokenStream.addAttribute(classOf[CharTermAttribute])
 		val offsetAttribute   = tokenStream.addAttribute(classOf[OffsetAttribute])
+		val typeAttribute     = tokenStream.addAttribute(classOf[TypeAttribute])
+		val flagAttribute     = tokenStream.addAttribute(classOf[FlagsAttribute])
 
 		while (tokenStream.incrementToken()) {
-			tokenHandler(charTermAttribute, offsetAttribute)
+			tokenHandler(charTermAttribute, offsetAttribute, typeAttribute, flagAttribute)
 		}
-		analyzer.close()
+		tokenStream.end()
+		tokenStream.close()
 	}
 
 }

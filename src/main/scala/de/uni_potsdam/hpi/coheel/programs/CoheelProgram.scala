@@ -154,7 +154,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 		environment.readTextFile(surfaceProbsPath).flatMap { line =>
 			val split = line.split('\t')
 			if (split.size > 1) {
-				val tokens = TokenizerHelper.tokenize(split(0))
+				val tokens = split(0).split(' ')
 				if (tokens.nonEmpty) {
 					val prob = split(2).toDouble
 					if (prob > threshold)

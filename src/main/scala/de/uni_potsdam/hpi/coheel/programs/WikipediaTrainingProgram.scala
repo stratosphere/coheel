@@ -133,8 +133,11 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 	 */
 	def buildLanguageModelPlan(wikiPages: DataSet[WikiPage]): Unit = {
 		val words = filterNormalPages(wikiPages) flatMap { wikiPage =>
-			val tokens = TokenizerHelper.tokenizeWithCounts(wikiPage.plainText, stemming = false).map { case (token, count) =>
-				WordInDocument(wikiPage.pageTitle, token, count)
+			val tokens = TokenizerHelper.tokenize(wikiPage.plainText)
+				.groupBy { word => word }
+				.mapValues(_.size)
+				.map { case (token, count) =>
+					WordInDocument(wikiPage.pageTitle, token, count)
 			}.toIterator
 			tokens
 		}
