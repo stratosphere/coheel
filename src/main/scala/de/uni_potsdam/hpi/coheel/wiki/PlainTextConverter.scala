@@ -15,37 +15,9 @@ import org.sweble.wikitext.parser.nodes._
  */
 class PlainTextConverter(private val extractor: Extractor) extends AstVisitor[WtNode] {
 
-	private val wrapCol = Int.MaxValue
+	private val sb: StringBuilder = new StringBuilder
 
-	private val ws = Pattern.compile("\\s+")
-
-	private var sb: StringBuilder = _
-
-	private var line: StringBuilder = _
-
-	private var pastBod: Boolean = _
-
-	private var needNewlines: Int = _
-
-	private var needSpace: Boolean = _
-
-	private var noWrap: Boolean = _
-
-	private var sections: util.LinkedList[Integer] = _
-
-	protected override def before(node: WtNode): Boolean = {
-		sb = new StringBuilder()
-		line = new StringBuilder()
-		pastBod = false
-		needNewlines = 0
-		needSpace = false
-		noWrap = false
-		sections = new util.LinkedList[Integer]()
-		super.before(node)
-	}
-
-	protected override def after(node: WtNode, result: AnyRef): AnyRef = {
-		finishLine()
+	def getPlainText: String = {
 		sb.toString()
 	}
 
@@ -85,179 +57,55 @@ class PlainTextConverter(private val extractor: Extractor) extends AstVisitor[Wt
 		write(" ")
 	}
 
-	def visit(b: WtBold) {
-		iterate(b)
-	}
-
-	def visit(i: WtItalics) {
-		iterate(i)
-	}
-
-	def visit(cr: WtXmlCharRef) {
-		write(java.lang.Character.toChars(cr.getCodePoint))
-	}
-
 	def visit(er: WtXmlEntityRef) {
 		val ch = er.getResolved
-		if (ch == null) {
-			write('&')
-			write(er.getName)
-			write(';')
-		} else {
+		if (ch != null) {
 			write(ch)
 		}
 	}
 
 	def visit(url: WtUrl) {
 		write(url.getProtocol)
-		write(':')
+		write(":")
 		write(url.getPath)
 	}
 
 	def visit(link: WtExternalLink) {
-		write('[')
 		iterate(link.getTitle)
-		write(']')
 	}
 
 	def visit(internalLink: WtInternalLink) {
 		val links = extractor.extractLinks(internalLink)
 		links.headOption match {
 			case Some(link) =>
-//				write(">>>" + link.surface + "<<<")
 				write(link.surface)
 			case None =>
 		}
 	}
 
 	def visit(s: WtSection) {
-		finishLine()
-		val saveSb = sb
-		val saveNoWrap = noWrap
-		sb = new StringBuilder()
-		noWrap = true
 		iterate(s.getHeading)
-		finishLine()
-		var title = sb.toString.trim()
-		sb = saveSb
-		if (s.getLevel >= 1) {
-			while (sections.size > s.getLevel) {
-				sections.removeLast()
-			}
-			while (sections.size < s.getLevel) {
-				sections.add(1)
-			}
-			val sb2 = new StringBuilder()
-			for (i <- 0 until sections.size) {
-				sb2.append(sections.get(i))
-				sb2.append('.')
-			}
-			if (sb2.length > 0) {
-				sb2.append(' ')
-			}
-			sb2.append(title)
-			title = sb2.toString
-		}
-		write(title)
-		write(StringUtils.strrep('-', title.length))
-		noWrap = saveNoWrap
 		iterate(s.getBody)
-		while (sections.size > s.getLevel) {
-			sections.removeLast()
-		}
-		sections.add(sections.removeLast() + 1)
-	}
-
-	def visit(p: WtParagraph) {
-		iterate(p)
 	}
 
 	def visit(e: WtXmlElement) {
 		iterate(e.getBody)
 	}
 
-	def visit(n: WtListItem) {
-		iterate(n)
-	}
-
 	def visit(n: WtIllegalCodePoint) {}
-
 	def visit(n: WtXmlComment) {}
-
 	def visit(n: WtTemplate) {}
-
 	def visit(n: WtTemplateArgument) {}
-
 	def visit(n: WtTemplateParameter) {}
-
 	def visit(n: WtTagExtension) {}
-
-	private def wantSpace() {
-		if (pastBod) {
-			needSpace = true
-		}
-	}
-
-	private def finishLine() {
-		sb.append(line)
-		line.setLength(0)
-	}
-
-	private def writeNewlines(num: Int) {
-		finishLine()
-		sb.append(StringUtils.strrep('\n', num))
-		needNewlines = 0
-		needSpace = false
-	}
-
-	private def writeWord(s: String) {
-		var length = s.length
-		if (length == 0) {
-			return
-		}
-		if (!noWrap && needNewlines <= 0) {
-			if (needSpace) {
-				length += 1
-			}
-			if (line.length + length >= wrapCol && line.length > 0) {
-				writeNewlines(1)
-			}
-		}
-		if (needSpace && needNewlines <= 0) {
-			line.append(' ')
-		}
-		if (needNewlines > 0) {
-			writeNewlines(needNewlines)
-		}
-		needSpace = false
-		pastBod = true
-		line.append(s)
-	}
 
 	private def write(s: String) {
 		if (s.isEmpty)
 			return
-		if (java.lang.Character.isSpaceChar(s.charAt(0)))
-			wantSpace()
-		val words = ws.split(s)
-		var i = 0
-		while (i < words.length) {
-			writeWord(words(i))
-			if (i < words.length) {
-				wantSpace()
-			}
-			i += 1
+		if (sb.nonEmpty) {
+			sb.append(' ')
 		}
-		if (java.lang.Character.isSpaceChar(s.charAt(s.length - 1)))
-			wantSpace()
-	}
-
-	private def write(cs: Array[Char]) {
-		write(String.valueOf(cs))
-	}
-
-	private def write(ch: Char) {
-		writeWord(String.valueOf(ch))
+		sb.append(s)
 	}
 }
 

@@ -18,8 +18,20 @@ object TokenizerHelper {
 
 	def tokenize(text: String): Array[String] = {
 		val tokens = mutable.ArrayBuffer[String]()
-		tokenizeHelper(text, STEMMING_DEFAULT) { (charTermAttribute, _, _, _) =>
+		tokenizeHelper(text, STEMMING_DEFAULT) { (charTermAttribute, _, typeAttribute, flagsAttribute) =>
 			tokens += charTermAttribute.toString
+		}
+		tokens.toArray
+	}
+
+	def tokenizeDifferent(text: String): Array[String] = {
+		val tokens = mutable.ArrayBuffer[String]()
+		tokenizeHelper(text, STEMMING_DEFAULT) { (charTermAttribute, _, typeAttribute, flagsAttribute) =>
+			tokens += charTermAttribute.toString
+			if (typeAttribute.`type`() == WikipediaTokenizer.INTERNAL_LINK) {
+				println(charTermAttribute.toString, flagsAttribute.getFlags)
+			}
+
 		}
 		tokens.toArray
 	}

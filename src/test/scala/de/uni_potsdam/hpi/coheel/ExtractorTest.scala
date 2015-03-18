@@ -110,6 +110,12 @@ class ExtractorTest extends FunSuite {
 		}
 	}
 
+	test("plain text extraction") {
+		val extractor = fixture()
+		val plainText = extractor.extractPlainText()
+		assert(plainText.contains("Examples"))
+	}
+
 	test("does not run in infinite loop") {
 		val source = getClass.getResource("/manual_test_files/infinite_loop.xml")
 		val xml = Source.fromFile(source.toURI, "UTF-8").mkString

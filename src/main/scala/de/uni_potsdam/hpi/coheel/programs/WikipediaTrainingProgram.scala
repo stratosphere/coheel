@@ -130,7 +130,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 		}
 		plainTexts.map { plainTexts =>
 			val (wikiPage, plainTextTokens) = plainTexts
-			val plainText =  if (wikiPage.plainText.isEmpty)
+			val plainText =  if (plainTextTokens.isEmpty)
 				" "
 			else
 				plainTextTokens.mkString(" ")
