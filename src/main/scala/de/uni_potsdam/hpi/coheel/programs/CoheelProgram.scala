@@ -63,8 +63,9 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 				filteredWikiPages.foreach { wikiPage =>
 					try {
 						val extractor = new Extractor(wikiPage, s => TokenizerHelper.tokenize(s).mkString(" ") )
-						val links = extractor.extractAllLinks()
-						val plainText = extractor.extractPlainText()
+						extractor.extract()
+						val links = extractor.getLinks()
+						val plainText = extractor.getPlainText
 						wikiPage.source = ""
 						out.collect(WikiPage(wikiPage.pageTitle, wikiPage.ns, wikiPage.redirect,
 							plainText, links.toArray, wikiPage.isDisambiguation, wikiPage.isList))
@@ -84,7 +85,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 		}.name("Filter-Normal-Pages")
 	}
 
-	def getPlainTexts(): DataSet[Plaintext] = {
+	def getPlainTexts: DataSet[Plaintext] = {
 		environment.readTextFile(plainTextsPath).name("Plain-Texts").flatMap { line =>
 			val split = line.split('\t')
 			// TODO: Change, once we only have plaintext files with 3 entries

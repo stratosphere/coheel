@@ -10,7 +10,11 @@ import scala.io.Source
 @RunWith(classOf[JUnitRunner])
 class PlainTextExtractionTest extends FunSuite {
 
-	def fixture() = new Extractor(wikiPage, s => s)
+	def fixture() = {
+		val extractor = new Extractor(wikiPage, s => s)
+		extractor.extract()
+		extractor
+	}
 
 	lazy val wikiPage = {
 		val source = getClass.getResource("/manual_test_files/wikipedia_Kilobyte.xml")
@@ -19,21 +23,21 @@ class PlainTextExtractionTest extends FunSuite {
 	}
 
 	test("print plaintext") {
-		println(fixture().extractPlainText())
+		println(fixture().getPlainText)
 
 	}
 	test("contains file captions") {
-		val plainText = fixture().extractPlainText()
+		val plainText = fixture().getPlainText
 		assert(plainText.contains("University of Cambridge"))
 	}
 
 	test("contains extra paragraphs") {
-		val plainText = fixture().extractPlainText()
+		val plainText = fixture().getPlainText
 		assert(plainText.contains("Empty texts with categories"))
 	}
 
 	test("contains broken links correctly") {
-		val plainText = fixture().extractPlainText()
+		val plainText = fixture().getPlainText
 		assert(plainText.contains("Bilateral relations of Bosnia and Herzegovina"))
 
 	}

@@ -20,14 +20,16 @@ class ExtractorTest extends FunSuite {
 
 	def links: Seq[Link] = {
 		val extractor = fixture()
-		extractor.extractAllLinks(filterEmptySurfaceRepr = false)
+		extractor.extract()
+		println(extractor.compiledWikiPage)
+		extractor.getLinks(filterEmptySurfaceRepr = false)
 	}
 
 	test("check links inside of ''") {
 		assert(links.exists { link => link.surface == "Anno Domini" && link.destination == "Anno Domini" })
 	}
 
-	test("some crazy infobox syntax") {
+	test("infoboxes inside tables") {
 		assert(links.exists { link => link.surface == "photo-reconnaissance" })
 	}
 
@@ -116,7 +118,8 @@ class ExtractorTest extends FunSuite {
 
 	test("plain text extraction") {
 		val extractor = fixture()
-		val plainText = extractor.extractPlainText()
+		extractor.extract()
+		val plainText = extractor.getPlainText
 		assert(plainText.contains("Examples"))
 	}
 
@@ -125,7 +128,8 @@ class ExtractorTest extends FunSuite {
 		val xml = Source.fromFile(source.toURI, "UTF-8").mkString
 		val wikiPage = new WikiPageReader().xmlToWikiPages(xml).next()
 		val linkExtractor = new Extractor(wikiPage, s => s)
-		linkExtractor.extractLinks()
+		linkExtractor.extract()
+		linkExtractor.getLinks()
 	}
 
 }

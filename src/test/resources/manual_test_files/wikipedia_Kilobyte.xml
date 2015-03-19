@@ -16,10 +16,11 @@
 						Note: This file is based on the Kilobyte page, but contains some manually added hard cases for the parser.
 						Regression suite:
 
-						Handle some crazy infobox syntax:
+						Handle infoboxes inside tables
 {|{{Infobox Aircraft Type
-|type=Fast [[photo-reconnaissance]] aircraft&lt;        br&gt; Fast unarmed transport in high-risk air zones
+|type=Fast [[photo-reconnaissance]] aircraft
 }}|}
+
 						Handle links in templates:
 {{columns-list|4|
 * [[A Cappella Records]]

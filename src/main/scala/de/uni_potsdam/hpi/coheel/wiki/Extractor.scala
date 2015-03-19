@@ -11,7 +11,7 @@ import scala.collection.mutable
 import org.sweble.wikitext.engine._
 import scala.collection.JavaConversions._
 
-class Extractor(wikiPage: WikiPage, surfaceRepr: String => String) {
+class Extractor(val wikiPage: WikiPage, val surfaceRepr: String => String) {
 
 	val config = DefaultConfigEnWp.generate()
 	/**
@@ -25,33 +25,22 @@ class Extractor(wikiPage: WikiPage, surfaceRepr: String => String) {
 	}
 
 	val compiledWikiPage = getCompiledWikiPage(wikiPage)
-	var links: Seq[Link] = _
+	val plainTextConverter = new WikipediaExtractor(this)
 
+	def extract(): Unit = {
+		plainTextConverter.go(compiledWikiPage)
+	}
 
-	def extractAllLinks(filterEmptySurfaceRepr: Boolean = true): Seq[Link] = {
-		val allLinks = extractLinks() // TODO: ++ extractAlternativeNames()
+	def getPlainText: String = {
+		plainTextConverter.getPlainText
+	}
+
+	def getLinks(filterEmptySurfaceRepr: Boolean = true): mutable.ArrayBuffer[Link] = {
+		val allLinks = plainTextConverter.getLinks // TODO: ++ extractAlternativeNames()
 		if (filterEmptySurfaceRepr)
 			allLinks.filter { link => link.surfaceRepr.nonEmpty }
 		else
 			allLinks
-	}
-
-	def extractLinks(): Seq[Link] = {
-		val rootNode = compiledWikiPage
-//		println(compiledWikiPage.toString)
-		val links = extractLinks(rootNode)
-		links
-	}
-
-	/**
-	 * Extracts plain text, with all wiki markup removed.
-	 * @return The plain text of the wikipage.
-	 */
-	def extractPlainText(): String = {
-		val plainTextConverter = new PlainTextConverter(this)
-		val page = compiledWikiPage
-		plainTextConverter.go(page)
-		plainTextConverter.getPlainText
 	}
 
 	/**
@@ -143,20 +132,15 @@ class Extractor(wikiPage: WikiPage, surfaceRepr: String => String) {
 		val pageId = new PageId(pageTitle, 0)
 
 		val page = compiler.postprocess(pageId, wikiPage.source, null).getPage
+//		println(page)
+//		System.exit(1)
 
 		page
 	}
 
 	val TEMPLATE_SEPARATOR = "#####"
-	protected[wiki] def extractLinks(parentNode: WtNode): Seq[Link] = {
-		links = Vector()
-		nodeIterator(parentNode) { node =>
-			extractPotentialLink(node)
-		}
-		links
-	}
 
-	private def extractPotentialLink(node: WtNode): Unit = {
+	protected[wiki] def extractPotentialLink(node: WtNode): Option[Link] = {
 		val link: Option[LinkWithNode] = Some(new LinkWithNode(node))
 		link
 			.flatMap(filterNonLinks)
@@ -169,9 +153,6 @@ class Extractor(wikiPage: WikiPage, surfaceRepr: String => String) {
 			.flatMap(filterExternalLinks)
 //			.flatMap(debugPrintAllLinks)
 			.flatMap(toLink)
-			.foreach { link =>
-				links = links :+ link
-			}
 	}
 
 	private def getText(link: WtContentNode): String = {
