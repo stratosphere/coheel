@@ -27,6 +27,10 @@ class ExtractorTest extends FunSuite {
 		assert(links.exists { link => link.surface == "Anno Domini" && link.destination == "Anno Domini" })
 	}
 
+	test("some crazy infobox syntax") {
+		assert(links.exists { link => link.surface == "photo-reconnaissance" })
+	}
+
 	test("find links inside templates") {
 		assert(links.exists { link => link.surface == "A Cappella Records" })
 		assert(links.exists { link => link.surface == "A Different Drum" })
@@ -101,7 +105,7 @@ class ExtractorTest extends FunSuite {
 
 	test("all links are found") {
 		// add +2 when using bold text extraction
-		assert(links.size === 63 /* hand-counted :) */)
+		assert(links.size === 64 /* hand-counted :) */)
 	}
 
 	test("just print links") {
