@@ -18,6 +18,7 @@ object OutputFiles {
 	lazy val resolvedRedirectsPath            = s"$location://${outputPath}resolved-redirects.wiki"
 	lazy val wikiPagesPath                    = s"$location://${outputPath}wiki-pages.wiki"
 	lazy val plainTextsPath                   = s"$location://${outputPath}plain-texts.wiki"
+	lazy val allLinksPath                     = s"$location://${outputPath}all-links.wiki"
 	lazy val surfaceDocumentCountsPath        = s"$location://${outputPath}surface-document-counts.wiki"
 	lazy val entireTextSurfacesPath           = s"$location://${outputPath}entire-text-surfaces.wiki"
 	lazy val surfaceLinkProbsPath             = s"$location://${outputPath}surface-link-probs.wiki"

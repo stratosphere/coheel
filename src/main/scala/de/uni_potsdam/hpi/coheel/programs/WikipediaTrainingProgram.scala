@@ -44,6 +44,8 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 		val normalPageLinks = linksFrom(normalPages)
 		val allPageLinks    = linksFrom(wikiPages)
 
+		allPageLinks.writeAsTsv(allLinksPath)
+
 		val groupedByLinkText = allPageLinks
 			.groupBy { link => link.surfaceRepr }
 		// counts in how many documents a surface occurs
