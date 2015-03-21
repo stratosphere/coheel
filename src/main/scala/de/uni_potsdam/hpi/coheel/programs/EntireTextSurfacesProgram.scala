@@ -22,7 +22,7 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 
 	override def buildProgram(env: ExecutionEnvironment, param: Int): Unit = {
 //		val plainTexts = env.readCsvFile[(String, String)](plainTextsPath, OutputFiles.LINE_DELIMITER, OutputFiles.ROW_DELIMITER).name("Parsed Plain-Texts")
-		val plainTexts = getPlainTexts()
+		val plainTexts = getPlainTexts
 
 		val currentFile = if (runsOffline()) "" else s"/$param"
 		val surfaces = getSurfaces(currentFile)
@@ -32,7 +32,7 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 			.withBroadcastSet(surfaces, EntireTextSurfacesProgram.BROADCAST_SURFACES)
 			.name("Entire-Text-Surfaces-Along-With-Document")
 
-		val surfaceDocumentCounts = getSurfaceDocumentCounts()
+		val surfaceDocumentCounts = getSurfaceDocumentCounts
 
 		val entireTextSurfaceCounts = entireTextSurfaces
 			.groupBy { _.surface }

@@ -29,11 +29,6 @@
 						[[File:WorldSeries1903-640.jpg|250px]]
 
 
-						Handle infoboxes inside tables
-						{|{{Infobox Aircraft Type
-						|type=Fast [[photo-reconnaissance]] aircraft
-						}}|}
-
 						Handle links in templates:
 						{{columns-list|4|
 						* [[A Cappella Records]]
@@ -129,6 +124,11 @@ Abdelkader]]
 						{{Computer Storage Volumes}}
 
 						[[Category:Units of information]]
+
+						Handle infoboxes inside tables
+						{|
+						 {{Infobox Aircraft Type|type=Fast [[photo-reconnaissance]] aircraft}}
+						|}
 					</text>
 				</revision>
 			</page>

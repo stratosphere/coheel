@@ -67,6 +67,7 @@ class WikiPageTraversal(protected val extractor: Extractor) {
 		while (nodeStack.nonEmpty) {
 			val nodeItem = nodeStack.pop()
 			val NodeTraversalItem(node, insideTemplateLevel) = nodeItem
+//			println(s"${"\t" * level} ${node.getClass.getSimpleName} ${Try(node.asInstanceOf[WtText].getContent.replaceAll("[\n\t]", "").trim).getOrElse("")}")
 			if (node != null) {
 				nodeHandlerFunction(nodeItem)
 				node match {

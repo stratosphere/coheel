@@ -21,7 +21,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 	 * @param env Flink execution environment.
 	 */
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
-		val wikiPages = getWikiPages()
+		val wikiPages = getWikiPages
 		if (!configurationParams.contains(ConfigurationParams.ONLY_WIKIPAGES)) {
 			buildLinkPlans(wikiPages)
 			buildLanguageModelPlan(wikiPages)

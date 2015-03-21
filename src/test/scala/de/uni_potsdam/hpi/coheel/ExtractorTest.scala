@@ -152,6 +152,10 @@ class ExtractorTest extends FunSuite {
 		assert(plainText.contains("An overflow crowd at the"))
 	}
 
+	test("plain text contains link texts") {
+		assert(plainText.contains("History of the floppy disk"))
+	}
+
 	test("does not run in infinite loop") {
 		val source = getClass.getResource("/manual_test_files/infinite_loop.xml")
 		val xml = Source.fromFile(source.toURI, "UTF-8").mkString

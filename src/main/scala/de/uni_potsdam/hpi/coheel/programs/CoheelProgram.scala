@@ -49,7 +49,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 		buildProgram(env, param)
 	}
 
-	def getWikiPages(): DataSet[WikiPage] = {
+	def getWikiPages: DataSet[WikiPage] = {
 		val input = environment.readFile(new WikiPageInputFormat, wikipediaFilesPath)
 
 		input.mapPartition(new RichMapPartitionFunction[String, WikiPage] {
@@ -117,7 +117,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 			.flatMap(new RichFlatMapFunction[String, (String, Float)] {
 			override def flatMap(line: String, out: Collector[(String, Float)]): Unit = {
 				val split = line.split('\t')
-				if (split.size == 3)
+				if (split.length == 3)
 					out.collect((split(0), split(2).toFloat))
 				else {
 					log.warn(s"Discarding '${split.deep}' because split size not correct")
@@ -128,12 +128,12 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 		}).name("Parsed Surfaces with Probabilities")
 	}
 
-	def getSurfaceDocumentCounts(): DataSet[SurfaceAsLinkCount] = {
+	def getSurfaceDocumentCounts: DataSet[SurfaceAsLinkCount] = {
 		environment.readTextFile(surfaceDocumentCountsPath).name("Raw-Surface-Document-Counts").flatMap { line =>
 			val split = line.split('\t')
 			// not clear, why lines without a count occur, but they do
 			try {
-				if (split.size != 3) {
+				if (split.length != 3) {
 					log.warn(s"Discarding '${split.deep}' because split size not correct")
 					log.warn(line)
 					None
