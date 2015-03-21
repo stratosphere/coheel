@@ -36,7 +36,7 @@ class ExtractorTest extends FunSuite {
 		assert(links.exists { link => link.surface == "Anno Domini" && link.destination == "Anno Domini" })
 	}
 
-	test("find links in infobxes") {
+	test("find links in infoboxes") {
 		assert(links.exists { link => link.surface == "Huntington Avenue Grounds" })
 	}
 
@@ -142,6 +142,14 @@ class ExtractorTest extends FunSuite {
 	test("template arguments should not be in plain text") {
 		assert(!plainText.contains("image"))
 		assert(!plainText.contains("caption"))
+	}
+
+	test("template arguments with plain numbers should not be in plain text") {
+		assert(!plainText.contains("21011991"))
+	}
+
+	test("plain text from infoboxes") {
+		assert(plainText.contains("An overflow crowd at the"))
 	}
 
 	test("does not run in infinite loop") {

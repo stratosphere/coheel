@@ -5,6 +5,7 @@ import org.sweble.wikitext.parser.nodes._
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
+import scala.util.Try
 
 /**
  * Stores information for the depth-first search of the document AST.
@@ -50,6 +51,8 @@ class WikiPageTraversal(protected val extractor: Extractor) {
 		}
 	}
 
+	val templateBlackList = Seq("rp", "convert", "class", "ipa", "verify", "refimprove", "see also", "refn", "citation",
+		"cite", "language", "iso ", "clarification", "clarify", "reflist", "refbegin")
 	// Private helper function to do depth-first search in the node tree
 	private def nodeIterator(startNode: WtNode)(nodeHandlerFunction: NodeTraversalItem => Unit): Unit = {
 		// The next nodes to process
@@ -71,7 +74,8 @@ class WikiPageTraversal(protected val extractor: Extractor) {
 						// if we reached an outermost template ..
 						// .. recursively call the extractor, to get the links and text inside templates.
 						val sourceString = aggregatedTemplateSource.toString()
-						if (sourceString.nonEmpty) {
+						val sourceStart = sourceString.take(templateBlackList.map(_.length).max)
+						if (sourceString.nonEmpty && !templateBlackList.exists(sourceStart.toLowerCase.startsWith)) {
 							val templatePage = WikiPage.fromSource(extractor.wikiPage.pageTitle, sourceString)
 							val newExtractor = new Extractor(templatePage, extractor.surfaceRepr)
 							nodeStack.push(NodeTraversalItem(newExtractor.rootNode, 0))
@@ -85,7 +89,10 @@ class WikiPageTraversal(protected val extractor: Extractor) {
 					case txt: WtText if insideTemplateLevel > 0 =>
 						// collect text inside one template
 						val source = txt.getContent.trim
-						aggregatedTemplateSource.append(s"$source ")
+						if (source.length > 2 &&
+							Try(source.toInt > 1900 && source.toInt < 2100).getOrElse(true)) {
+							aggregatedTemplateSource.append(s"$source ")
+						}
 					case n: WtTemplateArgument =>
 						// drop the first template argument, because it's just the name of the parameter
 						val templateChildren = n.iterator().toSeq.drop(1)
