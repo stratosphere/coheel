@@ -18,12 +18,18 @@ class ExtractorTest extends FunSuite {
 		new WikiPageReader().xmlToWikiPages(xml).next()
 	}
 
-	def links: Seq[Link] = {
+	val links: Seq[Link] = {
 		val extractor = fixture()
 		extractor.extract()
 		println(extractor.rootNode)
 		println(extractor.getPlainText)
 		extractor.getLinks
+	}
+
+	val plainText: String = {
+		val extractor = fixture()
+		extractor.extract()
+		extractor.getPlainText
 	}
 
 	test("check links inside of ''") {
@@ -122,10 +128,15 @@ class ExtractorTest extends FunSuite {
 	}
 
 	test("plain text extraction") {
-		val extractor = fixture()
-		extractor.extract()
-		val plainText = extractor.getPlainText
 		assert(plainText.contains("Examples"))
+	}
+
+	test("external links do not occur in plain text") {
+		assert(!plainText.contains("www.aalborgkommune.dk"))
+	}
+
+	test("external links should not be in plain text") {
+		assert(!plainText.contains("WorldSeries1903-640.jpg"))
 	}
 
 	test("does not run in infinite loop") {

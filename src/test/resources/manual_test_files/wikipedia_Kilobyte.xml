@@ -23,6 +23,9 @@
 						External links should not be in plaintext
 						{{en icon}}[http://www.aalborgkommune.dk/Borgerportal/Engelsk/ Aalborg Municipality's official website]
 
+						File texts should not be in plaintext:
+						[[File:WorldSeries1903-640.jpg|250px]]
+
 
 						Handle infoboxes inside tables
 						{|{{Infobox Aircraft Type
@@ -30,10 +33,11 @@
 						}}|}
 
 						Handle links in templates:
-{{columns-list|4|
-* [[A Cappella Records]]
-* [[A Different Drum]]
-}}
+						{{columns-list|4|
+						* [[A Cappella Records]]
+						* [[A Different Drum]]
+						}}
+
 						Handles line breaks:
 						[[Abdelkader El Djezairi|Emir
 Abdelkader]]

@@ -1,10 +1,9 @@
 package de.uni_potsdam.hpi.coheel.wiki
 
-import de.uni_potsdam.hpi.coheel.{Timer, PerformanceTimer}
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.Link
 import org.sweble.wikitext.parser.nodes._
-import scala.collection.JavaConversions._
 
+import scala.collection.JavaConversions._
 import scala.collection.mutable
 
 /**
@@ -23,7 +22,7 @@ case class NodeTraversalItem(node: WtNode, insideTemplateLevel: Int)
  * To now, when we finished traversing an template and all of it's subnodes,
  * we use class as a marker element.
  */
-class WtTemplateClose extends WtTemplate
+class WtTemplateClose extends WtInnerNode2(de.fau.cs.osr.ptk.common.ast.Uninitialized.X) { override def getChildNames = ??? }
 
 class WikiPageTraversal(protected val extractor: Extractor) {
 
@@ -68,18 +67,16 @@ class WikiPageTraversal(protected val extractor: Extractor) {
 			if (node != null) {
 				nodeHandlerFunction(nodeItem)
 				node match {
-					case t: WtTemplateClose =>
+					case t: WtTemplateClose if insideTemplateLevel == 0 =>
 						// if we reached an outermost template ..
-						if (insideTemplateLevel == 0) {
-							// .. recursively call the extractor, to get the links and text inside templates.
-							val sourceString = aggregatedTemplateSource.toString()
-							if (sourceString.nonEmpty) {
-								val templatePage = WikiPage.fromSource(extractor.wikiPage.pageTitle, sourceString)
-								val newExtractor = new Extractor(templatePage, extractor.surfaceRepr)
-								nodeStack.push(NodeTraversalItem(newExtractor.rootNode, 0))
-							}
-							aggregatedTemplateSource.clear()
+						// .. recursively call the extractor, to get the links and text inside templates.
+						val sourceString = aggregatedTemplateSource.toString()
+						if (sourceString.nonEmpty) {
+							val templatePage = WikiPage.fromSource(extractor.wikiPage.pageTitle, sourceString)
+							val newExtractor = new Extractor(templatePage, extractor.surfaceRepr)
+							nodeStack.push(NodeTraversalItem(newExtractor.rootNode, 0))
 						}
+						aggregatedTemplateSource.clear()
 					case t: WtTemplate =>
 						// add a template end indicator first, then add all the template sub-nodes
 						// once we reach the template close again, we now we finished that template
@@ -91,11 +88,18 @@ class WikiPageTraversal(protected val extractor: Extractor) {
 						// collect text inside one template
 						val source = txt.getContent.trim
 						aggregatedTemplateSource.append(s"$source ")
-					// do not go deeper into internal links
-					case t: WtInternalLink =>
+					// do not go deeper into internal links, tags
+					case n: WtInternalLink =>
+					case n: WtExternalLink =>
+					case t: WtImageLink =>
+						val imageChildren = t.iterator().toSeq.drop(1)
+						nodeStack.pushAll(imageChildren.reverseMap(NodeTraversalItem(_, insideTemplateLevel)))
+//					case n: WtPageName if inside =>
+					case t: WtTagExtension =>
 					case _ =>
 						// on default, just push all sub nodes
-						nodeStack.pushAll(node.iterator().toSeq.reverseMap(NodeTraversalItem(_, insideTemplateLevel)))
+						val children = node.iterator().toSeq
+						nodeStack.pushAll(children.reverseMap(NodeTraversalItem(_, insideTemplateLevel)))
 				}
 			}
 		}
