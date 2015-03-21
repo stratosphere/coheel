@@ -12,14 +12,22 @@
 						<username>Compvis</username>
 						<id>10359871</id>
 					</contributor>
-					<text xml:space="preserve">'''''Aldrovandia phalacra''''', the '''       Hawaiian halosaurid''', is a species of ray-finned fish in the family Halosauridae.
+					<text xml:space="preserve">
+						{{Infobox World Series Expanded
+						| caption=An overflow crowd at the [[Huntington Avenue Grounds]] in Boston prior to Game 3
+						}}
+						'''''Aldrovandia phalacra''''', the '''       Hawaiian halosaurid''', is a species of ray-finned fish in the family Halosauridae.
 						Note: This file is based on the Kilobyte page, but contains some manually added hard cases for the parser.
 						Regression suite:
 
+						External links should not be in plaintext
+						{{en icon}}[http://www.aalborgkommune.dk/Borgerportal/Engelsk/ Aalborg Municipality's official website]
+
+
 						Handle infoboxes inside tables
-{|{{Infobox Aircraft Type
-|type=Fast [[photo-reconnaissance]] aircraft
-}}|}
+						{|{{Infobox Aircraft Type
+						|type=Fast [[photo-reconnaissance]] aircraft
+						}}|}
 
 						Handle links in templates:
 {{columns-list|4|

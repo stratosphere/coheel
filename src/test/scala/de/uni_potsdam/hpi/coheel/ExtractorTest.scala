@@ -21,12 +21,17 @@ class ExtractorTest extends FunSuite {
 	def links: Seq[Link] = {
 		val extractor = fixture()
 		extractor.extract()
-		println(extractor.compiledWikiPage)
-		extractor.getLinks(filterEmptySurfaceRepr = false)
+		println(extractor.rootNode)
+		println(extractor.getPlainText)
+		extractor.getLinks
 	}
 
 	test("check links inside of ''") {
 		assert(links.exists { link => link.surface == "Anno Domini" && link.destination == "Anno Domini" })
+	}
+
+	test("find links in infobxes") {
+		assert(links.exists { link => link.surface == "Huntington Avenue Grounds" })
 	}
 
 	test("infoboxes inside tables") {
@@ -107,7 +112,7 @@ class ExtractorTest extends FunSuite {
 
 	test("all links are found") {
 		// add +2 when using bold text extraction
-		assert(links.size === 64 /* hand-counted :) */)
+		assert(links.size === 65 /* hand-counted :) */)
 	}
 
 	test("just print links") {
@@ -129,7 +134,7 @@ class ExtractorTest extends FunSuite {
 		val wikiPage = new WikiPageReader().xmlToWikiPages(xml).next()
 		val linkExtractor = new Extractor(wikiPage, s => s)
 		linkExtractor.extract()
-		linkExtractor.getLinks()
+		linkExtractor.getLinks
 	}
 
 }

@@ -64,7 +64,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 					try {
 						val extractor = new Extractor(wikiPage, s => TokenizerHelper.tokenize(s).mkString(" ") )
 						extractor.extract()
-						val links = extractor.getLinks()
+						val links = extractor.getLinks
 						val plainText = extractor.getPlainText
 						wikiPage.source = ""
 						out.collect(WikiPage(wikiPage.pageTitle, wikiPage.ns, wikiPage.redirect,

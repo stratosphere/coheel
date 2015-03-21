@@ -57,7 +57,7 @@ class SurfaceEvaluationProgram extends CoheelProgram[Int] {
 	def runEvaluationOnSubset(param: Int): Unit = {
 		val currentFile = if (runsOffline()) "" else s"/$param"
 		val surfaceLinkProbs = getSurfaceLinkProbs(currentFile)
-		val plainTexts = getPlainTexts()
+		val plainTexts = getPlainTexts
 
 		val surfaceEvaluationPerDocument = plainTexts
 			.flatMap(new SurfaceEvaluationFlatMap)

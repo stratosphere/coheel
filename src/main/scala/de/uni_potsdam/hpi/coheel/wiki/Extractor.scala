@@ -5,15 +5,15 @@ import org.sweble.wikitext.engine.nodes.EngPage
 import org.sweble.wikitext.engine.utils.DefaultConfigEnWp
 import org.sweble.wikitext.parser.nodes._
 
-import scala.StringBuilder
-import scala.collection.immutable.Queue
 import scala.collection.mutable
 import org.sweble.wikitext.engine._
 import scala.collection.JavaConversions._
 
 class Extractor(val wikiPage: WikiPage, val surfaceRepr: String => String) {
+	val rootNode = getCompiledWikiPage(wikiPage)
 
-	val config = DefaultConfigEnWp.generate()
+	val wikiTraversal = new WikiPageTraversal(this)
+
 	/**
 	 * Internal class for processing a possible link.
 	 * @param node The XML node.
@@ -24,121 +24,63 @@ class Extractor(val wikiPage: WikiPage, val surfaceRepr: String => String) {
 		def this(node: WtNode) = this(node, null, null)
 	}
 
-	val compiledWikiPage = getCompiledWikiPage(wikiPage)
-	val plainTextConverter = new WikipediaExtractor(this)
-
 	def extract(): Unit = {
-		plainTextConverter.go(compiledWikiPage)
+		wikiTraversal.traversePage(rootNode)
 	}
 
 	def getPlainText: String = {
-		plainTextConverter.getPlainText
+		wikiTraversal.getPlainText
 	}
 
-	def getLinks(filterEmptySurfaceRepr: Boolean = true): mutable.ArrayBuffer[Link] = {
-		val allLinks = plainTextConverter.getLinks // TODO: ++ extractAlternativeNames()
-		if (filterEmptySurfaceRepr)
-			allLinks.filter { link => link.surfaceRepr.nonEmpty }
-		else
-			allLinks
+	def getLinks: mutable.ArrayBuffer[Link] = {
+		wikiTraversal.getLinks // TODO: ++ extractAlternativeNames()
 	}
 
-	/**
-	 * This searches for the first paragraph in the text, and returns all bold texts within that first paragraph.
-	 * These are supposed to be alternative names for the entity.
-	 * @return A list of alternative names
-	 */
-	def extractAlternativeNames(): Queue[Link] = {
-		// The minimum number of characters for the first paragraph
-		val MIN_PARAGRAPH_LENGTH = 20
-		val rootNode = compiledWikiPage
+//	/**
+//	 * This searches for the first paragraph in the text, and returns all bold texts within that first paragraph.
+//	 * These are supposed to be alternative names for the entity.
+//	 * @return A list of alternative names
+//	 */
+//	def extractAlternativeNames(): Queue[Link] = {
+//		// The minimum number of characters for the first paragraph
+//		val MIN_PARAGRAPH_LENGTH = 20
+//		val rootNode = compiledWikiPage
+//
+//		nodeIterator(rootNode) {
+//			case paragraph: WtParagraph =>
+//				val paragraphText = getText(paragraph)
+//				if (paragraphText.length > MIN_PARAGRAPH_LENGTH) {
+//					return extractBoldWordsFrom(paragraph)
+//				}
+//			case _ =>
+//		}
+//		Queue()
+//	}
+//
+//	private def extractBoldWordsFrom(paragraph: WtParagraph): Queue[Link] = {
+//		var boldWords = Queue[String]()
+//		nodeIterator(paragraph) {
+//			case bold: WtBold =>
+//				val text = getText(bold).trim
+//				if (text.nonEmpty) // TODO: Check why texts can be empty
+//					boldWords = boldWords.enqueue(text)
+//			case _ =>
+//		}
+//		boldWords.map { word => Link(word, surfaceRepr(word), wikiPage.pageTitle, wikiPage.pageTitle) }
+//	}
 
-		nodeIterator(rootNode) {
-			case paragraph: WtParagraph =>
-				val paragraphText = getText(paragraph)
-				if (paragraphText.length > MIN_PARAGRAPH_LENGTH) {
-					return extractBoldWordsFrom(paragraph)
-				}
-			case _ =>
-		}
-		Queue()
-	}
-
-	private def extractBoldWordsFrom(paragraph: WtParagraph): Queue[Link] = {
-		var boldWords = Queue[String]()
-		nodeIterator(paragraph) {
-			case bold: WtBold =>
-				val text = getText(bold).trim
-				if (text.nonEmpty) // TODO: Check why texts can be empty
-					boldWords = boldWords.enqueue(text)
-			case _ =>
-		}
-		boldWords.map { word => Link(word, surfaceRepr(word), wikiPage.pageTitle, wikiPage.pageTitle) }
-	}
-
-	// Private helper function to do depth-first search in the node tree
-	private def nodeIterator(startNode: WtNode)(nodeHandlerFunction: WtNode => Unit): Unit = {
-		/**
-		 * Stores information for the depth-first search of the document AST.
-		 * @param node The node to handle.
-		 * @param insideTemplate Whether or not the current node is a sub-node of a template.
-		 *                       Important because template parameters need an recursive invocation
-		 *                       of the parser, because they are not parsed by default.
-		 */
-		case class StackItem(node: WtNode, insideTemplate: Boolean)
-		val nodeStack = mutable.Stack[StackItem](StackItem(startNode, false))
-
-		/**
-		 * Aggregate all text inside templates for performance reasons.
-		 * This way, only one recursive Extractor instance is need, instead of one
-		 * per template parameter.
-		 * TODO: Think about whether this is better dealt with by a heuristic, e.g.
-		 * only parse parameters with wiki markup or with a mininum length.
-		 * The current situation somehow breaks the context, because template
-		 * parameters are at the end.
-		 */
-		val aggregatedTemplateSource = new StringBuilder()
-		while (nodeStack.nonEmpty) {
-			val StackItem(node, insideTemplate) = nodeStack.pop()
-			if (node != null) {
-				nodeHandlerFunction(node)
-				node match {
-					case t: WtTemplate =>
-						nodeStack.pushAll(node.iterator().toList.reverse.map(StackItem(_, true)))
-					case txt: WtText if insideTemplate =>
-						val source = txt.getContent.trim
-						aggregatedTemplateSource.append(source)
-						// To links between two overlapping template parameters, we introduce
-						// a splitter, which must not be inside a link.
-						aggregatedTemplateSource.append(s"\n$TEMPLATE_SEPARATOR\n")
-					case _ =>
-						nodeStack.pushAll(node.iterator().toList.reverse.map(StackItem(_, insideTemplate)))
-				}
-			}
-		}
-
-		// Now call the extractor recursively, to get the links inside templates.
-		val sourceString = aggregatedTemplateSource.toString()
-		if (sourceString.nonEmpty) {
-			val templatePage = WikiPage.fromSource(wikiPage.pageTitle, sourceString)
-			val newExtractor = new Extractor(templatePage, surfaceRepr)
-			newExtractor.nodeIterator(newExtractor.compiledWikiPage)(nodeHandlerFunction)
-		}
-	}
 
 	private def getCompiledWikiPage(wikiPage: WikiPage): EngPage = {
+		val config = DefaultConfigEnWp.generate()
 		val compiler = new WtEngineImpl(config)
 		val pageTitle = PageTitle.make(config, wikiPage.pageTitle)
 		val pageId = new PageId(pageTitle, 0)
 
 		val page = compiler.postprocess(pageId, wikiPage.source, null).getPage
-//		println(page)
-//		System.exit(1)
 
 		page
 	}
 
-	val TEMPLATE_SEPARATOR = "#####"
 
 	protected[wiki] def extractPotentialLink(node: WtNode): Option[Link] = {
 		val link: Option[LinkWithNode] = Some(new LinkWithNode(node))
@@ -147,12 +89,12 @@ class Extractor(val wikiPage: WikiPage, val surfaceRepr: String => String) {
 			.flatMap(filterImages)
 			.flatMap(filterFiles)
 			.flatMap(filterCategories)
-			.flatMap(filterTemplateSeparator)
 			.flatMap(removeAnchorLinks)
 			.flatMap(trimWhitespace)
 			.flatMap(filterExternalLinks)
 //			.flatMap(debugPrintAllLinks)
 			.flatMap(toLink)
+			.flatMap(filterEmptySurfaceRepr)
 	}
 
 	private def getText(link: WtContentNode): String = {
@@ -163,13 +105,6 @@ class Extractor(val wikiPage: WikiPage, val surfaceRepr: String => String) {
 				Some(getText(otherNode))
 			case _ => None
 		}.mkString("")
-	}
-
-	private def filterTemplateSeparator(link: LinkWithNode): Option[LinkWithNode] = {
-		if (link.text.contains(TEMPLATE_SEPARATOR))
-			None
-		else
-			Some(link)
 	}
 
 	/**
@@ -258,5 +193,15 @@ class Extractor(val wikiPage: WikiPage, val surfaceRepr: String => String) {
 	 */
 	private def toLink(link: LinkWithNode): Option[Link] = {
 		Some(Link(link.text, surfaceRepr(link.text), wikiPage.pageTitle, link.destination))
+	}
+
+	/**
+	 * Translates an internal link to an link, that can be exposed to the user.
+	 */
+	private def filterEmptySurfaceRepr(link: Link): Option[Link] = {
+		if (link.surfaceRepr.isEmpty)
+			None
+		else
+			Some(link)
 	}
 }
