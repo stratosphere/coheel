@@ -139,6 +139,11 @@ class ExtractorTest extends FunSuite {
 		assert(!plainText.contains("WorldSeries1903-640.jpg"))
 	}
 
+	test("template arguments should not be in plain text") {
+		assert(!plainText.contains("image"))
+		assert(!plainText.contains("caption"))
+	}
+
 	test("does not run in infinite loop") {
 		val source = getClass.getResource("/manual_test_files/infinite_loop.xml")
 		val xml = Source.fromFile(source.toURI, "UTF-8").mkString

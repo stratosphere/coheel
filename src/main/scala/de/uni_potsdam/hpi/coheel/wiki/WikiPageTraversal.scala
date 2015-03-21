@@ -82,12 +82,14 @@ class WikiPageTraversal(protected val extractor: Extractor) {
 						// once we reach the template close again, we now we finished that template
 						nodeStack.push(NodeTraversalItem(new WtTemplateClose, insideTemplateLevel))
 						nodeStack.pushAll(node.iterator().toSeq.reverseMap(NodeTraversalItem(_, insideTemplateLevel + 1)))
-//					case a: WtTemplateArgument =>
-//						a.iterator()
 					case txt: WtText if insideTemplateLevel > 0 =>
 						// collect text inside one template
 						val source = txt.getContent.trim
 						aggregatedTemplateSource.append(s"$source ")
+					case n: WtTemplateArgument =>
+						// drop the first template argument, because it's just the name of the parameter
+						val templateChildren = n.iterator().toSeq.drop(1)
+						nodeStack.pushAll(templateChildren.reverseMap(NodeTraversalItem(_, insideTemplateLevel)))
 					// do not go deeper into internal links, tags
 					case n: WtInternalLink =>
 					case n: WtExternalLink =>
