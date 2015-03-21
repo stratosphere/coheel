@@ -14,13 +14,15 @@ object Timer {
 			return
 		startTimes += (name -> time())
 	}
-	def end(name: String): Unit = {
+	def end(name: String): Long = {
 		if (!ON)
-			return
+			return -1
 		val startTime = startTimes(name)
 		val endTime   = time()
+		val timeDiff = endTime - startTime
 		val timeSoFar = timesSum(name)
-		timesSum += (name -> (endTime - startTime + timeSoFar))
+		timesSum += (name -> (timeDiff + timeSoFar))
+		timeDiff
 
 	}
 
