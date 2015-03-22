@@ -127,15 +127,11 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 	 * Builds the plan who creates the language model for a given entity.
 	 */
 	def buildLanguageModelPlan(wikiPages: DataSet[WikiPage]): Unit = {
-		val plainTexts = filterNormalPages(wikiPages).map { wikiPage =>
-			(wikiPage, TokenizerHelper.tokenize(wikiPage.plainText))
-		}
-		plainTexts.map { plainTexts =>
-			val (wikiPage, plainTextTokens) = plainTexts
-			val plainText =  if (plainTextTokens.isEmpty)
+		wikiPages.map { wikiPage =>
+			val plainText =  if (wikiPage.plainText.isEmpty)
 				" "
 			else
-				plainTextTokens.mkString(" ")
+				wikiPage.plainText.mkString(" ")
 
 			val links = if (wikiPage.links.isEmpty)
 				CoheelProgram.LINK_SPLITTER
@@ -145,16 +141,17 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 			(wikiPage.pageTitle, plainText, links)
 		}.writeAsTsv(plainTextsPath)
 
-		val words = plainTexts.flatMap { plainTexts =>
-			val (wikiPage, plainTextTokens) = plainTexts
-			val tokens = plainTextTokens
+		val words = wikiPages.flatMap { wikiPage =>
+			val tokens = wikiPage.plainText
 				.groupBy { word => word }
-				.mapValues(_.size)
+				.mapValues(_.length)
 				.map { case (token, count) =>
 					WordInDocument(wikiPage.pageTitle, token, count)
 			}.toIterator
 			tokens
 		}
+
+		// TODO: WHY NOT DO LANGUAGE MODEL COMPLETELY IN MEMORY AT ONE NODE, NOT DISTRIBUTED?
 
 		// count the words in a document
 		val documentCounts = words.name("Tokenization")

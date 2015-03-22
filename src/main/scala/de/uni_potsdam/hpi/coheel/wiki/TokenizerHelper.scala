@@ -3,6 +3,7 @@ package de.uni_potsdam.hpi.coheel.wiki
 import java.io.StringReader
 
 import org.apache.lucene.analysis.en.PorterStemFilter
+import org.apache.lucene.analysis.standard.StandardAnalyzer
 import org.apache.lucene.analysis.tokenattributes.{CharTermAttribute, FlagsAttribute, OffsetAttribute, TypeAttribute}
 import org.apache.lucene.analysis.util.CharArraySet
 import org.apache.lucene.util.Version
@@ -18,22 +19,27 @@ object TokenizerHelper {
 
 	def tokenize(text: String): Array[String] = {
 		val tokens = mutable.ArrayBuffer[String]()
-		tokenizeHelper(text, STEMMING_DEFAULT) { (charTermAttribute, _, typeAttribute, flagsAttribute) =>
+		tokenizeHelper(text, STEMMING_DEFAULT) { (charTermAttribute, posAttribute, typeAttribute, flagsAttribute) =>
 			tokens += charTermAttribute.toString
+
 		}
 		tokens.toArray
 	}
 
-	def tokenizeDifferent(text: String): Array[String] = {
+	def tokenizeWithPositionInfo[T](text: String, positionInfo: mutable.Map[Int, T]): (Array[String], mutable.Map[Int, T]) = {
 		val tokens = mutable.ArrayBuffer[String]()
-		tokenizeHelper(text, STEMMING_DEFAULT) { (charTermAttribute, _, typeAttribute, flagsAttribute) =>
-			tokens += charTermAttribute.toString
-			if (typeAttribute.`type`() == WikipediaTokenizer.INTERNAL_LINK) {
-				println(charTermAttribute.toString, flagsAttribute.getFlags)
-			}
+		val arrayOffsetToInfo = mutable.Map[Int, T]()
 
+		tokenizeHelper(text, STEMMING_DEFAULT) { (charTermAttribute, posAttribute, typeAttribute, flagsAttribute) =>
+			tokens += charTermAttribute.toString
+			positionInfo.get(posAttribute.startOffset()) match {
+				case Some(info) =>
+					// last index in the tokens array is the index of the information in the new tokenized output array
+					arrayOffsetToInfo(tokens.size - 1) = info
+				case None =>
+			}
 		}
-		tokens.toArray
+		(tokens.toArray, arrayOffsetToInfo)
 	}
 
 	type TokenHandler = (CharTermAttribute, OffsetAttribute, TypeAttribute, FlagsAttribute) => Unit

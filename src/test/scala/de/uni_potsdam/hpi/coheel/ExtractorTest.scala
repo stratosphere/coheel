@@ -23,7 +23,7 @@ class ExtractorTest extends FunSuite {
 		extractor.extract()
 		println(extractor.rootNode)
 		println(extractor.getPlainText)
-		extractor.getLinks
+		extractor.getLinks._1
 	}
 
 	val plainText: String = {
@@ -38,6 +38,10 @@ class ExtractorTest extends FunSuite {
 
 	test("find links in infoboxes") {
 		assert(links.exists { link => link.surface == "Huntington Avenue Grounds" })
+	}
+
+	test("find links in blacklisted templates") {
+		assert(links.exists { link => link.surface == "Joseph Carens" })
 	}
 
 	test("infoboxes inside tables") {
@@ -118,7 +122,7 @@ class ExtractorTest extends FunSuite {
 
 	test("all links are found") {
 		// add +2 when using bold text extraction
-		assert(links.size === 65 /* hand-counted :) */)
+		assert(links.size === 66 /* hand-counted :) */)
 	}
 
 	test("just print links") {

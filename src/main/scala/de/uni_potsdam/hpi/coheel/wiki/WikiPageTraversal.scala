@@ -15,7 +15,7 @@ import scala.util.Try
  *                       of the parser, because they are not parsed by default.
  *                       Therefore, we
  */
-case class NodeTraversalItem(node: WtNode, insideTemplateLevel: Int)
+case class NodeTraversalItem(node: WtNode, insideTemplateLevel: Int, ignoreText: Boolean)
 
 /**
  * Indicator
@@ -29,17 +29,19 @@ class WikiPageTraversal(protected val extractor: Extractor) {
 
 	val sb    = new StringBuilder
 	val links = mutable.ArrayBuffer[Link]()
+	val linkOffsets = mutable.Map[Int, Link]()
 
 	def getPlainText: String = { sb.toString() }
 	def getLinks: mutable.ArrayBuffer[Link] = { links }
+	def getLinkOffsets: mutable.Map[Int, Link] = { linkOffsets }
 
 	def traversePage(rootNode: WtNode): Unit = {
 		nodeIterator(rootNode) { nodeItem =>
-			val NodeTraversalItem(node, insideTemplate) = nodeItem
+			val NodeTraversalItem(node, insideTemplate, ignoreText) = nodeItem
 			node match {
 				case n: WtText =>
 					// we are still inside a template, if the inside template level is at least one
-					visit(n, insideTemplate > 0)
+					visit(n, insideTemplate > 0, ignoreText)
 				case n: WtUrl =>
 					visit(n)
 				case n: WtInternalLink =>
@@ -56,7 +58,7 @@ class WikiPageTraversal(protected val extractor: Extractor) {
 	// Private helper function to do depth-first search in the node tree
 	private def nodeIterator(startNode: WtNode)(nodeHandlerFunction: NodeTraversalItem => Unit): Unit = {
 		// The next nodes to process
-		val nodeStack = mutable.Stack(NodeTraversalItem(startNode, 0))
+		val nodeStack = mutable.Stack(NodeTraversalItem(startNode, 0, false))
 
 		/**
 		 * Aggregate all text inside templates for performance reasons.
@@ -66,7 +68,7 @@ class WikiPageTraversal(protected val extractor: Extractor) {
 		val aggregatedTemplateSource = new StringBuilder()
 		while (nodeStack.nonEmpty) {
 			val nodeItem = nodeStack.pop()
-			val NodeTraversalItem(node, insideTemplateLevel) = nodeItem
+			val NodeTraversalItem(node, insideTemplateLevel, ignoreText) = nodeItem
 //			println(s"${"\t" * level} ${node.getClass.getSimpleName} ${Try(node.asInstanceOf[WtText].getContent.replaceAll("[\n\t]", "").trim).getOrElse("")}")
 			if (node != null) {
 				nodeHandlerFunction(nodeItem)
@@ -76,47 +78,51 @@ class WikiPageTraversal(protected val extractor: Extractor) {
 						// .. recursively call the extractor, to get the links and text inside templates.
 						val sourceString = aggregatedTemplateSource.toString()
 						val sourceStart = sourceString.take(templateBlackList.map(_.length).max)
-						if (sourceString.nonEmpty && !templateBlackList.exists(sourceStart.toLowerCase.startsWith)) {
+						if (sourceString.nonEmpty) {
+							val isBlackListed = templateBlackList.exists(sourceStart.toLowerCase.startsWith)
 							val templatePage = WikiPage.fromSource(extractor.wikiPage.pageTitle, sourceString)
 							val newExtractor = new Extractor(templatePage, extractor.surfaceRepr)
-							nodeStack.push(NodeTraversalItem(newExtractor.rootNode, 0))
+							nodeStack.push(NodeTraversalItem(newExtractor.rootNode, 0, isBlackListed))
 						}
 						aggregatedTemplateSource.clear()
 					case t: WtTemplate =>
 						// add a template end indicator first, then add all the template sub-nodes
 						// once we reach the template close again, we now we finished that template
-						nodeStack.push(NodeTraversalItem(new WtTemplateClose, insideTemplateLevel))
-						nodeStack.pushAll(node.iterator().toSeq.reverseMap(NodeTraversalItem(_, insideTemplateLevel + 1)))
+						nodeStack.push(NodeTraversalItem(new WtTemplateClose, insideTemplateLevel, ignoreText))
+						nodeStack.pushAll(node.iterator().toSeq.reverseMap(NodeTraversalItem(_, insideTemplateLevel + 1, ignoreText)))
 					case txt: WtText if insideTemplateLevel > 0 =>
 						// collect text inside one template
 						val source = txt.getContent.trim
 						if (source.length > 2 &&
+							(!ignoreText || (source.contains("[[") && source.contains("]]"))) &&
 							Try(source.toInt > 1900 && source.toInt < 2100).getOrElse(true)) {
 							aggregatedTemplateSource.append(s"$source ")
 						}
 					case n: WtTemplateArgument =>
 						// drop the first template argument, because it's just the name of the parameter
-						val templateChildren = n.iterator().toSeq.drop(1)
-						nodeStack.pushAll(templateChildren.reverseMap(NodeTraversalItem(_, insideTemplateLevel)))
+						val templateChildren = n.iterator().toSeq
+						nodeStack.pushAll(templateChildren.drop(1).reverseMap(NodeTraversalItem(_, insideTemplateLevel, ignoreText)))
+						nodeStack.pushAll(templateChildren.take(1).reverseMap(NodeTraversalItem(_, insideTemplateLevel, true)))
 					// do not go deeper into internal links, tags
 					case n: WtInternalLink =>
 					case n: WtExternalLink =>
 					case t: WtImageLink =>
-						val imageChildren = t.iterator().toSeq.drop(1)
-						nodeStack.pushAll(imageChildren.reverseMap(NodeTraversalItem(_, insideTemplateLevel)))
+						val imageChildren = t.iterator().toSeq
+						nodeStack.pushAll(imageChildren.drop(1).reverseMap(NodeTraversalItem(_, insideTemplateLevel, ignoreText)))
+						nodeStack.pushAll(imageChildren.take(1).reverseMap(NodeTraversalItem(_, insideTemplateLevel, true)))
 //					case n: WtPageName if inside =>
 					case t: WtTagExtension =>
 					case _ =>
 						// on default, just push all sub nodes
 						val children = node.iterator().toSeq
-						nodeStack.pushAll(children.reverseMap(NodeTraversalItem(_, insideTemplateLevel)))
+						nodeStack.pushAll(children.reverseMap(NodeTraversalItem(_, insideTemplateLevel, ignoreText)))
 				}
 			}
 		}
 	}
 
-	def visit(text: WtText, insideTemplate: Boolean) {
-		if (!insideTemplate)
+	def visit(text: WtText, insideTemplate: Boolean, ignoreText: Boolean) {
+		if (!insideTemplate && !ignoreText)
 			write(text.getContent)
 	}
 
@@ -138,6 +144,7 @@ class WikiPageTraversal(protected val extractor: Extractor) {
 		linkOption match {
 			case Some(link) =>
 				links += link
+				linkOffsets += (sb.length + 1 -> link)
 				write(link.surface)
 			case None =>
 		}

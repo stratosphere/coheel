@@ -25,11 +25,11 @@ import de.uni_potsdam.hpi.coheel.programs.DataClasses._
  * @param pageTitle The title of the page as a string.
  * @param ns The namespace of the wiki page.
  * @param redirect The title of the page this page is redirecting to or null, if it is not a redirect.
- * @param plainText This page's plain text content.
+ * @param plainText This page's plain text content as array of tokens.
  */
 case class WikiPage(pageTitle: String,
                     ns: Int, redirect: String,
-                    plainText: String,
+                    plainText: Array[String],
                     links: Array[Link],
 	                isDisambiguation: Boolean,
 	                isList: Boolean) {
@@ -48,7 +48,7 @@ object WikiPage {
 	 * Builds a wiki page from the given title and wiki markup source.
 	 */
 	def fromSource(pageTitle:String, source: String): WikiPage = {
-		val wp = WikiPage(pageTitle, 0, "", "", Array(), false, false)
+		val wp = WikiPage(pageTitle, 0, "", Array(), Array(), false, false)
 		wp.source = source
 		wp
 	}
@@ -117,7 +117,7 @@ class WikiPageReader {
 					pageTitle,
 					ns,
 					redirectTitle,
-					"",
+					Array(),
 					Array(),
 					isDisambiguation,
 					isList

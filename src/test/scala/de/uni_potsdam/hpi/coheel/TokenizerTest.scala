@@ -9,14 +9,14 @@ import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
 @RunWith(classOf[JUnitRunner])
 class TokenizerTest extends FunSuite {
 
-	val text = Sample.ANGELA_MERKEL_SAMPLE_TEXT
+	val text = "Toynbee's law of challenge and response"
 
 	test("Test tokenizer") {
 		println("Raw text")
 		println(text)
-//		println("Tokenized text, no stemming")
-//		println(TokenizerHelper.tokenize(text, stemming = false).mkString(" "))
-		println("Tokenized text, with stemming")
+		println("Tokenized text with 1x stemming")
 		println(TokenizerHelper.tokenize(text).mkString(" "))
+		println("Tokenized text with 2x stemming")
+		println(TokenizerHelper.tokenize(TokenizerHelper.tokenize(text).mkString(" ")).mkString(" "))
 	}
 }

@@ -28,6 +28,10 @@
 						File texts should not be in plaintext:
 						[[File:WorldSeries1903-640.jpg|250px]]
 
+						Find links in black listed templates:
+						{{Cite book
+						| last = [[Joseph Carens]]
+						}}
 
 						Handle links in templates:
 						{{columns-list|4|
