@@ -45,7 +45,7 @@ object TokenizerHelper {
 	type TokenHandler = (CharTermAttribute, OffsetAttribute, TypeAttribute, FlagsAttribute) => Unit
 
 	private def tokenizeHelper(text: String, stemming: Boolean)(tokenHandler: TokenHandler): Unit = {
-		val analyzer = new WikipediaAnalyzer(Version.LUCENE_48, CharArraySet.EMPTY_SET)
+		val analyzer = new StandardAnalyzer(Version.LUCENE_48, CharArraySet.EMPTY_SET)
 		// implemented following this guide:
 		// http://stackoverflow.com/questions/6334692/how-to-use-a-lucene-analyzer-to-tokenize-a-string
 		val tokenStream = if (stemming)
