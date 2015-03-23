@@ -12,7 +12,7 @@ object OutputFiles {
 
 	lazy val surfaceProbsPath                 = s"$location://${outputPath}surface-probs.wiki"
 	lazy val contextLinkProbsPath             = s"$location://${outputPath}context-link-probs.wiki"
-	lazy val languageModelProbsPath           = s"$location://${outputPath}language-model-probs.wiki"
+	lazy val languageModelsPath               = s"$location://${outputPath}language-model-probs.wiki"
 	lazy val documentWordCountsPath           = s"$location://${outputPath}document-word-counts.wiki"
 	lazy val redirectPath                     = s"$location://${outputPath}redirects.wiki"
 	lazy val resolvedRedirectsPath            = s"$location://${outputPath}resolved-redirects.wiki"

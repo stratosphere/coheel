@@ -1,6 +1,7 @@
 package de.uni_potsdam.hpi.coheel.programs
 
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
+import org.apache.flink.api.java.aggregation.Aggregations
 import org.apache.flink.api.scala._
 import de.uni_potsdam.hpi.coheel.wiki._
 import scala.collection.mutable
@@ -127,7 +128,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 	 * Builds the plan who creates the language model for a given entity.
 	 */
 	def buildLanguageModelPlan(wikiPages: DataSet[WikiPage]): Unit = {
-		wikiPages.map { wikiPage =>
+		val plainTexts = wikiPages.map { wikiPage =>
 			val plainText =  if (wikiPage.plainText.isEmpty)
 				" "
 			else
@@ -139,52 +140,27 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 				wikiPage.links.map(_.surfaceRepr).mkString(CoheelProgram.LINK_SPLITTER)
 
 			(wikiPage.pageTitle, plainText, links)
-		}.writeAsTsv(plainTextsPath)
+		}.name("Plain Texts with Links: Title-Text-Links")
 
-		val words = wikiPages.flatMap { wikiPage =>
-			val tokens = wikiPage.plainText
-				.groupBy { word => word }
+		val languageModels = wikiPages.flatMap { wikiPage =>
+			val wordsInDoc = wikiPage.plainText.length
+			wikiPage.plainText
+				.groupBy(identity)
 				.mapValues(_.length)
 				.map { case (token, count) =>
-					WordInDocument(wikiPage.pageTitle, token, count)
+					(wikiPage.pageTitle, token, count.toDouble / wordsInDoc)
 			}.toIterator
-			tokens
-		}
-
-		// TODO: WHY NOT DO LANGUAGE MODEL COMPLETELY IN MEMORY AT ONE NODE, NOT DISTRIBUTED?
-
-		// count the words in a document
-		val documentCounts = words.name("Tokenization")
-			.groupBy(0)
-			.sum(2).name("Document-Counts")
-		val wordCounts = words
-			.groupBy(1)
-			.sum(2).name("Word-Counts")
-		val languageModel = documentCounts.join(wordCounts)
-			.where { _.document }
-			.equalTo { _.document }
-			.map { joinResult => joinResult match {
-				case (documentCount, wordCount) =>
-					(documentCount.document, wordCount.word, wordCount.count.toDouble / documentCount.count)
-			}
 		}.name("Language Model: Document-Word-Prob")
 
-
 		// count document word counts (in how many documents does a word occur?)
-		val documentWordCounts = words
-			.groupBy { word => word.word }
-			.reduceGroup { it =>
-				var word: String = null
-				var size: Int = 0
-				it.foreach { wordDocument =>
-					if (word == null)
-						word = wordDocument.word
-					size += 1
-				}
-				(word, size)
-		}.name("Document Word Counts: Word-DocumentCount")
+		val documentWordCounts = languageModels
+			.map { lmEntry => (lmEntry._2, 1) }
+			.groupBy(0)
+			.aggregate(Aggregations.SUM, 1)
+			.name("Document Word Counts: Word-DocumentCount")
 
-		languageModel.writeAsTsv(languageModelProbsPath)
+		plainTexts.writeAsTsv(plainTextsPath)
+		languageModels.writeAsTsv(languageModelsPath)
 		documentWordCounts.writeAsTsv(documentWordCountsPath)
 	}
 }
