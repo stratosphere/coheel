@@ -1,9 +1,11 @@
 package de.uni_potsdam.hpi.coheel.programs
 
+import de.uni_potsdam.hpi.coheel.io.LanguageModelOutputFormat
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import org.apache.flink.api.java.aggregation.Aggregations
 import org.apache.flink.api.scala._
 import de.uni_potsdam.hpi.coheel.wiki._
+import org.apache.flink.core.fs.FileSystem
 import scala.collection.mutable
 
 import DataClasses._
@@ -142,25 +144,23 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 			(wikiPage.pageTitle, plainText, links)
 		}.name("Plain Texts with Links: Title-Text-Links")
 
-		val languageModels = wikiPages.flatMap { wikiPage =>
+		val languageModels = wikiPages.map { wikiPage =>
 			val wordsInDoc = wikiPage.plainText.length
-			wikiPage.plainText
+			val model = wikiPage.plainText
 				.groupBy(identity)
-				.mapValues(_.length)
-				.map { case (token, count) =>
-					(wikiPage.pageTitle, token, count.toDouble / wordsInDoc)
-			}.toIterator
+				.mapValues(_.length.toDouble / wordsInDoc)
+			LanguageModel(wikiPage.pageTitle, model)
 		}.name("Language Model: Document-Word-Prob")
 
 		// count document word counts (in how many documents does a word occur?)
 		val documentWordCounts = languageModels
-			.map { lmEntry => (lmEntry._2, 1) }
+			.flatMap { lm => lm.model.keysIterator.map { word => (word, 1) } }
 			.groupBy(0)
 			.aggregate(Aggregations.SUM, 1)
 			.name("Document Word Counts: Word-DocumentCount")
 
 		plainTexts.writeAsTsv(plainTextsPath)
-		languageModels.writeAsTsv(languageModelsPath)
+		languageModels.write(new LanguageModelOutputFormat, languageModelsPath, FileSystem.WriteMode.OVERWRITE)
 		documentWordCounts.writeAsTsv(documentWordCountsPath)
 	}
 }

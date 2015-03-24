@@ -1,9 +1,15 @@
 package de.uni_potsdam.hpi.coheel.io
 
 import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
+import de.uni_potsdam.hpi.coheel.programs.DataClasses.LanguageModel
+import org.apache.flink.api.common.io.FileOutputFormat
+import org.apache.flink.api.common.io.FileOutputFormat.OutputDirectoryMode
 import org.apache.flink.api.java.operators.DataSink
 import org.apache.flink.api.scala._
-import org.apache.flink.core.fs.FileSystem
+import org.apache.flink.api.scala.operators.ScalaCsvOutputFormat
+import org.apache.flink.configuration.Configuration
+import org.apache.flink.core.fs.FileSystem.WriteMode
+import org.apache.flink.core.fs.{Path, FileSystem}
 import scala.language.implicitConversions
 
 object OutputFiles {
@@ -35,13 +41,41 @@ object OutputFiles {
 		new OutputFiles(dataSet)
 	}
 
-	val LINE_DELIMITER = "\n"
-	val ROW_DELIMITER  = '\t'
+	val RECORD_DELIMITER = "\n"
+	val FIELD_DELIMITER  = "\t"
 }
 
 class OutputFiles(dataSet: DataSet[_]) {
 
 	def writeAsTsv(path: String): DataSink[_] = {
-		dataSet.writeAsCsv(path, OutputFiles.LINE_DELIMITER, OutputFiles.ROW_DELIMITER.toString, FileSystem.WriteMode.OVERWRITE)
+		dataSet.writeAsCsv(path, OutputFiles.RECORD_DELIMITER, OutputFiles.FIELD_DELIMITER, FileSystem.WriteMode.OVERWRITE)
+	}
+}
+
+
+class LanguageModelOutputFormat extends FileOutputFormat[LanguageModel]() {
+
+	val output = new ScalaCsvOutputFormat[(String, String, Double)](outputFilePath,
+		OutputFiles.RECORD_DELIMITER, OutputFiles.FIELD_DELIMITER)
+
+
+	override def getOutputFilePath: Path = output.getOutputFilePath
+	override def setOutputDirectoryMode(mode: OutputDirectoryMode): Unit = output.setOutputDirectoryMode(mode)
+	override def configure(parameters: Configuration): Unit = output.configure(parameters)
+	override def getWriteMode: WriteMode = output.getWriteMode
+	override def getOutputDirectoryMode: OutputDirectoryMode = output.getOutputDirectoryMode
+	override def setOutputFilePath(outputPath: Path): Unit = output.setOutputFilePath(outputPath)
+//	override def getDirectoryFileName(taskNumber: Int): String = output.getDirectoryFileName(taskNumber)
+	override def close(): Unit = output.close()
+	override def setWriteMode(mode: WriteMode): Unit = output.setWriteMode(mode)
+	override def initializeGlobal(parallelism: Int): Unit = output.initializeGlobal(parallelism)
+	override def tryCleanupOnError(): Unit = output.tryCleanupOnError()
+
+	override def open(taskNumber: Int, numTask: Int): Unit = output.open(taskNumber, numTask)
+
+	override def writeRecord(record: LanguageModel): Unit = {
+		record.model.foreach { case (word, prob) =>
+			output.writeRecord((record.pageTitle, word, prob))
+		}
 	}
 }
