@@ -34,7 +34,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 	import CoheelLogger._
 	lazy val dumpFile = new Path(FlinkProgramRunner.config.getString("base_path"))
 	lazy val wikipediaFilesPath = if (dumpFile.isAbsolute) dumpFile.toUri.toString
-	else dumpFile.makeQualified(new LocalFileSystem).toUri.toString
+		else dumpFile.makeQualified(new LocalFileSystem).toUri.toString
 
 	var environment: ExecutionEnvironment = null
 
@@ -61,11 +61,15 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 					filter
 				}
 				filteredWikiPages.foreach { wikiPage =>
+					val CONTEXT_SIZE = 50
 					try {
 						val extractor = new Extractor(wikiPage, s => TokenizerHelper.tokenize(s).mkString(" ") )
 						extractor.extract()
-						val (links, linkTextOffsets) = extractor.getLinks
+						val linkTextOffsets = extractor.getLinks
 						val (plainText, linkOffsets) = TokenizerHelper.tokenizeWithPositionInfo(extractor.getPlainText, linkTextOffsets)
+						val linksWithContext = linkOffsets.map { case (position, link) =>
+							LinkWithContext(link, plainText.slice(Math.max(0, position - CONTEXT_SIZE), Math.min(position + CONTEXT_SIZE, plainText.length)))
+						}.toArray
 //						linkOffsets.foreach { case (linkOffset, link) =>
 //							val textFromLink = link.surfaceRepr.split(' ')(0)
 //							val textFromPlainText = plainText(linkOffset)
@@ -73,7 +77,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 //						}
 						wikiPage.source = ""
 						out.collect(WikiPage(wikiPage.pageTitle, wikiPage.ns, wikiPage.redirect,
-							plainText, links.toArray, wikiPage.isDisambiguation, wikiPage.isList))
+							plainText, linksWithContext, wikiPage.isDisambiguation, wikiPage.isList))
 					} catch {
 						case e: Throwable =>
 							log.warn(s"Discarding ${wikiPage.pageTitle} because of ${e.getClass.getSimpleName} (${e.getMessage})")

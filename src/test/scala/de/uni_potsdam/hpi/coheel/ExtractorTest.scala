@@ -23,7 +23,7 @@ class ExtractorTest extends FunSuite {
 		extractor.extract()
 		println(extractor.rootNode)
 		println(extractor.getPlainText)
-		extractor.getLinks._1
+		extractor.getLinks.values.toSeq
 	}
 
 	val plainText: String = {

@@ -120,7 +120,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 
 	def linksFrom(pages: DataSet[WikiPage]): DataSet[Link] = {
 		pages.flatMap { wikiPage =>
-			wikiPage.links.toIterator
+			wikiPage.links.map(_.link).toIterator
 		}
 	}
 
@@ -137,7 +137,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 			val links = if (wikiPage.links.isEmpty)
 				CoheelProgram.LINK_SPLITTER
 			else
-				wikiPage.links.map(_.surfaceRepr).mkString(CoheelProgram.LINK_SPLITTER)
+				wikiPage.links.map(_.link.surfaceRepr).mkString(CoheelProgram.LINK_SPLITTER)
 
 			(wikiPage.pageTitle, plainText, links)
 		}.name("Plain Texts with Links: Title-Text-Links")

@@ -32,8 +32,11 @@ class Extractor(val wikiPage: WikiPage, val surfaceRepr: String => String) {
 		wikiTraversal.getPlainText
 	}
 
-	def getLinks: (mutable.ArrayBuffer[Link], mutable.Map[Int, Link]) = {
-		(wikiTraversal.getLinks /* TODO: ++ extractAlternativeNames() */, wikiTraversal.getLinkOffsets)
+	/**
+	 * Returns a map from a plain text position to a link occuring at that position.
+	 */
+	def getLinks: mutable.Map[Int, Link] = {
+		wikiTraversal.getLinkOffsets /* TODO: ++ extractAlternativeNames() */
 	}
 
 //	/**

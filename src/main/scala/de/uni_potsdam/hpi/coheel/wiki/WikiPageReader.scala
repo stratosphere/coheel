@@ -30,7 +30,7 @@ import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 case class WikiPage(pageTitle: String,
                     ns: Int, redirect: String,
                     plainText: Array[String],
-                    links: Array[Link],
+                    links: Array[LinkWithContext],
 	                isDisambiguation: Boolean,
 	                isList: Boolean) {
 

@@ -28,11 +28,9 @@ class WtTemplateClose extends WtInnerNode2(de.fau.cs.osr.ptk.common.ast.Uninitia
 class WikiPageTraversal(protected val extractor: Extractor) {
 
 	val sb    = new StringBuilder
-	val links = mutable.ArrayBuffer[Link]()
 	val linkOffsets = mutable.Map[Int, Link]()
 
 	def getPlainText: String = { sb.toString() }
-	def getLinks: mutable.ArrayBuffer[Link] = { links }
 	def getLinkOffsets: mutable.Map[Int, Link] = { linkOffsets }
 
 	def traversePage(rootNode: WtNode): Unit = {
@@ -143,7 +141,6 @@ class WikiPageTraversal(protected val extractor: Extractor) {
 		val linkOption = extractor.extractPotentialLink(internalLink)
 		linkOption match {
 			case Some(link) =>
-				links += link
 				linkOffsets += (sb.length + 1 -> link)
 				write(link.surface)
 			case None =>

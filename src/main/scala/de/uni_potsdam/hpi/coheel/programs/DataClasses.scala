@@ -14,6 +14,7 @@ object DataClasses {
 	// Note: In contrast to InternalLink, this class does not contain a Node, because
 	// that should not be part of the interface of this class.
 	case class Link(surface: String, surfaceRepr: String, source: String, destination: String)
+	case class LinkWithContext(link: Link, context: Array[String])
 	case class WordInDocument(document: String, word: String, count: Int)
 	case class LanguageModel(pageTitle: String, model: Map[String, Double])
 	case class WordCounts(word: WordInDocument, count: Int)
