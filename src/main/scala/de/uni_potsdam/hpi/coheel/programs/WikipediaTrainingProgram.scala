@@ -47,8 +47,6 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 		val normalPageLinks = linksFrom(normalPages)
 		val allPageLinks    = linksFrom(wikiPages)
 
-		allPageLinks.writeAsTsv(allLinksPath)
-
 		val groupedByLinkText = allPageLinks
 			.groupBy { link => link.surfaceRepr }
 		// counts in how many documents a surface occurs
@@ -113,7 +111,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 			.filter { wikiPage => wikiPage.isRedirect }
 			.map { wikiPage => (wikiPage.pageTitle, wikiPage.redirect) }
 
-
+		allPageLinks.writeAsTsv(allLinksPath)
 		surfaceProbabilities.writeAsTsv(surfaceProbsPath)
 		contextLinkProbabilities.writeAsTsv(contextLinkProbsPath)
 		redirects.writeAsTsv(redirectPath)

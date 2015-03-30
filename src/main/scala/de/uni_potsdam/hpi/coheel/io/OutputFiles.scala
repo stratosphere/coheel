@@ -58,14 +58,12 @@ class LanguageModelOutputFormat extends FileOutputFormat[LanguageModel]() {
 	val output = new ScalaCsvOutputFormat[(String, String, Double)](outputFilePath,
 		OutputFiles.RECORD_DELIMITER, OutputFiles.FIELD_DELIMITER)
 
-
 	override def getOutputFilePath: Path = output.getOutputFilePath
 	override def setOutputDirectoryMode(mode: OutputDirectoryMode): Unit = output.setOutputDirectoryMode(mode)
 	override def configure(parameters: Configuration): Unit = output.configure(parameters)
 	override def getWriteMode: WriteMode = output.getWriteMode
 	override def getOutputDirectoryMode: OutputDirectoryMode = output.getOutputDirectoryMode
 	override def setOutputFilePath(outputPath: Path): Unit = output.setOutputFilePath(outputPath)
-//	override def getDirectoryFileName(taskNumber: Int): String = output.getDirectoryFileName(taskNumber)
 	override def close(): Unit = output.close()
 	override def setWriteMode(mode: WriteMode): Unit = output.setWriteMode(mode)
 	override def initializeGlobal(parallelism: Int): Unit = output.initializeGlobal(parallelism)
