@@ -30,16 +30,29 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 			val surfaceProbs = buildLinkPlans(wikiPages)
 			val languageModels = buildLanguageModelPlan(wikiPages)
 //
-//			val linksWithContext = wikiPages.flatMap { wikiPage => wikiPage.links }
-//			linksWithContext.coGroup(surfaceProbs)
-//				.where { linkWithContext => linkWithContext.link.surfaceRepr }
-//				.equalTo { surfaceProb => surfaceProb._1 }
-//				.apply { (links, surfaceProbsIt, out: Collector[(Double, Double)]) =>
-//					val surfaceProbs = surfaceProbsIt.toSeq
-//					val sum = surfaceProbs.map(_._3).sum
-//					assert(Math.abs(sum - 1.0) < 0.00001, s"Sum of surface probs $sum is not 1.0")
-//					out.collect((1.0, 1.0))
-//				}.writeAsTsv(surfaceProminenceScoresPath)
+			val linksWithContext = wikiPages.flatMap { wikiPage => wikiPage.links }
+			linksWithContext.coGroup(surfaceProbs)
+				.where { linkWithContext => linkWithContext.link.surfaceRepr }
+				.equalTo { surfaceProb => surfaceProb._1 }
+				.apply { (links, surfaceProbsIt, out: Collector[(String, String, Double, Int, Double, Double, Boolean)]) =>
+					// these surface probs sum to one
+					val surfaceProbs = surfaceProbsIt.toSeq.sortBy(-_._3)
+					val surfaceProbsTopValue = surfaceProbs.head._3
+					links.foreach { linkWithContext =>
+						val link = linkWithContext.link
+						var rank = 1
+						surfaceProbs.foreach { surfaceProb =>
+							val prob = surfaceProb._3
+							// TODO: Rank for equal probs?
+							// TODO: Optimize for repeated access, currently re-evaluating every time.
+							// TODO: Succ value for the last one?
+							val deltaTop = surfaceProbsTopValue - prob
+							val deltaSucc = if (rank != surfaceProbs.size) prob - surfaceProbs(rank)._3 else Double.NaN
+							out.collect((link.surfaceRepr, link.source, prob, rank, deltaTop, deltaSucc, link.destination == surfaceProb._2))
+							rank += 1
+						}
+					}
+				}.writeAsTsv(surfaceProminenceScoresPath)
 		} else {
 			wikiPages.map { wikiPage =>
 				(wikiPage.pageTitle, wikiPage.isDisambiguation, wikiPage.isList, wikiPage.isRedirect, wikiPage.ns, if (wikiPage.isNormalPage) "normal" else "special")
