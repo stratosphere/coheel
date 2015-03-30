@@ -6,6 +6,7 @@ import org.apache.flink.api.java.aggregation.Aggregations
 import org.apache.flink.api.scala._
 import de.uni_potsdam.hpi.coheel.wiki._
 import org.apache.flink.core.fs.FileSystem
+import org.apache.flink.util.Collector
 import scala.collection.mutable
 
 import DataClasses._
@@ -26,8 +27,19 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val wikiPages = getWikiPages
 		if (!configurationParams.contains(ConfigurationParams.ONLY_WIKIPAGES)) {
-			buildLinkPlans(wikiPages)
-			buildLanguageModelPlan(wikiPages)
+			val surfaceProbs = buildLinkPlans(wikiPages)
+			val languageModels = buildLanguageModelPlan(wikiPages)
+//
+//			val linksWithContext = wikiPages.flatMap { wikiPage => wikiPage.links }
+//			linksWithContext.coGroup(surfaceProbs)
+//				.where { linkWithContext => linkWithContext.link.surfaceRepr }
+//				.equalTo { surfaceProb => surfaceProb._1 }
+//				.apply { (links, surfaceProbsIt, out: Collector[(Double, Double)]) =>
+//					val surfaceProbs = surfaceProbsIt.toSeq
+//					val sum = surfaceProbs.map(_._3).sum
+//					assert(Math.abs(sum - 1.0) < 0.00001, s"Sum of surface probs $sum is not 1.0")
+//					out.collect((1.0, 1.0))
+//				}.writeAsTsv(surfaceProminenceScoresPath)
 		} else {
 			wikiPages.map { wikiPage =>
 				(wikiPage.pageTitle, wikiPage.isDisambiguation, wikiPage.isList, wikiPage.isRedirect, wikiPage.ns, if (wikiPage.isNormalPage) "normal" else "special")
@@ -41,7 +53,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 	 *   <li> the plan who counts how often one document links to another
 	 *   <li> the plan who counts how often a link occurs under a certain surface
 	 */
-	def buildLinkPlans(wikiPages: DataSet[WikiPage]): Unit = {
+	def buildLinkPlans(wikiPages: DataSet[WikiPage]): DataSet[(String, String, Double)] = {
 		val normalPages = wikiPages.filter { !_.isDisambiguation }
 
 		val normalPageLinks = linksFrom(normalPages)
@@ -49,6 +61,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 
 		val groupedByLinkText = allPageLinks
 			.groupBy { link => link.surfaceRepr }
+
 		// counts in how many documents a surface occurs
 		val surfaceDocumentCounts = groupedByLinkText
 			.reduceGroup { linksWithSameText =>
@@ -63,6 +76,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 					distinctDocuments += linkWithText.source
 				}
 				val count = distinctDocuments.size
+				// for debugging purposes, also output one variant of the actual surface (untokenized, unstemmed)
 				(surfaceRepr, list.minBy(_.surface).surface, count)
 			}
 
@@ -78,7 +92,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 			.groupBy(0, 1)
 			.sum(2).name("Surface-LinkTo-Counts")
 		// join them together and calculate the probabilities
-		val surfaceProbabilities = surfaceCounts.join(surfaceLinkCounts)
+		val surfaceProbs = surfaceCounts.join(surfaceLinkCounts)
 			.where { _.surface }
 			.equalTo { _.surface }
 			.map { joinResult => joinResult match {
@@ -112,10 +126,12 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 			.map { wikiPage => (wikiPage.pageTitle, wikiPage.redirect) }
 
 		allPageLinks.writeAsTsv(allLinksPath)
-		surfaceProbabilities.writeAsTsv(surfaceProbsPath)
+		surfaceProbs.writeAsTsv(surfaceProbsPath)
 		contextLinkProbabilities.writeAsTsv(contextLinkProbsPath)
 		redirects.writeAsTsv(redirectPath)
 		surfaceDocumentCounts.writeAsTsv(surfaceDocumentCountsPath)
+
+		surfaceProbs
 	}
 
 	def linksFrom(pages: DataSet[WikiPage]): DataSet[Link] = {
@@ -127,7 +143,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 	/**
 	 * Builds the plan who creates the language model for a given entity.
 	 */
-	def buildLanguageModelPlan(wikiPages: DataSet[WikiPage]): Unit = {
+	def buildLanguageModelPlan(wikiPages: DataSet[WikiPage]): DataSet[DataClasses.LanguageModel] = {
 		val plainTexts = wikiPages.map { wikiPage =>
 			val plainText =  if (wikiPage.plainText.isEmpty)
 				" "
@@ -160,5 +176,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 		plainTexts.writeAsTsv(plainTextsPath)
 		languageModels.write(new LanguageModelOutputFormat, languageModelsPath, FileSystem.WriteMode.OVERWRITE)
 		documentWordCounts.writeAsTsv(documentWordCountsPath)
+
+		languageModels
 	}
 }
