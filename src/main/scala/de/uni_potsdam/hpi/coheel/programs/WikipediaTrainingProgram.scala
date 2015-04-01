@@ -48,7 +48,8 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 							// TODO: Succ value for the last one?
 							val deltaTop = surfaceProbsTopValue - prob
 							val deltaSucc = if (rank != surfaceProbs.size) prob - surfaceProbs(rank)._3 else Double.NaN
-							out.collect((link.surfaceRepr, link.source, prob, rank, deltaTop, deltaSucc, link.destination == surfaceProb._2))
+							val positiveInstance = link.destination == surfaceProb._2
+							out.collect((link.surfaceRepr, link.source, prob, rank, deltaTop, deltaSucc, positiveInstance))
 							rank += 1
 						}
 					}
