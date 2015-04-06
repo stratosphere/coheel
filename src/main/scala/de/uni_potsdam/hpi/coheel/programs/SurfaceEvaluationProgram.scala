@@ -138,7 +138,8 @@ class SurfaceEvaluationFlatMap extends RichFlatMapFunction[Plaintext, (String, E
 		var nrOfFilteredSurfaces = 0
 
 		val subSetCheck = mutable.Map[Seq[String], Boolean]()
-		(0.005f to 0.05f by 0.005f).foreach { threshold =>
+		val thresholds = (0.005f to 0.05f by 0.005f).toSeq :+ 1.0f
+		thresholds.foreach { threshold =>
 			Timer.start("FILTER DOWN")
 			val sizeBefore = potentialSurfacesWithProbs.size
 			potentialSurfacesWithProbs = potentialSurfacesWithProbs.filter(_._2 >= threshold)
@@ -174,7 +175,7 @@ class SurfaceEvaluationFlatMap extends RichFlatMapFunction[Plaintext, (String, E
 			// FN are those surfaces, which are actual surfaces, but are not returned
 			val fn = potentialPositives.diff(potentialSurfaces)
 			Timer.end("FN")
-			out.collect(plainText.pageTitle, Evaluation(f"$threshold%.2f", nrOfFilteredSurfaces, actualSurfaces.size, potentialSurfaces.size, tp.size, fp.size, subsetFp, fn.size))
+			out.collect(plainText.pageTitle, Evaluation(f"$threshold%.3f", nrOfFilteredSurfaces, actualSurfaces.size, potentialSurfaces.size, tp.size, fp.size, subsetFp, fn.size))
 		}
 	}
 
