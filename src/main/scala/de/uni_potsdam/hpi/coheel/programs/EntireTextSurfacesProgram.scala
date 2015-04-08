@@ -21,7 +21,6 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 	override def getDescription = "Wikipedia Extraction: Entire Text Surfaces"
 
 	override def buildProgram(env: ExecutionEnvironment, param: Int): Unit = {
-//		val plainTexts = env.readCsvFile[(String, String)](plainTextsPath, OutputFiles.LINE_DELIMITER, OutputFiles.ROW_DELIMITER).name("Parsed Plain-Texts")
 		val plainTexts = getPlainTexts
 
 		val currentFile = if (runsOffline()) "" else s"/$param"
@@ -47,7 +46,7 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 			.equalTo { _.surface }
 			.map { joinResult => joinResult match {
 				case (surfaceAsLinkCount, entireTextSurfaceCount) =>
-					(surfaceAsLinkCount.surface, entireTextSurfaceCount.count,
+					(surfaceAsLinkCount.surface, surfaceAsLinkCount.count, entireTextSurfaceCount.count,
 						surfaceAsLinkCount.count.toDouble / entireTextSurfaceCount.count.toDouble)
 			}
 		}.name("Surface-Link-Probs")

@@ -126,8 +126,8 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 			.flatMap(new RichFlatMapFunction[String, (String, Float)] {
 			override def flatMap(line: String, out: Collector[(String, Float)]): Unit = {
 				val split = line.split('\t')
-				if (split.length == 3)
-					out.collect((split(0), split(2).toFloat))
+				if (split.length == 4)
+					out.collect((split(0), split(3).toFloat))
 				else {
 					log.warn(s"Discarding '${split.deep}' because split size not correct")
 					log.warn(line)
