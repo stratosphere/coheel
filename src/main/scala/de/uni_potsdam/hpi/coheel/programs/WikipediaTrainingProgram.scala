@@ -13,6 +13,8 @@ import scala.collection.mutable
 import DataClasses._
 import org.apache.log4j.Logger
 
+import scala.util.hashing.MurmurHash3
+
 class WikipediaTrainingProgram extends NoParamCoheelProgram {
 
 	override def getDescription = "Wikipedia Extraction"
@@ -31,8 +33,13 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 			val surfaceProbs = buildLinkPlans(wikiPages)
 			val languageModels = buildLanguageModelPlan(wikiPages)
 
-			val linksWithContext = wikiPages.flatMap { wikiPage => wikiPage.links }
-			linksWithContext.coGroup(surfaceProbs)
+			val linksWithContext = wikiPages.flatMap { wikiPage =>
+				if (MurmurHash3.stringHash(wikiPage.pageTitle) % 10000 == 0)
+					wikiPage.links
+				else
+					Nil
+			}
+			val prominenceScores = linksWithContext.coGroup(surfaceProbs)
 				.where { linkWithContext => linkWithContext.link.surfaceRepr }
 				.equalTo { surfaceProb => surfaceProb._1 }
 				.apply { (links, surfaceProbsIt, out: Collector[(String, String, Double, Double, Double, Double, Boolean)]) =>
@@ -51,7 +58,8 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 							out.collect((link.surfaceRepr, link.source, prob, ranks(i), deltaTops(i), deltaSuccs(i), positiveInstance))
 						}
 					}
-				}.writeAsTsv(surfaceProminenceScoresPath)
+				}
+			prominenceScores.writeAsTsv(surfaceProminenceScoresPath)
 		} else {
 			wikiPages.map { wikiPage =>
 				(wikiPage.pageTitle, wikiPage.isDisambiguation, wikiPage.isList, wikiPage.isRedirect, wikiPage.ns, if (wikiPage.isNormalPage) "normal" else "special")
