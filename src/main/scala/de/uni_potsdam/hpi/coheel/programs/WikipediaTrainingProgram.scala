@@ -5,6 +5,7 @@ import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.ml.SecondOrderFeatures
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import de.uni_potsdam.hpi.coheel.wiki._
+import org.apache.flink.api.common.functions.RichMapFunction
 import org.apache.flink.api.java.aggregation.Aggregations
 import org.apache.flink.api.scala._
 import org.apache.flink.core.fs.FileSystem
@@ -38,26 +39,53 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 				else
 					Nil
 			}
-			val prominenceScores = linksWithContext.coGroup(surfaceProbs)
+			val linkCandidates = linksWithContext.join(surfaceProbs)
 				.where { linkWithContext => linkWithContext.link.surfaceRepr }
 				.equalTo { surfaceProb => surfaceProb._1 }
-				.apply { (links, surfaceProbsIt, out: Collector[(String, String, Double, Double, Double, Double, Boolean)]) =>
-					// these surface probs sum to one
-					val surfaceProbs = surfaceProbsIt.map { tuple =>
-						SurfaceProb.tupled(tuple)
-					}.toSeq.sortBy(-_.prob)
-					val ranks = SecondOrderFeatures.rank.apply(surfaceProbs)
-					val deltaTops = SecondOrderFeatures.deltaTop.apply(surfaceProbs)
-					val deltaSuccs = SecondOrderFeatures.deltaSucc.apply(surfaceProbs)
-					links.foreach { linkWithContext =>
-						val link = linkWithContext.link
-						surfaceProbs.zipWithIndex.foreach { case (surfaceProb, i) =>
-							val prob = surfaceProb.prob
-							val positiveInstance = link.destination == surfaceProb.destination
-							out.collect((link.surfaceRepr, link.source, prob, ranks(i), deltaTops(i), deltaSuccs(i), positiveInstance))
-						}
+				.map { joinResult => joinResult match {
+					case (linkWithContext, (_, entity, prob)) =>
+						LinkCandidate(linkWithContext.link, entity, prob)
 					}
 				}
+
+			val prominenceScores = linkCandidates.groupBy { linkCandidates =>
+				(linkCandidates.link.id, linkCandidates.link.source)
+			}.reduceGroup { (candidatesIt, out: Collector[(String, String, Double, Double, Double, Double, Boolean)]) =>
+				val allCandidates = candidatesIt.toSeq.sortBy(_.prob)
+
+				val ranks = SecondOrderFeatures.rank.apply(allCandidates)
+				val deltaTops = SecondOrderFeatures.deltaTop.apply(allCandidates)
+				val deltaSuccs = SecondOrderFeatures.deltaSucc.apply(allCandidates)
+				allCandidates.zipWithIndex.foreach { case (candidate, i) =>
+					val prob = candidate.prob
+					val positiveInstance = candidate.link.destination == candidate.entity
+					out.collect((candidate.link.surfaceRepr, candidate.link.source, prob, ranks(i), deltaTops(i), deltaSuccs(i), positiveInstance))
+				}
+			}
+
+//				.map(new RichMapFunction[Int, Int] {
+//					override def map(value: Int): Int = {
+//							(1, 1)
+//					}
+//				})
+
+//				.apply { (links, surfaceProbsIt, out: Collector[(String, String, Double, Double, Double, Double, Boolean)]) =>
+//					// these surface probs sum to one
+//					val surfaceProbs = surfaceProbsIt.map { tuple =>
+//						SurfaceProb.tupled(tuple)
+//					}.toSeq.sortBy(-_.prob)
+//					val ranks = SecondOrderFeatures.rank.apply(surfaceProbs)
+//					val deltaTops = SecondOrderFeatures.deltaTop.apply(surfaceProbs)
+//					val deltaSuccs = SecondOrderFeatures.deltaSucc.apply(surfaceProbs)
+//					links.foreach { linkWithContext =>
+//						val link = linkWithContext.link
+//						surfaceProbs.zipWithIndex.foreach { case (surfaceProb, i) =>
+//							val prob = surfaceProb.prob
+//							val positiveInstance = link.destination == surfaceProb.destination
+//							out.collect((link.surfaceRepr, link.source, prob, ranks(i), deltaTops(i), deltaSuccs(i), positiveInstance))
+//						}
+//					}
+//				}
 			prominenceScores.writeAsTsv(surfaceProminenceScoresPath)
 		} else {
 			wikiPages.map { wikiPage =>

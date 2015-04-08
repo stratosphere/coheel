@@ -1,12 +1,12 @@
 package de.uni_potsdam.hpi.coheel.ml
 
-import de.uni_potsdam.hpi.coheel.programs.DataClasses.SurfaceProb
+import de.uni_potsdam.hpi.coheel.programs.DataClasses.LinkCandidate
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 trait SecondOrderFeatureFunction {
-	def apply(in: Seq[SurfaceProb]): Seq[Double]
+	def apply(in: Seq[LinkCandidate]): Seq[Double]
 
 }
 object SecondOrderFeatures {
@@ -16,7 +16,7 @@ object SecondOrderFeatures {
 	 */
 	val rank: SecondOrderFeatureFunction = {
 		new SecondOrderFeatureFunction {
-			override def apply(in: Seq[SurfaceProb]): Seq[Double] = {
+			override def apply(in: Seq[LinkCandidate]): Seq[Double] = {
 				val ranks = new ArrayBuffer[Double](in.size)
 				var lastValue = Double.NaN
 				var rank = 0
@@ -37,7 +37,7 @@ object SecondOrderFeatures {
 	 */
 	val deltaTop: SecondOrderFeatureFunction = {
 		new SecondOrderFeatureFunction {
-			override def apply(in: Seq[SurfaceProb]): Seq[Double] = {
+			override def apply(in: Seq[LinkCandidate]): Seq[Double] = {
 				val deltaTops = new ArrayBuffer[Double](in.size)
 				val topValue = in.head.prob
 				for (i <- 0 until in.size) {
@@ -50,7 +50,7 @@ object SecondOrderFeatures {
 
 	val deltaSucc: SecondOrderFeatureFunction = {
 		new SecondOrderFeatureFunction {
-			override def apply(in: Seq[SurfaceProb]): Seq[Double] = {
+			override def apply(in: Seq[LinkCandidate]): Seq[Double] = {
 				val deltaSuccs = new ArrayBuffer[Double](in.size)
 				val deltaSuccCache = mutable.Map[Double, Double]()
 				for (i <- 0 until in.size) {
