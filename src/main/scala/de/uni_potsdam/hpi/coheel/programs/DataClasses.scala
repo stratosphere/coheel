@@ -13,7 +13,13 @@ object DataClasses {
 	 */
 	// Note: In contrast to InternalLink, this class does not contain a Node, because
 	// that should not be part of the interface of this class.
-	case class Link(surface: String, surfaceRepr: String, source: String, destination: String)
+	case class Link(surface: String, surfaceRepr: String, source: String, destination: String) {
+		/**
+		 * An auto-incrementing id for a link. Note: This field alone is no key, because ids are generated at each node.
+		 * Therefore, only (id, source) makes a key.
+		 */
+		val id = newId()
+	}
 	case class LinkWithContext(link: Link, context: Array[String])
 	case class WordInDocument(document: String, word: String, count: Int)
 	case class LanguageModel(pageTitle: String, model: Map[String, Double])
@@ -39,4 +45,10 @@ object DataClasses {
 
 	// Classification
 	case class SurfaceProb(surface: String, destination: String, prob: Double)
+
+	var currentId = 0
+	def newId(): Int = {
+		currentId += 1
+		currentId
+	}
 }

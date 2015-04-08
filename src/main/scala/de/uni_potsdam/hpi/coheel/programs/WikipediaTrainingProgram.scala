@@ -147,7 +147,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 			.filter { wikiPage => wikiPage.isRedirect }
 			.map { wikiPage => (wikiPage.pageTitle, wikiPage.redirect) }
 
-		allPageLinks.writeAsTsv(allLinksPath)
+		allPageLinks.map { link => (link.id, link.surfaceRepr, link.surface, link.source, link.destination) }.writeAsTsv(allLinksPath)
 		surfaceCountHistogram.writeAsTsv(surfaceCountHistogramPath)
 		surfaceProbs.writeAsTsv(surfaceProbsPath)
 		contextLinkProbabilities.writeAsTsv(contextLinkProbsPath)
