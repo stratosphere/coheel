@@ -16,7 +16,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 
 	override def getDescription = "Wikipedia Extraction"
 
-	val SAMPLE_FRACTION = if (runsOffline()) 10000 else 100
+	val SAMPLE_FRACTION = if (runsOffline()) 100 else 10000
 
 	/**
 	 * Builds a plan to create the three main data structures CohEEL needs.
