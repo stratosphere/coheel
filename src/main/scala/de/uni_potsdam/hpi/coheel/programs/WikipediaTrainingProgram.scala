@@ -3,21 +3,20 @@ package de.uni_potsdam.hpi.coheel.programs
 import de.uni_potsdam.hpi.coheel.io.LanguageModelOutputFormat
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.ml.SecondOrderFeatures
+import de.uni_potsdam.hpi.coheel.programs.DataClasses._
+import de.uni_potsdam.hpi.coheel.wiki._
 import org.apache.flink.api.java.aggregation.Aggregations
 import org.apache.flink.api.scala._
-import de.uni_potsdam.hpi.coheel.wiki._
 import org.apache.flink.core.fs.FileSystem
 import org.apache.flink.util.Collector
+
 import scala.collection.mutable
 
-import DataClasses._
-import org.apache.log4j.Logger
-
-import scala.util.hashing.MurmurHash3
-
-class WikipediaTrainingProgram extends NoParamCoheelProgram {
+class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 
 	override def getDescription = "Wikipedia Extraction"
+
+	val SAMPLE_FRACTION = if (runsOffline()) 10000 else 100
 
 	/**
 	 * Builds a plan to create the three main data structures CohEEL needs.
@@ -34,7 +33,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 			val languageModels = buildLanguageModelPlan(wikiPages)
 
 			val linksWithContext = wikiPages.flatMap { wikiPage =>
-				if (wikiPage.pageTitle.hashCode % (if (runsOffline()) 100 else 10000) == 0)
+				if (wikiPage.pageTitle.hashCode % SAMPLE_FRACTION == 0)
 					wikiPage.links
 				else
 					Nil
