@@ -168,7 +168,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 				if (tokens.nonEmpty) {
 					val prob = split(2).toDouble
 					if (prob > threshold)
-						Some(SurfaceProb(tokens, split(1), prob))
+						Some(SurfaceProb(split(0), split(1), prob))
 					else
 						None
 				}

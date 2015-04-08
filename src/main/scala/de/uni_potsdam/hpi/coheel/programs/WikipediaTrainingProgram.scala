@@ -2,6 +2,7 @@ package de.uni_potsdam.hpi.coheel.programs
 
 import de.uni_potsdam.hpi.coheel.io.LanguageModelOutputFormat
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
+import de.uni_potsdam.hpi.coheel.ml.SecondOrderFeatures
 import org.apache.flink.api.java.aggregation.Aggregations
 import org.apache.flink.api.scala._
 import de.uni_potsdam.hpi.coheel.wiki._
@@ -29,28 +30,25 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 		if (!configurationParams.contains(ConfigurationParams.ONLY_WIKIPAGES)) {
 			val surfaceProbs = buildLinkPlans(wikiPages)
 			val languageModels = buildLanguageModelPlan(wikiPages)
-//
+
 			val linksWithContext = wikiPages.flatMap { wikiPage => wikiPage.links }
 			linksWithContext.coGroup(surfaceProbs)
 				.where { linkWithContext => linkWithContext.link.surfaceRepr }
 				.equalTo { surfaceProb => surfaceProb._1 }
-				.apply { (links, surfaceProbsIt, out: Collector[(String, String, Double, Int, Double, Double, Boolean)]) =>
+				.apply { (links, surfaceProbsIt, out: Collector[(String, String, Double, Double, Double, Double, Boolean)]) =>
 					// these surface probs sum to one
-					val surfaceProbs = surfaceProbsIt.toSeq.sortBy(-_._3)
-					val surfaceProbsTopValue = surfaceProbs.head._3
+					val surfaceProbs = surfaceProbsIt.map { tuple =>
+						SurfaceProb.tupled(tuple)
+					}.toSeq.sortBy(-_.prob)
+					val ranks = SecondOrderFeatures.rank.apply(surfaceProbs)
+					val deltaTops = SecondOrderFeatures.deltaTop.apply(surfaceProbs)
+					val deltaSuccs = SecondOrderFeatures.deltaSucc.apply(surfaceProbs)
 					links.foreach { linkWithContext =>
 						val link = linkWithContext.link
-						var rank = 1
-						surfaceProbs.foreach { surfaceProb =>
-							val prob = surfaceProb._3
-							// TODO: Rank for equal probs?
-							// TODO: Optimize for repeated access, currently re-evaluating every time.
-							// TODO: Succ value for the last one?
-							val deltaTop = surfaceProbsTopValue - prob
-							val deltaSucc = if (rank != surfaceProbs.size) prob - surfaceProbs(rank)._3 else Double.NaN
-							val positiveInstance = link.destination == surfaceProb._2
-							out.collect((link.surfaceRepr, link.source, prob, rank, deltaTop, deltaSucc, positiveInstance))
-							rank += 1
+						surfaceProbs.zipWithIndex.foreach { case (surfaceProb, i) =>
+							val prob = surfaceProb.prob
+							val positiveInstance = link.destination == surfaceProb.destination
+							out.collect((link.surfaceRepr, link.source, prob, ranks(i), deltaTops(i), deltaSuccs(i), positiveInstance))
 						}
 					}
 				}.writeAsTsv(surfaceProminenceScoresPath)
