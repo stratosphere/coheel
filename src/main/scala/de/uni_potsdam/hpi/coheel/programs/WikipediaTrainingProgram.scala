@@ -34,7 +34,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 			val languageModels = buildLanguageModelPlan(wikiPages)
 
 			val linksWithContext = wikiPages.flatMap { wikiPage =>
-				if (MurmurHash3.stringHash(wikiPage.pageTitle) % 10000 == 0)
+				if (wikiPage.pageTitle.hashCode % (if (runsOffline()) 100 else 10000) == 0)
 					wikiPage.links
 				else
 					Nil
