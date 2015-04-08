@@ -1,6 +1,6 @@
 package de.uni_potsdam.hpi.coheel
 
-import java.io.{StringReader, File}
+import java.io.File
 
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import org.apache.commons.io.FileUtils
@@ -12,7 +12,7 @@ import org.apache.flink.configuration.GlobalConfiguration
 import org.apache.log4j.Logger
 import com.typesafe.config.{Config, ConfigFactory}
 import de.uni_potsdam.hpi.coheel.programs._
-import org.apache.lucene.analysis.tokenattributes.{FlagsAttribute, PositionIncrementAttribute, CharTermAttribute, TypeAttribute}
+import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
 
 /**
@@ -119,6 +119,10 @@ object FlinkProgramRunner {
 						""
 					val paramsString = if (param == null) "" else s" current-param = $param"
 					val result = env.execute(s"${program.getDescription} (dataset = ${config.getString("name")}$paramsString$configurationString)")
+					val accResults = result.getAllAccumulatorResults.asScala
+					accResults.foreach { case (acc, obj) =>
+						println(acc)
+					}
 					log.info(s"Net runtime: ${result.getNetRuntime / 1000} s")
 				}
 			} catch {

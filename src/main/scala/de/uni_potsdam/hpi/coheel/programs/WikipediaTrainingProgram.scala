@@ -100,6 +100,9 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 				val links = group.toList
 				SurfaceCounts(links.head.surfaceRepr, links.size)
 			}
+		val surfaceCountHistogram = surfaceCounts.map { surfaceCount => (surfaceCount.count, 1) }.groupBy(0).sum(1)
+//		val surfaceCountHistogram = surfaceDocumentCounts.map { surfaceCount => (surfaceCount._3, 1) }.groupBy(0).sum(1)
+
 		// count how often a surface occurs with a certain destination
 		val surfaceLinkCounts = allPageLinks
 			.map { link => SurfaceLinkCounts(link.surfaceRepr, link.destination, 1) }
@@ -107,11 +110,11 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 			.sum(2).name("Surface-LinkTo-Counts")
 		// join them together and calculate the probabilities
 		val surfaceProbs = surfaceCounts.join(surfaceLinkCounts)
-			.where { _.surface }
+			.where { _.surfaceRepr }
 			.equalTo { _.surface }
 			.map { joinResult => joinResult match {
 				case (surfaceCount, surfaceLinkCount) =>
-					(surfaceCount.surface, surfaceLinkCount.destination,
+					(surfaceCount.surfaceRepr, surfaceLinkCount.destination,
 					 surfaceLinkCount.count / surfaceCount.count.toDouble)
 			}
 		}
@@ -140,6 +143,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram {
 			.map { wikiPage => (wikiPage.pageTitle, wikiPage.redirect) }
 
 		allPageLinks.writeAsTsv(allLinksPath)
+		surfaceCountHistogram.writeAsTsv(surfaceCountHistogramPath)
 		surfaceProbs.writeAsTsv(surfaceProbsPath)
 		contextLinkProbabilities.writeAsTsv(contextLinkProbsPath)
 		redirects.writeAsTsv(redirectPath)

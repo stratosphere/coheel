@@ -19,7 +19,7 @@ object DataClasses {
 	case class LanguageModel(pageTitle: String, model: Map[String, Double])
 	case class WordCounts(word: WordInDocument, count: Int)
 	case class DocumentCounts(document: String, count: Int)
-	case class SurfaceCounts(surface: String, count: Int)
+	case class SurfaceCounts(surfaceRepr: String, count: Int)
 	case class SurfaceLinkCounts(surface: String, destination: String, count: Int)
 	case class LinkCounts(source: String, count: Int)
 	case class ContextLinkCounts(source: String, destination: String, count: Int)

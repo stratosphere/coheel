@@ -26,6 +26,7 @@ object OutputFiles {
 	lazy val plainTextsPath                   = s"$location://${outputPath}plain-texts.wiki"
 	lazy val allLinksPath                     = s"$location://${outputPath}all-links.wiki"
 	lazy val surfaceDocumentCountsPath        = s"$location://${outputPath}surface-document-counts.wiki"
+	lazy val surfaceCountHistogramPath        = s"$location://${outputPath}surface-count-histogram.wiki"
 	lazy val entireTextSurfacesPath           = s"$location://${outputPath}entire-text-surfaces.wiki"
 	lazy val surfaceLinkProbsPath             = s"$location://${outputPath}surface-link-probs.wiki"
 	lazy val surfaceProminenceScoresPath      = s"$location://${outputPath}surface-prominence-scores.wiki"
