@@ -51,7 +51,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 			val prominenceScores = linkCandidates.groupBy { linkCandidates =>
 				(linkCandidates.link.id, linkCandidates.link.source)
 			}.reduceGroup { (candidatesIt, out: Collector[(String, String, Double, Double, Double, Double, Boolean)]) =>
-				val allCandidates = candidatesIt.toSeq.sortBy(_.prob)
+				val allCandidates = candidatesIt.toSeq.sortBy(-_.prob)
 
 				val ranks = SecondOrderFeatures.rank.apply(allCandidates)
 				val deltaTops = SecondOrderFeatures.deltaTop.apply(allCandidates)

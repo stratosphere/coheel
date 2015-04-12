@@ -199,7 +199,7 @@ class Extractor(val wikiPage: WikiPage, val surfaceRepr: String => String) {
 	}
 
 	/**
-	 * Translates an internal link to an link, that can be exposed to the user.
+	 * Filters links with an empty surface representation
 	 */
 	private def filterEmptySurfaceRepr(link: Link): Option[Link] = {
 		if (link.surfaceRepr.isEmpty)
