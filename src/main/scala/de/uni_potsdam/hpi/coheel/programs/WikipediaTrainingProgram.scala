@@ -43,50 +43,51 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 				.where { linkWithContext => linkWithContext.link.surfaceRepr }
 				.equalTo { surfaceProb => surfaceProb._1 }
 				.map { joinResult => joinResult match {
-					case (linkWithContext, (_, entity, prob)) =>
-						LinkCandidate(linkWithContext.link, entity, prob)
+					case (linkWithContext, (_, candidateEntity, prob)) =>
+						import linkWithContext.link._
+						LinkCandidate(id, surfaceRepr, source, destination, candidateEntity, prob, linkWithContext.context)
 					}
 				}
 
-			val prominenceScores = linkCandidates.groupBy { linkCandidates =>
-				(linkCandidates.link.id, linkCandidates.link.source)
-			}.reduceGroup { (candidatesIt, out: Collector[(String, String, Double, Double, Double, Double, Boolean)]) =>
+			def applySecondOrderFunctions(candidatesIt: Iterator[LinkCandidate], out: Collector[(Int, String, String, String, Double, Double, Double, Double, Boolean)]): Unit = {
 				val allCandidates = candidatesIt.toSeq.sortBy(-_.prob)
+				if (allCandidates.size > 1) {
+					val ranks = SecondOrderFeatures.rank.apply(allCandidates)
+					val deltaTops = SecondOrderFeatures.deltaTop.apply(allCandidates)
+					val deltaSuccs = SecondOrderFeatures.deltaSucc.apply(allCandidates)
 
-				val ranks = SecondOrderFeatures.rank.apply(allCandidates)
-				val deltaTops = SecondOrderFeatures.deltaTop.apply(allCandidates)
-				val deltaSuccs = SecondOrderFeatures.deltaSucc.apply(allCandidates)
-				allCandidates.zipWithIndex.foreach { case (candidate, i) =>
-					val prob = candidate.prob
-					val positiveInstance = candidate.link.destination == candidate.entity
-					out.collect((candidate.link.surfaceRepr, candidate.link.source, prob, ranks(i), deltaTops(i), deltaSuccs(i), positiveInstance))
+					allCandidates.zipWithIndex.foreach { case (candidate, i) =>
+						val prob = candidate.prob
+						val positiveInstance = candidate.destination == candidate.candidateEntity
+						import candidate._
+						out.collect((id, surfaceRepr, source, candidateEntity, prob, ranks(i), deltaTops(i), deltaSuccs(i), positiveInstance))
+					}
 				}
 			}
 
-//				.map(new RichMapFunction[Int, Int] {
-//					override def map(value: Int): Int = {
-//							(1, 1)
-//					}
-//				})
+			val prominenceScores = linkCandidates.groupBy("id", "source")
+				.reduceGroup(applySecondOrderFunctions _)
 
-//				.apply { (links, surfaceProbsIt, out: Collector[(String, String, Double, Double, Double, Double, Boolean)]) =>
-//					// these surface probs sum to one
-//					val surfaceProbs = surfaceProbsIt.map { tuple =>
-//						SurfaceProb.tupled(tuple)
-//					}.toSeq.sortBy(-_.prob)
-//					val ranks = SecondOrderFeatures.rank.apply(surfaceProbs)
-//					val deltaTops = SecondOrderFeatures.deltaTop.apply(surfaceProbs)
-//					val deltaSuccs = SecondOrderFeatures.deltaSucc.apply(surfaceProbs)
-//					links.foreach { linkWithContext =>
-//						val link = linkWithContext.link
-//						surfaceProbs.zipWithIndex.foreach { case (surfaceProb, i) =>
-//							val prob = surfaceProb.prob
-//							val positiveInstance = link.destination == surfaceProb.destination
-//							out.collect((link.surfaceRepr, link.source, prob, ranks(i), deltaTops(i), deltaSuccs(i), positiveInstance))
-//						}
-//					}
-//				}
+			val contextScores = linkCandidates.join(languageModels)
+				.where("candidateEntity")
+				.equalTo("pageTitle")
+				.map { joinResult => joinResult match {
+					case (linkWithContext, languageModel) =>
+						val modelSize = languageModel.model.size
+						val contextProb = linkWithContext.context.map { word =>
+							Math.log(languageModel.model.get(word) match {
+								case Some(prob) => prob
+								case None => 1.0 / modelSize
+							})
+						}.sum
+
+						linkWithContext.copy(context = Array(), prob = contextProb)
+				}
+			}.groupBy("id", "surfaceRepr")
+			.reduceGroup(applySecondOrderFunctions _)
+
 			prominenceScores.writeAsTsv(surfaceProminenceScoresPath)
+			contextScores.writeAsTsv(contextScoresPath)
 		} else {
 			wikiPages.map { wikiPage =>
 				(wikiPage.pageTitle, wikiPage.isDisambiguation, wikiPage.isList, wikiPage.isRedirect, wikiPage.ns, if (wikiPage.isNormalPage) "normal" else "special")
@@ -211,9 +212,10 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 
 		val languageModels = wikiPages.map { wikiPage =>
 			val wordsInDoc = wikiPage.plainText.length
-			val model = wikiPage.plainText
+			val groupedWords = wikiPage.plainText
 				.groupBy(identity)
-				.mapValues(_.length.toDouble / wordsInDoc)
+			val groupCount = groupedWords.size
+			val model = groupedWords.mapValues { v => (v.length + 1).toDouble / (wordsInDoc + groupCount) }
 			LanguageModel(wikiPage.pageTitle, model)
 		}.name("Language Model: Document-Word-Prob")
 
