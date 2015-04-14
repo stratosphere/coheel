@@ -73,7 +73,7 @@ class SurfaceEvaluationProgram extends CoheelProgram[Int] {
 	def summarizeEvaluation(): Unit = {
 		val conf = new Configuration
 		conf.setBoolean("recursive.file.enumeration", true)
-		val evaluations = environment.readCsvFile[Evaluation](surfaceEvaluationPerSubsetPath, "\n", '\t').withParameters(conf)
+		val evaluations = environment.readCsvFile[Evaluation](surfaceEvaluationPerSubsetPath, "\n", "\t").withParameters(conf)
 
 		val (aggregatedEvaluations, maxFilteredSurfaces) = aggregateEvaluations(evaluations)
 		val finalSurfaceEvaluation = aggregatedEvaluations.map(new RichMapFunction[Evaluation, (String, Double, Double, Double, Double, Double)] {
