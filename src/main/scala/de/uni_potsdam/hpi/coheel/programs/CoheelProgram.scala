@@ -68,7 +68,9 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 						val linkTextOffsets = extractor.getLinks
 						val (plainText, linkOffsets) = TokenizerHelper.tokenizeWithPositionInfo(extractor.getPlainText, linkTextOffsets)
 						val linksWithContext = linkOffsets.map { case (position, link) =>
-							LinkWithContext(link, plainText.slice(Math.max(0, position - CONTEXT_SIZE), Math.min(position + CONTEXT_SIZE, plainText.length)))
+							val context = plainText.slice(Math.max(0, position - CONTEXT_SIZE), Math.min(position + CONTEXT_SIZE, plainText.length))
+							import link._
+							LinkWithContext(surface, surfaceRepr, source, destination, id, context)
 						}.toArray
 //						linkOffsets.foreach { case (linkOffset, link) =>
 //							val textFromLink = link.surfaceRepr.split(' ')(0)

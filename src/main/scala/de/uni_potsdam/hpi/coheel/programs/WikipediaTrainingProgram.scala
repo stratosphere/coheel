@@ -30,7 +30,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val wikiPages = getWikiPages
 		if (!configurationParams.contains(ConfigurationParams.ONLY_WIKIPAGES)) {
-			val surfaceProbs = buildLinkPlans(wikiPages)
+			val (surfaceProbs, redirects) = buildLinkPlans(wikiPages)
 			val languageModels = buildLanguageModelPlan(wikiPages)
 
 			val linksWithContext = wikiPages.flatMap { wikiPage =>
@@ -39,12 +39,21 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 				else
 					Nil
 			}
+//			.join(redirects)
+//			.where { linkWithContext => linkWithContext.destination }
+//			.equalTo(0)
+//			.map { joinResult => joinResult match {
+//					case (linkWithContext, (from, to)) =>
+//						linkWithContext.copy(destination = to)
+//				}
+//			}
+
 			val linkCandidates = linksWithContext.join(surfaceProbs)
-				.where { linkWithContext => linkWithContext.link.surfaceRepr }
+				.where { linkWithContext => linkWithContext.surfaceRepr }
 				.equalTo { surfaceProb => surfaceProb._1 }
 				.map { joinResult => joinResult match {
 					case (linkWithContext, (_, candidateEntity, prob)) =>
-						import linkWithContext.link._
+						import linkWithContext._
 						LinkCandidate(id, surfaceRepr, source, destination, candidateEntity, prob, linkWithContext.context)
 					}
 				}
@@ -101,7 +110,8 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 	 *   <li> the plan who counts how often one document links to another
 	 *   <li> the plan who counts how often a link occurs under a certain surface
 	 */
-	def buildLinkPlans(wikiPages: DataSet[WikiPage]): DataSet[(String, String, Double)] = {
+	def buildLinkPlans(wikiPages: DataSet[WikiPage]):
+		(DataSet[(String, String, Double)], DataSet[(String, String)]) = {
 		val normalPages = wikiPages.filter { !_.isDisambiguation }
 
 		val normalPageLinks = linksFrom(normalPages)
@@ -183,12 +193,13 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 		redirects.writeAsTsv(redirectPath)
 		surfaceDocumentCounts.writeAsTsv(surfaceDocumentCountsPath)
 
-		surfaceProbs
+		(surfaceProbs, redirects)
 	}
 
-	def linksFrom(pages: DataSet[WikiPage]): DataSet[Link] = {
+	def linksFrom(pages: DataSet[WikiPage]): DataSet[LinkWithContext] = {
 		pages.flatMap { wikiPage =>
-			wikiPage.links.map(_.link).toIterator
+			// TODO: In the jobs using these LinkWithContext's, tell Flink that the context is not used.
+			wikiPage.links.toIterator
 		}
 	}
 
@@ -205,7 +216,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 			val links = if (wikiPage.links.isEmpty)
 				CoheelProgram.LINK_SPLITTER
 			else
-				wikiPage.links.map(_.link.surfaceRepr).mkString(CoheelProgram.LINK_SPLITTER)
+				wikiPage.links.map(_.surfaceRepr).mkString(CoheelProgram.LINK_SPLITTER)
 
 			(wikiPage.pageTitle, plainText, links)
 		}.name("Plain Texts with Links: Title-Text-Links")

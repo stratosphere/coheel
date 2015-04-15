@@ -20,7 +20,7 @@ object DataClasses {
 		 */
 //		val id = newId()
 	}
-	case class LinkWithContext(link: Link, context: Array[String])
+	case class LinkWithContext(surface: String, surfaceRepr: String, source: String, destination: String, id: Int, context: Array[String])
 	case class WordInDocument(document: String, word: String, count: Int)
 	case class LanguageModel(pageTitle: String, model: Map[String, Double])
 	case class WordCounts(word: WordInDocument, count: Int)
