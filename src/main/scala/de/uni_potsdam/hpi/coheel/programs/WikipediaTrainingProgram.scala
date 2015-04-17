@@ -58,7 +58,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 					}
 				}
 
-			def applySecondOrderFunctions(candidatesIt: Iterator[LinkCandidate], out: Collector[(Int, String, String, String, Double, Double, Double, Double, Boolean)]): Unit = {
+			def applySecondOrderFunctions(candidatesIt: Iterator[LinkCandidate], out: Collector[(Int, Double, String, String, String, Double, Double, Double, Boolean)]): Unit = {
 				val allCandidates = candidatesIt.toSeq.sortBy(-_.prob)
 				if (allCandidates.size > 1) {
 					val ranks = SecondOrderFeatures.rank.apply(allCandidates)
@@ -69,7 +69,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 						val prob = candidate.prob
 						val positiveInstance = candidate.destination == candidate.candidateEntity
 						import candidate._
-						out.collect((id, surfaceRepr, source, candidateEntity, prob, ranks(i), deltaTops(i), deltaSuccs(i), positiveInstance))
+						out.collect((id, ranks(i), surfaceRepr, source, candidateEntity, prob, deltaTops(i), deltaSuccs(i), positiveInstance))
 					}
 				}
 			}
