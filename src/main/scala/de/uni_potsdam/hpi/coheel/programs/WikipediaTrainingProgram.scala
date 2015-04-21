@@ -39,14 +39,6 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 				else
 					Nil
 			}
-//			.join(redirects)
-//			.where { linkWithContext => linkWithContext.destination }
-//			.equalTo(0)
-//			.map { joinResult => joinResult match {
-//					case (linkWithContext, (from, to)) =>
-//						linkWithContext.copy(destination = to)
-//				}
-//			}
 
 			val linkCandidates = linksWithContext.join(surfaceProbs)
 				.where { linkWithContext => linkWithContext.surfaceRepr }
@@ -58,26 +50,29 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 					}
 				}
 
-			def applySecondOrderFunctions(candidatesIt: Iterator[LinkCandidate], out: Collector[(Int, Double, String, String, String, Double, Double, Double, Boolean)]): Unit = {
-				val allCandidates = candidatesIt.toSeq.sortBy(-_.prob)
+			def applySecondOrderFunctions(candidatesIt: Iterator[LinkWithScores],
+			                              out: Collector[(Int, String, String, String, Double, Double, Double, Double, Double, Double, Double, Double, Boolean)]): Unit = {
+				val allCandidates = candidatesIt.toSeq
+				val promOrder = allCandidates.sortBy(-_.promScore)
+				val contextOrder = allCandidates.sortBy(-_.contextScore)
 				if (allCandidates.size > 1) {
-					val ranks = SecondOrderFeatures.rank.apply(allCandidates)
-					val deltaTops = SecondOrderFeatures.deltaTop.apply(allCandidates)
-					val deltaSuccs = SecondOrderFeatures.deltaSucc.apply(allCandidates)
+					val promRank       = SecondOrderFeatures.rank.apply(promOrder)(_.promScore)
+					val promDeltaTops  = SecondOrderFeatures.deltaTop.apply(promOrder)(_.promScore)
+					val promDeltaSuccs = SecondOrderFeatures.deltaSucc.apply(promOrder)(_.promScore)
+					val contextRank       = SecondOrderFeatures.rank.apply(contextOrder)(_.contextScore)
+					val contextDeltaTops  = SecondOrderFeatures.deltaTop.apply(contextOrder)(_.contextScore)
+					val contextDeltaSuccs = SecondOrderFeatures.deltaSucc.apply(contextOrder)(_.contextScore)
 
-					allCandidates.zipWithIndex.foreach { case (candidate, i) =>
-						val prob = candidate.prob
+					promOrder.zipWithIndex.foreach { case (candidate, i) =>
 						val positiveInstance = candidate.destination == candidate.candidateEntity
 						import candidate._
-						out.collect((id, ranks(i), surfaceRepr, source, candidateEntity, prob, deltaTops(i), deltaSuccs(i), positiveInstance))
+						out.collect((id, surfaceRepr, source, candidateEntity, promScore, promRank(i), promDeltaTops(i), promDeltaSuccs(i),
+							contextScore, contextRank(i), contextDeltaTops(i), contextDeltaSuccs(i), positiveInstance))
 					}
 				}
 			}
 
-			val prominenceScores = linkCandidates.groupBy("id", "source")
-				.reduceGroup(applySecondOrderFunctions _)
-
-			val contextScores = linkCandidates.join(languageModels)
+			val baseScores = linkCandidates.join(languageModels)
 				.where("candidateEntity")
 				.equalTo("pageTitle")
 				.map { joinResult => joinResult match {
@@ -90,13 +85,14 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 							})
 						}.sum
 
-						linkWithContext.copy(context = Array(), prob = contextProb)
+						import linkWithContext._
+						LinkWithScores(id, surfaceRepr, source, destination, candidateEntity, prob, contextProb)
 				}
-			}.groupBy("id", "surfaceRepr")
+			}
+			val scores = baseScores.groupBy("id", "source")
 			.reduceGroup(applySecondOrderFunctions _)
 
-			prominenceScores.writeAsTsv(surfaceProminenceScoresPath)
-			contextScores.writeAsTsv(contextScoresPath)
+			scores.writeAsTsv(scoresPath)
 		} else {
 			wikiPages.map { wikiPage =>
 				(wikiPage.pageTitle, wikiPage.isDisambiguation, wikiPage.isList, wikiPage.isRedirect, wikiPage.ns, if (wikiPage.isNormalPage) "normal" else "special")
@@ -145,7 +141,6 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 				SurfaceCounts(links.head.surfaceRepr, links.size)
 			}
 		val surfaceCountHistogram = surfaceCounts.map { surfaceCount => (surfaceCount.count, 1) }.groupBy(0).sum(1)
-//		val surfaceCountHistogram = surfaceDocumentCounts.map { surfaceCount => (surfaceCount._3, 1) }.groupBy(0).sum(1)
 
 		// count how often a surface occurs with a certain destination
 		val surfaceLinkCounts = allPageLinks

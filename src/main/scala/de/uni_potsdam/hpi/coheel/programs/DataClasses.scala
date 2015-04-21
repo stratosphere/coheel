@@ -25,6 +25,7 @@ object DataClasses {
 	case class LanguageModel(pageTitle: String, model: Map[String, Double])
 	case class WordCounts(word: WordInDocument, count: Int)
 	case class LinkCandidate(id: Int, surfaceRepr: String, source: String, destination: String, candidateEntity: String, prob: Double, context: Array[String])
+	case class LinkWithScores(id: Int, surfaceRepr: String, source: String, destination: String, candidateEntity: String, promScore: Double, contextScore: Double)
 	case class LinkContextScore(id: Int, surfaceRepr: String, contextProb: Double)
 	case class DocumentCounts(document: String, count: Int)
 	case class SurfaceCounts(surfaceRepr: String, count: Int)

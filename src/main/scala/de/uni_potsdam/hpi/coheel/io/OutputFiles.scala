@@ -31,6 +31,7 @@ object OutputFiles {
 	lazy val surfaceLinkProbsPath             = s"$location://${outputPath}surface-link-probs.wiki"
 	lazy val surfaceProminenceScoresPath      = s"$location://${outputPath}surface-prominence-scores.wiki"
 	lazy val contextScoresPath                = s"$location://${outputPath}context-scores.wiki"
+	lazy val scoresPath                       = s"$location://${outputPath}scores.wiki"
 
 	lazy val surfaceEvaluationPerDocumentPath = s"$location://${outputPath}surface-evaluation-per-document.wiki"
 	lazy val surfaceEvaluationPerSubsetPath   = s"$location://${outputPath}surface-evaluation-per-subset.wiki"
