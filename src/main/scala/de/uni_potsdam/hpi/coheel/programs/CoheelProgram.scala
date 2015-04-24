@@ -16,6 +16,7 @@ import org.apache.log4j.Logger
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 
 import scala.collection.JavaConverters._
+import scala.util.{Failure, Success, Try}
 
 object CoheelLogger {
 	val log: Logger = Logger.getLogger(getClass)
@@ -62,7 +63,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 				}
 				filteredWikiPages.foreach { wikiPage =>
 					val CONTEXT_SIZE = 50
-					try {
+					Try {
 						val extractor = new Extractor(wikiPage, s => TokenizerHelper.tokenize(s).mkString(" ") )
 						extractor.extract()
 						val linkTextOffsets = extractor.getLinks
@@ -78,12 +79,14 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 //							assert(textFromLink == textFromPlainText)
 //						}
 						wikiPage.source = ""
-						out.collect(WikiPage(wikiPage.pageTitle, wikiPage.ns, wikiPage.redirect,
-							plainText, linksWithContext, wikiPage.isDisambiguation, wikiPage.isList))
-					} catch {
-						case e: Throwable =>
-							log.warn(s"Discarding ${wikiPage.pageTitle} because of ${e.getClass.getSimpleName} (${e.getMessage})")
-							log.warn(e.getStackTraceString)
+						WikiPage(wikiPage.pageTitle, wikiPage.ns, wikiPage.redirect,
+							plainText, linksWithContext, wikiPage.isDisambiguation, wikiPage.isList)
+					} match {
+						case Success(parsedPage) =>
+							out.collect(parsedPage)
+						case Failure(e) =>
+							log.error(s"Discarding ${wikiPage.pageTitle} because of ${e.getClass.getSimpleName} (${e.getMessage.replace('\n', ' ')})")
+//							log.warn(e.getStackTraceString)
 					}
 				}
 			}
