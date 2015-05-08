@@ -6,5 +6,7 @@ Create real unique link ids by using the server as the starting counter, e.g. te
 
 Find network monitoring tool
 
-➜  ~  wc -l 1
+➜  ~  wc -l all-links/1
 16825720 1
+
+Try rebalance
