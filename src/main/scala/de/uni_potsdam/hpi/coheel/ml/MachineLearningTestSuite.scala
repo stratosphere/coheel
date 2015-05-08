@@ -15,7 +15,7 @@ import scala.io.Source
 import scala.util.Random
 
 
-object WekaLearner {
+object MachineLearningTestSuite {
 
 	val CLASS_INDEX = 9
 
@@ -132,13 +132,13 @@ object WekaLearner {
 		simpleLogistic.setErrorOnProbabilities(true)
 
 		val base = List(
-//			new Logistic
-			new J48
-//			new SimpleLogistic,
-//			simpleLogistic,
-//			new MultilayerPerceptron,
-//			new RandomForest,
-//			new SMO
+			new Logistic,
+			new J48,
+			new SimpleLogistic,
+			simpleLogistic,
+			new MultilayerPerceptron,
+			new RandomForest,
+			new SMO
 		)
 		base.flatMap { classifier =>
 			val costMatrixFN = new CostMatrix(2)

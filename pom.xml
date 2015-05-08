@@ -227,6 +227,14 @@
 								<jvmArg>-Xmx10g</jvmArg>
 							</jvmArgs>
 						</launcher>
+						<launcher>
+							<id>MachineLearningTestSuite</id>
+							<mainClass>de.uni_potsdam.hpi.coheel.ml.MachineLearningTestSuite</mainClass>
+							<jvmArgs>
+								<jvmArg>-Xms10g</jvmArg>
+								<jvmArg>-Xmx10g</jvmArg>
+							</jvmArgs>
+						</launcher>
 					</launchers>
 				</configuration>
 				<executions>
