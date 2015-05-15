@@ -109,7 +109,10 @@ object MachineLearningTestSuite {
 		val filteredTraining = Filter.useFilter(training, removeFilter)
 
 		classifiers.foreach { case (name, classifier) =>
-			println(name)
+			val runtime = Timer.timeFunction {
+				classifier.buildClassifier(filteredTraining)
+			}
+			println(s"$name in ${runtime.toInt} ms")
 			val evaluation = new Evaluation(filteredTraining)
 			classifier.buildClassifier(filteredTraining)
 			evaluation.evaluateModel(classifier, Filter.useFilter(test, removeFilter))
