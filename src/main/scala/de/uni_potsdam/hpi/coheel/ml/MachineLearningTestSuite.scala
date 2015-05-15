@@ -2,6 +2,7 @@ package de.uni_potsdam.hpi.coheel.ml
 
 import java.io.File
 
+import weka.classifiers.bayes.NaiveBayes
 import weka.classifiers.{CostMatrix, Evaluation}
 import weka.classifiers.functions.{Logistic, MultilayerPerceptron, SMO, SimpleLogistic}
 import weka.classifiers.meta.CostSensitiveClassifier
@@ -131,12 +132,19 @@ object MachineLearningTestSuite {
 		simpleLogistic.setMaxBoostingIterations(1500)
 		simpleLogistic.setErrorOnProbabilities(true)
 
+		val nb1 = new NaiveBayes
+		nb1.setUseSupervisedDiscretization(true)
+		val nb2 = new NaiveBayes
+		nb2.setUseSupervisedDiscretization(false)
+
 		val base = List(
 			new Logistic,
 			new J48,
 			new SimpleLogistic,
 			simpleLogistic,
 			new MultilayerPerceptron,
+			nb1,
+			nb2,
 			new RandomForest,
 			new SMO
 		)
