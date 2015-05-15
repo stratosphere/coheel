@@ -73,7 +73,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 							val contextOption = Util.extractContext(plainText, position, CONTEXT_SPREADING)
 							contextOption.map { context =>
 								import link._
-								LinkWithContext(surface, surfaceRepr, source, destination, id, context)
+								LinkWithContext(surface, surfaceRepr, source, destination, fullId, context)
 							}
 						}.toArray
 //						linkOffsets.foreach { case (linkOffset, link) =>

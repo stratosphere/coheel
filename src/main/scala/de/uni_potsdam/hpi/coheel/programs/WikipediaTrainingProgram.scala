@@ -51,7 +51,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 				}
 
 			def applySecondOrderFunctions(candidatesIt: Iterator[LinkWithScores],
-			                              out: Collector[(Int, String, String, String, Double, Double, Double, Double, Double, Double, Double, Double, Boolean)]): Unit = {
+			                              out: Collector[(String, String, String, String, Double, Double, Double, Double, Double, Double, Double, Double, Boolean)]): Unit = {
 				val allCandidates = candidatesIt.toSeq
 				val promOrder = allCandidates.sortBy(-_.promScore)
 				val contextOrder = allCandidates.sortBy(-_.contextScore)

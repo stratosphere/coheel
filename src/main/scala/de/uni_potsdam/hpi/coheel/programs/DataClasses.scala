@@ -1,5 +1,7 @@
 package de.uni_potsdam.hpi.coheel.programs
 
+import scala.util.hashing.MurmurHash3
+
 object DataClasses {
 
 	/**
@@ -10,22 +12,20 @@ object DataClasses {
 	 *      application.
 	 * @param source The page the link is on, e.g. 'Germany'
 	 * @param destination The link's destination, e.g. 'Angela Merkel'
+	 * @param id An auto-incrementing id for a link. Note: This field alone is no key, because ids are generated at each node.
+	 *           Therefore, only (id, source) makes a key. Therefore, see the fullId method, which returns an unique string id.
 	 */
 	// Note: In contrast to InternalLink, this class does not contain a Node, because
 	// that should not be part of the interface of this class.
 	case class Link(surface: String, surfaceRepr: String, source: String, destination: String, id: Int = newId()) {
-		/**
-		 * An auto-incrementing id for a link. Note: This field alone is no key, because ids are generated at each node.
-		 * Therefore, only (id, source) makes a key.
-		 */
-//		val id = newId()
+		def fullId: String = s"$id-${MurmurHash3.stringHash(source)}"
 	}
-	case class LinkWithContext(surface: String, surfaceRepr: String, source: String, destination: String, id: Int, context: Array[String])
+	case class LinkWithContext(surface: String, surfaceRepr: String, source: String, destination: String, id: String, context: Array[String])
 	case class WordInDocument(document: String, word: String, count: Int)
 	case class LanguageModel(pageTitle: String, model: Map[String, Double])
 	case class WordCounts(word: WordInDocument, count: Int)
-	case class LinkCandidate(id: Int, surfaceRepr: String, source: String, destination: String, candidateEntity: String, prob: Double, context: Array[String])
-	case class LinkWithScores(id: Int, surfaceRepr: String, source: String, destination: String, candidateEntity: String, promScore: Double, contextScore: Double)
+	case class LinkCandidate(id: String, surfaceRepr: String, source: String, destination: String, candidateEntity: String, prob: Double, context: Array[String])
+	case class LinkWithScores(id: String, surfaceRepr: String, source: String, destination: String, candidateEntity: String, promScore: Double, contextScore: Double)
 	case class LinkContextScore(id: Int, surfaceRepr: String, contextProb: Double)
 	case class DocumentCounts(document: String, count: Int)
 	case class SurfaceCounts(surfaceRepr: String, count: Int)

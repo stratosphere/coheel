@@ -1,9 +1,5 @@
 Look for library for random walk/apache matrix?
 
-LM entity model in one line toString, fromString
-
-Create real unique link ids by using the server as the starting counter, e.g. tenem11 --> 0, tenem12 --> 10000000 etc..
-
 Find network monitoring tool
 
 redirect resolving
@@ -15,4 +11,6 @@ Unique ids
 Entity POS tagging, stanford left-3-words
 
 Try rebalance
+
+ForwardedFields everywhere
 
