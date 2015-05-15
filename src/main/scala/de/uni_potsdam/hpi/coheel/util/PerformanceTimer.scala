@@ -1,6 +1,4 @@
-package de.uni_potsdam.hpi.coheel
-
-import org.apache.log4j.Logger
+package de.uni_potsdam.hpi.coheel.util
 
 import scala.collection.immutable.ListMap
 

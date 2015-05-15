@@ -1,4 +1,4 @@
-package de.uni_potsdam.hpi.coheel
+package de.uni_potsdam.hpi.coheel.util
 
 import scala.collection.mutable
 

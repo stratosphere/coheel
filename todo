@@ -12,6 +12,7 @@ redirect resolving
 16825720 1
 Unique ids
 
-Entity POS tagging
+Entity POS tagging, stanford left-3-words
 
 Try rebalance
+

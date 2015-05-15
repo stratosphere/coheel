@@ -5,6 +5,7 @@ import java.lang.Iterable
 import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
 import de.uni_potsdam.hpi.coheel.io.{IteratorReader, WikiPageInputFormat}
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
+import de.uni_potsdam.hpi.coheel.util.Util
 import de.uni_potsdam.hpi.coheel.wiki.{Extractor, TokenizerHelper, WikiPage, WikiPageReader}
 import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.common.functions.{RichFlatMapFunction, RichMapPartitionFunction}
@@ -62,16 +63,18 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 					filter
 				}
 				filteredWikiPages.foreach { wikiPage =>
-					val CONTEXT_SIZE = 50
+					val CONTEXT_SPREADING = 25
 					Try {
 						val extractor = new Extractor(wikiPage, s => TokenizerHelper.tokenize(s).mkString(" ") )
 						extractor.extract()
 						val linkTextOffsets = extractor.getLinks
 						val (plainText, linkOffsets) = TokenizerHelper.tokenizeWithPositionInfo(extractor.getPlainText, linkTextOffsets)
-						val linksWithContext = linkOffsets.map { case (position, link) =>
-							val context = plainText.slice(Math.max(0, position - CONTEXT_SIZE), Math.min(position + CONTEXT_SIZE, plainText.length))
-							import link._
-							LinkWithContext(surface, surfaceRepr, source, destination, id, context)
+						val linksWithContext = linkOffsets.flatMap { case (position, link) =>
+							val contextOption = Util.extractContext(plainText, position, CONTEXT_SPREADING)
+							contextOption.map { context =>
+								import link._
+								LinkWithContext(surface, surfaceRepr, source, destination, id, context)
+							}
 						}.toArray
 //						linkOffsets.foreach { case (linkOffset, link) =>
 //							val textFromLink = link.surfaceRepr.split(' ')(0)

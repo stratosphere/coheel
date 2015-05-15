@@ -3,6 +3,7 @@ package de.uni_potsdam.hpi.coheel
 import java.io.File
 import java.util.StringTokenizer
 
+import de.uni_potsdam.hpi.coheel.util.PerformanceTimer
 import org.scalatest.FunSuite
 
 import scala.io.Source
