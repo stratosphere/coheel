@@ -4,6 +4,14 @@ import scala.collection.mutable
 
 object Timer {
 
+	def timeFunction[R](block: => R): Double = {
+		val start = System.nanoTime()
+		val result = block
+		val end = System.nanoTime()
+		val time = (end - start) / 1000 / 1000
+		time
+	}
+
 	val ON = true
 
 	var timesSum = mutable.LinkedHashMap[String, Long]().withDefaultValue(0L)

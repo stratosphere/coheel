@@ -18,14 +18,14 @@ object DataClasses {
 	// Note: In contrast to InternalLink, this class does not contain a Node, because
 	// that should not be part of the interface of this class.
 	case class Link(surface: String, surfaceRepr: String, source: String, destination: String, id: Int = newId()) {
-		def fullId: String = s"$id-${MurmurHash3.stringHash(source)}"
+		def fullId: String = s"$id-${MurmurHash3.stringHash(source).toLong - Int.MinValue}"
 	}
 	case class LinkWithContext(surface: String, surfaceRepr: String, source: String, destination: String, id: String, context: Array[String])
 	case class WordInDocument(document: String, word: String, count: Int)
 	case class LanguageModel(pageTitle: String, model: Map[String, Double])
 	case class WordCounts(word: WordInDocument, count: Int)
-	case class LinkCandidate(id: String, surfaceRepr: String, source: String, destination: String, candidateEntity: String, prob: Double, context: Array[String])
-	case class LinkWithScores(id: String, surfaceRepr: String, source: String, destination: String, candidateEntity: String, promScore: Double, contextScore: Double)
+	case class LinkCandidate(fullId: String, surfaceRepr: String, source: String, destination: String, candidateEntity: String, prob: Double, context: Array[String])
+	case class LinkWithScores(fullId: String, surfaceRepr: String, source: String, destination: String, candidateEntity: String, promScore: Double, contextScore: Double)
 	case class LinkContextScore(id: Int, surfaceRepr: String, contextProb: Double)
 	case class DocumentCounts(document: String, count: Int)
 	case class SurfaceCounts(surfaceRepr: String, count: Int)

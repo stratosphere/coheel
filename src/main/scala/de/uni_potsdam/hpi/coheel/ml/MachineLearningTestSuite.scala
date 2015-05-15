@@ -2,6 +2,7 @@ package de.uni_potsdam.hpi.coheel.ml
 
 import java.io.File
 
+import de.uni_potsdam.hpi.coheel.util.Timer
 import weka.classifiers.bayes.NaiveBayes
 import weka.classifiers.{CostMatrix, Evaluation}
 import weka.classifiers.functions.{Logistic, MultilayerPerceptron, SMO, SimpleLogistic}
@@ -20,6 +21,13 @@ object MachineLearningTestSuite {
 
 	val CLASS_INDEX = 9
 
+
+	val removeFilter = {
+		val remove = new Remove
+		remove.setAttributeIndices("1")
+		remove
+	}
+
 	def main(args: Array[String]) = {
 		println("Reading.")
 		val r = new Random(21011991)
@@ -31,10 +39,11 @@ object MachineLearningTestSuite {
 		val randomOrder = r.shuffle(instanceGroups)
 
 		println("Building separate training and validation set.")
-		val fullTrainingInstances = buildInstances("train-full",
-			randomOrder.take(trainingRatio).flatten)
-		val fullTestInstances     = buildInstances("test-full",
-			randomOrder.drop(trainingRatio).flatten)
+		val training = randomOrder.take(trainingRatio)
+		val fullTrainingInstances = buildInstances("train-full", training.flatten)
+		removeFilter.setInputFormat(fullTrainingInstances)
+		val test = randomOrder.drop(trainingRatio)
+		val fullTestInstances     = buildInstances("test-full", test.flatten)
 
 		println("Use all instances")
 		println("=" * 80)
@@ -56,7 +65,13 @@ object MachineLearningTestSuite {
 		)
 		runWithInstances(oneSampleTrainingInstances, fullTestInstances)
 
-		// context size fix
+		println("Use all instances")
+		println("=" * 80)
+		runGroupWise(fullTrainingInstances, test)
+		println("Use only one negative example")
+		println("=" * 80)
+		runGroupWise(oneSampleTrainingInstances, test)
+
 		// missing values
 
 		// surface-link-at-all probability?
@@ -91,20 +106,65 @@ object MachineLearningTestSuite {
 	}
 
 	def runWithInstances(training: Instances, test: Instances): Unit = {
-		val remove = new Remove
-		remove.setAttributeIndices("1")
-		remove.setInputFormat(training)
-		Filter.useFilter(training, remove)
-		Filter.useFilter(test, remove)
+		val filteredTraining = Filter.useFilter(training, removeFilter)
 
 		classifiers.foreach { case (name, classifier) =>
 			println(name)
-			val evaluation = new Evaluation(training)
-			classifier.buildClassifier(training)
-			evaluation.evaluateModel(classifier, test)
+			val evaluation = new Evaluation(filteredTraining)
+			classifier.buildClassifier(filteredTraining)
+			evaluation.evaluateModel(classifier, Filter.useFilter(test, removeFilter))
 			System.out.println(f"P: ${evaluation.precision(1)}%.3f, R: ${evaluation.recall(1)}%.3f")
 		}
 		println("-" * 80)
+	}
+
+	def runGroupWise(training: Instances, test: ArrayBuffer[ArrayBuffer[Instance]]) =  {
+		val filteredTraining = Filter.useFilter(training, removeFilter)
+
+		classifiers.foreach { case (name, classifier) =>
+			val runtime = Timer.timeFunction {
+				classifier.buildClassifier(filteredTraining)
+			}
+			println(s"$name in ${runtime.toInt} ms")
+			var tp = 0
+			var fp = 0
+			var fn = 0
+			var tn = 0
+			test.foreach { group =>
+				var positiveCount = 0
+				var truePositiveCount = 0
+				var trueCount = 0
+
+				group.foreach { instance =>
+					val filteredInstance = { removeFilter.input(instance); removeFilter.batchFinished(); removeFilter.output() }
+					val result = classifier.classifyInstance(filteredInstance)
+					assert(filteredInstance.classValue() == filteredInstance.value(8))
+					if (result == 1.0) {
+						positiveCount += 1
+						if (filteredInstance.classValue == 1.0)
+							truePositiveCount += 1
+					}
+					if (filteredInstance.classValue == 1.0)
+						trueCount += 1
+				}
+
+				if (positiveCount == 1 && truePositiveCount == 1)
+					tp += 1
+				else if (positiveCount == 1 && truePositiveCount == 0)
+					fp += 1
+				else if (positiveCount != 1 && trueCount == 1)
+					fn += 1
+				else if (positiveCount == 0 && trueCount == 0)
+					tn += 1
+				else
+					throw new RuntimeException("Uncovered case!")
+			}
+			val precision = tp.toDouble / (tp + fp)
+			val recall    = tp.toDouble / (tp + fn)
+			System.out.println(f"P: $precision%.3f, R: $recall%.3f")
+		}
+		println("-" * 80)
+
 	}
 
 	val featureDefinition = {
@@ -126,7 +186,8 @@ object MachineLearningTestSuite {
 		attrs
 	}
 
-	val classifiers = {
+	def classifiers = {
+		println("----------- Rebuilding classifiers")
 		val simpleLogistic = new SimpleLogistic
 		simpleLogistic.setHeuristicStop(0)
 		simpleLogistic.setMaxBoostingIterations(1500)

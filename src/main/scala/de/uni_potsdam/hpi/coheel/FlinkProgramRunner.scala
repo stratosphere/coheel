@@ -3,6 +3,7 @@ package de.uni_potsdam.hpi.coheel
 import java.io.File
 
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
+import de.uni_potsdam.hpi.coheel.util.Timer
 import org.apache.commons.io.FileUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.ProgramDescription
@@ -95,7 +96,7 @@ object FlinkProgramRunner {
 		log.info("# " + StringUtils.rightPad(s"Free Memory: ${FreeMemory.get(true)} MB", 136) + " #")
 		log.info("# " + StringUtils.rightPad(s"Configuration Params: ${program.configurationParams}", 136) + " #")
 
-		time {
+		val runtime = Timer.timeFunction {
 			val env = if (config.getString("type") == "file") {
 				GlobalConfiguration.loadConfiguration("conf")
 				ExecutionEnvironment.createLocalEnvironment(1)
@@ -131,13 +132,6 @@ object FlinkProgramRunner {
 						println("Stopping .. Program has been canceled.")
 			}
 		}
-	}
-	def time[R](block: => R): Double = {
-		val start = System.nanoTime()
-		val result = block
-		val end = System.nanoTime()
-		val time = (end - start) / 1000 / 1000 / 1000
-		log.info("Took " + time + " s.")
-		time
+		println(s"Took ${runtime / 1000} s.")
 	}
 }

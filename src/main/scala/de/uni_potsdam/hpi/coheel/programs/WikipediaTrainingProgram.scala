@@ -50,28 +50,6 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 					}
 				}
 
-			def applySecondOrderFunctions(candidatesIt: Iterator[LinkWithScores],
-			                              out: Collector[(String, String, String, String, Double, Double, Double, Double, Double, Double, Double, Double, Boolean)]): Unit = {
-				val allCandidates = candidatesIt.toSeq
-				val promOrder = allCandidates.sortBy(-_.promScore)
-				val contextOrder = allCandidates.sortBy(-_.contextScore)
-				if (allCandidates.size > 1) {
-					val promRank       = SecondOrderFeatures.rank.apply(promOrder)(_.promScore)
-					val promDeltaTops  = SecondOrderFeatures.deltaTop.apply(promOrder)(_.promScore)
-					val promDeltaSuccs = SecondOrderFeatures.deltaSucc.apply(promOrder)(_.promScore)
-					val contextRank       = SecondOrderFeatures.rank.apply(contextOrder)(_.contextScore)
-					val contextDeltaTops  = SecondOrderFeatures.deltaTop.apply(contextOrder)(_.contextScore)
-					val contextDeltaSuccs = SecondOrderFeatures.deltaSucc.apply(contextOrder)(_.contextScore)
-
-					promOrder.zipWithIndex.foreach { case (candidate, i) =>
-						val positiveInstance = candidate.destination == candidate.candidateEntity
-						import candidate._
-						out.collect((id, surfaceRepr, source, candidateEntity, promScore, promRank(i), promDeltaTops(i), promDeltaSuccs(i),
-							contextScore, contextRank(i), contextDeltaTops(i), contextDeltaSuccs(i), positiveInstance))
-					}
-				}
-			}
-
 			val baseScores = linkCandidates.join(languageModels)
 				.where("candidateEntity")
 				.equalTo("pageTitle")
@@ -86,11 +64,11 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 						}.sum
 
 						import linkWithContext._
-						LinkWithScores(id, surfaceRepr, source, destination, candidateEntity, prob, contextProb)
+						LinkWithScores(fullId, surfaceRepr, source, destination, candidateEntity, prob, contextProb)
 				}
 			}
-			val scores = baseScores.groupBy("id", "source")
-			.reduceGroup(applySecondOrderFunctions _)
+			val scores = baseScores.groupBy("fullId")
+			.reduceGroup(applySecondOrderCoheelFunctions _)
 
 			scores.writeAsTsv(scoresPath)
 		} else {
@@ -237,5 +215,27 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 		documentWordCounts.writeAsTsv(documentWordCountsPath)
 
 		languageModels
+	}
+
+	def applySecondOrderCoheelFunctions(candidatesIt: Iterator[LinkWithScores],
+	                                    out: Collector[(String, String, String, String, Double, Double, Double, Double, Double, Double, Double, Double, Boolean)]): Unit = {
+		val allCandidates = candidatesIt.toSeq
+		val promOrder = allCandidates.sortBy(-_.promScore)
+		val contextOrder = allCandidates.sortBy(-_.contextScore)
+		if (allCandidates.size > 1) {
+			val promRank       = SecondOrderFeatures.rank.apply(promOrder)(_.promScore)
+			val promDeltaTops  = SecondOrderFeatures.deltaTop.apply(promOrder)(_.promScore)
+			val promDeltaSuccs = SecondOrderFeatures.deltaSucc.apply(promOrder)(_.promScore)
+			val contextRank       = SecondOrderFeatures.rank.apply(contextOrder)(_.contextScore)
+			val contextDeltaTops  = SecondOrderFeatures.deltaTop.apply(contextOrder)(_.contextScore)
+			val contextDeltaSuccs = SecondOrderFeatures.deltaSucc.apply(contextOrder)(_.contextScore)
+
+			promOrder.zipWithIndex.foreach { case (candidate, i) =>
+				val positiveInstance = candidate.destination == candidate.candidateEntity
+				import candidate._
+				out.collect((fullId, surfaceRepr, source, candidateEntity, promScore, promRank(i), promDeltaTops(i), promDeltaSuccs(i),
+					contextScore, contextRank(i), contextDeltaTops(i), contextDeltaSuccs(i), positiveInstance))
+			}
+		}
 	}
 }
