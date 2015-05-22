@@ -1,21 +1,38 @@
 package de.uni_potsdam.hpi.coheel.util
 
 import java.io.StringReader
-import edu.stanford.nlp.tagger.maxent.MaxentTagger
-import scala.collection.JavaConverters._
 
-object StanfordPosMain {
+import edu.stanford.nlp.tagger.maxent.MaxentTagger
+
+import scala.collection.JavaConverters._
+import scala.collection.mutable
+
+object StanfordPos {
+	val modelName = "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger"
+	val tagger = new MaxentTagger(modelName)
+
+	def tagPOS(s: String): mutable.Map[Int, String] = {
+		val sentences = MaxentTagger.tokenizeText(new StringReader(s)).asScala
+		val tags = mutable.Map[Int, String]()
+
+		sentences.foreach { sentence =>
+			val sentenceTags = tagger.tagSentence(sentence)
+			sentenceTags.asScala.foreach { tag =>
+				tags(tag.beginPosition()) = tag.tag()
+			}
+		}
+		tags
+	}
+
 	def main(args: Array[String]) {
 		val text = "Pierre Vinken, 61 years old, will join the board as a nonexecutive director Nov. 29.\n" +
 			"Mr. Vinken is chairman of Elsevier N.V., the Dutch publishing group.\n" +
 			"Rudolph Agnew, 55 years old and former chairman of Consolidated Gold Fields PLC, was named a director of this British industrial conglomerate.\n"
-		val modelName = "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger"
-		val tagger = new MaxentTagger(modelName)
-		println(tagger.getTags)
-		println("======================")
-		for (i <- 0 until tagger.numTags())
-			println(tagger.getTag(i))
-		println("======================")
+//		println(tagger.getTags)
+//		println("======================")
+//		for (i <- 0 until tagger.numTags())
+//			println(tagger.getTag(i))
+//		println("======================")
 		val textReader = new StringReader(text)
 		val sentences = MaxentTagger.tokenizeText(textReader)
 		sentences.asScala.foreach { sentence =>

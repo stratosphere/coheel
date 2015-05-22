@@ -17,10 +17,10 @@ object DataClasses {
 	 */
 	// Note: In contrast to InternalLink, this class does not contain a Node, because
 	// that should not be part of the interface of this class.
-	case class Link(surface: String, surfaceRepr: String, source: String, destination: String, id: Int = newId()) {
+	case class Link(surface: String, surfaceRepr: String, posTags: Vector[String], source: String, destination: String, id: Int = newId()) {
 		def fullId: String = s"$id-${MurmurHash3.stringHash(source).toLong - Int.MinValue}"
 	}
-	case class LinkWithContext(surface: String, surfaceRepr: String, source: String, destination: String, id: String, context: Array[String])
+	case class LinkWithContext(surface: String, surfaceRepr: String, posTags: Vector[String], source: String, destination: String, id: String, context: Array[String])
 	case class WordInDocument(document: String, word: String, count: Int)
 	case class LanguageModel(pageTitle: String, model: Map[String, Double])
 	case class WordCounts(word: WordInDocument, count: Int)

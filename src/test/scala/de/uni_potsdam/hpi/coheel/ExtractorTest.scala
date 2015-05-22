@@ -6,6 +6,7 @@ import org.scalatest.junit.JUnitRunner
 import de.uni_potsdam.hpi.coheel.wiki.{Extractor, WikiPageReader}
 import scala.io.Source
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
+import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
 class ExtractorTest extends FunSuite {
@@ -23,7 +24,7 @@ class ExtractorTest extends FunSuite {
 		extractor.extract()
 		println(extractor.rootNode)
 		println(extractor.getPlainText)
-		extractor.getLinks.values.toSeq
+		extractor.getLinks.asMapOfRanges().values().asScala.toSeq
 	}
 
 	val plainText: String = {

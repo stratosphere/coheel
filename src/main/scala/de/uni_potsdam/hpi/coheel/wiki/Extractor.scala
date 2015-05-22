@@ -1,6 +1,7 @@
 package de.uni_potsdam.hpi.coheel.wiki
 
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.Link
+import org.apache.flink.shaded.com.google.common.collect.TreeRangeMap
 import org.sweble.wikitext.engine.nodes.EngPage
 import org.sweble.wikitext.engine.utils.DefaultConfigEnWp
 import org.sweble.wikitext.parser.nodes._
@@ -35,7 +36,7 @@ class Extractor(val wikiPage: WikiPage, val surfaceRepr: String => String) {
 	/**
 	 * Returns a map from a plain text position to a link occuring at that position.
 	 */
-	def getLinks: mutable.Map[Int, Link] = {
+	def getLinks: TreeRangeMap[Integer, Link] = {
 		wikiTraversal.getLinkOffsets /* TODO: ++ extractAlternativeNames() */
 	}
 
@@ -173,7 +174,7 @@ class Extractor(val wikiPage: WikiPage, val surfaceRepr: String => String) {
 	 */
 	private def trimWhitespace(link: LinkWithNode): Option[LinkWithNode] = {
 		link.text = link.text.trim
-		while (link.text.startsWith("\"") && link.text.endsWith("\"") && link.text.size > 1)
+		while (link.text.startsWith("\"") && link.text.endsWith("\"") && link.text.length > 1)
 			link.text = link.text.drop(1).dropRight(1)
 		link.text = link.text.replace("\r\n", " ").replace('\n', ' ')
 		Some(link)
@@ -195,7 +196,7 @@ class Extractor(val wikiPage: WikiPage, val surfaceRepr: String => String) {
 	 * Translates an internal link to an link, that can be exposed to the user.
 	 */
 	private def toLink(link: LinkWithNode): Option[Link] = {
-		Some(Link(link.text, surfaceRepr(link.text), wikiPage.pageTitle, link.destination))
+		Some(Link(link.text, surfaceRepr(link.text), Vector(), wikiPage.pageTitle, link.destination))
 	}
 
 	/**

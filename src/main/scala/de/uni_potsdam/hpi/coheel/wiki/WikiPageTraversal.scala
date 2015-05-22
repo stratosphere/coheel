@@ -1,6 +1,7 @@
 package de.uni_potsdam.hpi.coheel.wiki
 
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.Link
+import org.apache.flink.shaded.com.google.common.collect.{Range, TreeRangeMap}
 import org.sweble.wikitext.parser.nodes._
 
 import scala.collection.JavaConversions._
@@ -21,17 +22,17 @@ case class NodeTraversalItem(node: WtNode, insideTemplateLevel: Int, ignoreText:
  * Indicator
  * We process the wiki page tree with a stack-based depth-first approach.
  * To now, when we finished traversing an template and all of it's subnodes,
- * we use class as a marker element.
+ * we use the following class as a marker element.
  */
 class WtTemplateClose extends WtInnerNode2(de.fau.cs.osr.ptk.common.ast.Uninitialized.X) { override def getChildNames = ??? }
 
 class WikiPageTraversal(protected val extractor: Extractor) {
 
 	val sb    = new StringBuilder
-	val linkOffsets = mutable.Map[Int, Link]()
+	val linkOffsets = TreeRangeMap.create[Integer, Link]()
 
 	def getPlainText: String = { sb.toString() }
-	def getLinkOffsets: mutable.Map[Int, Link] = { linkOffsets }
+	def getLinkOffsets: TreeRangeMap[Integer, Link] = { linkOffsets }
 
 	def traversePage(rootNode: WtNode): Unit = {
 		nodeIterator(rootNode) { nodeItem =>
@@ -51,7 +52,7 @@ class WikiPageTraversal(protected val extractor: Extractor) {
 		}
 	}
 
-	val templateBlackList = Seq("rp", "convert", "class", "ipa", "verify", "refimprove", "see also", "refn", "citation",
+	val templateBlackList = Seq("redirect", "rp", "convert", "class", "ipa", "verify", "refimprove", "see also", "refn", "citation",
 		"cite", "language", "iso ", "clarification", "clarify", "reflist", "refbegin")
 	// Private helper function to do depth-first search in the node tree
 	private def nodeIterator(startNode: WtNode)(nodeHandlerFunction: NodeTraversalItem => Unit): Unit = {
@@ -85,7 +86,7 @@ class WikiPageTraversal(protected val extractor: Extractor) {
 						aggregatedTemplateSource.clear()
 					case t: WtTemplate =>
 						// add a template end indicator first, then add all the template sub-nodes
-						// once we reach the template close again, we now we finished that template
+						// once we reach the template close again, we know we finished that template
 						nodeStack.push(NodeTraversalItem(new WtTemplateClose, insideTemplateLevel, ignoreText))
 						nodeStack.pushAll(node.iterator().toSeq.reverseMap(NodeTraversalItem(_, insideTemplateLevel + 1, ignoreText)))
 					case txt: WtText if insideTemplateLevel > 0 =>
@@ -139,11 +140,11 @@ class WikiPageTraversal(protected val extractor: Extractor) {
 
 	def visit(internalLink: WtInternalLink) {
 		val linkOption = extractor.extractPotentialLink(internalLink)
-		linkOption match {
-			case Some(link) =>
-				linkOffsets += (sb.length + 1 -> link)
-				write(link.surface)
-			case None =>
+		linkOption.foreach { link =>
+			val start = sb.length + 1
+			val range = Range.closedOpen(new Integer(start), new Integer(start + link.surface.length))
+			linkOffsets.put(range, link)
+			write(link.surface)
 		}
 	}
 

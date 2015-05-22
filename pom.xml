@@ -55,6 +55,13 @@
 			<artifactId>weka-stable</artifactId>
 			<version>3.6.12</version>
 		</dependency>
+		<!-- Guava for utilities like range map (good point for removing if space/dependency issues) -->
+		<!--There's a shaded guava dependency in Flink, we'll use that one for now.-->
+		<!--<dependency>-->
+			<!--<groupId>com.google.guava</groupId>-->
+			<!--<artifactId>guava</artifactId>-->
+			<!--<version>18.0</version>-->
+		<!--</dependency>-->
 		<!-- Sweble for wikitext parsing -->
 		<dependency>
 			<groupId>org.sweble.wikitext</groupId>
