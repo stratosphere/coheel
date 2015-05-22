@@ -14,7 +14,7 @@ import weka.filters.unsupervised.attribute.Remove
 
 import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
-import scala.util.Random
+import scala.util.{Success, Failure, Try, Random}
 
 
 object MachineLearningTestSuite {
@@ -125,49 +125,53 @@ object MachineLearningTestSuite {
 		val filteredTraining = Filter.useFilter(training, removeFilter)
 
 		classifiers.foreach { case (name, classifier) =>
-			val runtime = Timer.timeFunction {
+			val runtimeOption = Try(Timer.timeFunction {
 				classifier.buildClassifier(filteredTraining)
-			}
-			println(s"$name in ${runtime.toInt} ms")
-			var tp = 0
-			var fp = 0
-			var fn = 0
-			var tn = 0
-			test.foreach { group =>
-				var positiveCount = 0
-				var truePositiveCount = 0
-				var trueCount = 0
+			})
+			runtimeOption match {
+				case Failure(e) =>
+					println(s"$name failed with ${e.}")
+				case Success(runtime) =>
+					println(s"$name in ${runtime.toInt} ms")
+					var tp = 0
+					var fp = 0
+					var fn = 0
+					var tn = 0
+					test.foreach { group =>
+						var positiveCount = 0
+						var truePositiveCount = 0
+						var trueCount = 0
 
-				group.foreach { instance =>
-					val filteredInstance = { removeFilter.input(instance); removeFilter.batchFinished(); removeFilter.output() }
-					val result = classifier.classifyInstance(filteredInstance)
-					assert(filteredInstance.classValue() == filteredInstance.value(8))
-					if (result == 1.0) {
-						positiveCount += 1
-						if (filteredInstance.classValue == 1.0)
-							truePositiveCount += 1
+						group.foreach { instance =>
+							val filteredInstance = { removeFilter.input(instance); removeFilter.batchFinished(); removeFilter.output() }
+							val result = classifier.classifyInstance(filteredInstance)
+							assert(filteredInstance.classValue() == filteredInstance.value(8))
+							if (result == 1.0) {
+								positiveCount += 1
+								if (filteredInstance.classValue == 1.0)
+									truePositiveCount += 1
+							}
+							if (filteredInstance.classValue == 1.0)
+								trueCount += 1
+						}
+
+						if (positiveCount == 1 && truePositiveCount == 1)
+							tp += 1
+						else if (positiveCount == 1 && truePositiveCount == 0)
+							fp += 1
+						else if (positiveCount != 1 && trueCount == 1)
+							fn += 1
+						else if (positiveCount == 0 && trueCount == 0)
+							tn += 1
+						else
+							throw new RuntimeException("Uncovered case!")
 					}
-					if (filteredInstance.classValue == 1.0)
-						trueCount += 1
-				}
-
-				if (positiveCount == 1 && truePositiveCount == 1)
-					tp += 1
-				else if (positiveCount == 1 && truePositiveCount == 0)
-					fp += 1
-				else if (positiveCount != 1 && trueCount == 1)
-					fn += 1
-				else if (positiveCount == 0 && trueCount == 0)
-					tn += 1
-				else
-					throw new RuntimeException("Uncovered case!")
+					val precision = tp.toDouble / (tp + fp)
+					val recall    = tp.toDouble / (tp + fn)
+					System.out.println(f"P: $precision%.3f, R: $recall%.3f")
 			}
-			val precision = tp.toDouble / (tp + fp)
-			val recall    = tp.toDouble / (tp + fn)
-			System.out.println(f"P: $precision%.3f, R: $recall%.3f")
+			println("-" * 80)
 		}
-		println("-" * 80)
-
 	}
 
 	val featureDefinition = {
