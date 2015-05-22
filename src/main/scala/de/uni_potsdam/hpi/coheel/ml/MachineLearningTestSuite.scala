@@ -130,7 +130,7 @@ object MachineLearningTestSuite {
 			})
 			runtimeOption match {
 				case Failure(e) =>
-					println(s"$name failed with ${e.}")
+					println(s"$name failed with ${e.getMessage}")
 				case Success(runtime) =>
 					println(s"$name in ${runtime.toInt} ms")
 					var tp = 0
