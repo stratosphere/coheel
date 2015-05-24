@@ -109,30 +109,39 @@ object MachineLearningTestSuite {
 		val filteredTraining = Filter.useFilter(training, removeFilter)
 
 		classifiers.foreach { case (name, classifier) =>
-			val runtime = Timer.timeFunction {
+			val runtimeTry = Try(Timer.timeFunction {
 				classifier.buildClassifier(filteredTraining)
+			})
+			runtimeTry match {
+				case Failure(e) =>
+					println(s"$name failed with ${e.getMessage}")
+				case Success(runtime) =>
+					println(s"$name in ${msToMin(runtime.toInt)} min")
+					val evaluation = new Evaluation(filteredTraining)
+					classifier.buildClassifier(filteredTraining)
+					evaluation.evaluateModel(classifier, Filter.useFilter(test, removeFilter))
+					System.out.println(f"P: ${evaluation.precision(1)}%.3f, R: ${evaluation.recall(1)}%.3f")
 			}
-			println(s"$name in ${runtime.toInt} ms")
-			val evaluation = new Evaluation(filteredTraining)
-			classifier.buildClassifier(filteredTraining)
-			evaluation.evaluateModel(classifier, Filter.useFilter(test, removeFilter))
-			System.out.println(f"P: ${evaluation.precision(1)}%.3f, R: ${evaluation.recall(1)}%.3f")
 		}
 		println("-" * 80)
+	}
+
+	def msToMin(t: Int): Int = {
+		t / (1000 * 60)
 	}
 
 	def runGroupWise(training: Instances, test: ArrayBuffer[ArrayBuffer[Instance]]) =  {
 		val filteredTraining = Filter.useFilter(training, removeFilter)
 
 		classifiers.foreach { case (name, classifier) =>
-			val runtimeOption = Try(Timer.timeFunction {
+			val runtimeTry = Try(Timer.timeFunction {
 				classifier.buildClassifier(filteredTraining)
 			})
-			runtimeOption match {
+			runtimeTry match {
 				case Failure(e) =>
 					println(s"$name failed with ${e.getMessage}")
 				case Success(runtime) =>
-					println(s"$name in ${runtime.toInt} ms")
+					println(s"$name in ${msToMin(runtime.toInt)} min")
 					var tp = 0
 					var fp = 0
 					var fn = 0
