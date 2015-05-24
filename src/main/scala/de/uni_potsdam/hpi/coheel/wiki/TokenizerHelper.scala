@@ -49,11 +49,11 @@ object TokenizerHelper {
 
 		val posTags = StanfordPos.tagPOS(text)
 
+		var currentTokenArrayOffset = -1
 		tokenStream(text, STEMMING_DEFAULT) { (charTermAttribute, offsetAttribute, _, _) =>
 			// add latest token
 			tokens += charTermAttribute.toString
 
-			var currentTokenArrayOffset = -1
 			val startOffset = offsetAttribute.startOffset()
 			// check if we have some position information bundled with the current position
 			Option(positionInfo.getEntry(startOffset)) match {
@@ -74,10 +74,10 @@ object TokenizerHelper {
 							arrayOffsetToLink(currentTokenArrayOffset) = newLink
 						case None =>
 							// sometimes pos tags do not exist for all tokens, because lucene tokenization and stanford tokenization
-							// is different
+							// work different
 					}
 				case None =>
-					// reset the token array offset to indicate, that a link is over
+					// reset the token array offset to indicate that a link is over
 					currentTokenArrayOffset = -1
 			}
 		}
