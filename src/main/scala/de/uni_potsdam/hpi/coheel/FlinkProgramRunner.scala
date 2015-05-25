@@ -125,6 +125,7 @@ object FlinkProgramRunner {
 						println(acc)
 					}
 					log.info(s"Net runtime: ${result.getNetRuntime / 1000} s")
+					Timer.printAll()
 				}
 			} catch {
 				case e: ProgramInvocationException =>

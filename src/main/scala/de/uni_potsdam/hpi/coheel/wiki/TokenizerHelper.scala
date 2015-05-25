@@ -1,30 +1,39 @@
 package de.uni_potsdam.hpi.coheel.wiki
 
 import java.io.StringReader
+import java.util.regex.Pattern
 
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.Link
-import de.uni_potsdam.hpi.coheel.util.StanfordPos
+import de.uni_potsdam.hpi.coheel.util.{Timer, StanfordPos}
+import edu.stanford.nlp.ling.HasWord
+import edu.stanford.nlp.process.DocumentPreprocessor
+import edu.stanford.nlp.process.PTBTokenizer.PTBTokenizerFactory
+import edu.stanford.nlp.tagger.maxent.MaxentTagger
 import org.apache.flink.shaded.com.google.common.collect.TreeRangeMap
 import org.apache.lucene.analysis.en.PorterStemFilter
 import org.apache.lucene.analysis.standard.StandardAnalyzer
 import org.apache.lucene.analysis.tokenattributes.{CharTermAttribute, FlagsAttribute, OffsetAttribute, TypeAttribute}
 import org.apache.lucene.analysis.util.CharArraySet
 import org.apache.lucene.util.Version
+import org.tartarus.snowball.ext.PorterStemmer
+import scala.collection.JavaConverters._
 
 import scala.collection.mutable
-
 /**
  * Small wrapper around Lucene's tokenizing and stemming.
  */
 object TokenizerHelper {
 
 	val STEMMING_DEFAULT = true
+	val modelName = "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger"
+	val tagger = new MaxentTagger(modelName)
 
 	def tokenize(text: String): Array[String] = {
 		val tokens = mutable.ArrayBuffer[String]()
-		tokenStream(text, STEMMING_DEFAULT) { (charTermAttribute, posAttribute, typeAttribute, flagsAttribute) =>
-			tokens += charTermAttribute.toString
-
+		tokenStream(text, STEMMING_DEFAULT).foreach { sent =>
+			sent.asScala.foreach { token =>
+				tokens += token.word()
+			}
 		}
 		tokens.toArray
 	}
@@ -47,66 +56,68 @@ object TokenizerHelper {
 		val tokens = mutable.ArrayBuffer[String]()
 		val arrayOffsetToLink = mutable.Map[Int, Link]()
 
-		val posTags = StanfordPos.tagPOS(text)
+		var currentTokenArrayIndex = 0
+		var currentLink: Link = null
 
-		var currentTokenArrayOffset = -1
-		tokenStream(text, STEMMING_DEFAULT) { (charTermAttribute, offsetAttribute, _, _) =>
-			// add latest token
-			tokens += charTermAttribute.toString
+		val rawTokens = tokenStream(text, STEMMING_DEFAULT)
+		rawTokens.foreach { sent =>
+			val sentenceTags = StanfordPos.tagSentence(sent)
+			sentenceTags.foreach { token =>
+				tokens += token.word()
+				val startOffset = token.beginPosition()
+				// check if we have some position information bundled with the current position
+				Option(positionInfo.getEntry(startOffset)) match {
+					case Some(entry) =>
+						val range = entry.getKey
+						val link  = entry.getValue
+						// check, whether a new link started, then build a new offset, use old link offset otherwise
+						// last index in the tokens array is the index of the link in the new tokenized output array
+						if (currentLink == null || currentLink.fullId != link.fullId) {
+							currentTokenArrayIndex = tokens.size - 1
+							currentLink = link
+						}
 
-			val startOffset = offsetAttribute.startOffset()
-			// check if we have some position information bundled with the current position
-			Option(positionInfo.getEntry(startOffset)) match {
-				case Some(entry) =>
-					// check, whether a new link started, then build a new offset, use old link offset otherwise
-					// last index in the tokens array is the index of the link in the new tokenized output array
-					currentTokenArrayOffset = if (currentTokenArrayOffset == -1) tokens.size - 1 else currentTokenArrayOffset
-					val range = entry.getKey
-					val link  = entry.getValue
-					// check whether a pos tags exists for the current word in the link
-					posTags.get(startOffset) match {
-						case Some(newPosTag) =>
-							// build link with new pos tag
-							val newLink = link.copy(posTags = link.posTags :+ newPosTag)
-							// store it back in position info, so we accumulate all tags and ..
-							positionInfo.put(range, newLink)
-							// .. store it in the output
-							arrayOffsetToLink(currentTokenArrayOffset) = newLink
-						case None =>
-							// sometimes pos tags do not exist for all tokens, because lucene tokenization and stanford tokenization
-							// work different
-					}
-				case None =>
-					// reset the token array offset to indicate that a link is over
-					currentTokenArrayOffset = -1
+						val newPosTag = token.tag()
+
+						// build link with new pos tag
+						val newLink = link.copy(posTags = link.posTags :+ newPosTag)
+						// store it back in position info, so we accumulate all tags and ..
+						positionInfo.put(range, newLink)
+						// .. store it in the output
+						arrayOffsetToLink(currentTokenArrayIndex) = newLink
+					case None =>
+				}
 			}
 		}
 		(tokens.toArray, arrayOffsetToLink)
 	}
 
-	type TokenHandler = (CharTermAttribute, OffsetAttribute, TypeAttribute, FlagsAttribute) => Unit
+	val p = "\\p{Punct}+".r
+	private def tokenStream(text: String, stemming: Boolean): Iterator[java.util.List[HasWord]] = {
+		val textReader = new StringReader(text)
+		val stemmer = new PorterStemmer()
 
-	private def tokenStream(text: String, stemming: Boolean)(tokenHandler: TokenHandler): Unit = {
-		val analyzer = new StandardAnalyzer(Version.LUCENE_48, CharArraySet.EMPTY_SET)
-		// implemented following this guide:
-		// http://stackoverflow.com/questions/6334692/how-to-use-a-lucene-analyzer-to-tokenize-a-string
-		val tokenStream = if (stemming)
-			new PorterStemFilter(analyzer.tokenStream(null, new StringReader(text)))
-		else
-			analyzer.tokenStream(null, new StringReader(text))
-
-		tokenStream.reset()
-
-		val charTermAttribute = tokenStream.addAttribute(classOf[CharTermAttribute])
-		val offsetAttribute   = tokenStream.addAttribute(classOf[OffsetAttribute])
-		val typeAttribute     = tokenStream.addAttribute(classOf[TypeAttribute])
-		val flagAttribute     = tokenStream.addAttribute(classOf[FlagsAttribute])
-
-		while (tokenStream.incrementToken()) {
-			tokenHandler(charTermAttribute, offsetAttribute, typeAttribute, flagAttribute)
+		val prep = new DocumentPreprocessor(textReader)
+		val tokenizer = PTBTokenizerFactory.newCoreLabelTokenizerFactory("normalizeParentheses=false,normalizeOtherBrackets=false,untokenizable=noneKeep")
+		prep.setTokenizerFactory(tokenizer)
+		val sentences = prep.iterator().asScala
+		val stemmedSentences = sentences.map { sent =>
+			var i = 0
+			while (i < sent.size()) {
+				val token = sent.get(i)
+				stemmer.setCurrent(token.word())
+				stemmer.stem()
+				val stemmedWord = stemmer.getCurrent.toLowerCase.trim
+				if (p.unapplySeq(stemmedWord).isEmpty) {
+					token.setWord(stemmedWord)
+					i += 1
+				} else {
+					sent.remove(i)
+				}
+			}
+			sent
 		}
-		tokenStream.end()
-		tokenStream.close()
+		stemmedSentences
 	}
 
 }
