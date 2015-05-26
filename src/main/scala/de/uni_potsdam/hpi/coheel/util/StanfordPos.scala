@@ -40,11 +40,11 @@ object StanfordPos {
 		val text = "Pierre Vinken (61 years old) will join the board as a nonexecutive director Nov. 29.\n" +
 			"Mr. Vinken is chairman of Elsevier N.V., the Dutch publishing group.\n" +
 			"Rudolph Agnew, 55 years old and former chairman of Consolidated Gold Fields PLC, was named a director of this British industrial conglomerate.\n"
-//		println(tagger.getTags)
-//		println("======================")
-//		for (i <- 0 until tagger.numTags())
-//			println(tagger.getTag(i))
-//		println("======================")
+		println(tagger.getTags)
+		println("======================")
+		for (i <- 0 until tagger.numTags())
+			println(tagger.getTag(i))
+		println("======================")
 		val textReader = new StringReader(text)
 
 		val prep = new DocumentPreprocessor(textReader)

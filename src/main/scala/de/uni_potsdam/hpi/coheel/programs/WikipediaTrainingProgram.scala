@@ -46,7 +46,8 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 				.map { joinResult => joinResult match {
 					case (linkWithContext, (_, candidateEntity, prob)) =>
 						import linkWithContext._
-						LinkCandidate(id, surfaceRepr, source, destination, candidateEntity, prob, linkWithContext.context)
+						LinkCandidate(id, surfaceRepr, posTags.exists(_.startsWith("N")), posTags.exists(_.startsWith("V")),
+							source, destination, candidateEntity, prob, context)
 					}
 				}
 
@@ -54,17 +55,20 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 				.where("candidateEntity")
 				.equalTo("pageTitle")
 				.map { joinResult => joinResult match {
-					case (linkWithContext, languageModel) =>
+					case (linkCandidate, languageModel) =>
 						val modelSize = languageModel.model.size
-						val contextProb = linkWithContext.context.map { word =>
+						val contextProb = linkCandidate.context.map { word =>
 							Math.log(languageModel.model.get(word) match {
 								case Some(prob) => prob
 								case None => 1.0 / modelSize
 							})
 						}.sum
 
-						import linkWithContext._
-						LinkWithScores(fullId, surfaceRepr, source, destination, candidateEntity, prob, contextProb)
+						import linkCandidate._
+
+						val np = if (nounPhrase) 1.0 else 0.0
+						val vp = if (verbPhrase) 1.0 else 0.0
+						LinkWithScores(fullId, surfaceRepr, source, destination, candidateEntity, np, vp, prob, contextProb)
 				}
 			}
 			val scores = baseScores.groupBy("fullId")
@@ -159,7 +163,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 			.filter { wikiPage => wikiPage.isRedirect }
 			.map { wikiPage => (wikiPage.pageTitle, wikiPage.redirect) }
 
-		allPageLinks.map { link => (link.id, link.surfaceRepr, link.surface, link.source, link.destination) }.writeAsTsv(allLinksPath)
+		allPageLinks.map { link => (link.id, link.surfaceRepr, link.posTags.mkString(","), link.surface, link.source, link.destination) }.writeAsTsv(allLinksPath)
 		surfaceCountHistogram.writeAsTsv(surfaceCountHistogramPath)
 		surfaceProbs.writeAsTsv(surfaceProbsPath)
 		contextLinkProbabilities.writeAsTsv(contextLinkProbsPath)
@@ -217,8 +221,11 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 		languageModels
 	}
 
+	/**
+	 * @param candidatesIt All link candidates with scores (all LinkWithScore's have the same id).
+	 */
 	def applySecondOrderCoheelFunctions(candidatesIt: Iterator[LinkWithScores],
-	                                    out: Collector[(String, String, String, String, Double, Double, Double, Double, Double, Double, Double, Double, Boolean)]): Unit = {
+	                                    out: Collector[(String, String, String, String, Double, Double, Double, Double, Double, Double, Double, Double, Double, Double, Boolean)]): Unit = {
 		val allCandidates = candidatesIt.toSeq
 		val promOrder = allCandidates.sortBy(-_.promScore)
 		val contextOrder = allCandidates.sortBy(-_.contextScore)
@@ -233,7 +240,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 			promOrder.zipWithIndex.foreach { case (candidate, i) =>
 				val positiveInstance = candidate.destination == candidate.candidateEntity
 				import candidate._
-				out.collect((fullId, surfaceRepr, source, candidateEntity, promScore, promRank(i), promDeltaTops(i), promDeltaSuccs(i),
+				out.collect((fullId, surfaceRepr, source, candidateEntity, np, vp, promScore, promRank(i), promDeltaTops(i), promDeltaSuccs(i),
 					contextScore, contextRank(i), contextDeltaTops(i), contextDeltaSuccs(i), positiveInstance))
 			}
 		}

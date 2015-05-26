@@ -108,9 +108,9 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 		environment.readTextFile(plainTextsPath).name("Plain-Texts").flatMap { line =>
 			val split = line.split('\t')
 			// TODO: Change, once we only have plaintext files with 3 entries
-			if (split.size == 2)
+			if (split.length == 2)
 				Some(Plaintext(split(0), split(1), "\0"))
-			else if (split.size == 3)
+			else if (split.length == 3)
 				Some(Plaintext(split(0), split(1), split(2)))
 			else
 				None
@@ -121,13 +121,12 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 			.flatMap(new RichFlatMapFunction[String, String] {
 			override def flatMap(line: String, out: Collector[String]): Unit = {
 				val split = line.split('\t')
-				if (split.size == 3)
+				if (split.length == 3)
 					out.collect(split(0))
 				else {
 					log.warn(s"Discarding '${split.deep}' because split size not correct")
 					log.warn(line)
 				}
-
 			}
 		}).name("Parsed Surfaces")
 	}
