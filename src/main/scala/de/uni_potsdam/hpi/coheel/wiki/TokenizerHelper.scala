@@ -1,23 +1,16 @@
 package de.uni_potsdam.hpi.coheel.wiki
 
 import java.io.StringReader
-import java.util.regex.Pattern
 
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.Link
-import de.uni_potsdam.hpi.coheel.util.{Timer, StanfordPos}
-import edu.stanford.nlp.ling.HasWord
+import edu.stanford.nlp.ling.{CoreLabel, HasWord, TaggedWord}
 import edu.stanford.nlp.process.DocumentPreprocessor
 import edu.stanford.nlp.process.PTBTokenizer.PTBTokenizerFactory
 import edu.stanford.nlp.tagger.maxent.MaxentTagger
 import org.apache.flink.shaded.com.google.common.collect.TreeRangeMap
-import org.apache.lucene.analysis.en.PorterStemFilter
-import org.apache.lucene.analysis.standard.StandardAnalyzer
-import org.apache.lucene.analysis.tokenattributes.{CharTermAttribute, FlagsAttribute, OffsetAttribute, TypeAttribute}
-import org.apache.lucene.analysis.util.CharArraySet
-import org.apache.lucene.util.Version
 import org.tartarus.snowball.ext.PorterStemmer
-import scala.collection.JavaConverters._
 
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 /**
  * Small wrapper around Lucene's tokenizing and stemming.
@@ -49,47 +42,16 @@ object TokenizerHelper {
 	 * If before we knew that there was a link at position 63 in the text, we now know there is a link at
 	 * index 7 in the token array.
 	 */
-
-	var successfulPos = 0
-	var unsuccessfulPos = 0
-	def tokenizeWithPositionInfo(text: String, positionInfo: TreeRangeMap[Integer, Link]): (Array[String], mutable.Map[Int, Link]) = {
+	def tokenizeWithPositionInfo(text: String, positionInfo: TreeRangeMap[Integer, Link]): KeepLinkTokenizer = {
 		val tokens = mutable.ArrayBuffer[String]()
-		val arrayOffsetToLink = mutable.Map[Int, Link]()
 
-		var currentTokenArrayIndex = 0
-		var currentLink: Link = null
+		// method object for translating the link annotations in the full text to link annotations
+		// for each token
+		val tokenizer = new KeepLinkTokenizer(positionInfo, tagger)
 
 		val rawTokens = tokenStream(text, STEMMING_DEFAULT)
-		rawTokens.foreach { sent =>
-			val sentenceTags = StanfordPos.tagSentence(sent)
-			sentenceTags.foreach { token =>
-				tokens += token.word()
-				val startOffset = token.beginPosition()
-				// check if we have some position information bundled with the current position
-				Option(positionInfo.getEntry(startOffset)) match {
-					case Some(entry) =>
-						val range = entry.getKey
-						val link  = entry.getValue
-						// check, whether a new link started, then build a new offset, use old link offset otherwise
-						// last index in the tokens array is the index of the link in the new tokenized output array
-						if (currentLink == null || currentLink.fullId != link.fullId) {
-							currentTokenArrayIndex = tokens.size - 1
-							currentLink = link
-						}
-
-						val newPosTag = token.tag()
-
-						// build link with new pos tag
-						val newLink = link.copy(posTags = link.posTags :+ newPosTag)
-						// store it back in position info, so we accumulate all tags and ..
-						positionInfo.put(range, newLink)
-						// .. store it in the output
-						arrayOffsetToLink(currentTokenArrayIndex) = newLink
-					case None =>
-				}
-			}
-		}
-		(tokens.toArray, arrayOffsetToLink)
+		rawTokens.foreach(tokenizer.processSentence)
+		tokenizer
 	}
 
 	val p = "\\p{Punct}+".r
@@ -119,5 +81,4 @@ object TokenizerHelper {
 		}
 		stemmedSentences
 	}
-
 }

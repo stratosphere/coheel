@@ -70,9 +70,9 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 						val rawPlainText = extractor.getPlainText
 						// link text offsets tell, where the links start in the raw plain text
 						val linkTextOffsets = extractor.getLinks
-						val (plainText, linkOffsets) = TokenizerHelper.tokenizeWithPositionInfo(rawPlainText, linkTextOffsets)
-						val linksWithContext = linkOffsets.flatMap { case (position, link) =>
-							val contextOption = Util.extractContext(plainText, position, CONTEXT_SPREADING)
+						val tokenizerResult = TokenizerHelper.tokenizeWithPositionInfo(rawPlainText, linkTextOffsets)
+						val linksWithContext = tokenizerResult.getLinkPositions.flatMap { case (position, link) =>
+							val contextOption = Util.extractContext(tokenizerResult.getTokens, position, CONTEXT_SPREADING)
 							contextOption.map { context =>
 								import link._
 								LinkWithContext(surface, surfaceRepr, posTags, source, destination, fullId, context)
@@ -85,7 +85,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 //						}
 						wikiPage.source = ""
 						WikiPage(wikiPage.pageTitle, wikiPage.ns, wikiPage.redirect,
-							plainText, linksWithContext, wikiPage.isDisambiguation, wikiPage.isList)
+							tokenizerResult.getTokens, linksWithContext, wikiPage.isDisambiguation, wikiPage.isList)
 					} match {
 						case Success(parsedPage) =>
 							out.collect(parsedPage)

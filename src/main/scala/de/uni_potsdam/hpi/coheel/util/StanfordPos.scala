@@ -15,14 +15,6 @@ object StanfordPos {
 	val modelName = "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger"
 	val tagger = new MaxentTagger(modelName)
 
-	def tagSentence(s: java.util.List[HasWord]): mutable.Buffer[TaggedWord] = {
-//		tagger.tagSentence(s).asScala
-		s.asScala.map { word =>
-			val tw = new ling.TaggedWord(word.word(), "NP")
-			tw.setBeginPosition(word.asInstanceOf[CoreLabel].beginPosition())
-			tw
-		}
-	}
 	def tagPOS(s: String): mutable.Map[Int, String] = {
 		val sentences = MaxentTagger.tokenizeText(new StringReader(s)).asScala
 		val tags = mutable.Map[Int, String]()
