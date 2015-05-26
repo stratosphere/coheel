@@ -7,6 +7,7 @@ import de.uni_potsdam.hpi.coheel.io.{IteratorReader, WikiPageInputFormat}
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import de.uni_potsdam.hpi.coheel.util.Util
 import de.uni_potsdam.hpi.coheel.wiki.{Extractor, TokenizerHelper, WikiPage, WikiPageReader}
+import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.common.functions.{RichFlatMapFunction, RichMapPartitionFunction}
 import org.apache.flink.api.scala.{DataSet, ExecutionEnvironment, _}
@@ -129,6 +130,13 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 				}
 			}
 		}).name("Parsed Surfaces")
+	}
+	def getScores(): DataSet[(String, Array[String])] = {
+		environment.readTextFile(scoresPath).name("Scores")
+		.map { line =>
+			val values = line.split('\t')
+			(values(1), values)
+		}
 	}
 	def getSurfaceLinkProbs(subFile: String = ""): DataSet[(String, Float)] = {
 		environment.readTextFile(surfaceLinkProbsPath + subFile).name("Subset of Surfaces with Probabilities")

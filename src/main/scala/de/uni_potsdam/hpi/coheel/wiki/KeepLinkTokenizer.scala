@@ -1,6 +1,7 @@
 package de.uni_potsdam.hpi.coheel.wiki
 
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.Link
+import de.uni_potsdam.hpi.coheel.util.Timer
 import edu.stanford.nlp.ling.{CoreLabel, HasWord, TaggedWord}
 import edu.stanford.nlp.tagger.maxent.MaxentTagger
 import org.apache.flink.shaded.com.google.common.collect.TreeRangeMap
@@ -54,8 +55,9 @@ class KeepLinkTokenizer(positionInfo: TreeRangeMap[Integer, Link], tagger: Maxen
 
 	private def tagSentence(sent: java.util.List[HasWord]): mutable.Buffer[TaggedWord] = {
 //		Timer.start("TAGGING")
-//		tagger.tagSentence(s).asScala
+//		val ret = tagger.tagSentence(sent).asScala
 //		Timer.end("TAGGING")
+//		ret
 		sent.asScala.map { word =>
 			val tw = new TaggedWord(word.word(), "NP")
 			tw.setBeginPosition(word.asInstanceOf[CoreLabel].beginPosition())

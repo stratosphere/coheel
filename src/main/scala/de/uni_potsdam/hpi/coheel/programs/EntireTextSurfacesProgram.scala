@@ -25,6 +25,7 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 
 		val currentFile = if (runsOffline()) "" else s"/$param"
 		val surfaces = getSurfaces(currentFile)
+		val scores   = getScores()
 
 		val entireTextSurfaces = plainTexts
 			.flatMap(new FindEntireTextSurfacesFlatMap)
@@ -51,8 +52,20 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 			}
 		}.name("Surface-Link-Probs")
 
+		val newScores = surfaceLinkProbs.join(scores)
+			.where(0)
+			.equalTo(0)
+			.map { joinResult =>
+				joinResult match {
+					case ((_, _, _, surfaceLinkProb), (_, values)) =>
+						values.toList.take(4).mkString("\t") + s"\t$surfaceLinkProb\t" + values.drop(4).mkString("\t")
+				}
+
+			}
+
 		entireTextSurfaces.writeAsTsv(entireTextSurfacesPath + currentFile)
 		surfaceLinkProbs.writeAsTsv(surfaceLinkProbsPath + currentFile)
+		newScores.writeAsText(newScoresPath + currentFile)
 	}
 }
 class FindEntireTextSurfacesFlatMap extends RichFlatMapFunction[Plaintext, EntireTextSurfaces] {
