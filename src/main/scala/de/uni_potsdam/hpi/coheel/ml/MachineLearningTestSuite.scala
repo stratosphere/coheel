@@ -218,7 +218,7 @@ object MachineLearningTestSuite {
 			new Logistic,
 			new J48,
 			new SimpleLogistic,
-			simpleLogistic,
+//			simpleLogistic,
 			new MultilayerPerceptron,
 			nb1,
 			nb2,
