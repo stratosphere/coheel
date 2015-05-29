@@ -42,15 +42,13 @@ object TokenizerHelper {
 	 * If before we knew that there was a link at position 63 in the text, we now know there is a link at
 	 * index 7 in the token array.
 	 */
-	def tokenizeWithPositionInfo(text: String, positionInfo: TreeRangeMap[Integer, Link]): KeepLinkTokenizer = {
-		val tokens = mutable.ArrayBuffer[String]()
-
+	def tokenizeWithPositionInfo(text: String, positionInfo: TreeRangeMap[Integer, Link], usePos: Boolean): KeepLinkTokenizer = {
 		// method object for translating the link annotations in the full text to link annotations
 		// for each token
 		val tokenizer = new KeepLinkTokenizer(positionInfo, tagger)
 
 		val rawTokens = tokenStream(text, STEMMING_DEFAULT)
-		rawTokens.foreach(tokenizer.processSentence)
+		rawTokens.foreach(tokenizer.processSentence(_, usePos))
 		tokenizer
 	}
 

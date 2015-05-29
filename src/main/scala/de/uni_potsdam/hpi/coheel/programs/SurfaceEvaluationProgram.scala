@@ -60,7 +60,7 @@ class SurfaceEvaluationProgram extends CoheelProgram[Int] {
 
 		val surfaceEvaluationPerDocument = plainTexts
 			.flatMap(new SurfaceEvaluationFlatMap)
-			.withBroadcastSet(surfaceLinkProbs, EntireTextSurfacesProgram.BROADCAST_SURFACES)
+			.withBroadcastSet(surfaceLinkProbs, SurfacesInTrieFlatMap.BROADCAST_SURFACES)
 			.name("Surface-Evaluation-Per-Document")
 
 		val evaluations = surfaceEvaluationPerDocument.map(_._2)
@@ -117,7 +117,7 @@ class SurfaceEvaluationFlatMap extends RichFlatMapFunction[Plaintext, (String, E
 	var trie: NewTrie = _
 
 	override def open(params: Configuration): Unit = {
-		trie = getRuntimeContext.getBroadcastVariableWithInitializer(EntireTextSurfacesProgram.BROADCAST_SURFACES, new TrieWithProbBroadcastInitializer)
+		trie = getRuntimeContext.getBroadcastVariableWithInitializer(SurfacesInTrieFlatMap.BROADCAST_SURFACES, new TrieWithProbBroadcastInitializer)
 	}
 	override def flatMap(plainText: Plaintext, out: Collector[(String, Evaluation)]): Unit = {
 		// determine the actual surfaces, from the real wikipedia article

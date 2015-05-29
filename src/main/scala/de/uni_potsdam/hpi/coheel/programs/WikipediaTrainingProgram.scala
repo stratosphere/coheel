@@ -28,53 +28,10 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 	 * @param env Flink execution environment.
 	 */
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
-		val wikiPages = getWikiPages
+		val wikiPages = getWikiPages(useContext = false, usePos = false)
 		if (!configurationParams.contains(ConfigurationParams.ONLY_WIKIPAGES)) {
-			val (surfaceProbs, redirects) = buildLinkPlans(wikiPages)
-			val languageModels = buildLanguageModelPlan(wikiPages)
-
-			val linksWithContext = wikiPages.flatMap { wikiPage =>
-				if (wikiPage.pageTitle.hashCode % SAMPLE_FRACTION == 0)
-					wikiPage.links
-				else
-					Nil
-			}
-
-			val linkCandidates = linksWithContext.join(surfaceProbs)
-				.where { linkWithContext => linkWithContext.surfaceRepr }
-				.equalTo { surfaceProb => surfaceProb._1 }
-				.map { joinResult => joinResult match {
-					case (linkWithContext, (_, candidateEntity, prob)) =>
-						import linkWithContext._
-						LinkCandidate(id, surfaceRepr, posTags.exists(_.startsWith("N")), posTags.exists(_.startsWith("V")),
-							source, destination, candidateEntity, prob, context)
-					}
-				}
-
-			val baseScores = linkCandidates.join(languageModels)
-				.where("candidateEntity")
-				.equalTo("pageTitle")
-				.map { joinResult => joinResult match {
-					case (linkCandidate, languageModel) =>
-						val modelSize = languageModel.model.size
-						val contextProb = linkCandidate.context.map { word =>
-							Math.log(languageModel.model.get(word) match {
-								case Some(prob) => prob
-								case None => 1.0 / modelSize
-							})
-						}.sum
-
-						import linkCandidate._
-
-						val np = if (nounPhrase) 1.0 else 0.0
-						val vp = if (verbPhrase) 1.0 else 0.0
-						LinkWithScores(fullId, surfaceRepr, source, destination, candidateEntity, np, vp, prob, contextProb)
-				}
-			}
-			val scores = baseScores.groupBy("fullId")
-			.reduceGroup(applySecondOrderCoheelFunctions _)
-
-			scores.writeAsTsv(scoresPath)
+			buildLinkPlans(wikiPages)
+			buildLanguageModelPlan(wikiPages)
 		} else {
 			wikiPages.map { wikiPage =>
 				(wikiPage.pageTitle, wikiPage.isDisambiguation, wikiPage.isList, wikiPage.isRedirect, wikiPage.ns, if (wikiPage.isNormalPage) "normal" else "special")

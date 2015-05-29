@@ -52,7 +52,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 		buildProgram(env, param)
 	}
 
-	def getWikiPages: DataSet[WikiPage] = {
+	def getWikiPages(useContext: Boolean, usePos: Boolean): DataSet[WikiPage] = {
 		val input = environment.readFile(new WikiPageInputFormat, wikipediaFilesPath)
 
 		input.mapPartition(new RichMapPartitionFunction[String, WikiPage] {
@@ -60,8 +60,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 				val reader = new IteratorReader(List("<foo>").iterator ++ linesIt.iterator.asScala ++ List("</foo>").iterator)
 				val wikiPages = new WikiPageReader().xmlToWikiPages(reader)
 				val filteredWikiPages = wikiPages.filter { page =>
-					val filter = page.ns == 0 && page.source.nonEmpty
-					filter
+					page.ns == 0 && page.source.nonEmpty
 				}
 				filteredWikiPages.foreach { wikiPage =>
 					val CONTEXT_SPREADING = 25
@@ -71,9 +70,12 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 						val rawPlainText = extractor.getPlainText
 						// link text offsets tell, where the links start in the raw plain text
 						val linkTextOffsets = extractor.getLinks
-						val tokenizerResult = TokenizerHelper.tokenizeWithPositionInfo(rawPlainText, linkTextOffsets)
+						val tokenizerResult = TokenizerHelper.tokenizeWithPositionInfo(rawPlainText, linkTextOffsets, usePos)
 						val linksWithContext = tokenizerResult.getLinkPositions.flatMap { case (position, link) =>
-							val contextOption = Util.extractContext(tokenizerResult.getTokens, position, CONTEXT_SPREADING)
+							val contextOption = if (useContext)
+								Util.extractContext(tokenizerResult.getTokens, position, CONTEXT_SPREADING)
+							else
+								Some(Array[String]())
 							contextOption.map { context =>
 								import link._
 								LinkWithContext(surface, surfaceRepr, posTags, source, destination, fullId, context)
@@ -131,13 +133,13 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 			}
 		}).name("Parsed Surfaces")
 	}
-	def getScores(): DataSet[(String, Array[String])] = {
-		environment.readTextFile(scoresPath).name("Scores")
-		.map { line =>
-			val values = line.split('\t')
-			(values(1), values)
-		}
-	}
+//	def getScores(): DataSet[(String, Array[String])] = {
+//		environment.readTextFile(scoresPath).name("Scores")
+//		.map { line =>
+//			val values = line.split('\t')
+//			(values(1), values)
+//		}
+//	}
 	def getSurfaceLinkProbs(subFile: String = ""): DataSet[(String, Float)] = {
 		environment.readTextFile(surfaceLinkProbsPath + subFile).name("Subset of Surfaces with Probabilities")
 			.flatMap(new RichFlatMapFunction[String, (String, Float)] {

@@ -24,9 +24,9 @@ class KeepLinkTokenizer(positionInfo: TreeRangeMap[Integer, Link], tagger: Maxen
 	// currentLink stores the last link we saw
 	private var currentLink: Link = null
 
-	def processSentence(sent: java.util.List[HasWord]): Unit = {
+	def processSentence(sent: java.util.List[HasWord], usePos: Boolean): Unit = {
 		// TODO: Only tokenize if necessary.
-		val sentenceTags = tagSentence(sent)
+		val sentenceTags = tagSentence(sent, usePos)
 		sentenceTags.foreach(processToken)
 	}
 	private def processToken(token: TaggedWord): Unit = {
@@ -53,15 +53,18 @@ class KeepLinkTokenizer(positionInfo: TreeRangeMap[Integer, Link], tagger: Maxen
 		}
 	}
 
-	private def tagSentence(sent: java.util.List[HasWord]): mutable.Buffer[TaggedWord] = {
-//		Timer.start("TAGGING")
-//		val ret = tagger.tagSentence(sent).asScala
-//		Timer.end("TAGGING")
-//		ret
-		sent.asScala.map { word =>
-			val tw = new TaggedWord(word.word(), "NP")
-			tw.setBeginPosition(word.asInstanceOf[CoreLabel].beginPosition())
-			tw
+	private def tagSentence(sent: java.util.List[HasWord], usePos: Boolean): mutable.Buffer[TaggedWord] = {
+		if (usePos) {
+			Timer.start("TAGGING")
+			val ret = tagger.tagSentence(sent).asScala
+			Timer.end("TAGGING")
+			ret
+		} else {
+			sent.asScala.map { word =>
+				val tw = new TaggedWord(word.word(), "NP")
+				tw.setBeginPosition(word.asInstanceOf[CoreLabel].beginPosition())
+				tw
+			}
 		}
 	}
 

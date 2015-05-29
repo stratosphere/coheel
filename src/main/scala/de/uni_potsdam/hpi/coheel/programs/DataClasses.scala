@@ -49,6 +49,9 @@ object DataClasses {
 	// Classification
 	case class SurfaceProb(surface: String, destination: String, prob: Double)
 
+	// Training
+	case class TrainingData(fullId: String, surfaceRepr: String, source: String, candidateEntity: String, features: Array[Double])
+
 	var currentId = 0
 	def newId(): Int = {
 		currentId += 1
