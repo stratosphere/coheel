@@ -182,7 +182,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 	def getSurfaceProbs(threshold: Double = 0.0): DataSet[SurfaceProb] = {
 		environment.readTextFile(surfaceProbsPath).flatMap { line =>
 			val split = line.split('\t')
-			if (split.size > 1) {
+			if (split.length > 1) {
 				val tokens = split(0).split(' ')
 				if (tokens.nonEmpty) {
 					val prob = split(2).toDouble
