@@ -33,6 +33,7 @@ object FlinkProgramRunner {
 	val programs = ListMap(
 		"extract-main" -> classOf[WikipediaTrainingProgram]
 		, "entire-text-surfaces" -> classOf[EntireTextSurfacesProgram]
+		, "training-data" -> classOf[TrainingDataProgram]
 		, "surface-evaluation" -> classOf[SurfaceEvaluationProgram]
 		, "classification" -> classOf[ClassificationProgram]
 		, "redirects" -> classOf[RedirectResolvingProgram]

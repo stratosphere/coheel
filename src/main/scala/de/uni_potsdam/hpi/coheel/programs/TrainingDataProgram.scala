@@ -7,13 +7,17 @@ import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import org.apache.flink.util.Collector
 import org.apache.flink.api.scala._
 
+class TrainingDataProgram extends CoheelProgram[Int] with Serializable {
 
-class TrainingDataProgram extends CoheelProgram[Int] {
+	val SAMPLE_FRACTION = if (runsOffline()) 100 else 10000
+
 	val params = if (runsOffline()) List(-1) else 1 to 10
 	override def getDescription = "Wikipedia Extraction: Build training data"
 
 	override def buildProgram(env: ExecutionEnvironment, param: Int): Unit = {
-		val wikiPages = getWikiPages(useContext = true, usePos = true)
+		val wikiPages = getWikiPages(useContext = true, usePos = true, { wikiPage =>
+			wikiPage.pageTitle.hashCode % SAMPLE_FRACTION == 0
+		})
 
 		val currentFile = if (runsOffline()) "" else s"/$param"
 		val surfaces    = getSurfaces(currentFile)
@@ -28,23 +32,16 @@ class TrainingDataProgram extends CoheelProgram[Int] {
 //			}
 //		}
 
-//		val trainingData = plainTexts
-//			.flatMap(new FindEntireTextSurfacesFlatMap)
-//			.withBroadcastSet(surfaces, SurfacesInTrieFlatMap.BROADCAST_SURFACES)
-//			.name("Entire-Text-Surfaces-Along-With-Document")
-//
-//		trainingData.writeAsText(trainingDataPath)
+		val trainingData = wikiPages
+			.flatMap(new TrainingDataFlatMap)
+			.withBroadcastSet(surfaces, SurfacesInTrieFlatMap.BROADCAST_SURFACES)
+			.name("Training-Data")
+
+		trainingData.writeAsText(trainingDataPath)
 	}
 
 
 	def foo(): Unit = {
-//		val linksWithContext = wikiPages.flatMap { wikiPage =>
-//			if (wikiPage.pageTitle.hashCode % SAMPLE_FRACTION == 0)
-//				wikiPage.links
-//			else
-//				Nil
-//		}
-//
 //		val linkCandidates = linksWithContext.join(surfaceProbs)
 //			.where { linkWithContext => linkWithContext.surfaceRepr }
 //			.equalTo { surfaceProb => surfaceProb._1 }
@@ -86,6 +83,10 @@ class TrainingDataProgram extends CoheelProgram[Int] {
 
 class TrainingDataFlatMap extends SurfacesInTrieFlatMap[WikiPage, TrainingData] {
 	override def flatMap(wikiPage: WikiPage, out: Collector[TrainingData]): Unit = {
+		val hits = trie.findAllInWithTrieHit(wikiPage.plainText)
+		hits.foreach { hit =>
+			println(hit)
+		}
 
 	}
 }

@@ -176,15 +176,18 @@ class NewTrie extends Trie {
 	}
 
 	def findAllIn(tokens: Array[String]): Iterator[String] = {
-		new FindAllInIterator(rootNode, tokens, { (s: String, p: Float ) => s })
+		new FindAllInIterator(rootNode, tokens, { t: TrieHit => t.s })
 	}
-
+	def findAllInWithTrieHit(tokens: Array[String]): Iterator[TrieHit] = {
+		new FindAllInIterator(rootNode, tokens, identity)
+	}
 	def findAllInWithProbs(text: String): Iterator[(String, Float)] = {
 		findAllInWithProbs(text.split(' '))
 	}
 	def findAllInWithProbs(tokens: Array[String]): Iterator[(String, Float)] = {
-		new FindAllInIterator(rootNode, tokens, { (s: String, p: Float) => (s, p) })
+		new FindAllInIterator(rootNode, tokens, { t: TrieHit => (t.s, t.prob) })
 	}
+
 
 	override def toString: String = {
 		val nodeStack = mutable.Stack[(Int, String, NewTrieNode, Float)]()
@@ -210,13 +213,14 @@ class NewTrie extends Trie {
 
 }
 
-class FindAllInIterator[T](rootNode: MapNewTrieNode, tokens: Array[String], fun: (String, Float) => T) extends Iterator[T] {
+case class TrieHit(s: String, prob: Float, startIndex: Int, offset: Int)
+class FindAllInIterator[T](rootNode: MapNewTrieNode, tokens: Array[String], fun: TrieHit => T) extends Iterator[T] {
 
 	val alreadySeen = mutable.Set[String]()
 	var startIndex = 0
 	var indexOffset = 0
 	var hasNextCalled = false
-	val tokenSize = tokens.size
+	val tokenSize = tokens.length
 
 	def currentIndex = startIndex + indexOffset
 
@@ -263,7 +267,7 @@ class FindAllInIterator[T](rootNode: MapNewTrieNode, tokens: Array[String], fun:
 		hasNextCalled = false
 		val res = buildCurrentTokenString()
 		alreadySeen += res
-		fun(res, currentProb)
+		fun(TrieHit(res, currentProb, startIndex, indexOffset))
 	}
 
 	private def buildCurrentTokenString(): String = {

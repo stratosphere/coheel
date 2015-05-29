@@ -52,7 +52,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 		buildProgram(env, param)
 	}
 
-	def getWikiPages(useContext: Boolean, usePos: Boolean): DataSet[WikiPage] = {
+	def getWikiPages(useContext: Boolean, usePos: Boolean, pageFilter: WikiPage => Boolean = _ => true): DataSet[WikiPage] = {
 		val input = environment.readFile(new WikiPageInputFormat, wikipediaFilesPath)
 
 		input.mapPartition(new RichMapPartitionFunction[String, WikiPage] {
@@ -60,7 +60,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 				val reader = new IteratorReader(List("<foo>").iterator ++ linesIt.iterator.asScala ++ List("</foo>").iterator)
 				val wikiPages = new WikiPageReader().xmlToWikiPages(reader)
 				val filteredWikiPages = wikiPages.filter { page =>
-					page.ns == 0 && page.source.nonEmpty
+					page.ns == 0 && page.source.nonEmpty && pageFilter(page)
 				}
 				filteredWikiPages.foreach { wikiPage =>
 					val CONTEXT_SPREADING = 25
