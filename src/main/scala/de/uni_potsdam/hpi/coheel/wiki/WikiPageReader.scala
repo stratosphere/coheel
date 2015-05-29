@@ -5,6 +5,7 @@ import javax.xml.stream.{XMLStreamConstants, XMLInputFactory}
 import org.apache.commons.lang3.StringEscapeUtils
 import org.apache.log4j.Logger
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
+import scala.collection.mutable
 
 /**
  * Captures the important aspects of a WikiPage for our use case, while still
@@ -30,7 +31,7 @@ import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 case class WikiPage(pageTitle: String,
                     ns: Int, redirect: String,
                     plainText: Array[String],
-                    links: Array[LinkWithContext],
+                    links: Array[Link],
 	                isDisambiguation: Boolean,
 	                isList: Boolean) {
 
@@ -41,6 +42,13 @@ case class WikiPage(pageTitle: String,
 		!isDisambiguation && !isRedirect && !isList
 	}
 }
+case class FullInfoWikiPage(pageTitle: String,
+                    ns: Int, redirect: String,
+                    plainText: mutable.ArrayBuffer[String],
+                    tags: mutable.ArrayBuffer[String],
+                    links: Array[Link],
+                    isDisambiguation: Boolean,
+                    isList: Boolean)
 
 object WikiPage {
 

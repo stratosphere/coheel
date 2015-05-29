@@ -1,7 +1,7 @@
 package de.uni_potsdam.hpi.coheel.programs
 
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{EntireTextSurfaceCounts, TrainingData}
-import de.uni_potsdam.hpi.coheel.wiki.WikiPage
+import de.uni_potsdam.hpi.coheel.wiki.{FullInfoWikiPage, WikiPage}
 import org.apache.flink.api.scala.ExecutionEnvironment
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import org.apache.flink.util.Collector
@@ -15,9 +15,9 @@ class TrainingDataProgram extends CoheelProgram[Int] with Serializable {
 	override def getDescription = "Wikipedia Extraction: Build training data"
 
 	override def buildProgram(env: ExecutionEnvironment, param: Int): Unit = {
-		val wikiPages = getWikiPages(useContext = true, usePos = true, { wikiPage =>
+		val wikiPages = getWikiPagesWithFullInfo { wikiPage =>
 			wikiPage.pageTitle.hashCode % SAMPLE_FRACTION == 0
-		})
+		}
 
 		val currentFile = if (runsOffline()) "" else s"/$param"
 		val surfaces    = getSurfaces(currentFile)
@@ -77,13 +77,18 @@ class TrainingDataProgram extends CoheelProgram[Int] with Serializable {
 //			.reduceGroup(applySecondOrderCoheelFunctions _)
 //
 //		trainingData.writeAsTsv(trainingDataPath)
+
+
+//			val CONTEXT_SPREADING = 25
+//			val contextOption =  Util.extractContext(tokenizerResult.getTokens, position, CONTEXT_SPREADING)
+
 	}
 }
 
 
-class TrainingDataFlatMap extends SurfacesInTrieFlatMap[WikiPage, TrainingData] {
-	override def flatMap(wikiPage: WikiPage, out: Collector[TrainingData]): Unit = {
-		val hits = trie.findAllInWithTrieHit(wikiPage.plainText)
+class TrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage, TrainingData] {
+	override def flatMap(wikiPage: FullInfoWikiPage, out: Collector[TrainingData]): Unit = {
+		val hits = trie.findAllInWithTrieHit(wikiPage.plainText.toArray)
 		hits.foreach { hit =>
 			println(hit)
 		}

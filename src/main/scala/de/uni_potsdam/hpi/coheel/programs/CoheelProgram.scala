@@ -1,23 +1,22 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import java.lang.Iterable
-
 import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
+import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.io.{IteratorReader, WikiPageInputFormat}
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import de.uni_potsdam.hpi.coheel.util.Util
-import de.uni_potsdam.hpi.coheel.wiki.{Extractor, TokenizerHelper, WikiPage, WikiPageReader}
-import org.apache.commons.lang3.StringUtils
+import de.uni_potsdam.hpi.coheel.wiki._
 import org.apache.flink.api.common.ProgramDescription
-import org.apache.flink.api.common.functions.{RichFlatMapFunction, RichMapPartitionFunction}
-import org.apache.flink.api.scala.{DataSet, ExecutionEnvironment, _}
+import org.apache.flink.api.common.functions.RichFlatMapFunction
+import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.api.scala._
 import org.apache.flink.core.fs.Path
 import org.apache.flink.core.fs.local.LocalFileSystem
 import org.apache.flink.util.Collector
 import org.apache.log4j.Logger
-import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 
 import scala.collection.JavaConverters._
+import scala.reflect.ClassTag
 import scala.util.{Failure, Success, Try}
 
 object CoheelLogger {
@@ -52,54 +51,56 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 		buildProgram(env, param)
 	}
 
-	def getWikiPages(useContext: Boolean, usePos: Boolean, pageFilter: WikiPage => Boolean = _ => true): DataSet[WikiPage] = {
-		val input = environment.readFile(new WikiPageInputFormat, wikipediaFilesPath)
-
-		input.mapPartition(new RichMapPartitionFunction[String, WikiPage] {
-			override def mapPartition(linesIt: Iterable[String], out: Collector[WikiPage]): Unit = {
-				val reader = new IteratorReader(List("<foo>").iterator ++ linesIt.iterator.asScala ++ List("</foo>").iterator)
-				val wikiPages = new WikiPageReader().xmlToWikiPages(reader)
-				val filteredWikiPages = wikiPages.filter { page =>
-					page.ns == 0 && page.source.nonEmpty && pageFilter(page)
-				}
-				filteredWikiPages.foreach { wikiPage =>
-					val CONTEXT_SPREADING = 25
-					Try {
-						val extractor = new Extractor(wikiPage, s => TokenizerHelper.tokenize(s).mkString(" ") )
-						extractor.extract()
-						val rawPlainText = extractor.getPlainText
-						// link text offsets tell, where the links start in the raw plain text
-						val linkTextOffsets = extractor.getLinks
-						val tokenizerResult = TokenizerHelper.tokenizeWithPositionInfo(rawPlainText, linkTextOffsets, usePos)
-						val linksWithContext = tokenizerResult.getLinkPositions.flatMap { case (position, link) =>
-							val contextOption = if (useContext)
-								Util.extractContext(tokenizerResult.getTokens, position, CONTEXT_SPREADING)
-							else
-								Some(Array[String]())
-							contextOption.map { context =>
-								import link._
-								LinkWithContext(surface, surfaceRepr, posTags, source, destination, fullId, context)
-							}
-						}.toArray
-//						linkOffsets.foreach { case (linkOffset, link) =>
-//							val textFromLink = link.surfaceRepr.split(' ')(0)
-//							val textFromPlainText = plainText(linkOffset)
-//							assert(textFromLink == textFromPlainText)
-//						}
-						wikiPage.source = ""
-						WikiPage(wikiPage.pageTitle, wikiPage.ns, wikiPage.redirect,
-							tokenizerResult.getTokens, linksWithContext, wikiPage.isDisambiguation, wikiPage.isList)
-					} match {
-						case Success(parsedPage) =>
-							out.collect(parsedPage)
-						case Failure(e) =>
-							log.error(s"Discarding ${wikiPage.pageTitle} because of ${e.getClass.getSimpleName} (${e.getMessage.replace('\n', ' ')})")
-//							log.warn(e.getStackTraceString)
-					}
+	private lazy val wikiInput = environment.readFile(new WikiPageInputFormat, wikipediaFilesPath)
+	private def readWikiPages[S : TypeInformation : ClassTag](fun: Extractor => S, pageFilter: WikiPage => Boolean = _ => true): DataSet[S] = {
+		wikiInput.mapPartition { (linesIt: Iterator[String], out: Collector[S]) =>
+			val reader = new IteratorReader(List("<foo>").iterator ++ linesIt ++ List("</foo>").iterator)
+			val wikiPages = new WikiPageReader().xmlToWikiPages(reader)
+			val filteredWikiPages = wikiPages.filter { page =>
+				page.ns == 0 && page.source.nonEmpty
+			}
+			filteredWikiPages.foreach { wikiPage =>
+				Try {
+					val extractor = new Extractor(wikiPage, s => TokenizerHelper.tokenize(s).mkString(" ") )
+					extractor.extract()
+					fun(extractor)
+				} match {
+					case Success(parsedPage) =>
+						out.collect(parsedPage)
+					case Failure(e) =>
+						log.error(s"Discarding ${wikiPage.pageTitle} because of ${e.getClass.getSimpleName} (${e.getMessage.replace('\n', ' ')})")
+//						log.warn(e.getStackTraceString)
 				}
 			}
-		}).name("Wiki-Pages")
+		}
 	}
+
+	def getWikiPages: DataSet[WikiPage] = {
+		readWikiPages { extractor =>
+			val wikiPage = extractor.wikiPage
+			val rawPlainText = extractor.getPlainText
+			val tokens = TokenizerHelper.tokenize(rawPlainText)
+			// TODO: extractor.getLinks.asMapOfRanges().values().asScala.toArray???
+			WikiPage(wikiPage.pageTitle, wikiPage.ns, wikiPage.redirect,
+				tokens, extractor.getLinks.asMapOfRanges().values().asScala.toArray, wikiPage.isDisambiguation, wikiPage.isList)
+		}
+
+	}
+
+	def getWikiPagesWithFullInfo(pageFilter: WikiPage => Boolean): DataSet[FullInfoWikiPage] = {
+		readWikiPages({ extractor =>
+			val wikiPage = extractor.wikiPage
+
+			val rawPlainText = extractor.getPlainText
+//			link text offsets tell, where the links start in the raw plain text
+			val linkTextOffsets = extractor.getLinks
+			val tokenizerResult = TokenizerHelper.tokenizeWithPositionInfo(rawPlainText, linkTextOffsets)
+			assert(tokenizerResult.getTags.size == tokenizerResult.getTags.size)
+			FullInfoWikiPage(wikiPage.pageTitle, wikiPage.ns, wikiPage.redirect,
+				tokenizerResult.getTokens, tokenizerResult.getTags, extractor.getLinks.asMapOfRanges().values().asScala.toArray, wikiPage.isDisambiguation, wikiPage.isList)
+		}, pageFilter)
+	}
+
 
 	def filterNormalPages(wikiPages: DataSet[WikiPage]): DataSet[WikiPage] = {
 		wikiPages.filter { wikiPage =>

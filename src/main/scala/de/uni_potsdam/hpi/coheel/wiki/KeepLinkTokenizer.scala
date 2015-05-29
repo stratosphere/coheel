@@ -11,11 +11,14 @@ import scala.collection.mutable
 
 class KeepLinkTokenizer(positionInfo: TreeRangeMap[Integer, Link], tagger: MaxentTagger) {
 	// stores the tokens
-	val tokens = mutable.ArrayBuffer[String]()
+	private val tokens = mutable.ArrayBuffer[String]()
+	// store the pos tags
+	private val tags = mutable.ArrayBuffer[String]()
 	// maps array offsets to link positions
-	val linkPositions = mutable.Map[Int, Link]()
-	def getTokens: Array[String] = tokens.toArray
+	private val linkPositions = mutable.Map[Int, Link]()
+	def getTokens: mutable.ArrayBuffer[String] = tokens
 	def getLinkPositions: mutable.Map[Int, Link] = linkPositions
+	def getTags: mutable.ArrayBuffer[String] = tags
 
 
 	// the following two variables keep track of the translation from string indices to token array indices
@@ -24,13 +27,14 @@ class KeepLinkTokenizer(positionInfo: TreeRangeMap[Integer, Link], tagger: Maxen
 	// currentLink stores the last link we saw
 	private var currentLink: Link = null
 
-	def processSentence(sent: java.util.List[HasWord], usePos: Boolean): Unit = {
+	def processSentence(sent: java.util.List[HasWord]): Unit = {
 		// TODO: Only tokenize if necessary.
-		val sentenceTags = tagSentence(sent, usePos)
+		val sentenceTags = tagSentence(sent)
 		sentenceTags.foreach(processToken)
 	}
 	private def processToken(token: TaggedWord): Unit = {
 		tokens += token.word()
+		tags   += token.tag()
 		val startOffset = token.beginPosition()
 		Option(positionInfo.getEntry(startOffset)).foreach { entry =>
 			val range = entry.getKey
@@ -53,20 +57,15 @@ class KeepLinkTokenizer(positionInfo: TreeRangeMap[Integer, Link], tagger: Maxen
 		}
 	}
 
-	private def tagSentence(sent: java.util.List[HasWord], usePos: Boolean): mutable.Buffer[TaggedWord] = {
-		if (usePos) {
-			Timer.start("TAGGING")
-			val ret = tagger.tagSentence(sent).asScala
-			Timer.end("TAGGING")
-			ret
-		} else {
-			sent.asScala.map { word =>
-				val tw = new TaggedWord(word.word(), "NP")
-				tw.setBeginPosition(word.asInstanceOf[CoreLabel].beginPosition())
-				tw
-			}
-		}
+	private def tagSentence(sent: java.util.List[HasWord]): mutable.Buffer[TaggedWord] = {
+		Timer.start("TAGGING")
+		val ret = tagger.tagSentence(sent).asScala
+		Timer.end("TAGGING")
+		ret
+//		sent.asScala.map { word =>
+//			val tw = new TaggedWord(word.word(), "NP")
+//			tw.setBeginPosition(word.asInstanceOf[CoreLabel].beginPosition())
+//			tw
+//		}
 	}
-
-
 }

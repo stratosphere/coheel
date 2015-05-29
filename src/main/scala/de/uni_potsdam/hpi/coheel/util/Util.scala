@@ -1,5 +1,7 @@
 package de.uni_potsdam.hpi.coheel.util
 
+import scala.collection.mutable
+
 object Util {
 
 	/**
@@ -9,7 +11,7 @@ object Util {
 	 * @return Some array with guaranteed size of 2 * contextSpreading + 1, None if that's not possible,
 	 *         because the array is to small.
 	 */
-	def extractContext(a: Array[String], position: Int, contextSpreading: Int): Option[Array[String]] = {
+	def extractContext(a: mutable.ArrayBuffer[String], position: Int, contextSpreading: Int): Option[mutable.ArrayBuffer[String]] = {
 		if (a.length < 2 * contextSpreading + 1)
 			None
 		else  {

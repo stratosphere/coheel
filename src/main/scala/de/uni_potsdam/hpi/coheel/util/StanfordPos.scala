@@ -13,7 +13,7 @@ import scala.collection.mutable
 
 object StanfordPos {
 	val modelName = "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger"
-	val tagger = new MaxentTagger(modelName)
+	lazy val tagger = new MaxentTagger(modelName)
 
 	def tagPOS(s: String): mutable.Map[Int, String] = {
 		val sentences = MaxentTagger.tokenizeText(new StringReader(s)).asScala
