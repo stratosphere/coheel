@@ -88,7 +88,7 @@ class TrainingDataProgram extends CoheelProgram[Int] with Serializable {
 
 class TrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage, TrainingData] {
 	override def flatMap(wikiPage: FullInfoWikiPage, out: Collector[TrainingData]): Unit = {
-		val hits = trie.findAllInWithTrieHit(wikiPage.plainText.toArray)
+		val hits = trie.findAllInWithTrieHit(wikiPage.plainText)
 		hits.foreach { hit =>
 			println(hit)
 		}

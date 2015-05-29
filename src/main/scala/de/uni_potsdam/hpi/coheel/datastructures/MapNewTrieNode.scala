@@ -33,7 +33,7 @@ object NoEntryZeroNewTrieNode extends ZeroNewTrieNode {
 abstract class ZeroNewTrieNode extends NewTrieNode {
 
 	override def add(tokens: Array[String], i: Int, tokenProb: Float): NewTrieNode = {
-		val isLastToken = i == tokens.size - 1
+		val isLastToken = i == tokens.length - 1
 		val newNodeProb = if (isLastToken) tokenProb else Float.NaN
 		val head = tokens(i)
 		var newNode: NewTrieNode = if (isLastToken) EntryZeroNewTrieNode else NoEntryZeroNewTrieNode
@@ -172,19 +172,19 @@ class NewTrie extends Trie {
 	}
 
 	override def findAllIn(text: String): Iterator[String] = {
-		findAllIn(text.split(' '))
+		findAllIn(text.split(' ').toBuffer)
 	}
 
-	def findAllIn(tokens: Array[String]): Iterator[String] = {
+	def findAllIn(tokens: mutable.Buffer[String]): Iterator[String] = {
 		new FindAllInIterator(rootNode, tokens, { t: TrieHit => t.s })
 	}
-	def findAllInWithTrieHit(tokens: Array[String]): Iterator[TrieHit] = {
+	def findAllInWithTrieHit(tokens: mutable.Buffer[String]): Iterator[TrieHit] = {
 		new FindAllInIterator(rootNode, tokens, identity)
 	}
 	def findAllInWithProbs(text: String): Iterator[(String, Float)] = {
-		findAllInWithProbs(text.split(' '))
+		findAllInWithProbs(text.split(' ').toBuffer)
 	}
-	def findAllInWithProbs(tokens: Array[String]): Iterator[(String, Float)] = {
+	def findAllInWithProbs(tokens: mutable.Buffer[String]): Iterator[(String, Float)] = {
 		new FindAllInIterator(rootNode, tokens, { t: TrieHit => (t.s, t.prob) })
 	}
 
@@ -214,7 +214,7 @@ class NewTrie extends Trie {
 }
 
 case class TrieHit(s: String, prob: Float, startIndex: Int, offset: Int)
-class FindAllInIterator[T](rootNode: MapNewTrieNode, tokens: Array[String], fun: TrieHit => T) extends Iterator[T] {
+class FindAllInIterator[T](rootNode: MapNewTrieNode, tokens: mutable.Buffer[String], fun: TrieHit => T) extends Iterator[T] {
 
 	val alreadySeen = mutable.Set[String]()
 	var startIndex = 0
