@@ -57,7 +57,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 			val reader = new IteratorReader(List("<foo>").iterator ++ linesIt ++ List("</foo>").iterator)
 			val wikiPages = new WikiPageReader().xmlToWikiPages(reader)
 			val filteredWikiPages = wikiPages.filter { page =>
-				page.ns == 0 && page.source.nonEmpty
+				page.ns == 0 && page.source.nonEmpty && pageFilter(page)
 			}
 			filteredWikiPages.foreach { wikiPage =>
 				Try {
@@ -97,7 +97,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 			val tokenizerResult = TokenizerHelper.tokenizeWithPositionInfo(rawPlainText, linkTextOffsets)
 			assert(tokenizerResult.getTags.size == tokenizerResult.getTags.size)
 			FullInfoWikiPage(wikiPage.pageTitle, wikiPage.ns, wikiPage.redirect,
-				tokenizerResult.getTokens, tokenizerResult.getTags, extractor.getLinks.asMapOfRanges().values().asScala.toArray, wikiPage.isDisambiguation, wikiPage.isList)
+				tokenizerResult.getTokens, tokenizerResult.getTags, tokenizerResult.getLinkPositions, wikiPage.isDisambiguation, wikiPage.isList)
 		}, pageFilter)
 	}
 

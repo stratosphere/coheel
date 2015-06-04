@@ -174,18 +174,18 @@ class NewTrie extends Trie {
 	override def findAllIn(text: String): Iterator[String] = {
 		findAllIn(text.split(' ').toBuffer)
 	}
-
-	def findAllIn(tokens: mutable.Buffer[String]): Iterator[String] = {
-		new FindAllInIterator(rootNode, tokens, { t: TrieHit => t.s })
-	}
-	def findAllInWithTrieHit(tokens: mutable.Buffer[String]): Iterator[TrieHit] = {
-		new FindAllInIterator(rootNode, tokens, identity)
-	}
 	def findAllInWithProbs(text: String): Iterator[(String, Float)] = {
 		findAllInWithProbs(text.split(' ').toBuffer)
 	}
-	def findAllInWithProbs(tokens: mutable.Buffer[String]): Iterator[(String, Float)] = {
-		new FindAllInIterator(rootNode, tokens, { t: TrieHit => (t.s, t.prob) })
+
+	def findAllIn(tokens: mutable.Buffer[String], duplicates: Boolean = false): Iterator[String] = {
+		new FindAllInIterator(rootNode, tokens, { t: TrieHit => t.s }, duplicates)
+	}
+	def findAllInWithTrieHit(tokens: mutable.Buffer[String], duplicates: Boolean = false): Iterator[TrieHit] = {
+		new FindAllInIterator(rootNode, tokens, identity, duplicates)
+	}
+	def findAllInWithProbs(tokens: mutable.Buffer[String], duplicates: Boolean = false): Iterator[(String, Float)] = {
+		new FindAllInIterator(rootNode, tokens, { t: TrieHit => (t.s, t.prob) }, duplicates)
 	}
 
 
@@ -214,7 +214,7 @@ class NewTrie extends Trie {
 }
 
 case class TrieHit(s: String, prob: Float, startIndex: Int, offset: Int)
-class FindAllInIterator[T](rootNode: MapNewTrieNode, tokens: mutable.Buffer[String], fun: TrieHit => T) extends Iterator[T] {
+class FindAllInIterator[T](rootNode: MapNewTrieNode, tokens: mutable.Buffer[String], fun: TrieHit => T, allowDuplicates: Boolean) extends Iterator[T] {
 
 	val alreadySeen = mutable.Set[String]()
 	var startIndex = 0
@@ -232,7 +232,12 @@ class FindAllInIterator[T](rootNode: MapNewTrieNode, tokens: mutable.Buffer[Stri
 	override def hasNext: Boolean = {
 		hasNextCalled = true
 		var alreadyReturned = currentNode.isEntry
-		while (alreadyReturned || !currentNode.isEntry || alreadySeen.contains(buildCurrentTokenString())) {
+		// when we:
+		// (1) already returned the current item, or
+		// (2) the current node is not an leaf node, or
+		// (3) we have already returned the current item previously in the tree (if we do not allow duplicates)
+		// we continue the search for the next token
+		while (alreadyReturned || !currentNode.isEntry || (!allowDuplicates && alreadySeen.contains(buildCurrentTokenString()))) {
 			alreadyReturned = false
 			if (currentIndex >= tokenSize) {
 				startIndex += 1

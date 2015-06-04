@@ -88,10 +88,23 @@ class TrainingDataProgram extends CoheelProgram[Int] with Serializable {
 
 class TrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage, TrainingData] {
 	override def flatMap(wikiPage: FullInfoWikiPage, out: Collector[TrainingData]): Unit = {
-		val hits = trie.findAllInWithTrieHit(wikiPage.plainText)
-		hits.foreach { hit =>
-			println(hit)
+		val hits = trie.findAllInWithTrieHit(wikiPage.plainText, false).toSeq
+		val hitPoints = hits.map { hits => hits.startIndex }.toSet
+		wikiPage.links.foreach { case (index, link) =>
+//			if (!hitPoints.contains(index)) {
+//				println(wikiPage.pageTitle)
+//				println(hits)
+////				println(wikiPage.links)
+//				println(hitPoints)
+//				println(index)
+//			}
+			// TODO: This assert failes, because the trie only returns surfaces !alreadySeen. Need to investigate, in which use cases
+			// this is necessary, and change it for this usecase.
+//			assert(hitPoints.contains(index))
 		}
+//		hits.foreach { hit =>
+//			println(hit)
+//		}
 
 	}
 }

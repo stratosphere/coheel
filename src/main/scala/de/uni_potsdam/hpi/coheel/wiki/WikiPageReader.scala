@@ -46,7 +46,7 @@ case class FullInfoWikiPage(pageTitle: String,
                     ns: Int, redirect: String,
                     plainText: mutable.ArrayBuffer[String],
                     tags: mutable.ArrayBuffer[String],
-                    links: Array[Link],
+                    links: mutable.Map[Int, Link],
                     isDisambiguation: Boolean,
                     isList: Boolean)
 
