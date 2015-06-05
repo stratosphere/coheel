@@ -18,7 +18,7 @@ class TrainingDataProgram extends CoheelProgram[Int] with Serializable {
 	override def getDescription = "Wikipedia Extraction: Build training data"
 
 	override def buildProgram(env: ExecutionEnvironment, param: Int): Unit = {
-		val wikiPages = read { wikiPage =>
+		val wikiPages = readWikiPagesWithFullInfo { wikiPage =>
 			wikiPage.pageTitle.hashCode % SAMPLE_FRACTION == 0
 		}
 
@@ -84,50 +84,15 @@ class TrainingDataProgram extends CoheelProgram[Int] with Serializable {
 		val trainingData = baseScores.groupBy("fullId")
 			.reduceGroup(applySecondOrderCoheelFunctions _)
 
-		trainingData.writeAsTsv(trainingDataPath)
-
-		//		linksWithContext.writeAsText(trainingDataPath, FileSystem.WriteMode.OVERWRITE)
+		trainingData.writeAsText(trainingDataPath, FileSystem.WriteMode.OVERWRITE)
 	}
 
-
-	def foo(): Unit = {
-//
-//		val baseScores = linkCandidates.join(languageModels)
-//			.where("candidateEntity")
-//			.equalTo("pageTitle")
-//			.map { joinResult => joinResult match {
-//			case (linkCandidate, languageModel) =>
-//				val modelSize = languageModel.model.size
-//				val contextProb = linkCandidate.context.map { word =>
-//					Math.log(languageModel.model.get(word) match {
-//						case Some(prob) => prob
-//						case None => 1.0 / modelSize
-//					})
-//				}.sum
-//
-//				import linkCandidate._
-//
-//				val np = if (nounPhrase) 1.0 else 0.0
-//				val vp = if (verbPhrase) 1.0 else 0.0
-//				LinkWithScores(fullId, surfaceRepr, source, destination, candidateEntity, np, vp, prob, contextProb)
-//		}
-//		}
-//		val trainingData = baseScores.groupBy("fullId")
-//			.reduceGroup(applySecondOrderCoheelFunctions _)
-//
-//		trainingData.writeAsTsv(trainingDataPath)
-
-
-//			val CONTEXT_SPREADING = 25
-//			val contextOption =  Util.extractContext(tokenizerResult.getTokens, position, CONTEXT_SPREADING)
-
-	}
 
 	/**
 	 * @param candidatesIt All link candidates with scores (all LinkWithScore's have the same id).
 	 */
 	def applySecondOrderCoheelFunctions(candidatesIt: Iterator[LinkWithScores],
-	                                    out: Collector[(String, String, String, String, Double, Double, Double, Double, Double, Double, Double, Double, Boolean)]): Unit = {
+	                                    out: Collector[String]): Unit = {
 		val allCandidates = candidatesIt.toSeq
 		val promOrder = allCandidates.sortBy(-_.promScore)
 		val contextOrder = allCandidates.sortBy(-_.contextScore)
@@ -142,8 +107,12 @@ class TrainingDataProgram extends CoheelProgram[Int] with Serializable {
 			promOrder.zipWithIndex.foreach { case (candidate, i) =>
 				val positiveInstance = candidate.destination == candidate.candidateEntity
 				import candidate._
-				out.collect((fullId, surfaceRepr, source, candidateEntity, promScore, promRank(i), promDeltaTops(i), promDeltaSuccs(i),
-					contextScore, contextRank(i), contextDeltaTops(i), contextDeltaSuccs(i), positiveInstance))
+				val posStrings = posTagScores.mkString("\t")
+				val output = s"$fullId\t$surfaceRepr\t$source\t$candidateEntity\t$posStrings\t" +
+						s"$promScore\t${promRank(i)}\t${promDeltaTops(i)}\t${promDeltaSuccs(i)}\t" +
+						s"$contextScore\t${contextRank(i)}\t${contextDeltaTops(i)}\t${contextDeltaSuccs(i)}\t" +
+						s"$positiveInstance"
+				out.collect(output)
 			}
 		}
 	}
