@@ -157,23 +157,28 @@ object MachineLearningTestSuite {
 
 						group.foreach { instance =>
 							val filteredInstance = { removeFilter.input(instance); removeFilter.batchFinished(); removeFilter.output() }
-							val result = classifier.classifyInstance(filteredInstance)
-							assert(filteredInstance.classValue() == filteredInstance.value(8))
-							if (result == 1.0) {
+							val pred = classifier.classifyInstance(filteredInstance)
+							val act  = filteredInstance.classValue()
+							assert(act == filteredInstance.value(8))
+							if (pred == 1.0) {
 								positiveCount += 1
-								if (filteredInstance.classValue == 1.0)
+								if (act == 1.0)
 									truePositiveCount += 1
 							}
-							if (filteredInstance.classValue == 1.0)
+							if (act == 1.0)
 								trueCount += 1
 						}
 
+						// we found the one correct
 						if (positiveCount == 1 && truePositiveCount == 1)
 							tp += 1
-						else if (positiveCount == 1 && truePositiveCount == 0)
+						// there is no true positive, but we predicted one
+						else if (positiveCount >= 1 && truePositiveCount == 0)
 							fp += 1
+						// there is a true positive, but we predicted no one or more than one
 						else if (positiveCount != 1 && trueCount == 1)
 							fn += 1
+						// there is none and we find none
 						else if (positiveCount == 0 && trueCount == 0)
 							tn += 1
 						else
