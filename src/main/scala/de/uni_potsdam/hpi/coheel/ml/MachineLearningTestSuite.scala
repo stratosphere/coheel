@@ -49,8 +49,6 @@ object MachineLearningTestSuite {
 		println("=" * 80)
 		runWithInstances(fullTrainingInstances, fullTestInstances)
 
-		println("Use only one negative example")
-		println("=" * 80)
 		val oneSampleTrainingInstances = buildInstances("train-one",
 			randomOrder.take(trainingRatio).map { group =>
 //				if (!group.exists { inst => inst.value(CLASS_INDEX) == 1.0 }) {
@@ -63,7 +61,13 @@ object MachineLearningTestSuite {
 				positive.toBuffer ++ negative.toBuffer
 			}.flatten
 		)
+		println("Use only one negative example")
+		println("=" * 80)
 		runWithInstances(oneSampleTrainingInstances, fullTestInstances)
+
+		println("#" * 80)
+		println("#" * 80)
+		println("#" * 80)
 
 		println("Use all instances")
 		println("=" * 80)
@@ -173,7 +177,7 @@ object MachineLearningTestSuite {
 						else if (positiveCount == 0 && trueCount == 0)
 							tn += 1
 						else
-							throw new RuntimeException("Uncovered case!")
+							throw new RuntimeException(s"Uncovered case! positiveCount = $positiveCount, trueCount = $trueCount, truePositiveCount = $truePositiveCount")
 					}
 					val precision = tp.toDouble / (tp + fp)
 					val recall    = tp.toDouble / (tp + fn)
@@ -222,8 +226,8 @@ object MachineLearningTestSuite {
 			new MultilayerPerceptron,
 			nb1,
 			nb2,
-			new RandomForest,
-			new SMO
+			new RandomForest
+//			new SMO
 		)
 		base.flatMap { classifier =>
 			val costMatrixFN = new CostMatrix(2)
