@@ -20,12 +20,12 @@ object DataClasses {
 	case class Link(surface: String, surfaceRepr: String, posTags: Vector[String], source: String, destination: String, id: Int = newId()) {
 		def fullId: String = s"$id-${MurmurHash3.stringHash(source).toLong - Int.MinValue}"
 	}
-	case class LinkWithContext(surface: String, surfaceRepr: String, posTags: Vector[String], source: String, destination: String, id: String, context: Array[String])
+	case class LinkWithContext(fullId: String, surfaceRepr: String, source: String, destination: String, context: Array[String], posTags: Array[String])
 	case class WordInDocument(document: String, word: String, count: Int)
 	case class LanguageModel(pageTitle: String, model: Map[String, Double])
 	case class WordCounts(word: WordInDocument, count: Int)
-	case class LinkCandidate(fullId: String, surfaceRepr: String, nounPhrase: Boolean, verbPhrase: Boolean, source: String, destination: String, candidateEntity: String, prob: Double, context: Array[String])
-	case class LinkWithScores(fullId: String, surfaceRepr: String, source: String, destination: String, candidateEntity: String, np: Double, vp: Double, promScore: Double, contextScore: Double)
+	case class LinkCandidate(fullId: String, surfaceRepr: String, source: String, destination: String, candidateEntity: String, prob: Double, context: Array[String], posTagsScores: Array[Int])
+	case class LinkWithScores(fullId: String, surfaceRepr: String, source: String, destination: String, candidateEntity: String, posTagScores: Array[Double], promScore: Double, contextScore: Double)
 	case class LinkContextScore(id: Int, surfaceRepr: String, contextProb: Double)
 	case class DocumentCounts(document: String, count: Int)
 	case class SurfaceCounts(surfaceRepr: String, count: Int)

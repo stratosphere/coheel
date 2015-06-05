@@ -11,6 +11,7 @@ import org.apache.flink.api.scala._
 import org.apache.flink.core.fs.FileSystem
 import org.apache.flink.util.Collector
 
+import scala.StringBuilder
 import scala.collection.mutable
 
 class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
@@ -169,34 +170,24 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 			.name("Document Word Counts: Word-DocumentCount")
 
 		plainTexts.writeAsTsv(plainTextsPath)
-		languageModels.write(new LanguageModelOutputFormat, languageModelsPath, FileSystem.WriteMode.OVERWRITE)
+		languageModels.map { lm =>
+			val sb = new StringBuilder()
+			sb.append(lm.pageTitle)
+			var first = true
+			lm.model.foreach { case (word, prob) =>
+				assert(!word.contains(" "))
+				if (first) {
+					sb.append(s"\t$word\0$prob")
+					first = false
+				} else {
+					sb.append(s" $word\0$prob")
+				}
+			}
+			sb.toString()
+		}.writeAsText(languageModelsPath, FileSystem.WriteMode.OVERWRITE)
 		documentWordCounts.writeAsTsv(documentWordCountsPath)
 
 		languageModels
 	}
 
-	/**
-	 * @param candidatesIt All link candidates with scores (all LinkWithScore's have the same id).
-	 */
-	def applySecondOrderCoheelFunctions(candidatesIt: Iterator[LinkWithScores],
-	                                    out: Collector[(String, String, String, String, Double, Double, Double, Double, Double, Double, Double, Double, Double, Double, Boolean)]): Unit = {
-		val allCandidates = candidatesIt.toSeq
-		val promOrder = allCandidates.sortBy(-_.promScore)
-		val contextOrder = allCandidates.sortBy(-_.contextScore)
-		if (allCandidates.size > 1) {
-			val promRank       = SecondOrderFeatures.rank.apply(promOrder)(_.promScore)
-			val promDeltaTops  = SecondOrderFeatures.deltaTop.apply(promOrder)(_.promScore)
-			val promDeltaSuccs = SecondOrderFeatures.deltaSucc.apply(promOrder)(_.promScore)
-			val contextRank       = SecondOrderFeatures.rank.apply(contextOrder)(_.contextScore)
-			val contextDeltaTops  = SecondOrderFeatures.deltaTop.apply(contextOrder)(_.contextScore)
-			val contextDeltaSuccs = SecondOrderFeatures.deltaSucc.apply(contextOrder)(_.contextScore)
-
-			promOrder.zipWithIndex.foreach { case (candidate, i) =>
-				val positiveInstance = candidate.destination == candidate.candidateEntity
-				import candidate._
-				out.collect((fullId, surfaceRepr, source, candidateEntity, np, vp, promScore, promRank(i), promDeltaTops(i), promDeltaSuccs(i),
-					contextScore, contextRank(i), contextDeltaTops(i), contextDeltaSuccs(i), positiveInstance))
-			}
-		}
-	}
 }

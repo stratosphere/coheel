@@ -199,6 +199,18 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 		}
 	}
 
+	def getLanguageModels(): DataSet[LanguageModel] = {
+		environment.readTextFile(languageModelsPath).map { line =>
+			val lineSplit = line.split('\t')
+			val pageTitle = lineSplit(0)
+			val model = lineSplit(1).split(' ').map { entrySplit =>
+				val wordSplit = entrySplit.split('\0')
+				(wordSplit(0), wordSplit(1).toDouble)
+			}.toMap
+			LanguageModel(pageTitle, model)
+		}
+	}
+
 	def getContextLinks(): DataSet[ContextLink] = {
 		environment.readTextFile(contextLinkProbsPath).map { line =>
 			val split = line.split('\t')

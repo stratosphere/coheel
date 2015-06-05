@@ -1,9 +1,12 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import de.uni_potsdam.hpi.coheel.programs.DataClasses.{EntireTextSurfaceCounts, TrainingData}
-import de.uni_potsdam.hpi.coheel.wiki.{FullInfoWikiPage, WikiPage}
+import de.uni_potsdam.hpi.coheel.ml.SecondOrderFeatures
+import de.uni_potsdam.hpi.coheel.programs.DataClasses._
+import de.uni_potsdam.hpi.coheel.util.Util
+import de.uni_potsdam.hpi.coheel.wiki.{TokenizerHelper, FullInfoWikiPage, WikiPage}
 import org.apache.flink.api.scala.ExecutionEnvironment
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
+import org.apache.flink.core.fs.FileSystem
 import org.apache.flink.util.Collector
 import org.apache.flink.api.scala._
 
@@ -20,38 +23,74 @@ class TrainingDataProgram extends CoheelProgram[Int] with Serializable {
 		}
 
 		val currentFile = if (runsOffline()) "" else s"/$param"
-		val surfaces    = getSurfaces(currentFile)
+		val surfaces = getSurfaces(currentFile)
+		val surfaceProbs = getSurfaceProbs()
+		val languageModels = getLanguageModels()
 
-//		val newScores = surfaceLinkProbs.join(scores)
-//			.where(0)
-//			.equalTo(0)
-//			.map { joinResult =>
-//			joinResult match {
-//				case ((_, _, _, surfaceLinkProb), (_, values)) =>
-//					values.toList.take(4).mkString("\t") + s"\t$surfaceLinkProb\t" + values.drop(4).mkString("\t")
-//			}
-//		}
+		//		val newScores = surfaceLinkProbs.join(scores)
+		//			.where(0)
+		//			.equalTo(0)
+		//			.map { joinResult =>
+		//			joinResult match {
+		//				case ((_, _, _, surfaceLinkProb), (_, values)) =>
+		//					values.toList.take(4).mkString("\t") + s"\t$surfaceLinkProb\t" + values.drop(4).mkString("\t")
+		//			}
+		//		}
 
-		val trainingData = wikiPages
+		val linksWithContext = wikiPages
 			.flatMap(new TrainingDataFlatMap)
 			.withBroadcastSet(surfaces, SurfacesInTrieFlatMap.BROADCAST_SURFACES)
 			.name("Training-Data")
 
-		trainingData.writeAsText(trainingDataPath)
+		val posTagGroups = Array(
+			List("NN", "NNS"),
+			List("NNP", "NNPS"),
+			List("JJ", "JJR", "JJS"),
+			List("VB", "VBD", "VBG", "VBN", "VBP", "VBZ"),
+			List("CD"),
+			List("SYM"),
+			List("WDT", "WP", "WP$", "WRB")
+		)
+
+
+		val linkCandidates = linksWithContext.join(surfaceProbs)
+			.where { linkWithContext => linkWithContext.surfaceRepr }
+			.equalTo { surfaceProb => surfaceProb.surface }
+			.map { joinResult => joinResult match {
+			case (linkWithContext, SurfaceProb(_, candidateEntity, prob)) =>
+				import linkWithContext._
+				LinkCandidate(fullId, surfaceRepr, source, destination, candidateEntity, prob, context,
+					posTagGroups.map { group => if (group.exists(posTags.contains(_))) 1 else 0 })
+		}
+		}
+		val baseScores = linkCandidates.join(languageModels)
+			.where("candidateEntity")
+			.equalTo("pageTitle")
+			.map { joinResult => joinResult match {
+				case (linkCandidate, languageModel) =>
+					val modelSize = languageModel.model.size
+					val contextProb = linkCandidate.context.map { word =>
+						Math.log(languageModel.model.get(word) match {
+							case Some(prob) => prob
+							case None => 1.0 / modelSize
+						})
+					}.sum
+
+					import linkCandidate._
+
+					LinkWithScores(fullId, surfaceRepr, source, destination, candidateEntity, posTagsScores.map(_.toDouble), prob, contextProb)
+			}
+		}
+		val trainingData = baseScores.groupBy("fullId")
+			.reduceGroup(applySecondOrderCoheelFunctions _)
+
+		trainingData.writeAsTsv(trainingDataPath)
+
+		//		linksWithContext.writeAsText(trainingDataPath, FileSystem.WriteMode.OVERWRITE)
 	}
 
 
 	def foo(): Unit = {
-//		val linkCandidates = linksWithContext.join(surfaceProbs)
-//			.where { linkWithContext => linkWithContext.surfaceRepr }
-//			.equalTo { surfaceProb => surfaceProb._1 }
-//			.map { joinResult => joinResult match {
-//			case (linkWithContext, (_, candidateEntity, prob)) =>
-//				import linkWithContext._
-//				LinkCandidate(id, surfaceRepr, posTags.exists(_.startsWith("N")), posTags.exists(_.startsWith("V")),
-//					source, destination, candidateEntity, prob, context)
-//		}
-//		}
 //
 //		val baseScores = linkCandidates.join(languageModels)
 //			.where("candidateEntity")
@@ -83,29 +122,60 @@ class TrainingDataProgram extends CoheelProgram[Int] with Serializable {
 //			val contextOption =  Util.extractContext(tokenizerResult.getTokens, position, CONTEXT_SPREADING)
 
 	}
+
+	/**
+	 * @param candidatesIt All link candidates with scores (all LinkWithScore's have the same id).
+	 */
+	def applySecondOrderCoheelFunctions(candidatesIt: Iterator[LinkWithScores],
+	                                    out: Collector[(String, String, String, String, Double, Double, Double, Double, Double, Double, Double, Double, Boolean)]): Unit = {
+		val allCandidates = candidatesIt.toSeq
+		val promOrder = allCandidates.sortBy(-_.promScore)
+		val contextOrder = allCandidates.sortBy(-_.contextScore)
+		if (allCandidates.size > 1) {
+			val promRank       = SecondOrderFeatures.rank.apply(promOrder)(_.promScore)
+			val promDeltaTops  = SecondOrderFeatures.deltaTop.apply(promOrder)(_.promScore)
+			val promDeltaSuccs = SecondOrderFeatures.deltaSucc.apply(promOrder)(_.promScore)
+			val contextRank       = SecondOrderFeatures.rank.apply(contextOrder)(_.contextScore)
+			val contextDeltaTops  = SecondOrderFeatures.deltaTop.apply(contextOrder)(_.contextScore)
+			val contextDeltaSuccs = SecondOrderFeatures.deltaSucc.apply(contextOrder)(_.contextScore)
+
+			promOrder.zipWithIndex.foreach { case (candidate, i) =>
+				val positiveInstance = candidate.destination == candidate.candidateEntity
+				import candidate._
+				out.collect((fullId, surfaceRepr, source, candidateEntity, promScore, promRank(i), promDeltaTops(i), promDeltaSuccs(i),
+					contextScore, contextRank(i), contextDeltaTops(i), contextDeltaSuccs(i), positiveInstance))
+			}
+		}
+	}
 }
 
 
-class TrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage, TrainingData] {
-	override def flatMap(wikiPage: FullInfoWikiPage, out: Collector[TrainingData]): Unit = {
-		val hits = trie.findAllInWithTrieHit(wikiPage.plainText, false).toSeq
-		val hitPoints = hits.map { hits => hits.startIndex }.toSet
-		wikiPage.links.foreach { case (index, link) =>
-//			if (!hitPoints.contains(index)) {
-//				println(wikiPage.pageTitle)
-//				println(hits)
-////				println(wikiPage.links)
-//				println(hitPoints)
-//				println(index)
-//			}
-			// TODO: This assert failes, because the trie only returns surfaces !alreadySeen. Need to investigate, in which use cases
-			// this is necessary, and change it for this usecase.
-//			assert(hitPoints.contains(index))
-		}
-//		hits.foreach { hit =>
-//			println(hit)
-//		}
+class TrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage, LinkWithContext] {
+	override def flatMap(wikiPage: FullInfoWikiPage, out: Collector[LinkWithContext]): Unit = {
+		val CONTEXT_SPREADING = 25
 
+		assert(wikiPage.tags.size == wikiPage.plainText.size)
+		wikiPage.links.foreach { case (index, link) =>
+			// In theory, the index of the link should be in the set of indices proposed by the trie:
+			//    assert(hitPoints.contains(index))
+			// After all, if this link was found in the first phase, its surface should be in the trie now.
+			// The problem, however, is the different tokenization: When tokenizing link text, we only tokenize
+			// the small text of the link, while plain text tokenization works on the entire text
+			// This tokenization is sometimes different, see the following example:
+			//    println(TokenizerHelper.tokenize("Robert V.").mkString(" "))            --> robert v.
+			//    println(TokenizerHelper.tokenize("Robert V. The Legacy").mkString(" ")) --> robert v the legaci (dot missing)
+			// TODO: This could be solved by taking the link tokenization directly from the plain text, however, this would
+			//       require quite a bit of rewriting.
+
+			val context = for {
+				text <- Util.extractContext(wikiPage.plainText, index, CONTEXT_SPREADING)
+				pos  <- Util.extractContext(wikiPage.tags, index, CONTEXT_SPREADING)
+			} yield (text, pos)
+
+			context.foreach { case (textContext, posContext) =>
+				out.collect(LinkWithContext(link.fullId, link.surfaceRepr, link.source, link.destination, textContext.toArray, posContext.toArray))
+			}
+		}
 	}
 }
 
