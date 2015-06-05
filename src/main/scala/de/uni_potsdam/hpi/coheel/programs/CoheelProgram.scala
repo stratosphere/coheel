@@ -52,7 +52,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 	}
 
 	private lazy val wikiInput = environment.readFile(new WikiPageInputFormat, wikipediaFilesPath)
-	private def readWikiPages[S : TypeInformation : ClassTag](fun: Extractor => S, pageFilter: WikiPage => Boolean = _ => true): DataSet[S] = {
+	private def readRawWikiPages[S : TypeInformation : ClassTag](fun: Extractor => S, pageFilter: WikiPage => Boolean = _ => true): DataSet[S] = {
 		wikiInput.mapPartition { (linesIt: Iterator[String], out: Collector[S]) =>
 			val reader = new IteratorReader(List("<foo>").iterator ++ linesIt ++ List("</foo>").iterator)
 			val wikiPages = new WikiPageReader().xmlToWikiPages(reader)
@@ -75,8 +75,8 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 		}
 	}
 
-	def getWikiPages: DataSet[WikiPage] = {
-		readWikiPages { extractor =>
+	def readWikiPages: DataSet[WikiPage] = {
+		readRawWikiPages { extractor =>
 			val wikiPage = extractor.wikiPage
 			val rawPlainText = extractor.getPlainText
 			val tokens = TokenizerHelper.tokenize(rawPlainText)
@@ -87,8 +87,8 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 
 	}
 
-	def getWikiPagesWithFullInfo(pageFilter: WikiPage => Boolean): DataSet[FullInfoWikiPage] = {
-		readWikiPages({ extractor =>
+	def readWikiPagesWithFullInfo(pageFilter: WikiPage => Boolean): DataSet[FullInfoWikiPage] = {
+		readRawWikiPages({ extractor =>
 			val wikiPage = extractor.wikiPage
 
 			val rawPlainText = extractor.getPlainText
@@ -108,7 +108,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 		}.name("Filter-Normal-Pages")
 	}
 
-	def getPlainTexts: DataSet[Plaintext] = {
+	def readPlainTexts: DataSet[Plaintext] = {
 		environment.readTextFile(plainTextsPath).name("Plain-Texts").flatMap { line =>
 			val split = line.split('\t')
 			// TODO: Change, once we only have plaintext files with 3 entries
@@ -120,7 +120,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 				None
 		}.name("Parsed Plain-Texts")
 	}
-	def getSurfaces(subFile: String = ""): DataSet[String] = {
+	def readSurfaces(subFile: String = ""): DataSet[String] = {
 		environment.readTextFile(surfaceDocumentCountsPath + subFile).name("Subset of Surfaces")
 			.flatMap(new RichFlatMapFunction[String, String] {
 			override def flatMap(line: String, out: Collector[String]): Unit = {
@@ -141,7 +141,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 //			(values(1), values)
 //		}
 //	}
-	def getSurfaceLinkProbs(subFile: String = ""): DataSet[(String, Float)] = {
+	def readSurfaceLinkProbs(subFile: String = ""): DataSet[(String, Float)] = {
 		environment.readTextFile(surfaceLinkProbsPath + subFile).name("Subset of Surfaces with Probabilities")
 			.flatMap(new RichFlatMapFunction[String, (String, Float)] {
 			override def flatMap(line: String, out: Collector[(String, Float)]): Unit = {
@@ -157,7 +157,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 		}).name("Parsed Surfaces with Probabilities")
 	}
 
-	def getSurfaceDocumentCounts: DataSet[SurfaceAsLinkCount] = {
+	def readSurfaceDocumentCounts: DataSet[SurfaceAsLinkCount] = {
 		environment.readTextFile(surfaceDocumentCountsPath).name("Raw-Surface-Document-Counts").flatMap { line =>
 			val split = line.split('\t')
 			// not clear, why lines without a count occur, but they do
@@ -180,7 +180,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 	}
 
 
-	def getSurfaceProbs(threshold: Double = 0.0): DataSet[SurfaceProb] = {
+	def readSurfaceProbs(threshold: Double = 0.0): DataSet[SurfaceProb] = {
 		environment.readTextFile(surfaceProbsPath).flatMap { line =>
 			val split = line.split('\t')
 			if (split.length > 1) {
@@ -199,7 +199,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 		}
 	}
 
-	def getLanguageModels(): DataSet[LanguageModel] = {
+	def readLanguageModels(): DataSet[LanguageModel] = {
 		environment.readTextFile(languageModelsPath).map { line =>
 			val lineSplit = line.split('\t')
 			val pageTitle = lineSplit(0)
@@ -211,7 +211,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 		}
 	}
 
-	def getContextLinks(): DataSet[ContextLink] = {
+	def readContextLinks(): DataSet[ContextLink] = {
 		environment.readTextFile(contextLinkProbsPath).map { line =>
 			val split = line.split('\t')
 			ContextLink(split(0), split(1), split(2).toDouble)

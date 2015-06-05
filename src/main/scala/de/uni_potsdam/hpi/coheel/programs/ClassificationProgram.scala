@@ -18,7 +18,7 @@ class ClassificationProgram extends NoParamCoheelProgram {
 			TokenizerHelper.tokenize(doc)
 		}
 
-		val surfaces = getSurfaceProbs(0.8)
+		val surfaces = readSurfaceProbs(0.8)
 
 		val result = documents.crossWithHuge(surfaces).flatMap { value =>
 			val (text, surfaceProb) = value

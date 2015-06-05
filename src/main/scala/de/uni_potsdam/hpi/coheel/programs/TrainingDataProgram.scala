@@ -18,14 +18,14 @@ class TrainingDataProgram extends CoheelProgram[Int] with Serializable {
 	override def getDescription = "Wikipedia Extraction: Build training data"
 
 	override def buildProgram(env: ExecutionEnvironment, param: Int): Unit = {
-		val wikiPages = getWikiPagesWithFullInfo { wikiPage =>
+		val wikiPages = read { wikiPage =>
 			wikiPage.pageTitle.hashCode % SAMPLE_FRACTION == 0
 		}
 
 		val currentFile = if (runsOffline()) "" else s"/$param"
-		val surfaces = getSurfaces(currentFile)
-		val surfaceProbs = getSurfaceProbs()
-		val languageModels = getLanguageModels()
+		val surfaces = readSurfaces(currentFile)
+		val surfaceProbs = readSurfaceProbs()
+		val languageModels = readLanguageModels()
 
 		//		val newScores = surfaceLinkProbs.join(scores)
 		//			.where(0)

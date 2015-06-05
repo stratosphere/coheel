@@ -24,7 +24,7 @@ class PageRankProgram extends NoParamCoheelProgram {
 		val DAMPENING_FACTOR = 0.85
 		val RANDOM_JUMP = (1.0 - DAMPENING_FACTOR) / NUM_VERTICES
 
-		val contextLinks = getContextLinks()
+		val contextLinks = readContextLinks()
 
 //		contextLinks.aggregate(Aggregations.SUM, "prob").print()
 //		contextLinks.groupBy("to").reduceGroup { _ => (1, 1) }.aggregate(Aggregations.SUM, 0).print()

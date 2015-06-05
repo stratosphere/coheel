@@ -15,17 +15,17 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 	override def getDescription = "Wikipedia Extraction: Entire Text Surfaces"
 
 	override def buildProgram(env: ExecutionEnvironment, param: Int): Unit = {
-		val plainTexts = getPlainTexts
+		val plainTexts = readPlainTexts
 
 		val currentFile = if (runsOffline()) "" else s"/$param"
-		val surfaces = getSurfaces(currentFile)
+		val surfaces = readSurfaces(currentFile)
 
 		val entireTextSurfaces = plainTexts
 			.flatMap(new FindEntireTextSurfacesFlatMap)
 			.withBroadcastSet(surfaces, SurfacesInTrieFlatMap.BROADCAST_SURFACES)
 			.name("Entire-Text-Surfaces-Along-With-Document")
 
-		val surfaceDocumentCounts = getSurfaceDocumentCounts
+		val surfaceDocumentCounts = readSurfaceDocumentCounts
 
 		val entireTextSurfaceCounts = entireTextSurfaces
 			.groupBy { _.surface }
