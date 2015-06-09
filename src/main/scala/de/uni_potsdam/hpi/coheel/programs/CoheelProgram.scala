@@ -207,9 +207,12 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 				log.warn(s"$pageTitle not long enough: $line")
 				None
 			} else {
-				val model = lineSplit(1).split(' ').map { entrySplit =>
+				val model = lineSplit(1).split(' ').flatMap { entrySplit =>
 					val wordSplit = entrySplit.split('\0')
-					(wordSplit(0), wordSplit(1).toDouble)
+					if (wordSplit.length == 2)
+						Some(wordSplit(0), wordSplit(1).toDouble)
+					else
+						None
 				}.toMap
 				Some(LanguageModel(pageTitle, model))
 			}
