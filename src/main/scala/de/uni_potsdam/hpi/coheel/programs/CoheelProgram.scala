@@ -203,6 +203,9 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 		environment.readTextFile(languageModelsPath).map { line =>
 			val lineSplit = line.split('\t')
 			val pageTitle = lineSplit(0)
+			if (lineSplit.length <= 2) {
+				throw new RuntimeException(s"$pageTitle not long enough: $line")
+			}
 			val model = lineSplit(1).split(' ').map { entrySplit =>
 				val wordSplit = entrySplit.split('\0')
 				(wordSplit(0), wordSplit(1).toDouble)
