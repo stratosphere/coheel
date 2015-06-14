@@ -40,12 +40,16 @@ abstract class SurfacesInTrieFlatMap[I, O] extends RichFlatMapFunction[I, O] {
 	var trie: NewTrie = _
 
 	override def open(params: Configuration): Unit = {
-		log.info(s"Building trie with ${FreeMemory.get(true)} MB")
-		val d1 = new Date
+		if (trie == null) {
+			log.info(s"Building trie with ${FreeMemory.get(true)} MB")
+			val d1 = new Date
 
-		trie = getRuntimeContext.getBroadcastVariableWithInitializer(SurfacesInTrieFlatMap.BROADCAST_SURFACES, new TrieBroadcastInitializer)
-		log.info(s"Finished trie initialization in ${(new Date().getTime - d1.getTime) / 1000} s")
-		log.info(s"${FreeMemory.get(true)} MB of memory remaining")
+			trie = getRuntimeContext.getBroadcastVariableWithInitializer(SurfacesInTrieFlatMap.BROADCAST_SURFACES, new TrieBroadcastInitializer)
+			log.info(s"Finished trie initialization in ${(new Date().getTime - d1.getTime) / 1000} s")
+			log.info(s"${FreeMemory.get(true)} MB of memory remaining")
+		} else {
+			log.info("Trie already exists")
+		}
 	}
 
 }

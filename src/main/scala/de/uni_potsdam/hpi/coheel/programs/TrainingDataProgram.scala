@@ -27,20 +27,14 @@ class TrainingDataProgram extends CoheelProgram[Int] with Serializable {
 		val surfaceProbs = readSurfaceProbs()
 		val languageModels = readLanguageModels()
 
-		//		val newScores = surfaceLinkProbs.join(scores)
-		//			.where(0)
-		//			.equalTo(0)
-		//			.map { joinResult =>
-		//			joinResult match {
-		//				case ((_, _, _, surfaceLinkProb), (_, values)) =>
-		//					values.toList.take(4).mkString("\t") + s"\t$surfaceLinkProb\t" + values.drop(4).mkString("\t")
-		//			}
-		//		}
-
-		val linksWithContext = wikiPages
-			.flatMap(new TrainingDataFlatMap)
-			.withBroadcastSet(surfaces, SurfacesInTrieFlatMap.BROADCAST_SURFACES)
-			.name("Training-Data")
+		val linksWithContext = if (TrainingDataFlatMap.SINGLETON.trie == null) {
+			wikiPages
+				.flatMap(TrainingDataFlatMap.SINGLETON)
+				.withBroadcastSet(surfaces, SurfacesInTrieFlatMap.BROADCAST_SURFACES)
+		} else {
+			wikiPages
+				.flatMap(TrainingDataFlatMap.SINGLETON)
+		}.name("Training-Data")
 
 		val posTagGroups = Array(
 			List("NN", "NNS"),
@@ -118,7 +112,9 @@ class TrainingDataProgram extends CoheelProgram[Int] with Serializable {
 	}
 }
 
-
+object TrainingDataFlatMap {
+	val SINGLETON = new TrainingDataFlatMap
+}
 class TrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage, LinkWithContext] {
 	override def flatMap(wikiPage: FullInfoWikiPage, out: Collector[LinkWithContext]): Unit = {
 		val CONTEXT_SPREADING = 25
