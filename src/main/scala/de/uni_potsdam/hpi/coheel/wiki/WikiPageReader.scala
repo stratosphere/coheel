@@ -74,7 +74,7 @@ class WikiPageReader {
 
 	private var readCounter = 1
 
-	def xmlToWikiPages(reader: Reader): Iterator[WikiPage] = {
+	def xmlToWikiPages(reader: Reader, pageFilter: String => Boolean = _ => true): Iterator[WikiPage] = {
 		new Iterator[WikiPage] {
 			var alreadyRead = false
 			var hasMorePages = true
@@ -92,16 +92,21 @@ class WikiPageReader {
 			def readNextPage(): Unit = {
 				redirectTitle = ""
 				var foundNextPage = false
+				var pagePassedFilter = true
 
 				while (!foundNextPage && streamReader.hasNext) {
 					streamReader.next
 					if (streamReader.getEventType == XMLStreamConstants.START_ELEMENT) {
 						streamReader.getLocalName match {
-							case "text" => text = streamReader.getElementText
-							case "ns" => ns = streamReader.getElementText.toInt
-							case "title" => pageTitle = StringEscapeUtils.unescapeXml(streamReader.getElementText)
-							case "redirect" => redirectTitle = StringEscapeUtils.unescapeXml(streamReader.getAttributeValue(null, "title"))
-							case "page" => foundNextPage = true
+							case "text" if pagePassedFilter => text = streamReader.getElementText
+							case "ns" if pagePassedFilter => ns = streamReader.getElementText.toInt
+							case "title" =>
+								pageTitle = StringEscapeUtils.unescapeXml(streamReader.getElementText)
+								// check whether the found page passes the page filter
+								// if not, we will search for the next page and test again here
+								pagePassedFilter = pageFilter(pageTitle)
+							case "redirect" if pagePassedFilter => redirectTitle = StringEscapeUtils.unescapeXml(streamReader.getAttributeValue(null, "title"))
+							case "page" if pagePassedFilter => foundNextPage = true
 							case _ =>
 						}
 					}

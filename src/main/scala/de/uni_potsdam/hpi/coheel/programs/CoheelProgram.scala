@@ -52,12 +52,12 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 	}
 
 	private lazy val wikiInput = environment.readFile(new WikiPageInputFormat, wikipediaFilesPath)
-	private def readRawWikiPages[S : TypeInformation : ClassTag](fun: Extractor => S, pageFilter: WikiPage => Boolean = _ => true): DataSet[S] = {
+	private def readRawWikiPages[S : TypeInformation : ClassTag](fun: Extractor => S, pageFilter: String => Boolean = _ => true): DataSet[S] = {
 		wikiInput.mapPartition { (linesIt: Iterator[String], out: Collector[S]) =>
 			val reader = new IteratorReader(List("<foo>").iterator ++ linesIt ++ List("</foo>").iterator)
-			val wikiPages = new WikiPageReader().xmlToWikiPages(reader)
+			val wikiPages = new WikiPageReader().xmlToWikiPages(reader, pageFilter)
 			val filteredWikiPages = wikiPages.filter { page =>
-				page.ns == 0 && page.source.nonEmpty && pageFilter(page)
+				page.ns == 0 && page.source.nonEmpty
 			}
 			filteredWikiPages.foreach { wikiPage =>
 				Try {
@@ -72,7 +72,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 //						log.warn(e.getStackTraceString)
 				}
 			}
-		}
+		}.name("Raw-Wiki-Pages")
 	}
 
 	def readWikiPages: DataSet[WikiPage] = {
@@ -87,7 +87,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 
 	}
 
-	def readWikiPagesWithFullInfo(pageFilter: WikiPage => Boolean): DataSet[FullInfoWikiPage] = {
+	def readWikiPagesWithFullInfo(pageFilter: String => Boolean): DataSet[FullInfoWikiPage] = {
 		readRawWikiPages({ extractor =>
 			val wikiPage = extractor.wikiPage
 
@@ -196,7 +196,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 					None
 			}
 			else None
-		}
+		}.name("Read surface probs")
 	}
 
 	def readLanguageModels(): DataSet[LanguageModel] = {
@@ -216,7 +216,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 				}.toMap
 				Some(LanguageModel(pageTitle, model))
 			}
-		}
+		}.name("Reading language models")
 	}
 
 	def readContextLinks(): DataSet[ContextLink] = {
