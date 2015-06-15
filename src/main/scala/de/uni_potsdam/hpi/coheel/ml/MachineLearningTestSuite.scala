@@ -19,7 +19,7 @@ import scala.util.{Success, Failure, Try, Random}
 
 object MachineLearningTestSuite {
 
-	val CLASS_INDEX = 9
+	val CLASS_INDEX = 16
 
 
 	val removeFilter = {
@@ -89,7 +89,7 @@ object MachineLearningTestSuite {
 	}
 
 	def readInstancesInGroups(): ArrayBuffer[ArrayBuffer[Instance]] = {
-		val scoresFile = new File("cluster-output/raw-scores.tsv")
+		val scoresFile = new File("cluster-output/raw-training-data.tsv")
 		val scoresSource = Source.fromFile(scoresFile)
 		val groups = ArrayBuffer[ArrayBuffer[Instance]]()
 		var currentGroup = ArrayBuffer[Instance]()
@@ -193,8 +193,19 @@ object MachineLearningTestSuite {
 	}
 
 	val featureDefinition = {
-		val attrs = new FastVector(10)
+		val attrs = new FastVector(17)
+
+
 		attrs.addElement(new Attribute("id"))
+
+		attrs.addElement(new Attribute("NN"))
+		attrs.addElement(new Attribute("NNP"))
+		attrs.addElement(new Attribute("JJ"))
+		attrs.addElement(new Attribute("VB"))
+		attrs.addElement(new Attribute("CD"))
+		attrs.addElement(new Attribute("SYM"))
+		attrs.addElement(new Attribute("W"))
+
 		attrs.addElement(new Attribute("prom"))
 		attrs.addElement(new Attribute("promRank"))
 		attrs.addElement(new Attribute("promDeltaTop"))
