@@ -38,6 +38,7 @@ object FlinkProgramRunner {
 		, "classification" -> classOf[ClassificationProgram]
 		, "redirects" -> classOf[RedirectResolvingProgram]
 		, "page-rank" -> classOf[PageRankProgram]
+		, "best-practices" -> classOf[BestPracticesProgram]
 	)
 
 	/**
