@@ -7,3 +7,17 @@ Try rebalance
 ForwardedFields everywhere
 
 Ask Sebastian about combineGroup
+
+
+14:26:50: Start
+14:27:16: Parsed Surfaces
+14:34:23: Read Wiki Pages
+14:35:25: Read Surface Probs
+14:46:12: Read Language Models
+14:46:38: First Join
+15:12:13: Group Reduce Training Data Scores (first)
+15:51:13: Group Reduce Training Data Scores (last)
+
+--> This times 10x.
+
+

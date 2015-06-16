@@ -27,16 +27,6 @@ class TrainingDataProgram extends CoheelProgram[Int] with Serializable {
 		val surfaceProbs = readSurfaceProbs()
 		val languageModels = readLanguageModels()
 
-		//		val newScores = surfaceLinkProbs.join(scores)
-		//			.where(0)
-		//			.equalTo(0)
-		//			.map { joinResult =>
-		//			joinResult match {
-		//				case ((_, _, _, surfaceLinkProb), (_, values)) =>
-		//					values.toList.take(4).mkString("\t") + s"\t$surfaceLinkProb\t" + values.drop(4).mkString("\t")
-		//			}
-		//		}
-
 		val linksWithContext = wikiPages
 			.flatMap(new TrainingDataFlatMap)
 			.withBroadcastSet(surfaces, SurfacesInTrieFlatMap.BROADCAST_SURFACES)
