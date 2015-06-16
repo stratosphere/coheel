@@ -9,6 +9,9 @@ import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import org.apache.flink.core.fs.FileSystem
 import org.apache.flink.util.Collector
 import org.apache.flink.api.scala._
+import scala.collection.mutable
+
+import scala.util.hashing.MurmurHash3
 
 class TrainingDataProgram extends CoheelProgram[Int] with Serializable {
 
@@ -110,6 +113,7 @@ class TrainingDataProgram extends CoheelProgram[Int] with Serializable {
 
 
 class TrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage, LinkWithContext] {
+	var tokenHitCount: Int = 1
 	override def flatMap(wikiPage: FullInfoWikiPage, out: Collector[LinkWithContext]): Unit = {
 		val CONTEXT_SPREADING = 25
 
@@ -133,6 +137,17 @@ class TrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage, LinkWi
 
 			context.foreach { case (textContext, posContext) =>
 				out.collect(LinkWithContext(link.fullId, link.surfaceRepr, link.source, link.destination, textContext.toArray, posContext.toArray))
+			}
+		}
+		trie.findAllInWithTrieHit(wikiPage.plainText).foreach { tokenHit =>
+			val context = for {
+				text <- Util.extractContext(wikiPage.plainText, tokenHit.offset, CONTEXT_SPREADING)
+				pos  <- Util.extractContext(wikiPage.tags, tokenHit.offset, CONTEXT_SPREADING)
+			} yield (text, pos)
+
+			context.foreach { case (textContext, posContext) =>
+				out.collect(LinkWithContext(s"TH-${MurmurHash3.stringHash(wikiPage.pageTitle).toLong - Int.MinValue}-$tokenHitCount", tokenHit.s, wikiPage.pageTitle, destination = "", textContext.toArray, posContext.toArray))
+				tokenHitCount += 1
 			}
 		}
 	}
