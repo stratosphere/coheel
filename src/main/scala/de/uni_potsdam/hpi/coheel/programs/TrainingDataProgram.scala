@@ -4,6 +4,7 @@ import de.uni_potsdam.hpi.coheel.ml.SecondOrderFeatures
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import de.uni_potsdam.hpi.coheel.util.Util
 import de.uni_potsdam.hpi.coheel.wiki.{TokenizerHelper, FullInfoWikiPage, WikiPage}
+import org.apache.flink.api.common.operators.base.JoinOperatorBase.JoinHint
 import org.apache.flink.api.scala.ExecutionEnvironment
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import org.apache.flink.core.fs.FileSystem
@@ -33,7 +34,7 @@ class TrainingDataProgram extends CoheelProgram[Int] with Serializable {
 		val linksWithContext = wikiPages
 			.flatMap(new TrainingDataFlatMap)
 			.withBroadcastSet(surfaces, SurfacesInTrieFlatMap.BROADCAST_SURFACES)
-			.name("Training-Data")
+			.name("Links and possible links")
 
 		val posTagGroups = Array(
 			List("NN", "NNS"),
@@ -46,7 +47,7 @@ class TrainingDataProgram extends CoheelProgram[Int] with Serializable {
 		)
 
 
-		val linkCandidates = linksWithContext.join(surfaceProbs)
+		val linkCandidates = linksWithContext.join(surfaceProbs, JoinHint.BROADCAST_HASH_SECOND)
 			.where { linkWithContext => linkWithContext.surfaceRepr }
 			.equalTo { surfaceProb => surfaceProb.surface }
 			.name("Join: Links With Surface Probs")
@@ -58,7 +59,7 @@ class TrainingDataProgram extends CoheelProgram[Int] with Serializable {
 			}
 		}.name("Link Candidates")
 
-		val baseScores = linkCandidates.join(languageModels)
+		val baseScores = linkCandidates.join(languageModels, JoinHint.BROADCAST_HASH_FIRST)
 			.where("candidateEntity")
 			.equalTo("pageTitle")
 			.name("Join: Link Candidates with LMs")
@@ -77,7 +78,7 @@ class TrainingDataProgram extends CoheelProgram[Int] with Serializable {
 					LinkWithScores(fullId, surfaceRepr, source, destination, candidateEntity, posTagsScores.map(_.toDouble), prob, contextProb)
 			}
 		}.name("Links with Scores")
-		val trainingData = baseScores.groupBy(_.fullId)
+		val trainingData = baseScores.rebalance().groupBy(_.fullId)
 			.reduceGroup(applySecondOrderCoheelFunctions _).name("Training Data")
 
 		// TODO: Also join surface link probs
