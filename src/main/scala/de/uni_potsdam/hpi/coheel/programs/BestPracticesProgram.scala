@@ -8,19 +8,19 @@ import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.util.Collector
 
-abstract class BestPracticesProgram extends NoParamCoheelProgram {
+class BestPracticesProgram extends NoParamCoheelProgram {
 
 	override def getDescription: String = "Best Practices"
 
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 //		illustrateExecuteName(env)
-		illustrateMapPartition(env)
-//		illustrateGroupBy(env)
+//		illustrateMapPartition(env)
+		illustrateGroupBy(env)
 
 
 
-		illustrateRichFunctions(env)
+//		illustrateRichFunctions(env)
 	}
 
 	def illustrateExecuteName(env: ExecutionEnvironment): Unit = {
@@ -36,6 +36,8 @@ abstract class BestPracticesProgram extends NoParamCoheelProgram {
 				out.collect(v / 2.0)
 			}
 		}
+
+		data.print()
 
 		// +: describe how it's useful in CohEEL
 	}
@@ -64,6 +66,7 @@ abstract class BestPracticesProgram extends NoParamCoheelProgram {
 			.reduceGroup(new MyReducer)
 			.withBroadcastSet(broadCastData, "BROADCASTDATA")
 		// +: describe how it's useful in CohEEL
+		data.print()
 	}
 	class MyReducer extends RichGroupReduceFunction[Int, Double] {
 		var broadcastData: util.List[Int] = null
