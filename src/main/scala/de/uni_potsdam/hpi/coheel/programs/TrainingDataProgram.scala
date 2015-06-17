@@ -18,7 +18,7 @@ class TrainingDataProgram extends CoheelProgram[Int] with Serializable {
 
 	val SAMPLE_FRACTION = if (runsOffline()) 100 else 10000
 
-	val params = if (runsOffline()) List(-1) else 1 to 10
+	val params = if (runsOffline()) List(-1) else 1 to 1
 	override def getDescription = "Wikipedia Extraction: Build training data"
 
 	override def buildProgram(env: ExecutionEnvironment, param: Int): Unit = {
@@ -26,7 +26,7 @@ class TrainingDataProgram extends CoheelProgram[Int] with Serializable {
 			pageTitle.hashCode % SAMPLE_FRACTION == 0
 		}
 
-		val currentFile = if (runsOffline()) "" else s"/$param"
+		val currentFile = ""
 		val surfaces = readSurfaces(currentFile)
 		val surfaceProbs = readSurfaceProbs()
 		val languageModels = readLanguageModels()
