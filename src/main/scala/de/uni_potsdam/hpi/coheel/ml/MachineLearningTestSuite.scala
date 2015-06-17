@@ -122,9 +122,12 @@ object MachineLearningTestSuite {
 				case Success(runtime) =>
 					println(s"$name in ${msToMin(runtime.toInt)} min")
 					val evaluation = new Evaluation(filteredTraining)
-					classifier.buildClassifier(filteredTraining)
-					evaluation.evaluateModel(classifier, Filter.useFilter(test, removeFilter))
-					System.out.println(f"P: ${evaluation.precision(1)}%.3f, R: ${evaluation.recall(1)}%.3f")
+					val time = Timer.timeFunction {
+						classifier.buildClassifier(filteredTraining)
+						evaluation.evaluateModel(classifier, Filter.useFilter(test, removeFilter))
+
+					}
+					System.out.println(f"P: ${evaluation.precision(1)}%.3f, R: ${evaluation.recall(1)}%.3f in ${msToMin(time.toInt)} min")
 			}
 		}
 		println("-" * 80)
@@ -150,43 +153,47 @@ object MachineLearningTestSuite {
 					var fp = 0
 					var fn = 0
 					var tn = 0
-					test.foreach { group =>
-						var positiveCount = 0
-						var truePositiveCount = 0
-						var trueCount = 0
+					val time = Timer.timeFunction {
+						test.foreach { group =>
+							var positiveCount = 0
+							var truePositiveCount = 0
+							var trueCount = 0
 
-						group.foreach { instance =>
-							val filteredInstance = { removeFilter.input(instance); removeFilter.batchFinished(); removeFilter.output() }
-							val pred = classifier.classifyInstance(filteredInstance)
-							val act  = filteredInstance.classValue()
-							assert(act == filteredInstance.value(15))
-							if (pred == 1.0) {
-								positiveCount += 1
+							group.foreach { instance =>
+								val filteredInstance = {
+									removeFilter.input(instance); removeFilter.batchFinished(); removeFilter.output()
+								}
+								val pred = classifier.classifyInstance(filteredInstance)
+								val act = filteredInstance.classValue()
+								assert(act == filteredInstance.value(15))
+								if (pred == 1.0) {
+									positiveCount += 1
+									if (act == 1.0)
+										truePositiveCount += 1
+								}
 								if (act == 1.0)
-									truePositiveCount += 1
+									trueCount += 1
 							}
-							if (act == 1.0)
-								trueCount += 1
-						}
 
-						// we found the one correct
-						if (positiveCount == 1 && truePositiveCount == 1)
-							tp += 1
-						// there is no true positive, but we predicted one
-						else if (positiveCount >= 1 && truePositiveCount == 0)
-							fp += 1
-						// there is a true positive, but we predicted no one or more than one
-						else if (positiveCount != 1 && trueCount == 1)
-							fn += 1
-						// there is none and we find none
-						else if (positiveCount == 0 && trueCount == 0)
-							tn += 1
-						else
-							throw new RuntimeException(s"Uncovered case! positiveCount = $positiveCount, trueCount = $trueCount, truePositiveCount = $truePositiveCount")
+							// we found the one correct
+							if (positiveCount == 1 && truePositiveCount == 1)
+								tp += 1
+							// there is no true positive, but we predicted one
+							else if (positiveCount >= 1 && truePositiveCount == 0)
+								fp += 1
+							// there is a true positive, but we predicted no one or more than one
+							else if (positiveCount != 1 && trueCount == 1)
+								fn += 1
+							// there is none and we find none
+							else if (positiveCount == 0 && trueCount == 0)
+								tn += 1
+							else
+								throw new RuntimeException(s"Uncovered case! positiveCount = $positiveCount, trueCount = $trueCount, truePositiveCount = $truePositiveCount")
+						}
 					}
 					val precision = tp.toDouble / (tp + fp)
 					val recall    = tp.toDouble / (tp + fn)
-					System.out.println(f"P: $precision%.3f, R: $recall%.3f")
+					System.out.println(f"P: $precision%.3f, R: $recall%.3f in ${msToMin(time.toInt)}")
 			}
 			println("-" * 80)
 		}
