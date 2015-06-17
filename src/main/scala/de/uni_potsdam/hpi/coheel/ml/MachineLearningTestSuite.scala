@@ -193,7 +193,7 @@ object MachineLearningTestSuite {
 					}
 					val precision = tp.toDouble / (tp + fp)
 					val recall    = tp.toDouble / (tp + fn)
-					System.out.println(f"P: $precision%.3f, R: $recall%.3f in ${msToMin(time.toInt)}")
+					System.out.println(f"P: $precision%.3f, R: $recall%.3f in ${msToMin(time.toInt)} min")
 			}
 			println("-" * 80)
 		}
@@ -201,7 +201,6 @@ object MachineLearningTestSuite {
 
 	val featureDefinition = {
 		val attrs = new FastVector(17)
-
 
 		attrs.addElement(new Attribute("id"))
 
