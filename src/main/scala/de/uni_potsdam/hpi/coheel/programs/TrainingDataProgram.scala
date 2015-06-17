@@ -50,11 +50,11 @@ class TrainingDataProgram extends CoheelProgram[Int] with Serializable {
 			.where { linkWithContext => linkWithContext.surfaceRepr }
 			.equalTo { surfaceProb => surfaceProb.surface }
 			.map { joinResult => joinResult match {
-			case (linkWithContext, SurfaceProb(_, candidateEntity, prob)) =>
-				import linkWithContext._
-				LinkCandidate(fullId, surfaceRepr, source, destination, candidateEntity, prob, context,
-					posTagGroups.map { group => if (group.exists(posTags.contains(_))) 1 else 0 })
-		}
+				case (linkWithContext, SurfaceProb(_, candidateEntity, prob)) =>
+					import linkWithContext._
+					LinkCandidate(fullId, surfaceRepr, source, destination, candidateEntity, prob, context,
+						posTagGroups.map { group => if (group.exists(posTags.contains(_))) 1 else 0 })
+			}
 		}
 		val baseScores = linkCandidates.join(languageModels)
 			.where("candidateEntity")
@@ -74,9 +74,10 @@ class TrainingDataProgram extends CoheelProgram[Int] with Serializable {
 					LinkWithScores(fullId, surfaceRepr, source, destination, candidateEntity, posTagsScores.map(_.toDouble), prob, contextProb)
 			}
 		}
-		val trainingData = baseScores.groupBy("fullId")
+		val trainingData = baseScores.groupBy(_.fullId)
 			.reduceGroup(applySecondOrderCoheelFunctions _)
 
+		// TODO: Also join surface link probs
 		trainingData.writeAsText(trainingDataPath, FileSystem.WriteMode.OVERWRITE)
 	}
 
