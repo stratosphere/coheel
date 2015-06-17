@@ -159,7 +159,7 @@ object MachineLearningTestSuite {
 							val filteredInstance = { removeFilter.input(instance); removeFilter.batchFinished(); removeFilter.output() }
 							val pred = classifier.classifyInstance(filteredInstance)
 							val act  = filteredInstance.classValue()
-							assert(act == filteredInstance.value(8))
+							assert(act == filteredInstance.value(15))
 							if (pred == 1.0) {
 								positiveCount += 1
 								if (act == 1.0)
