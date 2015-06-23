@@ -11,10 +11,11 @@ import org.apache.flink.configuration.Configuration
 import org.apache.flink.core.fs.FileSystem.WriteMode
 import org.apache.flink.core.fs.{Path, FileSystem}
 import scala.language.implicitConversions
+import scala.util.Try
 
 object OutputFiles {
-	lazy val outputPath = FlinkProgramRunner.config.getString("output_files_dir")
-	lazy val location = FlinkProgramRunner.config.getString("type")
+	lazy val outputPath = Try(FlinkProgramRunner.config.getString("output_files_dir")).getOrElse(s"/home/knub/Repositories/coheel-stratosphere/output/")
+	lazy val location = Try(FlinkProgramRunner.config.getString("type")).getOrElse("file")
 
 	lazy val surfaceProbsPath                 = s"$location://${outputPath}surface-probs.wiki"
 	lazy val contextLinkProbsPath             = s"$location://${outputPath}context-link-probs.wiki"
@@ -32,6 +33,7 @@ object OutputFiles {
 	lazy val surfaceProminenceScoresPath      = s"$location://${outputPath}surface-prominence-scores.wiki"
 	lazy val contextScoresPath                = s"$location://${outputPath}context-scores.wiki"
 	lazy val trainingDataPath                 = s"$location://${outputPath}training-data.wiki"
+	lazy val bestPracticesPath                = s"$location://${outputPath}best-practices.wiki"
 
 	lazy val surfaceEvaluationPerDocumentPath = s"$location://${outputPath}surface-evaluation-per-document.wiki"
 	lazy val surfaceEvaluationPerSubsetPath   = s"$location://${outputPath}surface-evaluation-per-subset.wiki"

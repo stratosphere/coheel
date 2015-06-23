@@ -6,6 +6,7 @@ import de.uni_potsdam.hpi.coheel.ml.SecondOrderFeatures
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import de.uni_potsdam.hpi.coheel.wiki._
 import org.apache.flink.api.common.functions.RichMapFunction
+import org.apache.flink.api.common.operators.base.JoinOperatorBase.JoinHint
 import org.apache.flink.api.java.aggregation.Aggregations
 import org.apache.flink.api.scala._
 import org.apache.flink.core.fs.FileSystem

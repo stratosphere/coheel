@@ -46,6 +46,9 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 
 	def buildProgram(env: ExecutionEnvironment, param: T): Unit
 
+	def makeProgram(env: ExecutionEnvironment): Unit = {
+		makeProgram(env, null.asInstanceOf[T])
+	}
 	def makeProgram(env: ExecutionEnvironment, param: T): Unit = {
 		environment = env
 		buildProgram(env, param)
