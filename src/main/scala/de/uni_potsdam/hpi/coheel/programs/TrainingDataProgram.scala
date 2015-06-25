@@ -18,7 +18,7 @@ class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 
 	val SAMPLE_FRACTION = if (runsOffline()) 100 else 10000
 
-	val params = if (runsOffline()) List(-1) else List("12345", "678910")
+	val params = if (runsOffline()) List("") else List("12345", "678910")
 	override def getDescription = "Wikipedia Extraction: Build training data"
 
 	override def buildProgram(env: ExecutionEnvironment, param: String): Unit = {
