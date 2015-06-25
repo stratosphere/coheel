@@ -92,7 +92,7 @@ class BestPracticesProgram extends NoParamCoheelProgram with Serializable {
 			runtimeContext.getNumberOfParallelSubtasks
 			runtimeContext.getIndexOfThisSubtask
 			val counter = runtimeContext.getIntCounter("c")
-			broadcastData = runtimeContext.getBroadcastVariableWithInitializer().getBroadcastVariable[Int]("BROADCASTDATA")
+			broadcastData = runtimeContext.getBroadcastVariable[Int]("BROADCASTDATA")
 			println(s"BD size: ${broadcastData.size}")
 
 		}
@@ -105,11 +105,11 @@ class BestPracticesProgram extends NoParamCoheelProgram with Serializable {
 
 	def illustrateIteration(env: ExecutionEnvironment): Unit = {
 		// split programs into smaller parts, run on subset
-		for (i <- 10 to 100 by 10) {
-			val data = env.fromElements(i to (i + 10))
-//			data.print()
-			env.execute(s"Iteration #$i")
-		}
+//		for (i <- 10 to 100 by 10) {
+//			val data = env.fromElements(i to (i + 10))
+////			data.print()
+//			env.execute(s"Iteration #$i")
+//		}
 	}
 
 	def illustrateTests(env: ExecutionEnvironment): Unit = {

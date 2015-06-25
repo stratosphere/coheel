@@ -19,8 +19,6 @@ class BestPracticesTest(mode: TestExecutionMode) extends MultipleProgramsTestBas
 		program.makeProgram(env)
 		env.execute("Test")
 
-		compareResultsByLinesInMemory("b", bestPracticesPath)
-
 	}
 
 }
