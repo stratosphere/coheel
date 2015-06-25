@@ -14,14 +14,14 @@ import scala.collection.mutable
 
 import scala.util.hashing.MurmurHash3
 
-class TrainingDataProgram extends CoheelProgram[Int] with Serializable {
+class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 
 	val SAMPLE_FRACTION = if (runsOffline()) 100 else 10000
 
-	val params = if (runsOffline()) List(-1) else List(12345, 678910)
+	val params = if (runsOffline()) List(-1) else List("12345", "678910")
 	override def getDescription = "Wikipedia Extraction: Build training data"
 
-	override def buildProgram(env: ExecutionEnvironment, param: Int): Unit = {
+	override def buildProgram(env: ExecutionEnvironment, param: String): Unit = {
 		val wikiPages = readWikiPagesWithFullInfo { pageTitle =>
 			pageTitle.hashCode % SAMPLE_FRACTION == 0
 		}
@@ -82,7 +82,7 @@ class TrainingDataProgram extends CoheelProgram[Int] with Serializable {
 			.reduceGroup(applySecondOrderCoheelFunctions _).name("Training Data")
 
 		// TODO: Also join surface link probs
-		trainingData.writeAsText(trainingDataPath, FileSystem.WriteMode.OVERWRITE)
+		trainingData.writeAsText(trainingDataPath + currentFile, FileSystem.WriteMode.OVERWRITE)
 	}
 
 
