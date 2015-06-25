@@ -12,6 +12,18 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Maven: org.apache.flink:flink-scala:0.9.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.flink:flink-core:0.9.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.flink:flink-shaded-include-yarn:0.9.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.flink:flink-java:0.9.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.flink:flink-optimizer:0.9.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.flink:flink-clients:0.9.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.flink:flink-runtime:0.9.0" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-all:4.0.27.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.javassist:javassist:3.18.1-GA" level="project" />
+    <orderEntry type="library" name="Maven: org.clapper:grizzled-slf4j_2.10:1.0.2" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.flink:flink-test-utils:0.9.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.flink:flink-runtime:test-jar:tests:0.9.0" level="project" />
     <orderEntry type="library" name="Maven: de.hpi.fgis:utilities:0.0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:15.0" level="project" />
     <orderEntry type="library" name="Maven: com.carrotsearch:hppc:0.6.0" level="project" />
