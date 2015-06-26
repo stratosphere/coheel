@@ -135,13 +135,14 @@ class TrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage, LinkWi
 			// TODO: This could be solved by taking the link tokenization directly from the plain text, however, this would
 			//       require quite a bit of rewriting.
 
-			val context = for {
-				text <- Util.extractContext(wikiPage.plainText, index, CONTEXT_SPREADING)
-				pos  <- Util.extractContext(wikiPage.tags, index, CONTEXT_SPREADING)
-			} yield (text, pos)
+//			val context = for {
+//				text <- Util.extractContext(wikiPage.plainText, index, CONTEXT_SPREADING)
+//				pos  <- Util.extractContext(wikiPage.tags, index, CONTEXT_SPREADING)
+//			} yield (text, pos)
+			val contextOption = Util.extractContext(wikiPage.plainText, index, CONTEXT_SPREADING)
 
-			context.foreach { case (textContext, posContext) =>
-				out.collect(LinkWithContext(link.fullId, link.surfaceRepr, link.source, link.destination, textContext.toArray, posContext.toArray))
+			contextOption.foreach { context =>
+				out.collect(LinkWithContext(link.fullId, link.surfaceRepr, link.source, link.destination, context.toArray, link.posTags.toArray))
 			}
 		}
 		trie.findAllInWithTrieHit(wikiPage.plainText).foreach { tokenHit =>
