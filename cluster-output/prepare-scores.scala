@@ -1,16 +1,25 @@
-//#!/opt/scala-2.11.5/bin/scala
+#!/bin/sh
+exec scala "$0" "$@"
+!#
 
 import java.io.{File, PrintWriter}
 
 import scala.io.Source
 
-val reader = Source.fromFile(new File("training-data.wiki"))
-val writer = new PrintWriter(new File("raw-training-data.tsv"))
+if (args.length != 1) {
+	println("Usage: ./prepare-scores.scala [training-data-file]")
+	System.exit(1)
+}
 
-writer.println(Array("id", "NN", "NNP", "JJ", "VB", "CD", "SYM", "W", "prom", "promRank", "promDeltaTop", "promDeltaSucc",
+val inputFile = new File(args(0))
+val input = Source.fromFile(inputFile)
+val inputFolder = inputFile.getParentFile()
+val outputFile = new PrintWriter(new File(inputFolder, "raw-training-data.tsv"))
+
+outputFile.println(Array("id", "NN", "NNP", "JJ", "VB", "CD", "SYM", "W", "prom", "promRank", "promDeltaTop", "promDeltaSucc",
 	"context", "contextRank", "contextDeltaTop", "contextDeltaSucc", "class").mkString("\t"))
 
-reader.getLines().foreach { line =>
+input.getLines().foreach { line =>
 	val values = line.split('\t').toSeq
 	assert(values.length == 20)
 	val ID_INDEX = 0
@@ -19,8 +28,8 @@ reader.getLines().foreach { line =>
 
 	val newValues = id.toString +: values.slice(4, values.size - 1) :+ (if (values.last == "true") "1.0" else "0.0")
 	val newLine = newValues.mkString("\t")
-	writer.println(newLine)
+	outputFile.println(newLine)
 }
-reader.close()
-writer.close()
+input.close()
+outputFile.close()
 
