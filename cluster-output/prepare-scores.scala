@@ -15,7 +15,7 @@ reader.getLines().foreach { line =>
 	assert(values.length == 20)
 	val ID_INDEX = 0
 	val SOURCE_INDEX = 2
-	val id = (values(ID_INDEX) + values(SOURCE_INDEX)).hashCode
+	val id = values(ID_INDEX)
 
 	val newValues = id.toString +: values.slice(4, values.size - 1) :+ (if (values.last == "true") "1.0" else "0.0")
 	val newLine = newValues.mkString("\t")

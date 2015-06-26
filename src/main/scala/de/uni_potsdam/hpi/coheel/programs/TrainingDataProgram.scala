@@ -151,6 +151,7 @@ class TrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage, LinkWi
 			} yield (text, pos)
 
 			context.foreach { case (textContext, posContext) =>
+				// TH for trie hit
 				out.collect(LinkWithContext(s"TH-${MurmurHash3.stringHash(wikiPage.pageTitle).toLong - Int.MinValue}-$tokenHitCount", tokenHit.s, wikiPage.pageTitle, destination = "", textContext.toArray, posContext.toArray))
 				tokenHitCount += 1
 			}
