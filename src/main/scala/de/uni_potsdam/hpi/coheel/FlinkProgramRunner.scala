@@ -122,6 +122,7 @@ object FlinkProgramRunner {
 						""
 					val paramsString = if (param == null) "" else s" current-param = $param"
 					FileUtils.write(new File("PLAN"), env.getExecutionPlan())
+					env.getConfig.disableSysoutLogging()
 					val result = env.execute(s"${program.getDescription} (dataset = ${config.getString("name")}$paramsString$configurationString)")
 					val accResults = result.getAllAccumulatorResults.asScala
 					accResults.foreach { case (acc, obj) =>

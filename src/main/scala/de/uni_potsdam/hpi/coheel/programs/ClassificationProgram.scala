@@ -14,7 +14,7 @@ class ClassificationProgram extends NoParamCoheelProgram {
 	override def getDescription: String = "CohEEL Classification"
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
-		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT).map { doc =>
+		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_1, Sample.ANGELA_MERKEL_SAMPLE_TEXT_2).map { doc =>
 			TokenizerHelper.tokenize(doc)
 		}
 
