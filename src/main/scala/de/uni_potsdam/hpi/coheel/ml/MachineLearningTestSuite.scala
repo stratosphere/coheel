@@ -93,17 +93,18 @@ object MachineLearningTestSuite {
 		val scoresSource = Source.fromFile(scoresFile)
 		val groups = ArrayBuffer[ArrayBuffer[Instance]]()
 		var currentGroup = ArrayBuffer[Instance]()
-		var lastId: Int = -1
+		var lastId: String = ""
 		val lines = scoresSource.getLines()
 		lines.drop(1)
 		lines.foreach { line =>
 			val split = line.split("\t")
-			val id = split.head.toInt
+			val id = split.head
 			if (id != lastId && currentGroup.nonEmpty) {
 				groups += currentGroup.clone()
 				currentGroup.clear()
 				lastId = id
 			}
+			split(0) = split(0).hashCode.toString
 			currentGroup += buildInstance(split)
 		}
 		groups
