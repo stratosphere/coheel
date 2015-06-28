@@ -144,8 +144,8 @@ class TrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage, LinkWi
 		}
 		trie.findAllInWithTrieHit(wikiPage.plainText).foreach { tokenHit =>
 			val context = for {
-				text <- Util.extractContext(wikiPage.plainText, tokenHit.offset, CONTEXT_SPREADING)
-				pos  <- Util.extractContext(wikiPage.tags, tokenHit.offset, CONTEXT_SPREADING)
+				text <- Util.extractContext(wikiPage.plainText, tokenHit.offset)
+				pos  <- Util.extractContext(wikiPage.tags, tokenHit.offset)
 			} yield (text, pos)
 
 			context.foreach { case (textContext, posContext) =>
