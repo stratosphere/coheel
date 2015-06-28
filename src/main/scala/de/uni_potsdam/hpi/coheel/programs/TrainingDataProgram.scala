@@ -150,7 +150,7 @@ class TrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage, LinkWi
 
 			context.foreach { case (textContext, posContext) =>
 				// TH for trie hit
-				out.collect(LinkWithContext(s"TH-${Util.id(wikiPage.pageTitle)}-$tokenHitCount", tokenHit.s, wikiPage.pageTitle, destination = "", textContext.toArray, wikiPage.tags))
+				out.collect(LinkWithContext(s"TH-${Util.id(wikiPage.pageTitle)}-$tokenHitCount", tokenHit.s, wikiPage.pageTitle, destination = "", textContext.toArray, List[String]().toArray))
 				tokenHitCount += 1
 			}
 		}
