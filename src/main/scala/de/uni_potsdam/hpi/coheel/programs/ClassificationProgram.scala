@@ -53,6 +53,7 @@ class ClassificationLinkFinderFlatMap extends SurfacesInTrieFlatMap[mutable.Arra
 
 			contextOption.foreach { case context =>
 				// TH for trie hit
+				// TODO: Fix tags!
 				out.collect(LinkWithContext(s"TH-$tokenHitCount", tokenHit.s, "TODO", destination = "", context.toArray, List("").toArray))
 				tokenHitCount += 1
 			}
