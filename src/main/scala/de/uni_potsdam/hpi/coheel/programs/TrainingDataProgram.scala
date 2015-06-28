@@ -142,18 +142,18 @@ class TrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage, LinkWi
 				out.collect(LinkWithContext(link.fullId, link.surfaceRepr, link.source, link.destination, context.toArray, link.posTags.toArray))
 			}
 		}
-//		trie.findAllInWithTrieHit(wikiPage.plainText).foreach { tokenHit =>
-//			val context = for {
-//				text <- Util.extractContext(wikiPage.plainText, tokenHit.offset, CONTEXT_SPREADING)
-//				pos  <- Util.extractContext(wikiPage.tags, tokenHit.offset, CONTEXT_SPREADING)
-//			} yield (text, pos)
-//
-//			context.foreach { case (textContext, posContext) =>
-//				// TH for trie hit
-//				out.collect(LinkWithContext(s"TH-${Util.id(wikiPage.pageTitle)}-$tokenHitCount", tokenHit.s, wikiPage.pageTitle, destination = "", textContext.toArray, wikiPage.tags))
-//				tokenHitCount += 1
-//			}
-//		}
+		trie.findAllInWithTrieHit(wikiPage.plainText).foreach { tokenHit =>
+			val context = for {
+				text <- Util.extractContext(wikiPage.plainText, tokenHit.offset, CONTEXT_SPREADING)
+				pos  <- Util.extractContext(wikiPage.tags, tokenHit.offset, CONTEXT_SPREADING)
+			} yield (text, pos)
+
+			context.foreach { case (textContext, posContext) =>
+				// TH for trie hit
+				out.collect(LinkWithContext(s"TH-${Util.id(wikiPage.pageTitle)}-$tokenHitCount", tokenHit.s, wikiPage.pageTitle, destination = "", textContext.toArray, wikiPage.tags))
+				tokenHitCount += 1
+			}
+		}
 	}
 }
 
