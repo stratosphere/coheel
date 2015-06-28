@@ -12,8 +12,6 @@ import org.apache.flink.util.Collector
 import org.apache.flink.api.scala._
 import scala.collection.mutable
 
-import scala.util.hashing.MurmurHash3
-
 class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 
 	val SAMPLE_FRACTION = if (runsOffline()) 100 else 10000
@@ -120,7 +118,6 @@ class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 class TrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage, LinkWithContext] {
 	var tokenHitCount: Int = 1
 	override def flatMap(wikiPage: FullInfoWikiPage, out: Collector[LinkWithContext]): Unit = {
-		val CONTEXT_SPREADING = 25
 
 		assert(wikiPage.tags.size == wikiPage.plainText.size)
 		wikiPage.links.foreach { case (index, link) =>
@@ -139,7 +136,7 @@ class TrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage, LinkWi
 //				text <- Util.extractContext(wikiPage.plainText, index, CONTEXT_SPREADING)
 //				pos  <- Util.extractContext(wikiPage.tags, index, CONTEXT_SPREADING)
 //			} yield (text, pos)
-			val contextOption = Util.extractContext(wikiPage.plainText, index, CONTEXT_SPREADING)
+			val contextOption = Util.extractContext(wikiPage.plainText, index)
 
 			contextOption.foreach { context =>
 				out.collect(LinkWithContext(link.fullId, link.surfaceRepr, link.source, link.destination, context.toArray, link.posTags.toArray))
@@ -153,7 +150,7 @@ class TrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage, LinkWi
 //
 //			context.foreach { case (textContext, posContext) =>
 //				// TH for trie hit
-//				out.collect(LinkWithContext(s"TH-${MurmurHash3.stringHash(wikiPage.pageTitle).toLong - Int.MinValue}-$tokenHitCount", tokenHit.s, wikiPage.pageTitle, destination = "", textContext.toArray, posContext.toArray))
+//				out.collect(LinkWithContext(s"TH-${Util.id(wikiPage.pageTitle)}-$tokenHitCount", tokenHit.s, wikiPage.pageTitle, destination = "", textContext.toArray, wikiPage.tags))
 //				tokenHitCount += 1
 //			}
 //		}

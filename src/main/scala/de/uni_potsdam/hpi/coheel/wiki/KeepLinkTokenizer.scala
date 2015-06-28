@@ -9,7 +9,12 @@ import org.apache.flink.shaded.com.google.common.collect.TreeRangeMap
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
-class KeepLinkTokenizer(positionInfo: TreeRangeMap[Integer, Link], tagger: MaxentTagger) {
+class KeepLinkTokenizer(positionInfo: TreeRangeMap[Integer, Link]) {
+
+	def this() = this(null)
+	val modelName = "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger"
+	val tagger = new MaxentTagger(modelName)
+
 	// stores the tokens
 	private val tokens = mutable.ArrayBuffer[String]()
 	// store the pos tags
@@ -36,6 +41,11 @@ class KeepLinkTokenizer(positionInfo: TreeRangeMap[Integer, Link], tagger: Maxen
 		tokens += token.word()
 		tags   += token.tag()
 		val startOffset = token.beginPosition()
+
+
+		if (positionInfo == null)
+			return
+
 		Option(positionInfo.getEntry(startOffset)).foreach { entry =>
 			val range = entry.getKey
 			val link = entry.getValue
@@ -55,6 +65,7 @@ class KeepLinkTokenizer(positionInfo: TreeRangeMap[Integer, Link], tagger: Maxen
 			// .. store it in the output
 			linkPositions(currentTokenArrayIndex) = newLink
 		}
+
 	}
 
 	private def tagSentence(sent: java.util.List[HasWord]): mutable.Buffer[TaggedWord] = {

@@ -18,8 +18,6 @@ import scala.collection.mutable
 object TokenizerHelper {
 
 	val STEMMING_DEFAULT = true
-	val modelName = "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger"
-	val tagger = new MaxentTagger(modelName)
 
 	def tokenize(text: String): Array[String] = {
 		val tokens = mutable.ArrayBuffer[String]()
@@ -45,7 +43,7 @@ object TokenizerHelper {
 	def tokenizeWithPositionInfo(text: String, positionInfo: TreeRangeMap[Integer, Link]): KeepLinkTokenizer = {
 		// method object for translating the link annotations in the full text to link annotations
 		// for each token
-		val tokenizer = new KeepLinkTokenizer(positionInfo, tagger)
+		val tokenizer = new KeepLinkTokenizer(positionInfo)
 
 		val rawTokens = tokenStream(text, STEMMING_DEFAULT)
 		rawTokens.foreach(tokenizer.processSentence)

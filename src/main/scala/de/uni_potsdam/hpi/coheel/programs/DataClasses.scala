@@ -1,5 +1,7 @@
 package de.uni_potsdam.hpi.coheel.programs
 
+import de.uni_potsdam.hpi.coheel.util.Util
+
 import scala.util.hashing.MurmurHash3
 
 object DataClasses {
@@ -18,7 +20,7 @@ object DataClasses {
 	// Note: In contrast to InternalLink, this class does not contain a Node, because
 	// that should not be part of the interface of this class.
 	case class Link(surface: String, surfaceRepr: String, posTags: Vector[String], source: String, destination: String, id: Int = newId()) {
-		def fullId: String = s"$id-${MurmurHash3.stringHash(source).toLong - Int.MinValue}"
+		def fullId: String = s"$id-${Util.id(source)}"
 	}
 	case class LinkWithContext(fullId: String, surfaceRepr: String, source: String, destination: String, context: Array[String], posTags: Array[String])
 	case class WordInDocument(document: String, word: String, count: Int)

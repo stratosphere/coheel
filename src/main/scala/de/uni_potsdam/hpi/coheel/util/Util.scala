@@ -1,9 +1,11 @@
 package de.uni_potsdam.hpi.coheel.util
 
 import scala.collection.mutable
+import scala.util.hashing.MurmurHash3
 
 object Util {
 
+	val CONTEXT_SPREADING_DEFAULT = 25
 	/**
 	 * Extracts the context from an position in the array.
 	 * @param contextSpreading How far the algorithm should look in either side of the word.
@@ -11,7 +13,7 @@ object Util {
 	 * @return Some array with guaranteed size of 2 * contextSpreading + 1, None if that's not possible,
 	 *         because the array is to small.
 	 */
-	def extractContext(a: mutable.ArrayBuffer[String], position: Int, contextSpreading: Int): Option[mutable.ArrayBuffer[String]] = {
+	def extractContext(a: mutable.ArrayBuffer[String], position: Int, contextSpreading: Int = CONTEXT_SPREADING_DEFAULT): Option[mutable.ArrayBuffer[String]] = {
 		if (a.length < 2 * contextSpreading + 1)
 			None
 		else  {
@@ -27,6 +29,10 @@ object Util {
 			assert(rangeToLeft + rangeToRight == 2 * contextSpreading)
 			Some(a.slice(position - rangeToLeft, position + rangeToRight + 1))
 		}
+	}
+
+	def id(s: String): Long = {
+		MurmurHash3.stringHash(s).toLong - Int.MinValue
 	}
 
 }
