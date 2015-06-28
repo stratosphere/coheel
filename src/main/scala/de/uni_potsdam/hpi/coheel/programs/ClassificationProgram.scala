@@ -17,7 +17,8 @@ class ClassificationProgram extends NoParamCoheelProgram {
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_1, Sample.ANGELA_MERKEL_SAMPLE_TEXT_2).map { text =>
-			TokenizerHelper.tokenize(text).toBuffer
+			// TODO
+			TokenizerHelper.tokenizeWithPositionInfo(text, null).getTokens
 		}
 
 		val currentFile = if (runsOffline()) "" else s"/12345"
@@ -27,6 +28,8 @@ class ClassificationProgram extends NoParamCoheelProgram {
 			.flatMap(new ClassificationLinkFinderFlatMap)
 			.withBroadcastSet(surfaces, SurfacesInTrieFlatMap.BROADCAST_SURFACES)
 			.name("Possible links")
+
+		potentialLinks.printOnTaskManager("FOO")
 
 //		val result = documents.crossWithHuge(surfaces).flatMap { value =>
 //			val (text, surfaceProb) = value
@@ -48,9 +51,9 @@ class ClassificationLinkFinderFlatMap extends SurfacesInTrieFlatMap[mutable.Arra
 		trie.findAllInWithTrieHit(document).foreach { tokenHit =>
 			val contextOption = Util.extractContext(document, tokenHit.offset)
 
-			contextOption.foreach { case (textContext, posContext) =>
+			contextOption.foreach { case context =>
 				// TH for trie hit
-				out.collect(LinkWithContext(s"TH-$tokenHitCount", tokenHit.s, wikiPage.pageTitle, destination = "", textContext.toArray, posContext.toArray))
+				out.collect(LinkWithContext(s"TH-$tokenHitCount", tokenHit.s, "TODO", destination = "", context.toArray, List("").toArray))
 				tokenHitCount += 1
 			}
 		}
