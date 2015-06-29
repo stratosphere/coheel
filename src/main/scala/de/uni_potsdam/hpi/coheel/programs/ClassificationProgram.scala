@@ -45,11 +45,12 @@ class ClassificationProgram extends NoParamCoheelProgram {
 
 }
 
-class ClassificationLinkFinderFlatMap extends SurfacesInTrieFlatMap[mutable.ArrayBuffer[String], LinkWithContext] {
+class ClassificationLinkFinderFlatMap extends SurfacesInTrieFlatMap[InputDocument, LinkWithContext] {
 	var tokenHitCount: Int = 1
-	override def flatMap(document: mutable.ArrayBuffer[String], out: Collector[LinkWithContext]): Unit = {
-		trie.findAllInWithTrieHit(document).foreach { tokenHit =>
-			val contextOption = Util.extractContext(document, tokenHit.offset)
+	override def flatMap(document: InputDocument, out: Collector[LinkWithContext]): Unit = {
+		trie.findAllInWithTrieHit(document.tokens).foreach { tokenHit =>
+			println(tokenHit)
+			val contextOption = Util.extractContext(document.tokens, tokenHit.length)
 
 			contextOption.foreach { case context =>
 				// TH for trie hit

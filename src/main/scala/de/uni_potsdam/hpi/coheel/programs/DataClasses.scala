@@ -1,8 +1,7 @@
 package de.uni_potsdam.hpi.coheel.programs
 
 import de.uni_potsdam.hpi.coheel.util.Util
-
-import scala.util.hashing.MurmurHash3
+import scala.collection.mutable
 
 object DataClasses {
 
@@ -49,6 +48,7 @@ object DataClasses {
 	case class Redirect(from: String, to: String)
 
 	// Classification
+	case class InputDocument(tokens: mutable.ArrayBuffer[String], tags: mutable.ArrayBuffer[String])
 	case class SurfaceProb(surface: String, destination: String, prob: Double)
 
 	// Training
