@@ -2,18 +2,16 @@ package de.uni_potsdam.hpi.coheel.wiki
 
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.Link
 import de.uni_potsdam.hpi.coheel.util.Timer
-import edu.stanford.nlp.ling.{CoreLabel, HasWord, TaggedWord}
+import edu.stanford.nlp.ling.{HasWord, TaggedWord}
 import edu.stanford.nlp.tagger.maxent.MaxentTagger
 import org.apache.flink.shaded.com.google.common.collect.TreeRangeMap
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
-class KeepLinkTokenizer(positionInfo: TreeRangeMap[Integer, Link]) {
+class KeepLinkTokenizer(positionInfo: TreeRangeMap[Integer, Link], tagger: MaxentTagger) {
 
-	def this() = this(null)
-	val modelName = "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger"
-	val tagger = new MaxentTagger(modelName)
+	def this(tagger: MaxentTagger) = this(null, tagger)
 
 	// stores the tokens
 	private val tokens = mutable.ArrayBuffer[String]()

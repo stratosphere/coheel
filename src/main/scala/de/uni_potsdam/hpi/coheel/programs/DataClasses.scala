@@ -48,7 +48,7 @@ object DataClasses {
 	case class Redirect(from: String, to: String)
 
 	// Classification
-	case class InputDocument(tokens: mutable.ArrayBuffer[String], tags: mutable.ArrayBuffer[String])
+	case class InputDocument(id: String, tokens: mutable.ArrayBuffer[String], tags: mutable.ArrayBuffer[String])
 	case class SurfaceProb(surface: String, destination: String, prob: Double)
 
 	// Training

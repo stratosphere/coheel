@@ -7,6 +7,7 @@ import edu.stanford.nlp.ling.{CoreLabel, HasWord, TaggedWord}
 import edu.stanford.nlp.process.DocumentPreprocessor
 import edu.stanford.nlp.process.PTBTokenizer.PTBTokenizerFactory
 import edu.stanford.nlp.tagger.maxent.MaxentTagger
+import edu.stanford.nlp.util.logging.RedwoodConfiguration
 import org.apache.flink.shaded.com.google.common.collect.TreeRangeMap
 import org.tartarus.snowball.ext.PorterStemmer
 
@@ -18,6 +19,13 @@ import scala.collection.mutable
 object TokenizerHelper {
 
 	val STEMMING_DEFAULT = true
+
+	// shut off the annoying intialization messages
+	RedwoodConfiguration.empty().capture(System.err).apply()
+	val modelName = "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger"
+	val tagger = new MaxentTagger(modelName)
+	// enable stderr again
+	RedwoodConfiguration.current().clear().apply()
 
 	def tokenize(text: String): Array[String] = {
 		val tokens = mutable.ArrayBuffer[String]()
@@ -43,7 +51,7 @@ object TokenizerHelper {
 	def tokenizeWithPositionInfo(text: String, positionInfo: TreeRangeMap[Integer, Link]): KeepLinkTokenizer = {
 		// method object for translating the link annotations in the full text to link annotations
 		// for each token
-		val tokenizer = new KeepLinkTokenizer(positionInfo)
+		val tokenizer = new KeepLinkTokenizer(positionInfo, tagger)
 
 		val rawTokens = tokenStream(text, STEMMING_DEFAULT)
 		rawTokens.foreach(tokenizer.processSentence)

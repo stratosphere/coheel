@@ -5,6 +5,7 @@ import java.util.Collections
 import de.uni_potsdam.hpi.coheel.io.Sample
 import de.uni_potsdam.hpi.coheel.util.Util
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
+import org.apache.flink.api.common.functions.Partitioner
 import org.apache.flink.api.scala._
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
@@ -16,9 +17,11 @@ class ClassificationProgram extends NoParamCoheelProgram {
 	override def getDescription: String = "CohEEL Classification"
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
-		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_1, Sample.ANGELA_MERKEL_SAMPLE_TEXT_2).map { text =>
-			// TODO
-			TokenizerHelper.tokenizeWithPositionInfo(text, null).getTokens
+		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_1, Sample.ANGELA_MERKEL_SAMPLE_TEXT_2).flatMap { (text, out: Collector[InputDocument]) =>
+			val tokenizer = TokenizerHelper.tokenizeWithPositionInfo(text, null)
+			val document = InputDocument(Util.id(text).toString, tokenizer.getTokens, tokenizer.getTags)
+			// TODO: Output several documents, to allow for partitioning on two nodes
+			out.collect(document)
 		}
 
 		val currentFile = if (runsOffline()) "" else s"/12345"
@@ -29,7 +32,9 @@ class ClassificationProgram extends NoParamCoheelProgram {
 			.withBroadcastSet(surfaces, SurfacesInTrieFlatMap.BROADCAST_SURFACES)
 			.name("Possible links")
 
-		potentialLinks.printOnTaskManager("FOO")
+		potentialLinks.map { link =>
+			(link.fullId, link.surfaceRepr, link.source, link.destination, List[String](), link.posTags.deep)
+		}.printOnTaskManager("")
 
 //		val result = documents.crossWithHuge(surfaces).flatMap { value =>
 //			val (text, surfaceProb) = value
@@ -49,13 +54,12 @@ class ClassificationLinkFinderFlatMap extends SurfacesInTrieFlatMap[InputDocumen
 	var tokenHitCount: Int = 1
 	override def flatMap(document: InputDocument, out: Collector[LinkWithContext]): Unit = {
 		trie.findAllInWithTrieHit(document.tokens).foreach { tokenHit =>
-			println(tokenHit)
-			val contextOption = Util.extractContext(document.tokens, tokenHit.length)
+			val contextOption = Util.extractContext(document.tokens, tokenHit.startIndex)
 
 			contextOption.foreach { case context =>
+				val tags = document.tags.slice(tokenHit.startIndex, tokenHit.startIndex + tokenHit.length).toArray
 				// TH for trie hit
-				// TODO: Fix tags!
-				out.collect(LinkWithContext(s"TH-$tokenHitCount", tokenHit.s, "TODO", destination = "", context.toArray, List("").toArray))
+				out.collect(LinkWithContext(s"TH-${document.id}-$tokenHitCount", tokenHit.s, "", destination = "", context.toArray, tags))
 				tokenHitCount += 1
 			}
 		}

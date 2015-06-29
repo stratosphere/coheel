@@ -26,58 +26,15 @@ class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 
 		val currentFile = if (runsOffline()) "" else s"/$param"
 		val surfaces = readSurfaces(currentFile)
-		val surfaceProbs = readSurfaceProbs()
-		val languageModels = readLanguageModels()
 
 		val linksWithContext = wikiPages
 			.flatMap(new TrainingDataFlatMap)
 			.withBroadcastSet(surfaces, SurfacesInTrieFlatMap.BROADCAST_SURFACES)
 			.name("Links and possible links")
 
-		val posTagGroups = Array(
-			List("NN", "NNS"),
-			List("NNP", "NNPS"),
-			List("JJ", "JJR", "JJS"),
-			List("VB", "VBD", "VBG", "VBN", "VBP", "VBZ"),
-			List("CD"),
-			List("SYM"),
-			List("WDT", "WP", "WP$", "WRB")
-		)
+		val featuresPerGroup = FeatureProgramHelper.buildFeaturesPerGroup(this, linksWithContext)
 
-
-		val linkCandidates = linksWithContext.join(surfaceProbs)
-			.where { linkWithContext => linkWithContext.surfaceRepr }
-			.equalTo { surfaceProb => surfaceProb.surface }
-			.name("Join: Links With Surface Probs")
-			.map { joinResult => joinResult match {
-				case (linkWithContext, SurfaceProb(_, candidateEntity, prob)) =>
-					import linkWithContext._
-					LinkCandidate(fullId, surfaceRepr, source, destination, candidateEntity, prob, context,
-						posTagGroups.map { group => if (group.exists(posTags.contains(_))) 1 else 0 })
-			}
-		}.name("Link Candidates")
-
-		val baseScores = linkCandidates.join(languageModels)
-			.where("candidateEntity")
-			.equalTo("pageTitle")
-			.name("Join: Link Candidates with LMs")
-			.map { joinResult => joinResult match {
-				case (linkCandidate, languageModel) =>
-					val modelSize = languageModel.model.size
-					val contextProb = linkCandidate.context.map { word =>
-						Math.log(languageModel.model.get(word) match {
-							case Some(prob) => prob
-							case None => 1.0 / modelSize
-						})
-					}.sum
-
-					import linkCandidate._
-
-					LinkWithScores(fullId, surfaceRepr, source, destination, candidateEntity, posTagsScores.map(_.toDouble), prob, contextProb)
-			}
-		}.name("Links with Scores")
-		val trainingData = baseScores.groupBy(_.fullId)
-			.reduceGroup(applySecondOrderCoheelFunctions _).name("Training Data")
+		val trainingData = featuresPerGroup.reduceGroup(applySecondOrderCoheelFunctions _).name("Training Data")
 
 		// TODO: Also join surface link probs
 		trainingData.writeAsText(trainingDataPath + currentFile, FileSystem.WriteMode.OVERWRITE)
@@ -101,8 +58,14 @@ class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 			val contextDeltaSuccs = SecondOrderFeatures.deltaSucc.apply(contextOrder)(_.contextScore)
 
 			promOrder.zipWithIndex.foreach { case (candidate, i) =>
-				val positiveInstance = candidate.destination == candidate.candidateEntity
+				val positiveInstance = if (candidate.destination == candidate.candidateEntity) 1.0 else 0.0
 				import candidate._
+				val stringInfo = List(fullId, surfaceRepr, source, candidateEntity)
+				val features = posTagScores.toList ::: List(
+					promScore, promRank(i), promDeltaTops(i), promDeltaSuccs(i),
+					contextScore, contextRank(i), contextDeltaTops(i), contextDeltaSuccs(i),
+					positiveInstance
+				)
 				val posStrings = posTagScores.mkString("\t")
 				val output = s"$fullId\t$surfaceRepr\t$source\t$candidateEntity\t$posStrings\t" +
 						s"$promScore\t${promRank(i)}\t${promDeltaTops(i)}\t${promDeltaSuccs(i)}\t" +

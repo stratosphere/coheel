@@ -9,6 +9,7 @@ object Sample {
 
 	val ANGELA_MERKEL_SAMPLE_TEXT_2 = """
 		  |Germany's Chancellor Merkel faces backlash for latest scandal involving country's BND foreign
-		  |intelligence agency.""".stripMargin
+		  |intelligence agency, which allegedly helped National Security Agency spy on Airbus Group with cooperation of Merkel's aides,
+		  | actions seen as violation of so-called 'no spy' rules. This is a test. This is a test. This is a test. This is a test.""".stripMargin
 
 }
