@@ -47,12 +47,13 @@ object DataClasses {
 	case class ContextLinkWithOrig(from: String, origTo: String, to: String, prob: Double)
 	case class Redirect(from: String, to: String)
 
+	// Training
+	case class TrainingData(fullId: String, surfaceRepr: String, source: String, candidateEntity: String, features: Array[Double])
+	case class FeatureLine(stringInfo: Seq[String], features: Seq[Double])
+
 	// Classification
 	case class InputDocument(id: String, tokens: mutable.ArrayBuffer[String], tags: mutable.ArrayBuffer[String])
 	case class SurfaceProb(surface: String, destination: String, prob: Double)
-
-	// Training
-	case class TrainingData(fullId: String, surfaceRepr: String, source: String, candidateEntity: String, features: Array[Double])
 
 	var currentId = 0
 	def newId(): Int = {

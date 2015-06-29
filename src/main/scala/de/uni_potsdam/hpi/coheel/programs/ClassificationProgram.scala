@@ -32,9 +32,19 @@ class ClassificationProgram extends NoParamCoheelProgram {
 			.withBroadcastSet(surfaces, SurfacesInTrieFlatMap.BROADCAST_SURFACES)
 			.name("Possible links")
 
+		val featuresPerGroup = FeatureProgramHelper.buildFeaturesPerGroup(this, potentialLinks)
+		featuresPerGroup.reduceGroup { (candidatesIt, out: Collector[String]) =>
+			val allCandidates = candidatesIt.toSeq
+			FeatureProgramHelper.applyCoheelFunctions(allCandidates) { featureLine =>
+				val output = s"${featureLine.stringInfo.mkString("\t")}\t${featureLine.features.mkString("\t")}"
+				out.collect(output)
+			}
+		}.printOnTaskManager("FEATURES")
+
 		potentialLinks.map { link =>
 			(link.fullId, link.surfaceRepr, link.source, link.destination, List[String](), link.posTags.deep)
-		}.printOnTaskManager("")
+		}.printOnTaskManager("LINKS")
+
 
 //		val result = documents.crossWithHuge(surfaces).flatMap { value =>
 //			val (text, surfaceProb) = value

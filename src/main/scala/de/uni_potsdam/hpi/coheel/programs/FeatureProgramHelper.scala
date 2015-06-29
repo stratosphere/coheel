@@ -1,5 +1,6 @@
 package de.uni_potsdam.hpi.coheel.programs
 
+import de.uni_potsdam.hpi.coheel.ml.SecondOrderFeatures
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import org.apache.flink.api.scala._
 
@@ -8,6 +9,31 @@ import org.apache.flink.api.scala._
  * This can be used both from the training data generator and the classifier.
  */
 object FeatureProgramHelper {
+
+	def applyCoheelFunctions(allCandidates: Seq[LinkWithScores])(featureLineIteratorFunction: FeatureLine => Unit): Unit = {
+		val promOrder = allCandidates.sortBy(-_.promScore)
+		val contextOrder = allCandidates.sortBy(-_.contextScore)
+		if (allCandidates.size > 1) {
+			val promRank       = SecondOrderFeatures.rank.apply(promOrder)(_.promScore)
+			val promDeltaTops  = SecondOrderFeatures.deltaTop.apply(promOrder)(_.promScore)
+			val promDeltaSuccs = SecondOrderFeatures.deltaSucc.apply(promOrder)(_.promScore)
+			val contextRank       = SecondOrderFeatures.rank.apply(contextOrder)(_.contextScore)
+			val contextDeltaTops  = SecondOrderFeatures.deltaTop.apply(contextOrder)(_.contextScore)
+			val contextDeltaSuccs = SecondOrderFeatures.deltaSucc.apply(contextOrder)(_.contextScore)
+
+			promOrder.zipWithIndex.foreach { case (candidate, i) =>
+				val positiveInstance = if (candidate.destination == candidate.candidateEntity) 1.0 else 0.0
+				import candidate._
+				val stringInfo = List(fullId, surfaceRepr, source, candidateEntity)
+				val features = posTagScores.toList ::: List(
+					promScore, promRank(i), promDeltaTops(i), promDeltaSuccs(i),
+					contextScore, contextRank(i), contextDeltaTops(i), contextDeltaSuccs(i),
+					positiveInstance
+				)
+				featureLineIteratorFunction(FeatureLine(stringInfo, features))
+			}
+		}
+	}
 
 	def buildFeaturesPerGroup(prg: CoheelProgram[_], linksWithContext: DataSet[LinkWithContext]): GroupedDataSet[LinkWithScores] = {
 		val surfaceProbs = prg.readSurfaceProbs()

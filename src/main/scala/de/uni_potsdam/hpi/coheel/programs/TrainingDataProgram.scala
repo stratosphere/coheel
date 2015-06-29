@@ -34,7 +34,7 @@ class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 
 		val featuresPerGroup = FeatureProgramHelper.buildFeaturesPerGroup(this, linksWithContext)
 
-		val trainingData = featuresPerGroup.reduceGroup(applySecondOrderCoheelFunctions _).name("Training Data")
+		val trainingData = featuresPerGroup.reduceGroup(createTrainingDataGroupWise _).name("Training Data")
 
 		// TODO: Also join surface link probs
 		trainingData.writeAsText(trainingDataPath + currentFile, FileSystem.WriteMode.OVERWRITE)
@@ -44,37 +44,14 @@ class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 	/**
 	 * @param candidatesIt All link candidates with scores (all LinkWithScore's have the same id).
 	 */
-	def applySecondOrderCoheelFunctions(candidatesIt: Iterator[LinkWithScores],
-	                                    out: Collector[String]): Unit = {
+	def createTrainingDataGroupWise(candidatesIt: Iterator[LinkWithScores], out: Collector[String]): Unit = {
 		val allCandidates = candidatesIt.toSeq
-		val promOrder = allCandidates.sortBy(-_.promScore)
-		val contextOrder = allCandidates.sortBy(-_.contextScore)
-		if (allCandidates.size > 1) {
-			val promRank       = SecondOrderFeatures.rank.apply(promOrder)(_.promScore)
-			val promDeltaTops  = SecondOrderFeatures.deltaTop.apply(promOrder)(_.promScore)
-			val promDeltaSuccs = SecondOrderFeatures.deltaSucc.apply(promOrder)(_.promScore)
-			val contextRank       = SecondOrderFeatures.rank.apply(contextOrder)(_.contextScore)
-			val contextDeltaTops  = SecondOrderFeatures.deltaTop.apply(contextOrder)(_.contextScore)
-			val contextDeltaSuccs = SecondOrderFeatures.deltaSucc.apply(contextOrder)(_.contextScore)
-
-			promOrder.zipWithIndex.foreach { case (candidate, i) =>
-				val positiveInstance = if (candidate.destination == candidate.candidateEntity) 1.0 else 0.0
-				import candidate._
-				val stringInfo = List(fullId, surfaceRepr, source, candidateEntity)
-				val features = posTagScores.toList ::: List(
-					promScore, promRank(i), promDeltaTops(i), promDeltaSuccs(i),
-					contextScore, contextRank(i), contextDeltaTops(i), contextDeltaSuccs(i),
-					positiveInstance
-				)
-				val posStrings = posTagScores.mkString("\t")
-				val output = s"$fullId\t$surfaceRepr\t$source\t$candidateEntity\t$posStrings\t" +
-						s"$promScore\t${promRank(i)}\t${promDeltaTops(i)}\t${promDeltaSuccs(i)}\t" +
-						s"$contextScore\t${contextRank(i)}\t${contextDeltaTops(i)}\t${contextDeltaSuccs(i)}\t" +
-						s"$positiveInstance"
-				out.collect(output)
-			}
+		FeatureProgramHelper.applyCoheelFunctions(allCandidates) { featureLine =>
+			val output = s"${featureLine.stringInfo.mkString("\t")}\t${featureLine.features.mkString("\t")}"
+			out.collect(output)
 		}
 	}
+
 }
 
 
@@ -105,16 +82,16 @@ class TrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage, LinkWi
 				out.collect(LinkWithContext(link.fullId, link.surfaceRepr, link.source, link.destination, context.toArray, link.posTags.toArray))
 			}
 		}
-		trie.findAllInWithTrieHit(wikiPage.plainText).foreach { tokenHit =>
-			val context = Util.extractContext(wikiPage.plainText, tokenHit.startIndex)
-
-			context.foreach { textContext =>
-				val tags = wikiPage.tags.slice(tokenHit.startIndex, tokenHit.startIndex + tokenHit.length).toArray
-				// TH for trie hit
-				out.collect(LinkWithContext(s"TH-${Util.id(wikiPage.pageTitle)}-$tokenHitCount", tokenHit.s, wikiPage.pageTitle, destination = "", textContext.toArray, tags))
-				tokenHitCount += 1
-			}
-		}
+//		trie.findAllInWithTrieHit(wikiPage.plainText).foreach { tokenHit =>
+//			val context = Util.extractContext(wikiPage.plainText, tokenHit.startIndex)
+//
+//			context.foreach { textContext =>
+//				val tags = wikiPage.tags.slice(tokenHit.startIndex, tokenHit.startIndex + tokenHit.length).toArray
+//				// TH for trie hit
+//				out.collect(LinkWithContext(s"TH-${Util.id(wikiPage.pageTitle)}-$tokenHitCount", tokenHit.s, wikiPage.pageTitle, destination = "", textContext.toArray, tags))
+//				tokenHitCount += 1
+//			}
+//		}
 	}
 }
 
