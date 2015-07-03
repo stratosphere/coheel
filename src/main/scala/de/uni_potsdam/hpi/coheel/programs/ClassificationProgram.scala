@@ -4,6 +4,7 @@ import java.lang.Iterable
 import java.util.Collections
 
 import de.uni_potsdam.hpi.coheel.io.Sample
+import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier
 import de.uni_potsdam.hpi.coheel.util.Util
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
 import org.apache.flink.api.common.functions.{RichGroupReduceFunction, Partitioner}
@@ -12,6 +13,7 @@ import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import org.apache.flink.configuration.Configuration
 import weka.classifiers.Classifier
+import weka.core.SerializationHelper
 import scala.collection.JavaConverters._
 import org.apache.flink.util.Collector
 import scala.collection.mutable
@@ -29,20 +31,22 @@ class ClassificationProgram extends NoParamCoheelProgram {
 		}
 
 		val currentFile = if (runsOffline()) "" else s"/12345"
+		// TODO: Call this with different current files on different nodes?
 		val surfaces = readSurfaces(currentFile)
 
-		val potentialLinks = documents
+		val trieHits = documents
 			.flatMap(new ClassificationLinkFinderFlatMap)
 			.withBroadcastSet(surfaces, SurfacesInTrieFlatMap.BROADCAST_SURFACES)
 			.name("Possible links")
 
-		val featuresPerGroup = FeatureProgramHelper.buildFeaturesPerGroup(this, potentialLinks)
-		featuresPerGroup.reduceGroup { (candidatesIt, out: Collector[String]) =>
-		}.printOnTaskManager("FEATURES")
+		val rawFeatures = FeatureProgramHelper.buildFeaturesPerGroup(this, trieHits)
+		val basicClassifierResults = rawFeatures.reduceGroup(new ClassificationReduceFeatureLineGroup)
 
-		potentialLinks.map { link =>
+		basicClassifierResults.printOnTaskManager("BASIC-CLASSIFIER-RESULTS")
+
+		trieHits.map { link =>
 			(link.fullId, link.surfaceRepr, link.source, link.destination, List[String](), link.posTags.deep)
-		}.printOnTaskManager("LINKS")
+		}.printOnTaskManager("TRIE-HITS")
 
 
 //		val result = documents.crossWithHuge(surfaces).flatMap { value =>
@@ -62,34 +66,38 @@ class ClassificationProgram extends NoParamCoheelProgram {
 class ClassificationLinkFinderFlatMap extends SurfacesInTrieFlatMap[InputDocument, LinkWithContext] {
 	var tokenHitCount: Int = 1
 	override def flatMap(document: InputDocument, out: Collector[LinkWithContext]): Unit = {
-		trie.findAllInWithTrieHit(document.tokens).foreach { tokenHit =>
-			val contextOption = Util.extractContext(document.tokens, tokenHit.startIndex)
+		trie.findAllInWithTrieHit(document.tokens).foreach { trieHit =>
+			val contextOption = Util.extractContext(document.tokens, trieHit.startIndex)
 
 			contextOption.foreach { case context =>
-				val tags = document.tags.slice(tokenHit.startIndex, tokenHit.startIndex + tokenHit.length).toArray
+				val tags = document.tags.slice(trieHit.startIndex, trieHit.startIndex + trieHit.length).toArray
 				// TH for trie hit
-				out.collect(LinkWithContext(s"TH-${document.id}-$tokenHitCount", tokenHit.s, "", destination = "", context.toArray, tags))
+				out.collect(LinkWithContext(s"TH-${document.id}-$tokenHitCount", trieHit.s, "", destination = "", context.toArray, tags))
 				tokenHitCount += 1
 			}
 		}
 	}
 }
 
-class ClassificationReduceFeatureLineGroup extends RichGroupReduceFunction[LinkWithScores, String] {
+class ClassificationReduceFeatureLineGroup extends RichGroupReduceFunction[LinkWithScores, FeatureLine] {
 
-	var classifier: Classifier = null
+	var seedClassifier: CoheelClassifier = null
+	var candidateClassifier: CoheelClassifier = null
 
 	override def open(params: Configuration): Unit = {
-
+		val classifier = SerializationHelper.read("NaiveBayes-10FN.model").asInstanceOf[Classifier]
+		seedClassifier = new CoheelClassifier(classifier)
+		candidateClassifier = new CoheelClassifier(classifier)
 	}
 
-	override def reduce(candidatesIt: Iterable[LinkWithScores], out: Collector[String]): Unit = {
+	override def reduce(candidatesIt: Iterable[LinkWithScores], out: Collector[FeatureLine]): Unit = {
 		val allCandidates = candidatesIt.asScala.toSeq
 		val features = new mutable.ArrayBuffer[FeatureLine](allCandidates.size)
 		FeatureProgramHelper.applyCoheelFunctions(allCandidates) { featureLine =>
-			val output = s"${featureLine.stringInfo.mkString("\t")}\t${featureLine.features.mkString("\t")}"
 			features.append(featureLine)
-			out.collect(output)
+		}
+		seedClassifier.classifyResults(features).foreach { result =>
+			out.collect(result)
 		}
 
 	}

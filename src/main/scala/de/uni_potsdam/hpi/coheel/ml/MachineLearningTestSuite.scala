@@ -225,34 +225,6 @@ object MachineLearningTestSuite {
 		}
 	}
 
-	val featureDefinition = {
-		val attrs = new FastVector(17)
-
-		attrs.addElement(new Attribute("id"))
-
-		attrs.addElement(new Attribute("NN"))
-		attrs.addElement(new Attribute("NNP"))
-		attrs.addElement(new Attribute("JJ"))
-		attrs.addElement(new Attribute("VB"))
-		attrs.addElement(new Attribute("CD"))
-		attrs.addElement(new Attribute("SYM"))
-		attrs.addElement(new Attribute("W"))
-
-		attrs.addElement(new Attribute("prom"))
-		attrs.addElement(new Attribute("promRank"))
-		attrs.addElement(new Attribute("promDeltaTop"))
-		attrs.addElement(new Attribute("promDeltaSucc"))
-		attrs.addElement(new Attribute("context"))
-		attrs.addElement(new Attribute("contextRank"))
-		attrs.addElement(new Attribute("contextDeltaTop"))
-		attrs.addElement(new Attribute("contextDeltaSucc"))
-		val classAttrValues = new FastVector(2)
-		classAttrValues.addElement("0.0")
-		classAttrValues.addElement("1.0")
-		val classAttr = new Attribute("class", classAttrValues)
-		attrs.addElement(classAttr)
-		attrs
-	}
 
 	def classifiers = {
 		println("----------- Rebuilding classifiers")
@@ -312,7 +284,7 @@ object MachineLearningTestSuite {
 	}
 
 	def buildInstances(name: String, instanceSeq: Seq[Instance]): Instances = {
-		val instances = new Instances(name, featureDefinition, 10000)
+		val instances = new Instances(name, CoheelClassifier.FEATURE_DEFINITION, 10000)
 		instanceSeq.foreach { inst =>
 			instances.add(inst)
 		}
