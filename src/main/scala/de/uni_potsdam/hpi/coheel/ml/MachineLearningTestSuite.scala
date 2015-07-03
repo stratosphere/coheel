@@ -1,6 +1,6 @@
 package de.uni_potsdam.hpi.coheel.ml
 
-import java.io.File
+import java.io.{FileOutputStream, ObjectOutputStream, File}
 
 import de.uni_potsdam.hpi.coheel.util.Timer
 import weka.classifiers.bayes.NaiveBayes
@@ -45,9 +45,33 @@ object MachineLearningTestSuite {
 		val test = randomOrder.drop(trainingRatio)
 		val fullTestInstances     = buildInstances("test-full", test.flatten)
 
+		println("Serialize good classifier")
+		println("=" * 80)
+		// Build classifier
+		val baseClassifier = new RandomForest
+		// Apply costs
+		val classifier = new CostSensitiveClassifier
+		classifier.setClassifier(baseClassifier)
+		classifier.setMinimizeExpectedCost(true)
+		val costMatrixFN = new CostMatrix(2)
+		costMatrixFN.setElement(1, 0, 10)
+		classifier.setCostMatrix(costMatrixFN)
+		// Train
+		val filteredTraining = Filter.useFilter(fullTrainingInstances, removeFilter)
+		classifier.buildClassifier(filteredTraining)
+		// Serialize
+		val oos = new ObjectOutputStream(
+			new FileOutputStream("RandomForest-10FN.model"))
+		oos.writeObject(classifier)
+		oos.flush()
+		oos.close()
+
 		println("Use all instances")
 		println("=" * 80)
 		runWithInstances(fullTrainingInstances, fullTestInstances)
+
+
+
 
 		val oneSampleTrainingInstances = buildInstances("train-one",
 			randomOrder.take(trainingRatio).map { group =>
@@ -188,8 +212,11 @@ object MachineLearningTestSuite {
 							// there is none and we find none
 							else if (positiveCount == 0 && trueCount == 0)
 								tn += 1
-							else
+							else {
+								println("ERROR, printing all the instances")
+								group.foreach(println)
 								throw new RuntimeException(s"Uncovered case! positiveCount = $positiveCount, trueCount = $trueCount, truePositiveCount = $truePositiveCount")
+							}
 						}
 					}
 					val precision = tp.toDouble / (tp + fp)
