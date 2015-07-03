@@ -1,6 +1,6 @@
 package de.uni_potsdam.hpi.coheel.ml
 
-import de.uni_potsdam.hpi.coheel.programs.DataClasses.FeatureLine
+import de.uni_potsdam.hpi.coheel.programs.DataClasses.{ClassificationInfo, FeatureLine}
 import weka.classifiers.Classifier
 import weka.core.{Instances, Attribute, FastVector, Instance}
 import scala.collection.mutable
@@ -66,8 +66,8 @@ class CoheelClassifier(classifier: Classifier) {
 	 * @param featureLine The features of all possible links.
 	 * @return The predicted link or None, if no link is predicted.
 	 */
-	def classifyResults(featureLine: mutable.ArrayBuffer[FeatureLine]): Option[FeatureLine] = {
-		var positivePredictions = List[FeatureLine]()
+	def classifyResults(featureLine: mutable.ArrayBuffer[FeatureLine[ClassificationInfo]]): Option[FeatureLine[ClassificationInfo]] = {
+		var positivePredictions = List[FeatureLine[ClassificationInfo]]()
 		featureLine.foreach { featureLine =>
 			println(featureLine.features)
 			assert(featureLine.features.size == NUMBER_OF_FEATURES + 1)
@@ -83,7 +83,7 @@ class CoheelClassifier(classifier: Classifier) {
 			None
 	}
 
-	private def buildInstance(featureLine: FeatureLine): Instance = {
+	private def buildInstance(featureLine: FeatureLine[ClassificationInfo]): Instance = {
 		val attValues = featureLine.features.toArray
 		val instance = new Instance(1.0, attValues)
 		instance

@@ -81,7 +81,7 @@ class ClassificationLinkFinderFlatMap extends SurfacesInTrieFlatMap[InputDocumen
 	}
 }
 
-class ClassificationReduceFeatureLineGroup extends RichGroupReduceFunction[Classifiable[ClassificationInfo], FeatureLine] {
+class ClassificationReduceFeatureLineGroup extends RichGroupReduceFunction[Classifiable[ClassificationInfo], FeatureLine[ClassificationInfo]] {
 
 	var seedClassifier: CoheelClassifier = null
 	var candidateClassifier: CoheelClassifier = null
@@ -92,10 +92,12 @@ class ClassificationReduceFeatureLineGroup extends RichGroupReduceFunction[Class
 		candidateClassifier = new CoheelClassifier(classifier)
 	}
 
-	override def reduce(candidatesIt: Iterable[Classifiable[ClassificationInfo]], out: Collector[FeatureLine]): Unit = {
+	override def reduce(candidatesIt: Iterable[Classifiable[ClassificationInfo]], out: Collector[FeatureLine[ClassificationInfo]]): Unit = {
 		val allCandidates = candidatesIt.asScala.toSeq
-		val features = new mutable.ArrayBuffer[FeatureLine](allCandidates.size)
+		val features = new mutable.ArrayBuffer[FeatureLine[ClassificationInfo]](allCandidates.size)
 		FeatureProgramHelper.applyCoheelFunctions(allCandidates) { featureLine =>
+			// TODO: Do something with this TrieInfo
+			featureLine.info.trieHit
 			features.append(featureLine)
 		}
 		seedClassifier.classifyResults(features).foreach { result =>

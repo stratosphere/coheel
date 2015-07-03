@@ -23,40 +23,10 @@ object DataClasses {
 		def fullId: String = s"$id-${Util.id(source)}-${Util.id(surface)}"
 	}
 
-	/**
-	 * Classifiable keeps track of the feature data
-	 *
-	 * It is just an abstraction to use slightly different code at train and classification time
-	 * For example, at classification time, we need to keep track of the trie hit information, at training time we need to keep track of the gold standard
-	 */
-	case class Classifiable[T <: Info](id: String, surfaceRepr: String, context: Array[String], candidateEntity: String = "", surfaceProb: Double = -1.0, contextProb: Double = -1.0, info: T)
-
-	abstract class Info {
-		def stringInfo: List[String]
-		def extraFeatures(classifiable: Classifiable[_]): List[Double]
-	}
-
-	case class TrainInfo(source: String, destination: String, posTags: Array[Double]) extends Info {
-		override def stringInfo = List(source)
-		override def extraFeatures(classifiable: Classifiable[_]): List[Double] = {
-			posTags.toList ::: List(if (destination == classifiable.candidateEntity) 1.0 else 0.0)
-		}
-	}
-	case class ClassificationInfo(trieHit: TrieHit, posTags: Array[Double]) extends Info {
-		override def stringInfo: List[String] = List()
-		override def extraFeatures(classifiable: Classifiable[_]): List[Double] = List()
-	}
-
-
-
-//	case class LinkWithContext(fullId: String, surfaceRepr: String, source: String, destination: String, context: Array[String], posTags: Array[Double])
 	case class WordInDocument(document: String, word: String, count: Int)
 	case class LanguageModel(pageTitle: String, model: Map[String, Double])
 	case class WordCounts(word: WordInDocument, count: Int)
 
-	case class LinkCandidate(fullId: String, surfaceRepr: String, source: String, destination: String, candidateEntity: String, prob: Double, context: Array[String], posTagsScores: Array[Int])
-
-	case class LinkWithScores(fullId: String, surfaceRepr: String, source: String, destination: String, candidateEntity: String, posTagScores: Array[Double], promScore: Double, contextScore: Double)
 	case class LinkContextScore(id: Int, surfaceRepr: String, contextProb: Double)
 	case class DocumentCounts(document: String, count: Int)
 	case class SurfaceCounts(surfaceRepr: String, count: Int)
@@ -78,8 +48,40 @@ object DataClasses {
 	case class Redirect(from: String, to: String)
 
 	// Training
+
+	/**
+	 * Classifiable keeps track of one instance of feature data, along with house-keeping information about where this data comes from.
+	 *
+	 * It is just an abstraction to use slightly different code at train and classification time
+	 * For example, at classification time, we need to keep track of the trie hit information, at training time we need to keep track of the gold standard.
+	 * This abstraction is done with an Info object, see below.
+	 */
+	case class Classifiable[T <: Info](id: String, surfaceRepr: String, context: Array[String], candidateEntity: String = "", surfaceProb: Double = -1.0, contextProb: Double = -1.0, info: T)
+
+	abstract class Info {
+		def stringInfo: List[String]
+		def extraFeatures(classifiable: Classifiable[_]): List[Double]
+	}
+
+	case class TrainInfo(source: String, destination: String, posTags: Array[Double]) extends Info {
+		override def stringInfo = List(source)
+		override def extraFeatures(classifiable: Classifiable[_]): List[Double] = {
+			posTags.toList ::: List(if (destination == classifiable.candidateEntity) 1.0 else 0.0)
+		}
+	}
+	case class ClassificationInfo(trieHit: TrieHit, posTags: Array[Double]) extends Info {
+		override def stringInfo: List[String] = List()
+		override def extraFeatures(classifiable: Classifiable[_]): List[Double] = List()
+	}
+
+	object ClassificationType extends Enumeration {
+		type ClassificationType = Value
+		val SEED, CANDIDATE = Value
+	}
+
+
 	case class TrainingData(fullId: String, surfaceRepr: String, source: String, candidateEntity: String, features: Array[Double])
-	case class FeatureLine(stringInfo: Seq[String], features: Seq[Double])
+	case class FeatureLine[T <: Info](stringInfo: Seq[String], features: Seq[Double], info: T)
 
 	// Classification
 	case class InputDocument(id: String, tokens: mutable.ArrayBuffer[String], tags: mutable.ArrayBuffer[String])

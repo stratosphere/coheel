@@ -13,7 +13,7 @@ import scala.reflect.ClassTag
  */
 object FeatureProgramHelper {
 
-	def applyCoheelFunctions[T <: Info](allCandidates: Seq[Classifiable[T]])(featureLineIteratorFunction: FeatureLine => Unit): Unit = {
+	def applyCoheelFunctions[T <: Info](allCandidates: Seq[Classifiable[T]])(featureLineIteratorFunction: FeatureLine[T] => Unit): Unit = {
 		val surfaceOrder = allCandidates.sortBy(-_.surfaceProb)
 		val contextOrder = allCandidates.sortBy(-_.contextProb)
 		if (allCandidates.size > 1) {
@@ -31,7 +31,7 @@ object FeatureProgramHelper {
 					surfaceProb, surfaceRank(i), surfaceDeltaTops(i), surfaceDeltaSuccs(i),
 					contextProb, contextRank(i), contextDeltaTops(i), contextDeltaSuccs(i)
 				) ::: classifiable.info.extraFeatures(classifiable)
-				featureLineIteratorFunction(FeatureLine(stringInfo, features))
+				featureLineIteratorFunction(FeatureLine[T](stringInfo, features, info))
 			}
 		}
 	}
