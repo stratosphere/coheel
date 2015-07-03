@@ -1,14 +1,18 @@
 package de.uni_potsdam.hpi.coheel.programs
 
+import java.lang.Iterable
 import java.util.Collections
 
 import de.uni_potsdam.hpi.coheel.io.Sample
 import de.uni_potsdam.hpi.coheel.util.Util
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
-import org.apache.flink.api.common.functions.Partitioner
+import org.apache.flink.api.common.functions.{RichGroupReduceFunction, Partitioner}
 import org.apache.flink.api.scala._
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
+import org.apache.flink.configuration.Configuration
+import weka.classifiers.Classifier
+import scala.collection.JavaConverters._
 import org.apache.flink.util.Collector
 import scala.collection.mutable
 
@@ -34,11 +38,6 @@ class ClassificationProgram extends NoParamCoheelProgram {
 
 		val featuresPerGroup = FeatureProgramHelper.buildFeaturesPerGroup(this, potentialLinks)
 		featuresPerGroup.reduceGroup { (candidatesIt, out: Collector[String]) =>
-			val allCandidates = candidatesIt.toSeq
-			FeatureProgramHelper.applyCoheelFunctions(allCandidates) { featureLine =>
-				val output = s"${featureLine.stringInfo.mkString("\t")}\t${featureLine.features.mkString("\t")}"
-				out.collect(output)
-			}
 		}.printOnTaskManager("FEATURES")
 
 		potentialLinks.map { link =>
@@ -73,5 +72,25 @@ class ClassificationLinkFinderFlatMap extends SurfacesInTrieFlatMap[InputDocumen
 				tokenHitCount += 1
 			}
 		}
+	}
+}
+
+class ClassificationReduceFeatureLineGroup extends RichGroupReduceFunction[LinkWithScores, String] {
+
+	var classifier: Classifier = null
+
+	override def open(params: Configuration): Unit = {
+
+	}
+
+	override def reduce(candidatesIt: Iterable[LinkWithScores], out: Collector[String]): Unit = {
+		val allCandidates = candidatesIt.asScala.toSeq
+		val features = new mutable.ArrayBuffer[FeatureLine](allCandidates.size)
+		FeatureProgramHelper.applyCoheelFunctions(allCandidates) { featureLine =>
+			val output = s"${featureLine.stringInfo.mkString("\t")}\t${featureLine.features.mkString("\t")}"
+			features.append(featureLine)
+			out.collect(output)
+		}
+
 	}
 }
