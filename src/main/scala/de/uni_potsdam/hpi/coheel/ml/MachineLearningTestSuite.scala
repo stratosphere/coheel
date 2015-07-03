@@ -8,7 +8,7 @@ import weka.classifiers.{CostMatrix, Evaluation}
 import weka.classifiers.functions.{Logistic, MultilayerPerceptron, SMO, SimpleLogistic}
 import weka.classifiers.meta.CostSensitiveClassifier
 import weka.classifiers.trees.{J48, RandomForest}
-import weka.core.{Attribute, FastVector, Instance, Instances}
+import weka.core._
 import weka.filters.Filter
 import weka.filters.unsupervised.attribute.Remove
 
@@ -60,11 +60,7 @@ object MachineLearningTestSuite {
 		val filteredTraining = Filter.useFilter(fullTrainingInstances, removeFilter)
 		classifier.buildClassifier(filteredTraining)
 		// Serialize
-		val oos = new ObjectOutputStream(
-			new FileOutputStream("RandomForest-10FN.model"))
-		oos.writeObject(classifier)
-		oos.flush()
-		oos.close()
+		SerializationHelper.write("RandomForest-10FN.model", classifier)
 
 		println("Use all instances")
 		println("=" * 80)
@@ -120,6 +116,7 @@ object MachineLearningTestSuite {
 		var lastId: String = ""
 		val lines = scoresSource.getLines()
 		lines.drop(1)
+		var lineNr = 1
 		lines.foreach { line =>
 			val split = line.split("\t")
 			val id = split.head
@@ -128,7 +125,8 @@ object MachineLearningTestSuite {
 				currentGroup.clear()
 				lastId = id
 			}
-			split(0) = split(0).hashCode.toString
+			split(0) = lineNr.toString
+			lineNr += 1
 			currentGroup += buildInstance(split)
 		}
 		groups
