@@ -6,6 +6,16 @@ import weka.core.{Instances, Attribute, FastVector, Instance}
 import scala.collection.mutable
 
 object CoheelClassifier {
+	val POS_TAG_GROUPS = Array(
+		List("NN", "NNS"),
+		List("NNP", "NNPS"),
+		List("JJ", "JJR", "JJS"),
+		List("VB", "VBD", "VBG", "VBN", "VBP", "VBZ"),
+		List("CD"),
+		List("SYM"),
+		List("WDT", "WP", "WP$", "WRB")
+	)
+
 	val FEATURE_DEFINITION = {
 		val attrs = new FastVector(17)
 		attrs.addElement(new Attribute("id"))

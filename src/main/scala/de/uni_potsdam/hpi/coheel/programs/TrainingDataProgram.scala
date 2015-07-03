@@ -1,6 +1,5 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import de.uni_potsdam.hpi.coheel.ml.SecondOrderFeatures
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import de.uni_potsdam.hpi.coheel.util.Util
 import de.uni_potsdam.hpi.coheel.wiki.{TokenizerHelper, FullInfoWikiPage, WikiPage}
@@ -11,6 +10,7 @@ import org.apache.flink.core.fs.FileSystem
 import org.apache.flink.util.Collector
 import org.apache.flink.api.scala._
 import scala.collection.mutable
+import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier.POS_TAG_GROUPS
 
 class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 
@@ -27,12 +27,12 @@ class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 		val currentFile = if (runsOffline()) "" else s"/$param"
 		val surfaces = readSurfaces(currentFile)
 
-		val linksWithContext = wikiPages
+		val classifiables = wikiPages
 			.flatMap(new TrainingDataFlatMap)
 			.withBroadcastSet(surfaces, SurfacesInTrieFlatMap.BROADCAST_SURFACES)
 			.name("Links and possible links")
 
-		val featuresPerGroup = FeatureProgramHelper.buildFeaturesPerGroup(this, linksWithContext)
+		val featuresPerGroup = FeatureProgramHelper.buildFeaturesPerGroup(this, classifiables)
 
 		val trainingData = featuresPerGroup.reduceGroup(createTrainingDataGroupWise _).name("Training Data")
 
@@ -44,7 +44,7 @@ class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 	/**
 	 * @param candidatesIt All link candidates with scores (all LinkWithScore's have the same id).
 	 */
-	def createTrainingDataGroupWise(candidatesIt: Iterator[LinkWithScores], out: Collector[String]): Unit = {
+	def createTrainingDataGroupWise(candidatesIt: Iterator[Classifiable[TrainInfo]], out: Collector[String]): Unit = {
 		val allCandidates = candidatesIt.toSeq
 		FeatureProgramHelper.applyCoheelFunctions(allCandidates) { featureLine =>
 			val output = s"${featureLine.stringInfo.mkString("\t")}\t${featureLine.features.mkString("\t")}"
@@ -55,9 +55,9 @@ class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 }
 
 
-class TrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage, LinkWithContext] {
+class TrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage, Classifiable[TrainInfo]] {
 	var tokenHitCount: Int = 1
-	override def flatMap(wikiPage: FullInfoWikiPage, out: Collector[LinkWithContext]): Unit = {
+	override def flatMap(wikiPage: FullInfoWikiPage, out: Collector[Classifiable[TrainInfo]]): Unit = {
 
 		assert(wikiPage.tags.size == wikiPage.plainText.size)
 		wikiPage.links.foreach { case (index, link) =>
@@ -78,8 +78,9 @@ class TrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage, LinkWi
 //			} yield (text, pos)
 			val contextOption = Util.extractContext(wikiPage.plainText, index)
 
+
 			contextOption.foreach { context =>
-				out.collect(LinkWithContext(link.fullId, link.surfaceRepr, link.source, link.destination, context.toArray, link.posTags.toArray))
+				out.collect(Classifiable[TrainInfo](link.fullId, link.surfaceRepr, context.toArray, info = TrainInfo(link.source, link.destination, POS_TAG_GROUPS.map { group => if (group.exists(link.posTags.contains(_))) 1.0 else 0.0 })))
 			}
 		}
 //		trie.findAllInWithTrieHit(wikiPage.plainText).foreach { tokenHit =>

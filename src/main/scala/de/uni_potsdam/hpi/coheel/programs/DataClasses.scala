@@ -1,5 +1,6 @@
 package de.uni_potsdam.hpi.coheel.programs
 
+import de.uni_potsdam.hpi.coheel.datastructures.TrieHit
 import de.uni_potsdam.hpi.coheel.util.Util
 import scala.collection.mutable
 
@@ -21,11 +22,40 @@ object DataClasses {
 	case class Link(surface: String, surfaceRepr: String, posTags: Vector[String], source: String, destination: String, id: Int = newId()) {
 		def fullId: String = s"$id-${Util.id(source)}-${Util.id(surface)}"
 	}
-	case class LinkWithContext(fullId: String, surfaceRepr: String, source: String, destination: String, context: Array[String], posTags: Array[String])
+
+	/**
+	 * Classifiable keeps track of the feature data
+	 *
+	 * It is just an abstraction to use slightly different code at train and classification time
+	 * For example, at classification time, we need to keep track of the trie hit information, at training time we need to keep track of the gold standard
+	 */
+	case class Classifiable[T <: Info](id: String, surfaceRepr: String, context: Array[String], candidateEntity: String = "", surfaceProb: Double = -1.0, contextProb: Double = -1.0, info: T)
+
+	abstract class Info {
+		def stringInfo: List[String]
+		def extraFeatures(classifiable: Classifiable[_]): List[Double]
+	}
+
+	case class TrainInfo(source: String, destination: String, posTags: Array[Double]) extends Info {
+		override def stringInfo = List(source)
+		override def extraFeatures(classifiable: Classifiable[_]): List[Double] = {
+			posTags.toList ::: List(if (destination == classifiable.candidateEntity) 1.0 else 0.0)
+		}
+	}
+	case class ClassificationInfo(trieHit: TrieHit, posTags: Array[Double]) extends Info {
+		override def stringInfo: List[String] = List()
+		override def extraFeatures(classifiable: Classifiable[_]): List[Double] = List()
+	}
+
+
+
+//	case class LinkWithContext(fullId: String, surfaceRepr: String, source: String, destination: String, context: Array[String], posTags: Array[Double])
 	case class WordInDocument(document: String, word: String, count: Int)
 	case class LanguageModel(pageTitle: String, model: Map[String, Double])
 	case class WordCounts(word: WordInDocument, count: Int)
+
 	case class LinkCandidate(fullId: String, surfaceRepr: String, source: String, destination: String, candidateEntity: String, prob: Double, context: Array[String], posTagsScores: Array[Int])
+
 	case class LinkWithScores(fullId: String, surfaceRepr: String, source: String, destination: String, candidateEntity: String, posTagScores: Array[Double], promScore: Double, contextScore: Double)
 	case class LinkContextScore(id: Int, surfaceRepr: String, contextProb: Double)
 	case class DocumentCounts(document: String, count: Int)

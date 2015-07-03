@@ -2,6 +2,7 @@ package de.uni_potsdam.hpi.coheel.programs
 
 import java.lang.Iterable
 import java.util.Collections
+import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier.POS_TAG_GROUPS
 
 import de.uni_potsdam.hpi.coheel.io.Sample
 import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier
@@ -44,8 +45,8 @@ class ClassificationProgram extends NoParamCoheelProgram {
 
 		basicClassifierResults.printOnTaskManager("BASIC-CLASSIFIER-RESULTS")
 
-		trieHits.map { link =>
-			(link.fullId, link.surfaceRepr, link.source, link.destination, List[String](), link.posTags.deep)
+		trieHits.map { trieHit =>
+			(trieHit.id, trieHit.surfaceRepr, trieHit.info.trieHit, trieHit.info.posTags.deep)
 		}.printOnTaskManager("TRIE-HITS")
 
 
@@ -63,23 +64,24 @@ class ClassificationProgram extends NoParamCoheelProgram {
 
 }
 
-class ClassificationLinkFinderFlatMap extends SurfacesInTrieFlatMap[InputDocument, LinkWithContext] {
+class ClassificationLinkFinderFlatMap extends SurfacesInTrieFlatMap[InputDocument, Classifiable[ClassificationInfo]] {
 	var tokenHitCount: Int = 1
-	override def flatMap(document: InputDocument, out: Collector[LinkWithContext]): Unit = {
+	override def flatMap(document: InputDocument, out: Collector[Classifiable[ClassificationInfo]]): Unit = {
 		trie.findAllInWithTrieHit(document.tokens).foreach { trieHit =>
 			val contextOption = Util.extractContext(document.tokens, trieHit.startIndex)
 
 			contextOption.foreach { case context =>
 				val tags = document.tags.slice(trieHit.startIndex, trieHit.startIndex + trieHit.length).toArray
 				// TH for trie hit
-				out.collect(LinkWithContext(s"TH-${document.id}-$tokenHitCount", trieHit.s, "", destination = "", context.toArray, tags))
+				val id = s"TH-${document.id}-$tokenHitCount"
+				out.collect(Classifiable(id, trieHit.s, context.toArray, info = ClassificationInfo(trieHit, POS_TAG_GROUPS.map { group => if (group.exists(tags.contains(_))) 1.0 else 0.0 })))
 				tokenHitCount += 1
 			}
 		}
 	}
 }
 
-class ClassificationReduceFeatureLineGroup extends RichGroupReduceFunction[LinkWithScores, FeatureLine] {
+class ClassificationReduceFeatureLineGroup extends RichGroupReduceFunction[Classifiable[ClassificationInfo], FeatureLine] {
 
 	var seedClassifier: CoheelClassifier = null
 	var candidateClassifier: CoheelClassifier = null
@@ -90,7 +92,7 @@ class ClassificationReduceFeatureLineGroup extends RichGroupReduceFunction[LinkW
 		candidateClassifier = new CoheelClassifier(classifier)
 	}
 
-	override def reduce(candidatesIt: Iterable[LinkWithScores], out: Collector[FeatureLine]): Unit = {
+	override def reduce(candidatesIt: Iterable[Classifiable[ClassificationInfo]], out: Collector[FeatureLine]): Unit = {
 		val allCandidates = candidatesIt.asScala.toSeq
 		val features = new mutable.ArrayBuffer[FeatureLine](allCandidates.size)
 		FeatureProgramHelper.applyCoheelFunctions(allCandidates) { featureLine =>

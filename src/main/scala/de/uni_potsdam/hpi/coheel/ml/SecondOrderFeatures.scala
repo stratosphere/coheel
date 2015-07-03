@@ -1,12 +1,12 @@
 package de.uni_potsdam.hpi.coheel.ml
 
-import de.uni_potsdam.hpi.coheel.programs.DataClasses.LinkWithScores
+import de.uni_potsdam.hpi.coheel.programs.DataClasses.{Info, Classifiable, LinkWithScores}
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 trait SecondOrderFeatureFunction {
-	def apply(in: Seq[LinkWithScores])(field: LinkWithScores => Double): Seq[Double]
+	def apply(in: Seq[Classifiable[_]])(field: Classifiable[_] => Double): Seq[Double]
 
 }
 object SecondOrderFeatures {
@@ -16,7 +16,7 @@ object SecondOrderFeatures {
 	 */
 	val rank: SecondOrderFeatureFunction = {
 		new SecondOrderFeatureFunction {
-			override def apply(in: Seq[LinkWithScores])(field: (LinkWithScores) => Double): Seq[Double] = {
+			override def apply(in: Seq[Classifiable[_]])(field: (Classifiable[_]) => Double): Seq[Double] = {
 				val ranks = new ArrayBuffer[Double](in.size)
 				var lastValue = Double.NaN
 				var rank = 0
@@ -38,7 +38,7 @@ object SecondOrderFeatures {
 	 */
 	val deltaTop: SecondOrderFeatureFunction = {
 		new SecondOrderFeatureFunction {
-			override def apply(in: Seq[LinkWithScores])(field: (LinkWithScores) => Double): Seq[Double] = {
+			override def apply(in: Seq[Classifiable[_]])(field: (Classifiable[_]) => Double): Seq[Double] = {
 				val deltaTops = new ArrayBuffer[Double](in.size)
 				val topValue = field(in.head)
 				for (i <- 0 until in.size) {
@@ -51,7 +51,7 @@ object SecondOrderFeatures {
 
 	val deltaSucc: SecondOrderFeatureFunction = {
 		new SecondOrderFeatureFunction {
-			override def apply(in: Seq[LinkWithScores])(field: (LinkWithScores) => Double): Seq[Double] = {
+			override def apply(in: Seq[Classifiable[_]])(field: (Classifiable[_]) => Double): Seq[Double] = {
 				val deltaSuccs = new ArrayBuffer[Double](in.size)
 				val deltaSuccCache = mutable.Map[Double, Double]()
 				for (i <- 0 until in.size) {
