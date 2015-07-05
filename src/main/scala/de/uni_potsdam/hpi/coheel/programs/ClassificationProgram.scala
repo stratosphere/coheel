@@ -96,9 +96,9 @@ class ClassificationReduceFeatureLineGroup extends RichGroupReduceFunction[Class
 	var seedClassifier: CoheelClassifier = null
 	var candidateClassifier: CoheelClassifier = null
 
-	val modelPath = if (CoheelProgram.runsOffline()) "NaiveBayes-10FN.model" else "/home/hadoop10/data/RandomForest-10FN.model"
-
 	override def open(params: Configuration): Unit = {
+		val modelPath = if (CoheelProgram.runsOffline()) "NaiveBayes-10FN.model" else "/home/hadoop10/data/RandomForest-10FN.model"
+		
 		log.info(s"Loading model with ${FreeMemory.get(true)} MB")
 
 		val d1 = new Date
