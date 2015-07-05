@@ -1,6 +1,6 @@
 package de.uni_potsdam.hpi.coheel.ml
 
-import de.uni_potsdam.hpi.coheel.programs.DataClasses.{Info, Classifiable, LinkWithScores}
+import de.uni_potsdam.hpi.coheel.programs.DataClasses.{Info, Classifiable}
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
