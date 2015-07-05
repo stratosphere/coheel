@@ -2,6 +2,7 @@ package de.uni_potsdam.hpi.coheel.programs
 
 import java.lang.Iterable
 import java.util.Collections
+import de.uni_potsdam.hpi.coheel.datastructures.TrieHit
 import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier.POS_TAG_GROUPS
 
 import de.uni_potsdam.hpi.coheel.io.Sample
@@ -43,11 +44,12 @@ class ClassificationProgram extends NoParamCoheelProgram {
 		val rawFeatures = FeatureProgramHelper.buildFeaturesPerGroup(this, trieHits)
 		val basicClassifierResults = rawFeatures.reduceGroup(new ClassificationReduceFeatureLineGroup)
 
-		basicClassifierResults.printOnTaskManager("BASIC-CLASSIFIER-RESULTS")
+		basicClassifierResults.writeAsTsv(classificationPath)
 
-		trieHits.map { trieHit =>
+		val trieHitOutput = trieHits.map { trieHit =>
 			(trieHit.id, trieHit.surfaceRepr, trieHit.info.trieHit, trieHit.info.posTags.deep)
-		}.printOnTaskManager("TRIE-HITS")
+		}
+		trieHitOutput.printOnTaskManager("TRIE-HITS")
 
 
 //		val result = documents.crossWithHuge(surfaces).flatMap { value =>
@@ -86,6 +88,8 @@ class ClassificationReduceFeatureLineGroup extends RichGroupReduceFunction[Class
 	var seedClassifier: CoheelClassifier = null
 	var candidateClassifier: CoheelClassifier = null
 
+	val modelPath = if (CoheelProgram.runsOffline()) "NaiveBayes-10FN.model" else "/home/hadoop10/data/RandomForest-10FN.model"
+
 	override def open(params: Configuration): Unit = {
 		val classifier = SerializationHelper.read("NaiveBayes-10FN.model").asInstanceOf[Classifier]
 		seedClassifier = new CoheelClassifier(classifier)
@@ -97,7 +101,7 @@ class ClassificationReduceFeatureLineGroup extends RichGroupReduceFunction[Class
 		val features = new mutable.ArrayBuffer[FeatureLine[ClassificationInfo]](allCandidates.size)
 		FeatureProgramHelper.applyCoheelFunctions(allCandidates) { featureLine =>
 			// TODO: Do something with this TrieInfo
-			featureLine.info.trieHit
+			featureLine.model
 			features.append(featureLine)
 		}
 		seedClassifier.classifyResults(features).foreach { result =>

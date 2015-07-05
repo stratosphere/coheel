@@ -70,6 +70,8 @@ class CoheelClassifier(classifier: Classifier) {
 		var positivePredictions = List[FeatureLine[ClassificationInfo]]()
 		featureLine.foreach { featureLine =>
 			println(featureLine.features)
+			println(featureLine.features.size)
+			println(NUMBER_OF_FEATURES + 1)
 			assert(featureLine.features.size == NUMBER_OF_FEATURES + 1)
 			val instance = buildInstance(featureLine)
 			instance.setDataset(instances)

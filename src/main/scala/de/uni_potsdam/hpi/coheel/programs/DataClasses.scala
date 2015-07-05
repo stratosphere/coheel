@@ -50,7 +50,9 @@ object DataClasses {
 	// Training
 
 	/**
-	 * Classifiable keeps track of one instance of feature data, along with house-keeping information about where this data comes from.
+	 * Classifiable keeps track of the surface and context (+ second order functions) features from an instance.
+	 * Furthermore, by a generic info element it tracks extra information about the instance.
+	 * An instance may also add further features (see below), e.g. pos tags, which are not directly linked to the second order functions.
 	 *
 	 * It is just an abstraction to use slightly different code at train and classification time
 	 * For example, at classification time, we need to keep track of the trie hit information, at training time we need to keep track of the gold standard.
@@ -58,20 +60,22 @@ object DataClasses {
 	 */
 	case class Classifiable[T <: Info](id: String, surfaceRepr: String, context: Array[String], candidateEntity: String = "", surfaceProb: Double = -1.0, contextProb: Double = -1.0, info: T)
 
+
+	/**
+	 * Tracks extra information, both about the model of an instance and about further features, which are not directly linked to second order functions.
+	 */
 	abstract class Info {
-		def stringInfo: List[String]
-		def extraFeatures(classifiable: Classifiable[_]): List[Double]
+		def furtherFeatures(classifiable: Classifiable[_]): List[Double]
 	}
 
 	case class TrainInfo(source: String, destination: String, posTags: Array[Double]) extends Info {
-		override def stringInfo = List(source)
-		override def extraFeatures(classifiable: Classifiable[_]): List[Double] = {
+		def modelInfo: List[String] = List(source, destination)
+		override def furtherFeatures(classifiable: Classifiable[_]): List[Double] = {
 			posTags.toList ::: List(if (destination == classifiable.candidateEntity) 1.0 else 0.0)
 		}
 	}
 	case class ClassificationInfo(trieHit: TrieHit, posTags: Array[Double]) extends Info {
-		override def stringInfo: List[String] = List()
-		override def extraFeatures(classifiable: Classifiable[_]): List[Double] = List()
+		override def furtherFeatures(classifiable: Classifiable[_]): List[Double] = List()
 	}
 
 	object ClassificationType extends Enumeration {
@@ -81,7 +85,12 @@ object DataClasses {
 
 
 	case class TrainingData(fullId: String, surfaceRepr: String, source: String, candidateEntity: String, features: Array[Double])
-	case class FeatureLine[T <: Info](stringInfo: Seq[String], features: Seq[Double], info: T)
+
+	/**
+	 * Keeps track of the features of an instance, and it's accompanying real-world information.
+	 * Features are passed to the classifier, model can be used to identify which element was classified.
+	 */
+	case class FeatureLine[T <: Info](id: String, surfaceRepr: String, candidateEntity: String, model: T, features: Seq[Double])
 
 	// Classification
 	case class InputDocument(id: String, tokens: mutable.ArrayBuffer[String], tags: mutable.ArrayBuffer[String])

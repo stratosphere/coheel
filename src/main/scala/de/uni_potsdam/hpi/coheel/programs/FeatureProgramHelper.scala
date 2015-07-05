@@ -26,12 +26,11 @@ object FeatureProgramHelper {
 
 			surfaceOrder.zipWithIndex.foreach { case (classifiable, i) =>
 				import classifiable._
-				val stringInfo = List(id, surfaceRepr, candidateEntity) ::: info.stringInfo
 				val features = List(
 					surfaceProb, surfaceRank(i), surfaceDeltaTops(i), surfaceDeltaSuccs(i),
 					contextProb, contextRank(i), contextDeltaTops(i), contextDeltaSuccs(i)
-				) ::: classifiable.info.extraFeatures(classifiable)
-				featureLineIteratorFunction(FeatureLine[T](stringInfo, features, info))
+				) ::: classifiable.info.furtherFeatures(classifiable)
+				featureLineIteratorFunction(FeatureLine[T](id, surfaceRepr, candidateEntity, classifiable.info, features))
 			}
 		}
 	}

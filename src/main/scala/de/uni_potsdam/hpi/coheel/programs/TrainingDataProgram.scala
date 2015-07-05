@@ -47,7 +47,9 @@ class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 	def createTrainingDataGroupWise(candidatesIt: Iterator[Classifiable[TrainInfo]], out: Collector[String]): Unit = {
 		val allCandidates = candidatesIt.toSeq
 		FeatureProgramHelper.applyCoheelFunctions(allCandidates) { featureLine =>
-			val output = s"${featureLine.stringInfo.mkString("\t")}\t${featureLine.features.mkString("\t")}"
+			import featureLine._
+			def stringInfo = List(id, surfaceRepr, candidateEntity) ::: featureLine.model.modelInfo
+			val output = s"${stringInfo.mkString("\t")}\t${featureLine.features.mkString("\t")}"
 			out.collect(output)
 		}
 	}
