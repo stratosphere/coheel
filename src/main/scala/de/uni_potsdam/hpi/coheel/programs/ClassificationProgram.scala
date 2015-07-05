@@ -14,6 +14,7 @@ import org.apache.flink.api.scala._
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import org.apache.flink.configuration.Configuration
+import org.apache.flink.core.fs.FileSystem
 import weka.classifiers.Classifier
 import weka.core.SerializationHelper
 import scala.collection.JavaConverters._
@@ -46,7 +47,7 @@ class ClassificationProgram extends NoParamCoheelProgram {
 
 		basicClassifierResults.map { featureLine =>
 			s"${featureLine.surfaceRepr} at ${featureLine.model.trieHit} is probably ${featureLine.candidateEntity}"
-		}.writeAsTsv(classificationPath)
+		}.writeAsText(classificationPath, FileSystem.WriteMode.OVERWRITE)
 
 		if (runsOffline()) {
 			val trieHitOutput = trieHits.map { trieHit =>
