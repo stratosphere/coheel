@@ -75,7 +75,7 @@ object DataClasses {
 		}
 	}
 	case class ClassificationInfo(trieHit: TrieHit, posTags: Array[Double]) extends Info {
-		override def furtherFeatures(classifiable: Classifiable[_]): List[Double] = List()
+		override def furtherFeatures(classifiable: Classifiable[_]): List[Double] = posTags.toList
 	}
 
 	object ClassificationType extends Enumeration {

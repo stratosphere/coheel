@@ -69,10 +69,7 @@ class CoheelClassifier(classifier: Classifier) {
 	def classifyResults(featureLine: mutable.ArrayBuffer[FeatureLine[ClassificationInfo]]): Option[FeatureLine[ClassificationInfo]] = {
 		var positivePredictions = List[FeatureLine[ClassificationInfo]]()
 		featureLine.foreach { featureLine =>
-			println(featureLine.features)
-			println(featureLine.features.size)
-			println(NUMBER_OF_FEATURES + 1)
-			assert(featureLine.features.size == NUMBER_OF_FEATURES + 1)
+			assert(featureLine.features.size == NUMBER_OF_FEATURES)
 			val instance = buildInstance(featureLine)
 			instance.setDataset(instances)
 			if (classifier.classifyInstance(instance) == POSITIVE_CLASS) {

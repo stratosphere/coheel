@@ -44,12 +44,16 @@ class ClassificationProgram extends NoParamCoheelProgram {
 		val rawFeatures = FeatureProgramHelper.buildFeaturesPerGroup(this, trieHits)
 		val basicClassifierResults = rawFeatures.reduceGroup(new ClassificationReduceFeatureLineGroup)
 
-		basicClassifierResults.writeAsTsv(classificationPath)
+		basicClassifierResults.map { featureLine =>
+			s"${featureLine.surfaceRepr} at ${featureLine.model.trieHit} is probably ${featureLine.candidateEntity}"
+		}.writeAsTsv(classificationPath)
 
-		val trieHitOutput = trieHits.map { trieHit =>
-			(trieHit.id, trieHit.surfaceRepr, trieHit.info.trieHit, trieHit.info.posTags.deep)
+		if (runsOffline()) {
+			val trieHitOutput = trieHits.map { trieHit =>
+				(trieHit.id, trieHit.surfaceRepr, trieHit.info.trieHit, trieHit.info.posTags.deep)
+			}
+			trieHitOutput.printOnTaskManager("TRIE-HITS")
 		}
-		trieHitOutput.printOnTaskManager("TRIE-HITS")
 
 
 //		val result = documents.crossWithHuge(surfaces).flatMap { value =>
@@ -101,7 +105,6 @@ class ClassificationReduceFeatureLineGroup extends RichGroupReduceFunction[Class
 		val features = new mutable.ArrayBuffer[FeatureLine[ClassificationInfo]](allCandidates.size)
 		FeatureProgramHelper.applyCoheelFunctions(allCandidates) { featureLine =>
 			// TODO: Do something with this TrieInfo
-			featureLine.model
 			features.append(featureLine)
 		}
 		seedClassifier.classifyResults(features).foreach { result =>
