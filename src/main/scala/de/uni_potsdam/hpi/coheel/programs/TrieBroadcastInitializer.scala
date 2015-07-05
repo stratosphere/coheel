@@ -44,8 +44,7 @@ abstract class SurfacesInTrieFlatMap[I, O] extends RichFlatMapFunction[I, O] {
 		val d1 = new Date
 
 		trie = getRuntimeContext.getBroadcastVariableWithInitializer(SurfacesInTrieFlatMap.BROADCAST_SURFACES, new TrieBroadcastInitializer)
-		log.info(s"Finished trie initialization in ${(new Date().getTime - d1.getTime) / 1000} s")
-		log.info(s"${FreeMemory.get(true)} MB of memory remaining")
+		log.info(s"Finished trie with ${FreeMemory.get(true)} MB in ${(new Date().getTime - d1.getTime) / 1000} s")
 	}
 
 }

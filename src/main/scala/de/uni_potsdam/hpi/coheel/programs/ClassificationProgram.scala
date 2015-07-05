@@ -1,8 +1,9 @@
 package de.uni_potsdam.hpi.coheel.programs
 
 import java.lang.Iterable
-import java.util.Collections
+import java.util.{Date, Collections}
 import de.uni_potsdam.hpi.coheel.datastructures.TrieHit
+import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier.POS_TAG_GROUPS
 
 import de.uni_potsdam.hpi.coheel.io.Sample
@@ -15,6 +16,7 @@ import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.core.fs.FileSystem
+import org.apache.log4j.Logger
 import weka.classifiers.Classifier
 import weka.core.SerializationHelper
 import scala.collection.JavaConverters._
@@ -90,15 +92,21 @@ class ClassificationLinkFinderFlatMap extends SurfacesInTrieFlatMap[InputDocumen
 
 class ClassificationReduceFeatureLineGroup extends RichGroupReduceFunction[Classifiable[ClassificationInfo], FeatureLine[ClassificationInfo]] {
 
+	def log = Logger.getLogger(getClass)
 	var seedClassifier: CoheelClassifier = null
 	var candidateClassifier: CoheelClassifier = null
 
 	val modelPath = if (CoheelProgram.runsOffline()) "NaiveBayes-10FN.model" else "/home/hadoop10/data/RandomForest-10FN.model"
 
 	override def open(params: Configuration): Unit = {
+		log.info(s"Loading model with ${FreeMemory.get(true)} MB")
+
+		val d1 = new Date
 		val classifier = SerializationHelper.read("NaiveBayes-10FN.model").asInstanceOf[Classifier]
 		seedClassifier = new CoheelClassifier(classifier)
 		candidateClassifier = new CoheelClassifier(classifier)
+
+		log.info(s"Finished model with ${FreeMemory.get(true)} MB in ${(new Date().getTime - d1.getTime) / 1000} s")
 	}
 
 	override def reduce(candidatesIt: Iterable[Classifiable[ClassificationInfo]], out: Collector[FeatureLine[ClassificationInfo]]): Unit = {
