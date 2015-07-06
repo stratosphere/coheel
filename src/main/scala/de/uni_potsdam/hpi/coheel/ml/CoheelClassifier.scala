@@ -76,7 +76,8 @@ class CoheelClassifier(classifier: Classifier) {
 				positivePredictions ::= featureLine
 			}
 		}
-		if (positivePredictions.size == 1)
+		// TODO: Change to return only if there is _exactly_ one positive prediction
+		if (positivePredictions.size >= 1)
 			positivePredictions.headOption
 		else
 			None

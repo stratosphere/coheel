@@ -97,14 +97,14 @@ class ClassificationReduceFeatureLineGroup extends RichGroupReduceFunction[Class
 	var candidateClassifier: CoheelClassifier = null
 
 	override def open(params: Configuration): Unit = {
-		val modelPath = if (CoheelProgram.runsOffline()) "NaiveBayes-10FN.model" else "/home/hadoop10/data/RandomForest-10FN.model"
+		val seedPath = if (CoheelProgram.runsOffline()) "NaiveBayes-10FN.model" else "/home/hadoop10/data/RandomForest-10FN.model"
+		val candidatePath = if (CoheelProgram.runsOffline()) "NaiveBayes-10FN.model" else "/home/hadoop10/data/RandomForest-10FP.model"
 
 		log.info(s"Loading model with ${FreeMemory.get(true)} MB")
 
 		val d1 = new Date
-		val classifier = SerializationHelper.read(modelPath).asInstanceOf[Classifier]
-		seedClassifier = new CoheelClassifier(classifier)
-		candidateClassifier = new CoheelClassifier(classifier)
+		seedClassifier      = new CoheelClassifier(SerializationHelper.read(seedPath).asInstanceOf[Classifier])
+		candidateClassifier = new CoheelClassifier(SerializationHelper.read(candidatePath).asInstanceOf[Classifier])
 
 		log.info(s"Finished model with ${FreeMemory.get(true)} MB in ${(new Date().getTime - d1.getTime) / 1000} s")
 	}
@@ -116,7 +116,7 @@ class ClassificationReduceFeatureLineGroup extends RichGroupReduceFunction[Class
 			// TODO: Do something with this TrieInfo
 			features.append(featureLine)
 		}
-		seedClassifier.classifyResults(features).foreach { result =>
+		candidateClassifier.classifyResults(features).foreach { result =>
 			out.collect(result)
 		}
 

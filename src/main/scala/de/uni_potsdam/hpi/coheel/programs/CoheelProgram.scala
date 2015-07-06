@@ -25,8 +25,12 @@ object CoheelLogger {
 object CoheelProgram {
 
 	def runsOffline(): Boolean = {
-		val fileType = FlinkProgramRunner.config.getString("type")
-		fileType == "file"
+		if (FlinkProgramRunner.config == null) {
+			false
+		} else {
+			val fileType = FlinkProgramRunner.config.getString("type")
+			fileType == "file"
+		}
 	}
 
 	val LINK_SPLITTER = "\0"
