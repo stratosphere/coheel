@@ -1,5 +1,7 @@
 package de.uni_potsdam.hpi.coheel.programs
 
+import java.net.InetAddress
+
 import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.io.{IteratorReader, WikiPageInputFormat}
@@ -31,6 +33,15 @@ object CoheelProgram {
 			val fileType = FlinkProgramRunner.config.getString("type")
 			fileType == "file"
 		}
+	}
+
+	def workerId(): Int = {
+		val addr = InetAddress.getLocalHost
+		val hostname = addr.getHostName
+		println(hostname)
+		assert(hostname.contains("tenem"))
+		val tenemId = hostname.slice(hostname.length - 2, hostname.length).toInt
+		tenemId - 11
 	}
 
 	val LINK_SPLITTER = "\0"
