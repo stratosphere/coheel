@@ -35,14 +35,7 @@ class ClassificationProgram extends NoParamCoheelProgram {
 			out.collect(document)
 		}
 
-		val currentFile = if (runsOffline()) {
-			""
-		} else {
-			if (CoheelProgram.workerId() % 2 == 0)
-				s"/12345"
-			else
-				s"/678910"
-		}
+		val currentFile = if (runsOffline()) "" else s"/678910"
 		println(s"Current file is >>$currentFile<<")
 
 		// TODO: Call this with different current files on different nodes?

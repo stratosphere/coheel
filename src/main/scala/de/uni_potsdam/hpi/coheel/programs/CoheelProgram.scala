@@ -38,10 +38,13 @@ object CoheelProgram {
 	def workerId(): Int = {
 		val addr = InetAddress.getLocalHost
 		val hostname = addr.getHostName
-		println(hostname)
 		assert(hostname.contains("tenem"))
-		val tenemId = hostname.slice(hostname.length - 2, hostname.length).toInt
-		tenemId - 11
+		if (hostname == "tenemhead2")
+			0
+		else {
+			val tenemId = hostname.slice(hostname.length - 2, hostname.length).toInt
+			tenemId
+		}
 	}
 
 	val LINK_SPLITTER = "\0"
