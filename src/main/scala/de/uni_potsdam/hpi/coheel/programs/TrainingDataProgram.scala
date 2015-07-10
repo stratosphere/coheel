@@ -14,7 +14,7 @@ import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier.POS_TAG_GROUPS
 
 class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 
-	val SAMPLE_FRACTION = if (runsOffline()) 100 else 10000
+	val SAMPLE_FRACTION = if (runsOffline()) 100 else 5000
 
 	val params = if (runsOffline()) List("") else List("12345", "678910")
 	override def getDescription = "Wikipedia Extraction: Build training data"
