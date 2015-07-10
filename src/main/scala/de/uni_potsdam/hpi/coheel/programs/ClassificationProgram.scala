@@ -25,20 +25,36 @@ import scala.collection.JavaConverters._
 import org.apache.flink.util.Collector
 import scala.collection.mutable
 import scala.io.Source
+import scala.util.Random
 
 class ClassificationProgram extends NoParamCoheelProgram {
 
 	override def getDescription: String = "CohEEL Classification"
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
-		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_1, Sample.ANGELA_MERKEL_SAMPLE_TEXT_2).flatMap { (text, out: Collector[InputDocument]) =>
+		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_1, Sample.ANGELA_MERKEL_SAMPLE_TEXT_2).name("Documents")
+		val tokenizedDocuments = documents.flatMap { (text, out: Collector[InputDocument]) =>
 			val tokenizer = TokenizerHelper.tokenizeWithPositionInfo(text, null)
-			val document = InputDocument(Util.id(text).toString, tokenizer.getTokens, tokenizer.getTags)
+			val document = InputDocument(Util.id(text).toString, tokenizer.getTokens, tokenizer.getTags, "12345")
 			// TODO: Output several documents, to allow for partitioning on two nodes
 			out.collect(document)
+			out.collect(document.copy(surfaceFile = "678910"))
 		}
+		tokenizedDocuments.partitionCustom(new Partitioner[String] {
+			override def partition(surfaceFile: String, numPartitions: Int): Int = {
+				// TODO: Do this more intelligently, e.g. do not redistribute if already on correct node.
+				if (surfaceFile == "12345") {
+					new Random().nextInt(5)
+				} else if (surfaceFile == "678910") {
+					5 + new Random().nextInt(5)
+				} else {
+					throw new RuntimeException(s"Unkown surface file $surfaceFile")
+				}
 
-		val trieHits = documents
+			}
+		}, "surfaceFile")
+
+		val trieHits = tokenizedDocuments
 			.flatMap(new ClassificationLinkFinderFlatMap)
 			.name("Possible links")
 
@@ -86,7 +102,7 @@ class ClassificationLinkFinderFlatMap extends RichFlatMapFunction[InputDocument,
 		val surfaces = Source.fromFile(surfacesFile).getLines().flatMap { line =>
 			CoheelProgram.parseSurfaceProbsLine(line)
 		}
-		log.info(s"On subtask id #${getRuntimeContext.getIndexOfThisSubtask}")
+		log.info(s"On subtask id #${getRuntimeContext.getIndexOfThisSubtask} with file ${surfacesFile.getName}")
 		log.info(s"Building trie with ${FreeMemory.get(true)} MB")
 		val d1 = new Date
 		trie = new NewTrie

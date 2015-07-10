@@ -93,7 +93,7 @@ object DataClasses {
 	case class FeatureLine[T <: Info](id: String, surfaceRepr: String, candidateEntity: String, model: T, features: Seq[Double])
 
 	// Classification
-	case class InputDocument(id: String, tokens: mutable.ArrayBuffer[String], tags: mutable.ArrayBuffer[String])
+	case class InputDocument(id: String, tokens: mutable.ArrayBuffer[String], tags: mutable.ArrayBuffer[String], surfaceFile: String)
 	case class SurfaceProb(surface: String, destination: String, prob: Double)
 
 	var currentId = 0
