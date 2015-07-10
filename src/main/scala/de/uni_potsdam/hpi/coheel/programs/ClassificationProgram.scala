@@ -27,6 +27,16 @@ import scala.collection.mutable
 import scala.io.Source
 import scala.util.Random
 
+class DocumentPartitioner extends Partitioner[String] {
+	override def partition(key: String, numPartitions: Int): Int = {
+		if (key == "12345")
+			0
+		else if (key == "678910") {
+			if (CoheelProgram.runsOffline()) 0 else 9
+		} else
+			throw new RuntimeException("Unknown surface file")
+	}
+}
 class ClassificationProgram extends NoParamCoheelProgram {
 
 	override def getDescription: String = "CohEEL Classification"
@@ -35,24 +45,16 @@ class ClassificationProgram extends NoParamCoheelProgram {
 		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_1, Sample.ANGELA_MERKEL_SAMPLE_TEXT_2).name("Documents")
 		val tokenizedDocuments = documents.flatMap { (text, out: Collector[InputDocument]) =>
 			val tokenizer = TokenizerHelper.tokenizeWithPositionInfo(text, null)
-			val document = InputDocument(Util.id(text).toString, tokenizer.getTokens, tokenizer.getTags, "12345")
-			out.collect(document)
-			out.collect(document.copy(surfaceFile = "678910"))
-		}.partitionCustom(new Partitioner[String] {
-			override def partition(surfaceFile: String, numPartitions: Int): Int = {
-				// TODO: Do this more intelligently, e.g. do not redistribute if already on correct node.
-				if (surfaceFile == "12345") {
-					new Random().nextInt(5)
-				} else if (surfaceFile == "678910") {
-					5 + new Random().nextInt(5)
-				} else {
-					throw new RuntimeException(s"Unkown surface file $surfaceFile")
-				}
+			val id = Util.id(text).toString
+			val tokens = tokenizer.getTokens
+			val tags = tokenizer.getTags
+			out.collect(InputDocument(id, tokens, tags, "12345"))
+			out.collect(InputDocument(id, tokens, tags, "678910"))
+		}
 
-			}
-		}, "surfaceFile")
+		val partitioned = tokenizedDocuments.partitionCustom(new DocumentPartitioner, "surfaceFile")
 
-		val trieHits = tokenizedDocuments
+		val trieHits = partitioned
 			.flatMap(new ClassificationLinkFinderFlatMap)
 			.name("Possible links")
 
@@ -85,6 +87,7 @@ class ClassificationLinkFinderFlatMap extends RichFlatMapFunction[InputDocument,
 
 	def log = Logger.getLogger(getClass)
 	var trie: NewTrie = _
+	var fileName: String = _
 
 	override def open(params: Configuration): Unit = {
 		val surfacesFile = if (CoheelProgram.runsOffline()) {
@@ -113,6 +116,8 @@ class ClassificationLinkFinderFlatMap extends RichFlatMapFunction[InputDocument,
 
 
 	override def flatMap(document: InputDocument, out: Collector[Classifiable[ClassificationInfo]]): Unit = {
+		if (!CoheelProgram.runsOffline())
+			assert(fileName == document.surfaceFile)
 		trie.findAllInWithTrieHit(document.tokens).foreach { trieHit =>
 			val contextOption = Util.extractContext(document.tokens, trieHit.startIndex)
 
