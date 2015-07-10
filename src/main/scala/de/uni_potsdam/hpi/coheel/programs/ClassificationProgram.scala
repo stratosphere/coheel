@@ -46,10 +46,10 @@ class ClassificationProgram extends NoParamCoheelProgram {
 		val basicClassifierResults = rawFeatures.reduceGroup(new ClassificationFeatureLineReduceGroup)
 
 
-		rawFeatures.reduceGroup { (classifiablesIt, out: Collector[(String, String, List[String], Double, Double, Int, Int)]) =>
+		rawFeatures.reduceGroup { (classifiablesIt, out: Collector[(String, String, Double, Double, Int, Int)]) =>
 			classifiablesIt.foreach { classifiable =>
 				import classifiable._
-				out.collect((surfaceRepr, candidateEntity, context.toList, surfaceProb, contextProb, info.trieHit.startIndex, info.trieHit.length))
+				out.collect((surfaceRepr, candidateEntity, surfaceProb, contextProb, info.trieHit.startIndex, info.trieHit.length))
 			}
 		}.writeAsTsv(rawFeaturesPath)
 
