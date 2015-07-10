@@ -32,7 +32,7 @@ class DocumentPartitioner extends Partitioner[String] {
 		if (key == "12345")
 			0
 		else if (key == "678910") {
-			if (CoheelProgram.runsOffline()) 0 else 9
+			if (CoheelProgram.runsOffline()) 0 else 8
 		} else
 			throw new RuntimeException("Unknown surface file")
 	}
@@ -116,8 +116,8 @@ class ClassificationLinkFinderFlatMap extends RichFlatMapFunction[InputDocument,
 
 
 	override def flatMap(document: InputDocument, out: Collector[Classifiable[ClassificationInfo]]): Unit = {
-		if (!CoheelProgram.runsOffline())
-			assert(fileName == document.surfaceFile)
+		if (!CoheelProgram.runsOffline() && fileName == document.surfaceFile)
+			log.error(s"Filename '$fileName' is not equal to surface file '${document.surfaceFile}'")
 		trie.findAllInWithTrieHit(document.tokens).foreach { trieHit =>
 			val contextOption = Util.extractContext(document.tokens, trieHit.startIndex)
 
