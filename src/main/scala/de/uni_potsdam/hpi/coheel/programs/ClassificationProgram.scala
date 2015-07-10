@@ -36,11 +36,9 @@ class ClassificationProgram extends NoParamCoheelProgram {
 		val tokenizedDocuments = documents.flatMap { (text, out: Collector[InputDocument]) =>
 			val tokenizer = TokenizerHelper.tokenizeWithPositionInfo(text, null)
 			val document = InputDocument(Util.id(text).toString, tokenizer.getTokens, tokenizer.getTags, "12345")
-			// TODO: Output several documents, to allow for partitioning on two nodes
 			out.collect(document)
 			out.collect(document.copy(surfaceFile = "678910"))
-		}
-		tokenizedDocuments.partitionCustom(new Partitioner[String] {
+		}.partitionCustom(new Partitioner[String] {
 			override def partition(surfaceFile: String, numPartitions: Int): Int = {
 				// TODO: Do this more intelligently, e.g. do not redistribute if already on correct node.
 				if (surfaceFile == "12345") {
