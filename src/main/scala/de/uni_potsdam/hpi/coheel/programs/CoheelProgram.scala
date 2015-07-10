@@ -25,6 +25,19 @@ object CoheelLogger {
 	val log: Logger = Logger.getLogger(getClass)
 }
 object CoheelProgram {
+	import CoheelLogger._
+
+	def parseSurfaceProbsLine(line: String): Option[String] = {
+		val split = line.split('\t')
+		if (split.length == 3)
+			Some(split(0))
+		else {
+			log.warn(s"Discarding '${split.deep}' because split size not correct")
+			log.warn(line)
+			None
+		}
+
+	}
 
 	def runsOffline(): Boolean = {
 		if (FlinkProgramRunner.config == null) {
@@ -145,12 +158,8 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 		environment.readTextFile(surfaceDocumentCountsPath + subFile).name("Subset of Surfaces")
 			.flatMap(new RichFlatMapFunction[String, String] {
 			override def flatMap(line: String, out: Collector[String]): Unit = {
-				val split = line.split('\t')
-				if (split.length == 3)
-					out.collect(split(0))
-				else {
-					log.warn(s"Discarding '${split.deep}' because split size not correct")
-					log.warn(line)
+				CoheelProgram.parseSurfaceProbsLine(line).foreach { surface =>
+					out.collect(surface)
 				}
 			}
 		}).name("Parsed Surfaces")

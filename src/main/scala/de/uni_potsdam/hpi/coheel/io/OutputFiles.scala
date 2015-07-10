@@ -40,6 +40,7 @@ object OutputFiles {
 	lazy val surfaceEvaluationPath            = s"$location://${outputPath}surface-evaluation.wiki"
 
 	lazy val classificationPath               = s"$location://${outputPath}classification.wiki"
+	lazy val trieHitPath                      = s"$location://${outputPath}trie-hits.wiki"
 
 	lazy val pageRankPath                     = s"$location://${outputPath}page-rank.wiki"
 

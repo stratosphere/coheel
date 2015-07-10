@@ -1,8 +1,10 @@
 package de.uni_potsdam.hpi.coheel.programs
 
+import java.io.File
 import java.lang.Iterable
 import java.util.{Date, Collections}
-import de.uni_potsdam.hpi.coheel.datastructures.TrieHit
+import de.hpi.util.trie.Trie
+import de.uni_potsdam.hpi.coheel.datastructures.{NewTrie, TrieHit}
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier.POS_TAG_GROUPS
 
@@ -10,7 +12,7 @@ import de.uni_potsdam.hpi.coheel.io.Sample
 import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier
 import de.uni_potsdam.hpi.coheel.util.Util
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
-import org.apache.flink.api.common.functions.{RichGroupReduceFunction, Partitioner}
+import org.apache.flink.api.common.functions.{RichFlatMapFunction, RichGroupReduceFunction, Partitioner}
 import org.apache.flink.api.scala._
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
@@ -22,6 +24,7 @@ import weka.core.SerializationHelper
 import scala.collection.JavaConverters._
 import org.apache.flink.util.Collector
 import scala.collection.mutable
+import scala.io.Source
 
 class ClassificationProgram extends NoParamCoheelProgram {
 
@@ -35,15 +38,8 @@ class ClassificationProgram extends NoParamCoheelProgram {
 			out.collect(document)
 		}
 
-		val currentFile = if (runsOffline()) "" else s"/678910"
-		println(s"Current file is >>$currentFile<<")
-
-		// TODO: Call this with different current files on different nodes?
-		val surfaces = readSurfaces(currentFile)
-
 		val trieHits = documents
 			.flatMap(new ClassificationLinkFinderFlatMap)
-			.withBroadcastSet(surfaces, SurfacesInTrieFlatMap.BROADCAST_SURFACES)
 			.name("Possible links")
 
 		val rawFeatures = FeatureProgramHelper.buildFeaturesPerGroup(this, trieHits)
@@ -53,11 +49,13 @@ class ClassificationProgram extends NoParamCoheelProgram {
 			s">${featureLine.surfaceRepr}< at ${featureLine.model.trieHit} is probably ${featureLine.candidateEntity}"
 		}.writeAsText(classificationPath, FileSystem.WriteMode.OVERWRITE)
 
+		val trieHitOutput = trieHits.map { trieHit =>
+			(trieHit.id, trieHit.surfaceRepr, trieHit.info.trieHit, trieHit.info.posTags.deep)
+		}
 		if (runsOffline()) {
-			val trieHitOutput = trieHits.map { trieHit =>
-				(trieHit.id, trieHit.surfaceRepr, trieHit.info.trieHit, trieHit.info.posTags.deep)
-			}
 			trieHitOutput.printOnTaskManager("TRIE-HITS")
+		} else {
+			trieHitOutput.writeAsTsv(trieHitPath)
 		}
 
 
@@ -75,8 +73,36 @@ class ClassificationProgram extends NoParamCoheelProgram {
 
 }
 
-class ClassificationLinkFinderFlatMap extends SurfacesInTrieFlatMap[InputDocument, Classifiable[ClassificationInfo]] {
+class ClassificationLinkFinderFlatMap extends RichFlatMapFunction[InputDocument, Classifiable[ClassificationInfo]] {
 	var tokenHitCount: Int = 1
+
+	def log = Logger.getLogger(getClass)
+	var trie: NewTrie = _
+
+	override def open(params: Configuration): Unit = {
+		val surfacesFile = if (CoheelProgram.runsOffline()) {
+			new File("output/surface-probs.wiki")
+		} else {
+			val file = new File("/home/hadoop10/data/coheel/12345")
+			if (file.exists())
+				file
+			else
+				new File("/home/hadoop10/data/coheel/678910")
+		}
+		val surfaces = Source.fromFile(surfacesFile).getLines().flatMap { line =>
+			CoheelProgram.parseSurfaceProbsLine(line)
+		}
+		log.info(s"Building trie with ${FreeMemory.get(true)} MB")
+		val d1 = new Date
+		trie = new NewTrie
+		surfaces.foreach { surface =>
+			trie.add(surface)
+		}
+		log.info(s"Finished trie with ${FreeMemory.get(true)} MB in ${(new Date().getTime - d1.getTime) / 1000} s")
+	}
+
+
+
 	override def flatMap(document: InputDocument, out: Collector[Classifiable[ClassificationInfo]]): Unit = {
 		trie.findAllInWithTrieHit(document.tokens).foreach { trieHit =>
 			val contextOption = Util.extractContext(document.tokens, trieHit.startIndex)
@@ -99,8 +125,8 @@ class ClassificationReduceFeatureLineGroup extends RichGroupReduceFunction[Class
 	var candidateClassifier: CoheelClassifier = null
 
 	override def open(params: Configuration): Unit = {
-		val seedPath = if (CoheelProgram.runsOffline()) "NaiveBayes-10FN.model" else "/home/hadoop10/data/RandomForest-10FN.model"
-		val candidatePath = if (CoheelProgram.runsOffline()) "NaiveBayes-10FN.model" else "/home/hadoop10/data/RandomForest-10FP.model"
+		val seedPath = if (CoheelProgram.runsOffline()) "NaiveBayes-10FN.model" else "/home/hadoop10/data/coheel/RandomForest-10FN.model"
+		val candidatePath = if (CoheelProgram.runsOffline()) "NaiveBayes-10FN.model" else "/home/hadoop10/data/coheel/RandomForest-10FP.model"
 
 		log.info(s"Loading model with ${FreeMemory.get(true)} MB")
 
