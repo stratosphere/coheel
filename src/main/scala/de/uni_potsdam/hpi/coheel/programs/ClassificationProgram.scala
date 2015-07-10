@@ -78,6 +78,7 @@ class ClassificationLinkFinderFlatMap extends RichFlatMapFunction[InputDocument,
 			else
 				new File("/home/hadoop10/data/coheel/678910")
 		}
+		assert(surfacesFile.exists())
 		val surfaces = Source.fromFile(surfacesFile).getLines().flatMap { line =>
 			CoheelProgram.parseSurfaceProbsLine(line)
 		}
