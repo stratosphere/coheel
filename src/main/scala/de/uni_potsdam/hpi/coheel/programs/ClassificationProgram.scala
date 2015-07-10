@@ -43,20 +43,24 @@ class ClassificationProgram extends NoParamCoheelProgram {
 			.name("Possible links")
 
 		val rawFeatures = FeatureProgramHelper.buildFeaturesPerGroup(this, trieHits)
-		val basicClassifierResults = rawFeatures.reduceGroup(new ClassificationReduceFeatureLineGroup)
+		val basicClassifierResults = rawFeatures.reduceGroup(new ClassificationFeatureLineReduceGroup)
+
+
+		rawFeatures.reduceGroup { (classifiablesIt, out: Collector[(String, String, List[String], Double, Double, Int, Int)]) =>
+			classifiablesIt.foreach { classifiable =>
+				import classifiable._
+				out.collect((surfaceRepr, candidateEntity, context.toList, surfaceProb, contextProb, info.trieHit.startIndex, info.trieHit.length))
+			}
+		}.writeAsTsv(rawFeaturesPath)
 
 		basicClassifierResults.map { featureLine =>
-			s">${featureLine.surfaceRepr}< at ${featureLine.model.trieHit} is probably ${featureLine.candidateEntity}"
-		}.writeAsText(classificationPath, FileSystem.WriteMode.OVERWRITE)
+			(featureLine.surfaceRepr, featureLine.candidateEntity, featureLine.model.trieHit)
+		}.writeAsTsv(classificationPath)
 
 		val trieHitOutput = trieHits.map { trieHit =>
 			(trieHit.id, trieHit.surfaceRepr, trieHit.info.trieHit, trieHit.info.posTags.deep)
 		}
-		if (runsOffline()) {
-			trieHitOutput.printOnTaskManager("TRIE-HITS")
-		} else {
-			trieHitOutput.writeAsTsv(trieHitPath)
-		}
+		trieHitOutput.writeAsTsv(trieHitPath)
 
 	}
 
@@ -109,7 +113,7 @@ class ClassificationLinkFinderFlatMap extends RichFlatMapFunction[InputDocument,
 	}
 }
 
-class ClassificationReduceFeatureLineGroup extends RichGroupReduceFunction[Classifiable[ClassificationInfo], FeatureLine[ClassificationInfo]] {
+class ClassificationFeatureLineReduceGroup extends RichGroupReduceFunction[Classifiable[ClassificationInfo], FeatureLine[ClassificationInfo]] {
 
 	def log = Logger.getLogger(getClass)
 	var seedClassifier: CoheelClassifier = null
