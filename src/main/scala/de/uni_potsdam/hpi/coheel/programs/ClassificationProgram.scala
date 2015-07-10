@@ -58,17 +58,6 @@ class ClassificationProgram extends NoParamCoheelProgram {
 			trieHitOutput.writeAsTsv(trieHitPath)
 		}
 
-
-//		val result = documents.crossWithHuge(surfaces).flatMap { value =>
-//			val (text, surfaceProb) = value
-//			val surface = surfaceProb.surface
-//			if (text.containsSlice(surface))
-//				List((surface.mkString(" "), surfaceProb.destination, surfaceProb.prob))
-//			else
-//				List()
-//		}
-//
-//		result.writeAsTsv(pageRankPath)
 	}
 
 }
@@ -92,6 +81,7 @@ class ClassificationLinkFinderFlatMap extends RichFlatMapFunction[InputDocument,
 		val surfaces = Source.fromFile(surfacesFile).getLines().flatMap { line =>
 			CoheelProgram.parseSurfaceProbsLine(line)
 		}
+		log.info(s"On subtask id #${getRuntimeContext.getIndexOfThisSubtask}")
 		log.info(s"Building trie with ${FreeMemory.get(true)} MB")
 		val d1 = new Date
 		trie = new NewTrie
@@ -141,7 +131,6 @@ class ClassificationReduceFeatureLineGroup extends RichGroupReduceFunction[Class
 		val allCandidates = candidatesIt.asScala.toSeq
 		val features = new mutable.ArrayBuffer[FeatureLine[ClassificationInfo]](allCandidates.size)
 		FeatureProgramHelper.applyCoheelFunctions(allCandidates) { featureLine =>
-			// TODO: Do something with this TrieInfo
 			features.append(featureLine)
 		}
 		candidateClassifier.classifyResults(features).foreach { result =>
