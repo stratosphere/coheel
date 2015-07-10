@@ -3,9 +3,8 @@ package de.uni_potsdam.hpi.coheel.ml
 import java.io.{FileOutputStream, ObjectOutputStream, File}
 
 import de.uni_potsdam.hpi.coheel.util.Timer
-import org.apache.commons.io.FileUtils
 import weka.classifiers.bayes.NaiveBayes
-import weka.classifiers.{Classifier, CostMatrix, Evaluation}
+import weka.classifiers.{CostMatrix, Evaluation}
 import weka.classifiers.functions.{Logistic, MultilayerPerceptron, SMO, SimpleLogistic}
 import weka.classifiers.meta.CostSensitiveClassifier
 import weka.classifiers.trees.{J48, RandomForest}
@@ -30,13 +29,6 @@ object MachineLearningTestSuite {
 	}
 
 	def main(args: Array[String]) = {
-//		val tree = SerializationHelper.read("RandomForest-10FP.model").asInstanceOf[CostSensitiveClassifier]
-//		println("Read model")
-//		FileUtils.writeStringToFile(new File("RandomForest-10FP.output"), tree.getClassifier.asInstanceOf[RandomForest].toString)
-//		println("Written output")
-//		System.exit(1)
-
-
 		println("Reading.")
 		val r = new Random(21011991)
 		val instanceGroups = readInstancesInGroups()
@@ -117,7 +109,7 @@ object MachineLearningTestSuite {
 
 	def buildInstance(split: Array[String]): Instance = {
 		val attValues = split.map(_.toDouble).array
-		val instance: Instance = new DenseInstance(1.0, attValues)
+		val instance = new Instance(1.0, attValues)
 		instance
 	}
 

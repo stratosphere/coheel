@@ -55,15 +55,10 @@
 			<version>3.4.1</version>
 		</dependency>
 		<!-- Machine learning -->
-		<!--<dependency>-->
-			<!--<groupId>nz.ac.waikato.cms.weka</groupId>-->
-			<!--<artifactId>weka-stable</artifactId>-->
-			<!--<version>3.6.12</version>-->
-		<!--</dependency>-->
 		<dependency>
 			<groupId>nz.ac.waikato.cms.weka</groupId>
-			<artifactId>weka-dev</artifactId>
-			<version>3.7.12</version>
+			<artifactId>weka-stable</artifactId>
+			<version>3.6.12</version>
 		</dependency>
 		<!-- Guava for utilities like range map (good point for removing if space/dependency issues) -->
 		<!--There's a shaded guava dependency in Flink, we'll use that one for now.-->

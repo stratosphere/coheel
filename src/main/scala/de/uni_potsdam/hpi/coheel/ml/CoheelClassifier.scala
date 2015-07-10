@@ -2,7 +2,7 @@ package de.uni_potsdam.hpi.coheel.ml
 
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{ClassificationInfo, FeatureLine}
 import weka.classifiers.Classifier
-import weka.core.{FastVector, Attribute, Instances, Instance, DenseInstance}
+import weka.core.{Instances, Attribute, FastVector, Instance}
 import scala.collection.mutable
 
 object CoheelClassifier {
@@ -17,7 +17,7 @@ object CoheelClassifier {
 	)
 
 	val FEATURE_DEFINITION = {
-		val attrs = new FastVector[Attribute](17)
+		val attrs = new FastVector(17)
 		attrs.addElement(new Attribute("id"))
 
 		attrs.addElement(new Attribute("NN"))
@@ -36,7 +36,7 @@ object CoheelClassifier {
 		attrs.addElement(new Attribute("contextRank"))
 		attrs.addElement(new Attribute("contextDeltaTop"))
 		attrs.addElement(new Attribute("contextDeltaSucc"))
-		val classAttrValues = new FastVector[String](2)
+		val classAttrValues = new FastVector(2)
 		classAttrValues.addElement("0.0")
 		classAttrValues.addElement("1.0")
 		val classAttr = new Attribute("class", classAttrValues)
@@ -44,7 +44,7 @@ object CoheelClassifier {
 		attrs
 	}
 	val FEATURE_DEFINITION_WITHOUT_ID = {
-		val newDefinition = FEATURE_DEFINITION.copy()//.asInstanceOf[FastVector[Attribute]]
+		val newDefinition = FEATURE_DEFINITION.copy().asInstanceOf[FastVector]
 		// remove id
 		newDefinition.removeElementAt(0)
 //		// remove class attribute
@@ -85,7 +85,7 @@ class CoheelClassifier(classifier: Classifier) {
 
 	private def buildInstance(featureLine: FeatureLine[ClassificationInfo]): Instance = {
 		val attValues = featureLine.features.toArray
-		val instance: Instance = new DenseInstance(1.0, attValues)
+		val instance = new Instance(1.0, attValues)
 		instance
 	}
 }
