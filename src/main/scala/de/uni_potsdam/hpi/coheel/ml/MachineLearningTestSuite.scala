@@ -3,6 +3,7 @@ package de.uni_potsdam.hpi.coheel.ml
 import java.io.{FileOutputStream, ObjectOutputStream, File}
 
 import de.uni_potsdam.hpi.coheel.util.Timer
+import org.apache.commons.io.FileUtils
 import weka.classifiers.bayes.NaiveBayes
 import weka.classifiers.{CostMatrix, Evaluation}
 import weka.classifiers.functions.{Logistic, MultilayerPerceptron, SMO, SimpleLogistic}
@@ -49,7 +50,7 @@ object MachineLearningTestSuite {
 		println("=" * 80)
 		// Build classifier
 		val baseClassifier = new RandomForest
-		baseClassifier.setPrintTrees(true)
+//		baseClassifier.setPrintTrees(true)
 		// Apply costs
 		val classifier = new CostSensitiveClassifier
 		classifier.setClassifier(baseClassifier)
