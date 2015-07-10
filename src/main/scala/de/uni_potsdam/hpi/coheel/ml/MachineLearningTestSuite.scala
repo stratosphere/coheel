@@ -57,10 +57,13 @@ object MachineLearningTestSuite {
 		println("=" * 80)
 		// Build classifier
 		val baseClassifier = new RandomForest
+		baseClassifier.setPrintTrees(true)
 		// Apply costs
 		val classifier = new CostSensitiveClassifier
 		classifier.setClassifier(baseClassifier)
 		classifier.setMinimizeExpectedCost(true)
+		val costMatrixFP = new CostMatrix(2)
+		costMatrixFP.setElement(0, 1, 10)
 		val costMatrixFN = new CostMatrix(2)
 		costMatrixFN.setElement(1, 0, 10)
 		classifier.setCostMatrix(costMatrixFN)
@@ -69,6 +72,8 @@ object MachineLearningTestSuite {
 		classifier.buildClassifier(filteredTraining)
 		// Serialize
 		SerializationHelper.write("RandomForest-10FN.model", classifier)
+		FileUtils.writeStringToFile(new File("model.as-string"), classifier.getClassifier.asInstanceOf[RandomForest].toString)
+		System.exit(1)
 
 		println("Use all instances")
 		println("=" * 80)
