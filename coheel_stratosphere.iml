@@ -12,18 +12,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Maven: org.apache.flink:flink-scala:0.9.0" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.flink:flink-core:0.9.0" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.flink:flink-shaded-include-yarn:0.9.0" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.flink:flink-java:0.9.0" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.flink:flink-optimizer:0.9.0" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.flink:flink-clients:0.9.0" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.flink:flink-runtime:0.9.0" level="project" />
-    <orderEntry type="library" name="Maven: io.netty:netty-all:4.0.27.Final" level="project" />
-    <orderEntry type="library" name="Maven: org.javassist:javassist:3.18.1-GA" level="project" />
-    <orderEntry type="library" name="Maven: org.clapper:grizzled-slf4j_2.10:1.0.2" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.flink:flink-test-utils:0.9.0" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.flink:flink-runtime:test-jar:tests:0.9.0" level="project" />
     <orderEntry type="library" name="Maven: de.hpi.fgis:utilities:0.0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:15.0" level="project" />
     <orderEntry type="library" name="Maven: com.carrotsearch:hppc:0.6.0" level="project" />
@@ -107,8 +95,9 @@
     <orderEntry type="library" name="Maven: javax.json:javax.json-api:1.0" level="project" />
     <orderEntry type="library" name="Maven: edu.stanford.nlp:stanford-corenlp:models:3.4.1" level="project" />
     <orderEntry type="library" name="Maven: edu.stanford.nlp:stanford-parser:3.4.1" level="project" />
-    <orderEntry type="library" name="Maven: nz.ac.waikato.cms.weka:weka-stable:3.6.12" level="project" />
+    <orderEntry type="library" name="Maven: nz.ac.waikato.cms.weka:weka-dev:3.7.12" level="project" />
     <orderEntry type="library" name="Maven: net.sf.squirrel-sql.thirdparty-non-maven:java-cup:0.11a" level="project" />
+    <orderEntry type="library" name="Maven: org.pentaho.pentaho-commons:pentaho-package-manager:1.0.8" level="project" />
     <orderEntry type="library" name="Maven: org.sweble.wikitext:swc-engine:2.0.0" level="project" />
     <orderEntry type="library" name="Maven: com.sun.xml.bind:jaxb-impl:2.2.5" level="project" />
     <orderEntry type="library" name="Maven: org.jsoup:jsoup:1.6.3" level="project" />
