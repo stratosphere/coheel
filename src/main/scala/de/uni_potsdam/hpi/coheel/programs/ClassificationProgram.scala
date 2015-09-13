@@ -111,8 +111,6 @@ class ClassificationLinkFinderFlatMap extends RichFlatMapFunction[InputDocument,
 		log.info(s"Finished trie with ${FreeMemory.get(true)} MB in ${(new Date().getTime - d1.getTime) / 1000} s")
 	}
 
-
-
 	override def flatMap(document: InputDocument, out: Collector[Classifiable[ClassificationInfo]]): Unit = {
 		if (!CoheelProgram.runsOffline() && fileName == document.surfaceFile)
 			log.error(s"Filename '$fileName' is not equal to surface file '${document.surfaceFile}'")
@@ -128,6 +126,10 @@ class ClassificationLinkFinderFlatMap extends RichFlatMapFunction[InputDocument,
 			}
 		}
 	}
+
+	override def close(): Unit = {
+		trie = null
+	}
 }
 
 class ClassificationFeatureLineReduceGroup extends RichGroupReduceFunction[Classifiable[ClassificationInfo], FeatureLine[ClassificationInfo]] {
@@ -140,7 +142,7 @@ class ClassificationFeatureLineReduceGroup extends RichGroupReduceFunction[Class
 		val seedPath = if (CoheelProgram.runsOffline()) "NaiveBayes-10FN.model" else "/home/hadoop10/data/coheel/RandomForest-10FN.model"
 		val candidatePath = if (CoheelProgram.runsOffline()) "NaiveBayes-10FN.model" else "/home/hadoop10/data/coheel/RandomForest-10FP.model"
 
-		log.info(s"Loading model with ${FreeMemory.get(true)} MB")
+		log.info(s"Loading models with ${FreeMemory.get(true)} MB")
 
 		val d1 = new Date
 		seedClassifier      = new CoheelClassifier(SerializationHelper.read(seedPath).asInstanceOf[Classifier])
@@ -158,6 +160,10 @@ class ClassificationFeatureLineReduceGroup extends RichGroupReduceFunction[Class
 		candidateClassifier.classifyResults(features).foreach { result =>
 			out.collect(result)
 		}
+	}
 
+	override def close(): Unit = {
+		seedClassifier = null
+		candidateClassifier = null
 	}
 }
