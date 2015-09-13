@@ -59,7 +59,13 @@ class ClassificationProgram extends NoParamCoheelProgram {
 		val rawFeatures = FeatureProgramHelper.buildFeaturesPerGroup(this, trieHits)
 		val basicClassifierResults = rawFeatures.reduceGroup(new ClassificationFeatureLineReduceGroup)
 
+		// Write trie hits for debugging
+		val trieHitOutput = trieHits.map { trieHit =>
+			(trieHit.id, trieHit.surfaceRepr, trieHit.info.trieHit, trieHit.info.posTags.deep)
+		}
+		trieHitOutput.writeAsTsv(trieHitPath)
 
+		// Write raw features for debugging
 		rawFeatures.reduceGroup { (classifiablesIt, out: Collector[(String, String, Double, Double, Int, Int)]) =>
 			classifiablesIt.foreach { classifiable =>
 				import classifiable._
@@ -67,14 +73,10 @@ class ClassificationProgram extends NoParamCoheelProgram {
 			}
 		}.writeAsTsv(rawFeaturesPath)
 
+		// Write candidate classifier results for debugging
 		basicClassifierResults.map { featureLine =>
 			(featureLine.surfaceRepr, featureLine.candidateEntity, featureLine.model.trieHit)
 		}.writeAsTsv(classificationPath)
-
-		val trieHitOutput = trieHits.map { trieHit =>
-			(trieHit.id, trieHit.surfaceRepr, trieHit.info.trieHit, trieHit.info.posTags.deep)
-		}
-		trieHitOutput.writeAsTsv(trieHitPath)
 
 	}
 
@@ -114,8 +116,12 @@ class ClassificationLinkFinderFlatMap extends RichFlatMapFunction[InputDocument,
 	override def flatMap(document: InputDocument, out: Collector[Classifiable[ClassificationInfo]]): Unit = {
 		if (!CoheelProgram.runsOffline() && fileName == document.surfaceFile)
 			log.error(s"Filename '$fileName' is not equal to surface file '${document.surfaceFile}'")
+
 		trie.findAllInWithTrieHit(document.tokens).foreach { trieHit =>
 			val contextOption = Util.extractContext(document.tokens, trieHit.startIndex)
+
+			if (contextOption.isEmpty)
+				log.error(s"Could not create context for ${document.id}.")
 
 			contextOption.foreach { case context =>
 				val tags = document.tags.slice(trieHit.startIndex, trieHit.startIndex + trieHit.length).toArray

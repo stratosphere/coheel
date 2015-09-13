@@ -15,6 +15,7 @@ object Util {
 	 */
 	def extractContext(a: mutable.ArrayBuffer[String], position: Int, contextSpreading: Int = CONTEXT_SPREADING_DEFAULT): Option[mutable.ArrayBuffer[String]] = {
 		if (a.length < 2 * contextSpreading + 1)
+			// if the text is not long enough to create a context, we abort, because the context probabilty is not comparable then
 			None
 		else  {
 			// Determine how many words can be included in the context to the left.
