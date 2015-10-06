@@ -24,15 +24,11 @@ import weka.core.SerializationHelper
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.io.Source
+import scala.util.Random
 
-class DocumentPartitioner extends Partitioner[String] {
-	override def partition(key: String, numPartitions: Int): Int = {
-		if (key == "12345")
-			0
-		else if (key == "678910") {
-			if (CoheelProgram.runsOffline()) 0 else 8
-		} else
-			throw new RuntimeException("Unknown surface file")
+class DocumentPartitioner extends Partitioner[Int] {
+	override def partition(index: Int, numPartitions: Int): Int = {
+		index
 	}
 }
 class ClassificationProgram extends NoParamCoheelProgram {
@@ -41,16 +37,35 @@ class ClassificationProgram extends NoParamCoheelProgram {
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_1, Sample.ANGELA_MERKEL_SAMPLE_TEXT_2).name("Documents")
-		val tokenizedDocuments = documents.flatMap { (text, out: Collector[InputDocument]) =>
-			val tokenizer = TokenizerHelper.tokenizeWithPositionInfo(text, null)
-			val id = Util.id(text).toString
-			val tokens = tokenizer.getTokens
-			val tags = tokenizer.getTags
-			out.collect(InputDocument(id, tokens, tags, "12345"))
-			out.collect(InputDocument(id, tokens, tags, "678910"))
-		}
 
-		val partitioned = tokenizedDocuments.partitionCustom(new DocumentPartitioner, "surfaceFile")
+		val tokenizedDocuments = documents.flatMap(new RichFlatMapFunction[String, InputDocument] {
+			var index: Int = -1
+			var isFirstHalf: Boolean = true
+			val firstHalf  = if (runsOffline()) List(0, 0, 0, 0, 0) else List(0, 1, 2, 3, 4)
+			val secondHalf = if (runsOffline()) List(0, 0, 0, 0, 0) else List(5, 6, 7, 8, 9)
+			var random: Random = null
+
+			override def open(params: Configuration): Unit = {
+				index = getRuntimeContext.getIndexOfThisSubtask
+				isFirstHalf = firstHalf contains index
+				random = new Random()
+			}
+			override def flatMap(text: String, out: Collector[InputDocument]): Unit = {
+				val tokenizer = TokenizerHelper.tokenizeWithPositionInfo(text, null)
+				val id = Util.id(text).toString
+				val tokens = tokenizer.getTokens
+				val tags = tokenizer.getTags
+				if (isFirstHalf) {
+					out.collect(InputDocument(id, index, tokens, tags))
+					out.collect(InputDocument(id, secondHalf(random.nextInt(5)), tokens, tags))
+				} else {
+					out.collect(InputDocument(id, firstHalf(random.nextInt(5)), tokens, tags))
+					out.collect(InputDocument(id, index, tokens, tags))
+				}
+			}
+		})
+
+		val partitioned = tokenizedDocuments.partitionCustom(new DocumentPartitioner, "index")
 
 		val trieHits = partitioned
 			.flatMap(new ClassificationLinkFinderFlatMap)
@@ -93,9 +108,8 @@ class ClassificationLinkFinderFlatMap extends RichFlatMapFunction[InputDocument,
 		val surfacesFile = if (CoheelProgram.runsOffline()) {
 			new File("output/surface-probs.wiki")
 		} else {
-			val file = new File("/home/hadoop10/data/coheel/12345")
-			if (file.exists())
-				file
+			if (getRuntimeContext.getIndexOfThisSubtask < 5)
+				new File("/home/hadoop10/data/coheel/12345")
 			else
 				new File("/home/hadoop10/data/coheel/678910")
 		}
@@ -114,9 +128,6 @@ class ClassificationLinkFinderFlatMap extends RichFlatMapFunction[InputDocument,
 	}
 
 	override def flatMap(document: InputDocument, out: Collector[Classifiable[ClassificationInfo]]): Unit = {
-		if (!CoheelProgram.runsOffline() && fileName == document.surfaceFile)
-			log.error(s"Filename '$fileName' is not equal to surface file '${document.surfaceFile}'")
-
 		trie.findAllInWithTrieHit(document.tokens).foreach { trieHit =>
 			val contextOption = Util.extractContext(document.tokens, trieHit.startIndex)
 
@@ -164,6 +175,9 @@ class ClassificationFeatureLineReduceGroup extends RichGroupReduceFunction[Class
 			features.append(featureLine)
 		}
 		candidateClassifier.classifyResults(features).foreach { result =>
+			out.collect(result)
+		}
+		seedClassifier.classifyResults(features).foreach { result =>
 			out.collect(result)
 		}
 	}
