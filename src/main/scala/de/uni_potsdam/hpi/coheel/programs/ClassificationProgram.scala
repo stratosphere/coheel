@@ -142,7 +142,8 @@ class ClassificationLinkFinderFlatMap extends RichFlatMapFunction[InputDocument,
 
 	override def open(params: Configuration): Unit = {
 		val surfacesFile = if (CoheelProgram.runsOffline()) {
-			new File("output/surface-probs.wiki")
+//			new File("output/surface-probs.wiki")
+			new File("cluster-output/678910")
 		} else {
 			if (getRuntimeContext.getIndexOfThisSubtask < 5)
 				new File("/home/hadoop10/data/coheel/12345")
@@ -150,7 +151,7 @@ class ClassificationLinkFinderFlatMap extends RichFlatMapFunction[InputDocument,
 				new File("/home/hadoop10/data/coheel/678910")
 		}
 		assert(surfacesFile.exists())
-		val surfaces = Source.fromFile(surfacesFile).getLines().flatMap { line =>
+		val surfaces = Source.fromFile(surfacesFile, "UTF-8").getLines().flatMap { line =>
 			CoheelProgram.parseSurfaceProbsLine(line)
 		}
 		log.info(s"On subtask id #${getRuntimeContext.getIndexOfThisSubtask} with file ${surfacesFile.getName}")
