@@ -35,7 +35,6 @@ class ClassificationProgram extends NoParamCoheelProgram {
 
 	override def getDescription: String = "CohEEL Classification"
 
-	def log = Logger.getLogger(getClass)
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_3).name("Documents")
@@ -46,6 +45,8 @@ class ClassificationProgram extends NoParamCoheelProgram {
 			val firstHalf  = if (runsOffline()) List(0, 0, 0, 0, 0) else List(0, 1, 2, 3, 4)
 			val secondHalf = if (runsOffline()) List(0, 0, 0, 0, 0) else List(5, 6, 7, 8, 9)
 			var random: Random = null
+			
+			def log = Logger.getLogger(getClass)
 
 			override def open(params: Configuration): Unit = {
 				index = getRuntimeContext.getIndexOfThisSubtask
