@@ -35,6 +35,8 @@ class ClassificationProgram extends NoParamCoheelProgram {
 
 	override def getDescription: String = "CohEEL Classification"
 
+	def log = Logger.getLogger(getClass)
+
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_3).name("Documents")
 
@@ -53,14 +55,22 @@ class ClassificationProgram extends NoParamCoheelProgram {
 			override def flatMap(text: String, out: Collector[InputDocument]): Unit = {
 				val tokenizer = TokenizerHelper.tokenizeWithPositionInfo(text, null)
 				val id = Util.id(text).toString
+				log.info(s"Reading $id on index $index")
+
 				val tokens = tokenizer.getTokens
 				val tags = tokenizer.getTags
 				if (isFirstHalf) {
 					out.collect(InputDocument(id, index, tokens, tags))
-					out.collect(InputDocument(id, secondHalf(random.nextInt(5)), tokens, tags))
+					val randomIndex = secondHalf(random.nextInt(5))
+					out.collect(InputDocument(id, randomIndex, tokens, tags))
+
+					log.info(s"Distributing to $index and $randomIndex")
 				} else {
-					out.collect(InputDocument(id, firstHalf(random.nextInt(5)), tokens, tags))
+					val randomIndex = firstHalf(random.nextInt(5))
+					out.collect(InputDocument(id, randomIndex, tokens, tags))
 					out.collect(InputDocument(id, index, tokens, tags))
+
+					log.info(s"Distributing to $index and $randomIndex")
 				}
 			}
 		})
