@@ -50,7 +50,7 @@ object DataClasses {
 	// Training
 
 	/**
-	 * Classifiable keeps track of the surface and context (+ second order functions) features from an instance.
+	 * Classifiable keeps track of the surface and context of an instance.
 	 * Furthermore, by a generic info element it tracks extra information about the instance.
 	 * An instance may also add further features (see below), e.g. pos tags, which are not directly linked to the second order functions.
 	 *
@@ -74,7 +74,7 @@ object DataClasses {
 			posTags.toList ::: List(if (destination == classifiable.candidateEntity) 1.0 else 0.0)
 		}
 	}
-	case class ClassificationInfo(trieHit: TrieHit, posTags: Array[Double]) extends Info {
+	case class ClassificationInfo(documentId: String, trieHit: TrieHit, posTags: Array[Double]) extends Info {
 		override def furtherFeatures(classifiable: Classifiable[_]): List[Double] = posTags.toList
 	}
 
@@ -88,13 +88,17 @@ object DataClasses {
 
 	/**
 	 * Keeps track of the features of an instance, and it's accompanying real-world information.
-	 * Features are passed to the classifier, model can be used to identify which element was classified.
+	 * FeatureLine's are passed to the classifier, model can be used to identify which element was classified.
 	 */
 	case class FeatureLine[T <: Info](id: String, surfaceRepr: String, candidateEntity: String, model: T, features: Seq[Double])
 
 	// Classification
 	case class InputDocument(id: String, index: Int, tokens: mutable.ArrayBuffer[String], tags: mutable.ArrayBuffer[String])
 	case class SurfaceProb(surface: String, destination: String, prob: Double)
+
+	case class Neighbour(entity: String, prob: Double)
+
+	case class Neighbours(entity: String, out: List[Neighbour], in: List[Neighbour])
 
 	var currentId = 0
 	def newId(): Int = {

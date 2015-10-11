@@ -36,7 +36,7 @@ class ClassificationProgram extends NoParamCoheelProgram {
 	override def getDescription: String = "CohEEL Classification"
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
-		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_1, Sample.ANGELA_MERKEL_SAMPLE_TEXT_2).name("Documents")
+		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_3).name("Documents")
 
 		val tokenizedDocuments = documents.flatMap(new RichFlatMapFunction[String, InputDocument] {
 			var index: Int = -1
@@ -73,6 +73,42 @@ class ClassificationProgram extends NoParamCoheelProgram {
 
 		val rawFeatures = FeatureProgramHelper.buildFeaturesPerGroup(this, trieHits)
 		val basicClassifierResults = rawFeatures.reduceGroup(new ClassificationFeatureLineReduceGroup)
+
+//		basicClassifierResults.groupBy(featureLine => featureLine.model.documentId)
+
+		val contextLinks = env.readTextFile(contextLinkProbsPath).map { line =>
+			val split = line.split('\t')
+			ContextLink(split(0), split(1), split(2).toDouble)
+		}
+		val outgoingNeighbours = contextLinks.groupBy("from").reduceGroup { grouped =>
+			val asList = grouped.toList
+			(asList.head.from, asList.map { contextLink => Neighbour(contextLink.to, contextLink.prob) })
+		}
+		val incomingNeighbours = contextLinks.groupBy("to").reduceGroup { grouped =>
+			val asList = grouped.toList
+			(asList.head.to, asList.map { contextLink => Neighbour(contextLink.from, contextLink.prob) })
+		}
+		val preprocessedNeighbours = outgoingNeighbours.join(incomingNeighbours)
+			.where(0)
+			.equalTo(0)
+			.map { joinResult =>
+				Neighbours(joinResult._1._1, joinResult._1._2, joinResult._2._2)
+			}
+
+
+//		basicClassifierResults.join(preprocessedNeighbours)
+//			.where("candidateEntity")
+//			.equalTo("entity")
+//			.
+
+
+
+
+
+
+
+
+
 
 		// Write trie hits for debugging
 		val trieHitOutput = trieHits.map { trieHit =>
@@ -138,7 +174,7 @@ class ClassificationLinkFinderFlatMap extends RichFlatMapFunction[InputDocument,
 				val tags = document.tags.slice(trieHit.startIndex, trieHit.startIndex + trieHit.length).toArray
 				// TH for trie hit
 				val id = s"TH-${document.id}-$tokenHitCount"
-				out.collect(Classifiable(id, trieHit.s, context.toArray, info = ClassificationInfo(trieHit, POS_TAG_GROUPS.map { group => if (group.exists(tags.contains(_))) 1.0 else 0.0 })))
+				out.collect(Classifiable(id, trieHit.s, context.toArray, info = ClassificationInfo(document.id, trieHit, POS_TAG_GROUPS.map { group => if (group.exists(tags.contains(_))) 1.0 else 0.0 })))
 				tokenHitCount += 1
 			}
 		}
@@ -156,8 +192,8 @@ class ClassificationFeatureLineReduceGroup extends RichGroupReduceFunction[Class
 	var candidateClassifier: CoheelClassifier = null
 
 	override def open(params: Configuration): Unit = {
-		val seedPath = if (CoheelProgram.runsOffline()) "NaiveBayes-10FN.model" else "/home/hadoop10/data/coheel/RandomForest-10FN.model"
-		val candidatePath = if (CoheelProgram.runsOffline()) "NaiveBayes-10FN.model" else "/home/hadoop10/data/coheel/RandomForest-10FP.model"
+		val seedPath = if (CoheelProgram.runsOffline()) "RandomForest-10FN.model" else "/home/hadoop10/data/coheel/RandomForest-10FN.model"
+		val candidatePath = if (CoheelProgram.runsOffline()) "RandomForest-10FP.model" else "/home/hadoop10/data/coheel/RandomForest-10FP.model"
 
 		log.info(s"Loading models with ${FreeMemory.get(true)} MB")
 
@@ -177,9 +213,9 @@ class ClassificationFeatureLineReduceGroup extends RichGroupReduceFunction[Class
 		candidateClassifier.classifyResults(features).foreach { result =>
 			out.collect(result)
 		}
-		seedClassifier.classifyResults(features).foreach { result =>
-			out.collect(result)
-		}
+//		seedClassifier.classifyResults(features).foreach { result =>
+//			out.collect(result)
+//		}
 	}
 
 	override def close(): Unit = {
