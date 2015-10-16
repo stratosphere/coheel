@@ -4,6 +4,7 @@ import java.io.File
 import java.lang.Iterable
 import java.util.Date
 
+import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
 import de.uni_potsdam.hpi.coheel.datastructures.NewTrie
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
@@ -23,8 +24,10 @@ import weka.core.SerializationHelper
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 import scala.io.Source
 import scala.util.Random
+
 
 class DocumentPartitioner extends Partitioner[Int] {
 	override def partition(index: Int, numPartitions: Int): Int = {
@@ -41,12 +44,14 @@ class ClassificationProgram extends NoParamCoheelProgram {
 
 		val tokenizedDocuments = documents.flatMap(new RichFlatMapFunction[String, InputDocument] {
 			var index: Int = -1
-			var isFirstHalf: Boolean = true
-			val firstHalf  = if (runsOffline()) List(0, 0, 0, 0, 0) else List(0, 1, 2, 3, 4)
-			val secondHalf = if (runsOffline()) List(0, 0, 0, 0, 0) else List(5, 6, 7, 8, 9)
 			var random: Random = null
-			
+			val parallelism = FlinkProgramRunner.params.parallelism
 			def log = Logger.getLogger(getClass)
+			log.info(s"Basing distribution on parallelism $parallelism")
+			val halfParallelism = if (CoheelProgram.runsOffline()) 1 else parallelism / 2
+			val firstHalf  = if (runsOffline()) List(0) else List.range(0, halfParallelism)
+			val secondHalf = if (runsOffline()) List(0) else List.range(halfParallelism, parallelism)
+			var isFirstHalf: Boolean = true
 
 			override def open(params: Configuration): Unit = {
 				index = getRuntimeContext.getIndexOfThisSubtask
@@ -62,12 +67,12 @@ class ClassificationProgram extends NoParamCoheelProgram {
 				val tags = tokenizer.getTags
 				if (isFirstHalf) {
 					out.collect(InputDocument(id, index, tokens, tags))
-					val randomIndex = secondHalf(random.nextInt(5))
+					val randomIndex = secondHalf(random.nextInt(halfParallelism))
 					out.collect(InputDocument(id, randomIndex, tokens, tags))
 
 					log.info(s"Distributing to $index and $randomIndex")
 				} else {
-					val randomIndex = firstHalf(random.nextInt(5))
+					val randomIndex = firstHalf(random.nextInt(halfParallelism))
 					out.collect(InputDocument(id, randomIndex, tokens, tags))
 					out.collect(InputDocument(id, index, tokens, tags))
 
@@ -84,8 +89,6 @@ class ClassificationProgram extends NoParamCoheelProgram {
 
 		val rawFeatures = FeatureProgramHelper.buildFeaturesPerGroup(this, trieHits)
 		val basicClassifierResults = rawFeatures.reduceGroup(new ClassificationFeatureLineReduceGroup)
-
-//		basicClassifierResults.groupBy(featureLine => featureLine.model.documentId)
 
 		val contextLinks = env.readTextFile(contextLinkProbsPath).map { line =>
 			val split = line.split('\t')
@@ -136,8 +139,10 @@ class ClassificationProgram extends NoParamCoheelProgram {
 		}.writeAsTsv(rawFeaturesPath)
 
 		// Write candidate classifier results for debugging
-		basicClassifierResults.map { featureLine =>
-			(featureLine.surfaceRepr, featureLine.candidateEntity, featureLine.model.trieHit)
+		basicClassifierResults.flatMap { group =>
+			(group.seeds ++ group.candidates).map { featureLine =>
+				(featureLine.surfaceRepr, featureLine.candidateEntity, featureLine.model.trieHit)
+			}
 		}.writeAsTsv(classificationPath)
 
 	}
@@ -156,7 +161,7 @@ class ClassificationLinkFinderFlatMap extends RichFlatMapFunction[InputDocument,
 //			new File("output/surface-probs.wiki")
 			new File("cluster-output/678910")
 		} else {
-			if (getRuntimeContext.getIndexOfThisSubtask < 5)
+			if (getRuntimeContext.getIndexOfThisSubtask < FlinkProgramRunner.params.parallelism / 2)
 				new File("/home/hadoop10/data/coheel/12345")
 			else
 				new File("/home/hadoop10/data/coheel/678910")
@@ -197,7 +202,7 @@ class ClassificationLinkFinderFlatMap extends RichFlatMapFunction[InputDocument,
 	}
 }
 
-class ClassificationFeatureLineReduceGroup extends RichGroupReduceFunction[Classifiable[ClassificationInfo], FeatureLine[ClassificationInfo]] {
+class ClassificationFeatureLineReduceGroup extends RichGroupReduceFunction[Classifiable[ClassificationInfo], DocumentCandidateGroup] {
 
 	def log = Logger.getLogger(getClass)
 	var seedClassifier: CoheelClassifier = null
@@ -216,18 +221,21 @@ class ClassificationFeatureLineReduceGroup extends RichGroupReduceFunction[Class
 		log.info(s"Finished model with ${FreeMemory.get(true)} MB in ${(new Date().getTime - d1.getTime) / 1000} s")
 	}
 
-	override def reduce(candidatesIt: Iterable[Classifiable[ClassificationInfo]], out: Collector[FeatureLine[ClassificationInfo]]): Unit = {
+	override def reduce(candidatesIt: Iterable[Classifiable[ClassificationInfo]], out: Collector[DocumentCandidateGroup]): Unit = {
 		val allCandidates = candidatesIt.asScala.toSeq
 		val features = new mutable.ArrayBuffer[FeatureLine[ClassificationInfo]](allCandidates.size)
 		FeatureProgramHelper.applyCoheelFunctions(allCandidates) { featureLine =>
 			features.append(featureLine)
 		}
+		val candidates = new ListBuffer[FeatureLine[ClassificationInfo]]()
 		candidateClassifier.classifyResults(features).foreach { result =>
-			out.collect(result)
+			candidates.append(result)
 		}
-//		seedClassifier.classifyResults(features).foreach { result =>
-//			out.collect(result)
-//		}
+		val seeds = new ListBuffer[FeatureLine[ClassificationInfo]]()
+		seedClassifier.classifyResults(features).foreach { result =>
+			seeds.append(result)
+		}
+		out.collect(DocumentCandidateGroup(seeds, candidates))
 	}
 
 	override def close(): Unit = {

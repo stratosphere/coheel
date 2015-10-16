@@ -100,6 +100,11 @@ object DataClasses {
 
 	case class Neighbours(entity: String, out: List[Neighbour], in: List[Neighbour])
 
+	/**
+	 * All candidates of one document.
+	 */
+	case class DocumentCandidateGroup(seeds: Seq[FeatureLine[ClassificationInfo]], candidates: Seq[FeatureLine[ClassificationInfo]])
+
 	var currentId = 0
 	def newId(): Int = {
 		currentId += 1

@@ -75,10 +75,12 @@ object FlinkProgramRunner {
 
 	// Configuration for various input and output folders in src/main/resources.
 	var config: Config = _
+	var params: Params = _
 
 	def main(args: Array[String]): Unit = {
 		// Parse the arguments
 		parser.parse(args, Params()) map { params =>
+			this.params = params
 			config = ConfigFactory.load(params.dataSetConf)
 			val programName = params.programName
 			val program = programs(programName).newInstance()
@@ -106,7 +108,7 @@ object FlinkProgramRunner {
 			else
 				ExecutionEnvironment.createRemoteEnvironment("tenemhead2", 6123, parallelism,
 					"target/coheel_stratosphere-0.1-SNAPSHOT-jar-with-dependencies.jar")
-			log.info("# " + StringUtils.rightPad(s"Degree of parallelism: ${env.getDegreeOfParallelism}", 136) + " #")
+			log.info("# " + StringUtils.rightPad(s"Degree of parallelism: ${env.getParallelism}", 136) + " #")
 			log.info(StringUtils.repeat('#', 140))
 
 			log.info("Starting ..")
