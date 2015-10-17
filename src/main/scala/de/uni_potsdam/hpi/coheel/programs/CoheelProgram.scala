@@ -2,7 +2,7 @@ package de.uni_potsdam.hpi.coheel.programs
 
 import java.net.InetAddress
 
-import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
+import de.uni_potsdam.hpi.coheel.{Params, FlinkProgramRunner}
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.io.{IteratorReader, WikiPageInputFormat}
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
@@ -70,18 +70,20 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 		else dumpFile.makeQualified(new LocalFileSystem).toUri.toString
 
 	var environment: ExecutionEnvironment = null
+	var params: Params = null
 
-	val params: Seq[T]
+	val arguments: Seq[T]
 
 	var configurationParams: Map[String, String] = _
 
 	def buildProgram(env: ExecutionEnvironment, param: T): Unit
 
-	def makeProgram(env: ExecutionEnvironment): Unit = {
-		makeProgram(env, null.asInstanceOf[T])
+	def makeProgram(env: ExecutionEnvironment, params: Params): Unit = {
+		makeProgram(env, params, null.asInstanceOf[T])
 	}
-	def makeProgram(env: ExecutionEnvironment, param: T): Unit = {
+	def makeProgram(env: ExecutionEnvironment, params: Params, param: T): Unit = {
 		environment = env
+		this.params = params
 		buildProgram(env, param)
 	}
 
@@ -262,7 +264,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 }
 
 abstract class NoParamCoheelProgram extends CoheelProgram[Void] {
-	val params: Seq[Void] = List(null)
+	val arguments: Seq[Void] = List(null)
 
 	def buildProgram(env: ExecutionEnvironment): Unit
 	override def buildProgram(env: ExecutionEnvironment, param: Void): Unit = {

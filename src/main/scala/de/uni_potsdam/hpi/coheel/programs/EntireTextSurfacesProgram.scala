@@ -11,7 +11,7 @@ import org.apache.flink.util.Collector
 
 class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 
-	val params = if (runsOffline()) List(-1) else 1 to 10
+	val arguments = if (runsOffline()) List(-1) else 1 to 10
 	override def getDescription = "Wikipedia Extraction: Entire Text Surfaces"
 
 	override def buildProgram(env: ExecutionEnvironment, param: Int): Unit = {

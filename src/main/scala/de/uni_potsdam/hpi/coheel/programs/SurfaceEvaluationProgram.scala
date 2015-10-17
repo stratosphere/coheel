@@ -44,7 +44,7 @@ class SurfaceEvaluationProgram extends CoheelProgram[Int] {
 	val SUBSET_NUMBER = 10
 	val SPECIAL_CASE_NUMBER = -1
 
-	val params = if (runsOffline()) Seq(0, SPECIAL_CASE_NUMBER) else (1 to SUBSET_NUMBER) :+ SPECIAL_CASE_NUMBER
+	val arguments = if (runsOffline()) Seq(0, SPECIAL_CASE_NUMBER) else (1 to SUBSET_NUMBER) :+ SPECIAL_CASE_NUMBER
 
 	override def buildProgram(env: ExecutionEnvironment, param: Int): Unit = {
 		if (param == SPECIAL_CASE_NUMBER)

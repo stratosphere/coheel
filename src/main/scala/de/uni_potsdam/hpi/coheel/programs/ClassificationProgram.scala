@@ -4,7 +4,6 @@ import java.io.File
 import java.lang.Iterable
 import java.util.Date
 
-import de.uni_potsdam.hpi.coheel.FlinkProgramRunner
 import de.uni_potsdam.hpi.coheel.datastructures.NewTrie
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
@@ -45,7 +44,7 @@ class ClassificationProgram extends NoParamCoheelProgram {
 		val tokenizedDocuments = documents.flatMap(new RichFlatMapFunction[String, InputDocument] {
 			var index: Int = -1
 			var random: Random = null
-			val parallelism = FlinkProgramRunner.params.parallelism
+			val parallelism = params.parallelism
 			def log = Logger.getLogger(getClass)
 			log.info(s"Basing distribution on parallelism $parallelism")
 			val halfParallelism = if (CoheelProgram.runsOffline()) 1 else parallelism / 2
@@ -84,7 +83,7 @@ class ClassificationProgram extends NoParamCoheelProgram {
 		val partitioned = tokenizedDocuments.partitionCustom(new DocumentPartitioner, "index")
 
 		val trieHits = partitioned
-			.flatMap(new ClassificationLinkFinderFlatMap)
+			.flatMap(new ClassificationLinkFinderFlatMap(params.parallelism))
 			.name("Possible links")
 
 		val rawFeatures = FeatureProgramHelper.buildFeaturesPerGroup(this, trieHits)
@@ -149,7 +148,7 @@ class ClassificationProgram extends NoParamCoheelProgram {
 
 }
 
-class ClassificationLinkFinderFlatMap extends RichFlatMapFunction[InputDocument, Classifiable[ClassificationInfo]] {
+class ClassificationLinkFinderFlatMap(parallelism: Int) extends RichFlatMapFunction[InputDocument, Classifiable[ClassificationInfo]] {
 	var tokenHitCount: Int = 1
 
 	def log = Logger.getLogger(getClass)
@@ -161,7 +160,7 @@ class ClassificationLinkFinderFlatMap extends RichFlatMapFunction[InputDocument,
 //			new File("output/surface-probs.wiki")
 			new File("cluster-output/678910")
 		} else {
-			if (getRuntimeContext.getIndexOfThisSubtask < FlinkProgramRunner.params.parallelism / 2)
+			if (getRuntimeContext.getIndexOfThisSubtask < parallelism / 2)
 				new File("/home/hadoop10/data/coheel/12345")
 			else
 				new File("/home/hadoop10/data/coheel/678910")

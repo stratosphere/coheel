@@ -17,12 +17,23 @@ import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
 
 /**
+ * Command line parameter configuration
+ */
+case class Params(dataSetConf: String = "chunk",
+                  programName: String = "main",
+                  doLogging: Boolean  = false,
+                  parallelism: Int    = 10,
+                  configurationParams: Map[String, String] = Map()
+)
+
+/**
  * Basic runner for several Flink programs.
  * Can be configured via several command line arguments.
  * Run without arguments for a list of available options.
  */
 // GC parameters: -verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails
 // Dump downloaded from http://dumps.wikimedia.org/enwiki/latest/
+
 object FlinkProgramRunner {
 
 	val log = Logger.getLogger(getClass)
@@ -40,16 +51,6 @@ object FlinkProgramRunner {
 		, "page-rank" -> classOf[PageRankProgram]
 		, "best-practices" -> classOf[BestPracticesProgram]
 	)
-
-	/**
-	 * Command line parameter configuration
-	 */
-	case class Params(dataSetConf: String = "chunk",
-	                  programName: String = "main",
-	                  doLogging: Boolean  = false,
-	                  parallelism: Int    = 10,
-	                  configurationParams: Map[String, String] = Map()
-	                  )
 
 	val parser = new scopt.OptionParser[Params]("bin/run") {
 		head("CohEEL", "0.0.1")
@@ -85,13 +86,13 @@ object FlinkProgramRunner {
 			val programName = params.programName
 			val program = programs(programName).newInstance()
 			program.configurationParams = params.configurationParams
-			runProgram(program, params.parallelism)
+			runProgram(program, params)
 		} getOrElse {
 			parser.showUsage
 		}
 	}
 
-	def runProgram[T](program: CoheelProgram[T] with ProgramDescription, parallelism: Int): Unit = {
+	def runProgram[T](program: CoheelProgram[T] with ProgramDescription, params: Params): Unit = {
 		log.info(StringUtils.repeat('#', 140))
 		log.info("# " + StringUtils.center(program.getDescription, 136) + " #")
 		log.info("# " + StringUtils.rightPad(s"Dataset: ${config.getString("name")}", 136) + " #")
@@ -106,23 +107,23 @@ object FlinkProgramRunner {
 				ExecutionEnvironment.createLocalEnvironment(1)
 			}
 			else
-				ExecutionEnvironment.createRemoteEnvironment("tenemhead2", 6123, parallelism,
+				ExecutionEnvironment.createRemoteEnvironment("tenemhead2", 6123, params.parallelism,
 					"target/coheel_stratosphere-0.1-SNAPSHOT-jar-with-dependencies.jar")
 			log.info("# " + StringUtils.rightPad(s"Degree of parallelism: ${env.getParallelism}", 136) + " #")
 			log.info(StringUtils.repeat('#', 140))
 
 			log.info("Starting ..")
 			try {
-				program.params.foreach { param =>
-					if (param != null)
-						log.info(s"Current parameter: $param")
-					program.makeProgram(env, param)
+				program.arguments.foreach { argument =>
+					if (argument != null)
+						log.info(s"Current parameter: $argument")
+					program.makeProgram(env, params, argument)
 					FileUtils.writeStringToFile(new File("PLAN"), env.getExecutionPlan())
 					val configurationString = if (program.configurationParams.size > 0)
 						" " + program.configurationParams.toString().replace("Map(", "configuration-params = (")
 					else
 						""
-					val paramsString = if (param == null) "" else s" current-param = $param"
+					val paramsString = if (argument == null) "" else s" current-param = $argument"
 					FileUtils.write(new File("PLAN"), env.getExecutionPlan())
 					env.getConfig.disableSysoutLogging()
 					val result = env.execute(s"${program.getDescription} (dataset = ${config.getString("name")}$paramsString$configurationString)")
