@@ -37,9 +37,8 @@ class ClassificationProgram extends NoParamCoheelProgram {
 
 	override def getDescription: String = "CohEEL Classification"
 
-
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
-		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_3).name("Documents")
+		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_1, Sample.ANGELA_MERKEL_SAMPLE_TEXT_2, Sample.ANGELA_MERKEL_SAMPLE_TEXT_3).name("Documents")
 
 		val tokenizedDocuments = documents.flatMap(new RichFlatMapFunction[String, InputDocument] {
 			var index: Int = -1
@@ -60,7 +59,7 @@ class ClassificationProgram extends NoParamCoheelProgram {
 			override def flatMap(text: String, out: Collector[InputDocument]): Unit = {
 				val tokenizer = TokenizerHelper.tokenizeWithPositionInfo(text, null)
 				val id = Util.id(text).toString
-				log.info(s"Reading $id on index $index")
+				log.info(s"Reading document $id on index $index")
 
 				val tokens = tokenizer.getTokens
 				val tags = tokenizer.getTags
