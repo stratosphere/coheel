@@ -105,6 +105,13 @@ object DataClasses {
 	 */
 	case class DocumentCandidateGroup(seeds: Seq[FeatureLine[ClassificationInfo]], candidates: Seq[FeatureLine[ClassificationInfo]])
 
+	/**
+	 * @param documentId Document this classification came from.
+	 * @param classifierType Either "seed" or "candidate"
+	 * @param candidateEntity Candidate entity to link
+	 */
+	case class ClassifierResult(documentId: String, classifierType: String, candidateEntity: String)
+
 	var currentId = 0
 	def newId(): Int = {
 		currentId += 1
