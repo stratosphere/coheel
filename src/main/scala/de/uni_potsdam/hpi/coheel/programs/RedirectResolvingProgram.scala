@@ -35,7 +35,7 @@ class RedirectResolvingProgram extends NoParamCoheelProgram {
 
 		// resolve redirects via delta iteration
 		val resolvedRedirects = contextLinks
-			.iterateDelta(contextLinks, 4, Array("from", "origTo"))(iterate)
+			.iterateDelta(contextLinks, 5, Array("from", "origTo"))(iterate)
 		.name("Resolved-Redirects")
 		.map { cl => (cl.from, cl.to, cl.prob) }
 		.name("Final-Redirect-Result")
