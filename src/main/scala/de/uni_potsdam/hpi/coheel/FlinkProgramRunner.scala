@@ -79,6 +79,7 @@ object FlinkProgramRunner {
 	var params: Params = _
 
 	def main(args: Array[String]): Unit = {
+
 		// Parse the arguments
 		parser.parse(args, Params()) map { params =>
 			this.params = params
@@ -106,9 +107,12 @@ object FlinkProgramRunner {
 				GlobalConfiguration.loadConfiguration("conf")
 				ExecutionEnvironment.createLocalEnvironment(1)
 			}
-			else
-				ExecutionEnvironment.createRemoteEnvironment("tenemhead2", 6123, params.parallelism,
-					"target/coheel_stratosphere-0.1-SNAPSHOT-jar-with-dependencies.jar")
+			else {
+				val classPath = System.getProperty("java.class.path")
+				val dependencies = "target/coheel_stratosphere-0.1-SNAPSHOT.jar" :: classPath.split(':').filter(p => p.contains(".m2/")).toList
+				ExecutionEnvironment.createRemoteEnvironment("tenemhead2", 6123, params.parallelism, dependencies: _*)
+			}
+
 			log.info("# " + StringUtils.rightPad(s"Degree of parallelism: ${env.getParallelism}", 136) + " #")
 			log.info(StringUtils.repeat('#', 140))
 
