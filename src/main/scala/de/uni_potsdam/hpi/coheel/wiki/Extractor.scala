@@ -163,8 +163,14 @@ class Extractor(val wikiPage: WikiPage, val surfaceRepr: String => String) {
 			link.text = link.destination
 		val hashTagIndex = link.destination.indexOf("#")
 		// if a hashtag was found, but not on the first position
-		if (hashTagIndex != -1 && hashTagIndex != 0)
-			link.destination = link.destination.substring(0, hashTagIndex)
+		if (hashTagIndex != -1 && hashTagIndex != 0) {
+			if (link.destination == link.text) {
+				link.destination = link.destination.substring(0, hashTagIndex)
+				link.text = link.destination
+			} else {
+				link.destination = link.destination.substring(0, hashTagIndex)
+			}
+		}
 		Some(link)
 	}
 

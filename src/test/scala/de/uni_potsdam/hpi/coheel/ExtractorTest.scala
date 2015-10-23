@@ -22,8 +22,8 @@ class ExtractorTest extends FunSuite {
 	val links: Seq[Link] = {
 		val extractor = fixture()
 		extractor.extract()
-		println(extractor.rootNode)
-		println(extractor.getPlainText)
+//		println(extractor.rootNode)
+//		println(extractor.getPlainText)
 		extractor.getLinks.asMapOfRanges().values().asScala.toSeq
 	}
 
@@ -77,6 +77,7 @@ class ExtractorTest extends FunSuite {
 	}
 	test("parsing a link whose text starts with an hash") {
 		assert(links.exists { _.surface == "#4 TOLL" })
+		assert(links.exists { _.surface == "Angela Merkel" })
 	}
 	test("parsing a link with template inside and starting with a blank") {
 		assert(links.exists { _.surface == "mortar" })
@@ -123,7 +124,7 @@ class ExtractorTest extends FunSuite {
 
 	test("all links are found") {
 		// add +2 when using bold text extraction
-		assert(links.size === 66 /* hand-counted :) */)
+		assert(links.size === 67 /* hand-counted :) */)
 	}
 
 	test("just print links") {
