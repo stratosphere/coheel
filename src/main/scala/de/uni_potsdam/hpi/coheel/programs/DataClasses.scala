@@ -112,6 +112,13 @@ object DataClasses {
 	 */
 	case class ClassifierResult(documentId: String, classifierType: String, candidateEntity: String)
 
+	case class ClassifierResultWithNeighbours(
+		 documentId: String,
+		 classifierType: String,
+		 candidateEntity: String,
+		 in: List[Neighbour],
+		 out: List[Neighbour])
+
 	var currentId = 0
 	def newId(): Int = {
 		currentId += 1

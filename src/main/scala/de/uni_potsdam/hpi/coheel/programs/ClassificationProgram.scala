@@ -43,9 +43,10 @@ class ClassificationProgram extends NoParamCoheelProgram {
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_3).name("Documents")
 
-		def log: Logger = Logger.getLogger(getClass)
 
 		val tokenizedDocuments = documents.flatMap(new RichFlatMapFunction[String, InputDocument] {
+			def log: Logger = Logger.getLogger(getClass)
+
 			var index: Int = -1
 			var random: Random = null
 			val parallelism = params.parallelism
@@ -92,13 +93,6 @@ class ClassificationProgram extends NoParamCoheelProgram {
 		val basicClassifierResults = features.reduceGroup(new ClassificationFeatureLineReduceGroup).name("Basic Classifier Results")
 
 
-		case class ClassifierResultWithNeighbours(
-			documentId: String,
-			classifierType: String,
-			candidateEntity: String,
-			in: List[Neighbour],
-			out: List[Neighbour])
-
 		val preprocessedNeighbours: DataSet[Neighbours] = loadNeighbours(env)
 		val withNeighbours = basicClassifierResults.join(preprocessedNeighbours)
 			.where("candidateEntity")
@@ -117,7 +111,6 @@ class ClassificationProgram extends NoParamCoheelProgram {
 
 		withNeighbours.groupBy("documentId")
 			.reduceGroup { candidatesIt =>
-
 
 				val candidates = candidatesIt.toList
 				val entities = new mutable.TreeSet[String]()
