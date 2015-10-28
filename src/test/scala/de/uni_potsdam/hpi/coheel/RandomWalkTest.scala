@@ -70,7 +70,7 @@ class RandomWalkTest extends FunSuite {
 		)
 		val c7 = ClassifierResultWithNeighbours("d1", NodeType.CANDIDATE, "c7",
 			List(
-				Neighbour("n3", 1.0)),
+				Neighbour("n3", 0.10)),
 			List(
 				Neighbour("c8", 0.60),
 				Neighbour("n7", 0.40))
@@ -158,17 +158,15 @@ class RandomWalkTest extends FunSuite {
 	}
 
 	test("Fill remaining space of neighbours with nullNode edges") {
-		val e = g.getEdge(n4Node, nullNode)
-		assert(g.getEdgeWeight(e) === 0.95)
+		val e1 = g.getEdge(n4Node, nullNode)
+		assert(g.getEdgeWeight(e1) === 0.95)
+
+		val e2 = g.getEdge(n3Node, nullNode)
+		assert(g.getEdgeWeight(e2) === 0.40)
 	}
 
 	test("Candidate C1 directly reachable over seed S1") {
 		assert(g.containsVertex(c1Node))
-	}
-
-	ignore("Circle N4-S1 gets removed") {
-		assert(!g.containsVertex(n4Node))
-		assert(!g.containsEdge(n4Node, s1Node))
 	}
 
 	test("Ingoing link from candidate C6 to seed S1 gets removed, as C6 not reachable") {

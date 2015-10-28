@@ -128,7 +128,7 @@ object DataClasses {
 
 	object NodeType extends Enumeration {
 		type NodeType = Value
-		val CANDIDATE, SEED, NEIGHBOUR = Value
+		val CANDIDATE, SEED, NEIGHBOUR, NULL = Value
 	}
 
 

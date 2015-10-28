@@ -46,6 +46,7 @@ class DocumentPartitioner extends Partitioner[Int] {
 class ClassificationProgram extends NoParamCoheelProgram {
 
 	override def getDescription: String = "CohEEL Classification"
+	def log: Logger = Logger.getLogger(getClass)
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_3).name("Documents")
@@ -217,66 +218,74 @@ class ClassificationProgram extends NoParamCoheelProgram {
 			}
 		}
 
-		// run connected components starting from the seeds
+		// run connected components/connectivity algorithm starting from the seeds
 		// unreachable nodes can then be removed
 		while (connectedQueue.nonEmpty) {
 			val n = connectedQueue.dequeue()
-			println(s"${n.entity}")
+//			println(s"${n.entity}")
 			val outNeighbours = g.outgoingEdgesOf(n)
 			if (outNeighbours.isEmpty)
 				n.isSink = true
 			outNeighbours.asScala.foreach { out =>
 				val target = g.getEdgeTarget(out)
-				println(s"  -> ${target.entity}")
+//				println(s"  -> ${target.entity}")
 				if (!target.visited) {
 					target.visited = true
 					connectedQueue.enqueue(target)
 				}
 			}
-			println(s"Neighbours: ${g.vertexSet().asScala.filter(!_.visited).toList.sortBy(_.entity)}")
-			println()
+//			println(s"Neighbours: ${g.vertexSet().asScala.filter(!_.visited).toList.sortBy(_.entity)}")
+//			println()
 		}
+
+		val unprunedVertexCount = g.vertexSet().size()
+		val unprunedEdgeCount   = g.edgeSet().size
 
 		// remove all the unreachable nodes
 		val unreachableNodes = g.vertexSet().asScala.filter(!_.visited)
 		g.removeAllVertices(unreachableNodes.asJava)
 
 		// add 0 node
-		val nullNode = RandomWalkNode("0")
+		val nullNode = RandomWalkNode("0").withNodeType(NodeType.NULL)
 		g.addVertex(nullNode)
 
-		// remove all neighbour sinks
+		// remove all neighbour sinks, and create corresponding links to the null node
 		val neighbourSinks = g.vertexSet().asScala.filter { n => n.isSink && n.nodeType == NodeType.NEIGHBOUR }
 		neighbourSinks.foreach { node =>
 			g.incomingEdgesOf(node).asScala.foreach { in =>
-				g.addEdge(g.getEdgeSource(in), nullNode)
+				val inNode = g.getEdgeSource(in)
+				val weight = g.getEdgeWeight(in)
+				val e = g.addEdge(inNode, nullNode)
+				if (e == null) {
+					val e = g.getEdge(inNode, nullNode)
+					val currentWeight = g.getEdgeWeight(e)
+					g.setEdgeWeight(e, currentWeight + weight)
+				} else {
+					g.setEdgeWeight(e, weight)
+				}
 			}
 		}
 		g.removeAllVertices(neighbourSinks.asJava)
 
-		// remove all circles, DEPRECATED: This was done earlier as an optimization, but was both unnecessary and wrong
-//		val circles = g.vertexSet().asScala.filter(_.nodeType == NodeType.NEIGHBOUR).filter { node =>
-//			val outNeighbours = g.outgoingEdgesOf(node)
-//			if (outNeighbours.size != 1)
-//				false
-//			else {
-//				val neighbour = g.getEdgeTarget(outNeighbours.asScala.head)
-//				g.incomingEdgesOf(node).asScala.map(g.getEdgeSource).contains(neighbour)
-//			}
-//		}
-//		g.removeAllVertices(circles.asJava)
-
-		g.vertexSet().asScala.foreach { node =>
-			g.addEdge(node, node)
+		g.vertexSet().asScala.filter(_.nodeType == NodeType.NEIGHBOUR).foreach { node =>
+			val edgeSum = g.outgoingEdgesOf(node).asScala.map { outNode => g.getEdgeWeight(outNode)}.sum
+			val e = g.addEdge(node, nullNode)
+			g.setEdgeWeight(e, 1.0 - edgeSum)
 		}
-
-
-//		g.incomingEdgesOf()
 
 		// add stalling edges
-		g.vertexSet().asScala.foreach { n =>
-			g.addEdge(n, n)
+		g.vertexSet().asScala.foreach { node =>
+			val e = g.addEdge(node, node)
+			// TODO: Think about default value
+			if (node == nullNode)
+				g.setEdgeWeight(e, 1.00)
+			else
+				g.setEdgeWeight(e, 0.01)
 		}
+
+		val prunedVertexCount = g.vertexSet().size()
+		val prunedEdgeCount   = g.edgeSet().size()
+		log.info(s"Unpruned Graph: ($unprunedVertexCount, $unprunedEdgeCount), Pruned Graph: ($prunedVertexCount, $prunedEdgeCount)")
 		g
 	}
 
