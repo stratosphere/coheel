@@ -1,0 +1,48 @@
+digraph G {
+    rankdir=LR;
+    fontname="sans-serif";
+    penwidth="0.1";
+    edge [comment="Wildcard edge", 
+          fontname="sans-serif", 
+          fontsize=10, 
+          colorscheme="blues3", 
+          color=2, 
+          fontcolor=3];
+    node [fontname="serif", 
+          fontsize=13, 
+          fillcolor="1", 
+          colorscheme="blues4", 
+          color="2", 
+          fontcolor="4", 
+          style="filled"];
+    "S1";
+    "C1";
+    "N1";
+    "N2";
+    "N3";
+    "N4";
+    "N5";
+    "N6";
+    "S2";
+    "C2";
+    "C3";
+    "C4";
+    "C5";
+    "S1" -> "C1";
+    "S1" -> "N1";
+    "S1" -> "N2";
+    "S1" -> "N3";
+    "S1" -> "S2";
+    "S1" -> "N4";
+    "N4" -> "S1";
+    "S2" -> "C4";
+    "N3" -> "C2";
+    "N3" -> "C3";
+    "C5" -> "N6";
+    "N6" -> "C5";
+}
+  "C2" -> "S1";
+    "N5" -> "S1";
+    "C6";
+    "C6" -> "S1";
+}
