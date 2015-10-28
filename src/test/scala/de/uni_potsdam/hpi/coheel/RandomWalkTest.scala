@@ -36,45 +36,46 @@ class RandomWalkTest extends FunSuite {
 			List(
 				Neighbour("c4", 1.0))
 		)
-		val c1 = ClassifierResultWithNeighbours("d1", NodeType.SEED, "c1",
+		val c1 = ClassifierResultWithNeighbours("d1", NodeType.CANDIDATE, "c1",
 			List(
 				Neighbour("s1", 1.0)),
 			List()
 		)
-		val c2 = ClassifierResultWithNeighbours("d1", NodeType.SEED, "c2",
+		val c2 = ClassifierResultWithNeighbours("d1", NodeType.CANDIDATE, "c2",
 			List(
 				Neighbour("n3", 1.0)),
 			List(
 				Neighbour("s1", 1.0))
 		)
-		val c3 = ClassifierResultWithNeighbours("d1", NodeType.SEED, "c3",
+		val c3 = ClassifierResultWithNeighbours("d1", NodeType.CANDIDATE, "c3",
 			List(
 				Neighbour("n3", 1.0)),
 			List()
 		)
-		val c4 = ClassifierResultWithNeighbours("d1", NodeType.SEED, "c4",
+		val c4 = ClassifierResultWithNeighbours("d1", NodeType.CANDIDATE, "c4",
 			List(
-				Neighbour("s3", 1.0)),
+				Neighbour("s2", 1.0)),
 			List()
 		)
-		val c5 = ClassifierResultWithNeighbours("d1", NodeType.SEED, "c5",
+		val c5 = ClassifierResultWithNeighbours("d1", NodeType.CANDIDATE, "c5",
 			List(
 				Neighbour("n6", 1.0)),
 			List(
 				Neighbour("n6", 1.0))
 		)
-		val c6 = ClassifierResultWithNeighbours("d1", NodeType.SEED, "c6",
+		val c6 = ClassifierResultWithNeighbours("d1", NodeType.CANDIDATE, "c6",
 			List(),
 			List(
 				Neighbour("s1", 1.0))
 		)
-		val c7 = ClassifierResultWithNeighbours("d1", NodeType.SEED, "c7",
+		val c7 = ClassifierResultWithNeighbours("d1", NodeType.CANDIDATE, "c7",
 			List(
 				Neighbour("n3", 1.0)),
 			List(
-				Neighbour("c8", 1.0))
+				Neighbour("c8", 1.0),
+				Neighbour("n7", 1.0))
 		)
-		val c8 = ClassifierResultWithNeighbours("d1", NodeType.SEED, "c8",
+		val c8 = ClassifierResultWithNeighbours("d1", NodeType.CANDIDATE, "c8",
 			List(
 				Neighbour("c7", 1.0)),
 			List(

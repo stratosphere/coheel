@@ -27,7 +27,7 @@ import org.apache.flink.util.Collector
 import org.apache.log4j.Logger
 import org.jgrapht.{WeightedGraph, ListenableGraph}
 import org.jgrapht.ext.JGraphXAdapter
-import org.jgrapht.graph.{ListenableDirectedWeightedGraph, DefaultEdge, DefaultWeightedEdge, SimpleDirectedWeightedGraph}
+import org.jgrapht.graph._
 import weka.classifiers.Classifier
 import weka.core.SerializationHelper
 
@@ -159,19 +159,36 @@ class ClassificationProgram extends NoParamCoheelProgram {
 
 	}
 
-	def buildGraph(candidates: List[ClassifierResultWithNeighbours]): WeightedGraph[RandomWalkNode, DefaultWeightedEdge] = {
-		val g = new ListenableDirectedWeightedGraph[RandomWalkNode, DefaultWeightedEdge](classOf[DefaultWeightedEdge])
+	def buildGraph(candidatesAndSeeds: List[ClassifierResultWithNeighbours]): WeightedGraph[RandomWalkNode, DefaultWeightedEdge] = {
+		val g = new DefaultDirectedWeightedGraph[RandomWalkNode, DefaultWeightedEdge](classOf[DefaultWeightedEdge])
+
+		val entityMap = mutable.Map[String, RandomWalkNode]()
+		val connectedQueue = mutable.Queue[RandomWalkNode]()
 		// Make sure candidates and seeds are added first to the graph, so they already exist
-		candidates.foreach { candidate =>
-			g.addVertex(RandomWalkNode(candidate.candidateEntity).withNodeType(candidate.classifierType))
+		candidatesAndSeeds.foreach { candidate =>
+			val node = RandomWalkNode(candidate.candidateEntity).withNodeType(candidate.classifierType)
+			if (node.nodeType == NodeType.SEED) {
+				node.visited = true
+				connectedQueue.enqueue(node)
+			}
+			entityMap.put(candidate.candidateEntity, node)
+			assert(g.addVertex(node))
 		}
 
 		// Now also add the neighbours, hopefully also connecting existing seeds and neighbours
-		candidates.foreach { candidate =>
-			val currentNode = RandomWalkNode(candidate.candidateEntity)
+		candidatesAndSeeds.foreach { candidate =>
+			val currentNode = entityMap.get(candidate.candidateEntity).get
 			candidate.in.foreach { candidateIn =>
-				val inNode = RandomWalkNode(candidateIn.entity)
-				g.addVertex(inNode)
+				val inNode = entityMap.get(candidateIn.entity) match {
+					case Some(node) =>
+						node
+					case None =>
+						val node = RandomWalkNode(candidateIn.entity)
+						entityMap.put(candidateIn.entity, node)
+						g.addVertex(node)
+						node
+				}
+				// TODO: Assert weights are same when edge already exists
 				val e = if (g.containsEdge(inNode, currentNode))
 					g.getEdge(inNode, currentNode)
 				else
@@ -179,8 +196,15 @@ class ClassificationProgram extends NoParamCoheelProgram {
 				g.setEdgeWeight(e, candidateIn.prob)
 			}
 			candidate.out.foreach { candidateOut =>
-				val outNode = RandomWalkNode(candidateOut.entity)
-				g.addVertex(outNode)
+				val outNode = entityMap.get(candidateOut.entity) match {
+					case Some(node) =>
+						node
+					case None =>
+						val node = RandomWalkNode(candidateOut.entity)
+						entityMap.put(candidateOut.entity, node)
+						g.addVertex(node)
+						node
+				}
 				val e = if (g.containsEdge(currentNode, outNode))
 					g.getEdge(currentNode, outNode)
 				else
@@ -188,6 +212,60 @@ class ClassificationProgram extends NoParamCoheelProgram {
 				g.setEdgeWeight(e, candidateOut.prob)
 			}
 		}
+
+		// run connected components starting from the seeds
+		// unreachable nodes can then be removed
+		while (connectedQueue.nonEmpty) {
+			val n = connectedQueue.dequeue()
+			println(s"${n.entity}")
+			val outNeighbours = g.outgoingEdgesOf(n)
+			if (outNeighbours.isEmpty)
+				n.isSink = true
+			outNeighbours.asScala.foreach { out =>
+				val target = g.getEdgeTarget(out)
+				println(s"  -> ${target.entity}")
+				if (!target.visited) {
+					target.visited = true
+					connectedQueue.enqueue(target)
+				}
+			}
+			println(s"Neighbours: ${g.vertexSet().asScala.filter(!_.visited).toList.sortBy(_.entity)}")
+			println()
+		}
+
+		// remove all the unreachable nodes
+		val unreachableNodes = g.vertexSet().asScala.filter(!_.visited)
+		g.removeAllVertices(unreachableNodes.asJava)
+
+		// add 0 node
+		val nullNode = RandomWalkNode("0")
+		g.addVertex(nullNode)
+
+		// remove all neighbour sinks
+		val neighbourSinks = g.vertexSet().asScala.filter { n => n.isSink && n.nodeType == NodeType.NEIGHBOUR }
+		neighbourSinks.foreach { node =>
+			g.incomingEdgesOf(node).asScala.foreach { in =>
+				g.addEdge(g.getEdgeSource(in), nullNode)
+			}
+		}
+		g.removeAllVertices(neighbourSinks.asJava)
+
+		// remove all circles
+		val circles = g.vertexSet().asScala.filter(_.nodeType == NodeType.NEIGHBOUR).filter { node =>
+			val outNeighbours = g.outgoingEdgesOf(node)
+			if (outNeighbours.size != 1)
+				false
+			else {
+				val neighbour = g.getEdgeTarget(outNeighbours.asScala.head)
+				g.incomingEdgesOf(node).asScala.map(g.getEdgeSource).contains(neighbour)
+			}
+		}
+		g.removeAllVertices(circles.asJava)
+
+		g.vertexSet().asScala.foreach { node =>
+			g.addEdge(node, node)
+		}
+
 
 //		g.incomingEdgesOf()
 

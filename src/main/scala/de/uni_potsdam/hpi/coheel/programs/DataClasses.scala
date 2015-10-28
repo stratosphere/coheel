@@ -135,6 +135,8 @@ object DataClasses {
 	case class RandomWalkNode(entity: String) {
 
 		var nodeType: NodeType = NodeType.NEIGHBOUR
+		var visited: Boolean = false
+		var isSink: Boolean = false
 
 		def withNodeType(nodeType: NodeType) = {
 			this.nodeType = nodeType
