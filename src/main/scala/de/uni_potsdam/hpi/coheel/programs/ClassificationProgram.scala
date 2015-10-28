@@ -159,7 +159,7 @@ class ClassificationProgram extends NoParamCoheelProgram {
 
 	}
 
-	def buildGraph(candidatesAndSeeds: List[ClassifierResultWithNeighbours]): WeightedGraph[RandomWalkNode, DefaultWeightedEdge] = {
+	def buildGraph(candidatesAndSeeds: List[ClassifierResultWithNeighbours]): DefaultDirectedWeightedGraph[RandomWalkNode, DefaultWeightedEdge] = {
 		val g = new DefaultDirectedWeightedGraph[RandomWalkNode, DefaultWeightedEdge](classOf[DefaultWeightedEdge])
 
 		val entityMap = mutable.Map[String, RandomWalkNode]()
@@ -188,12 +188,14 @@ class ClassificationProgram extends NoParamCoheelProgram {
 						g.addVertex(node)
 						node
 				}
-				// TODO: Assert weights are same when edge already exists
-				val e = if (g.containsEdge(inNode, currentNode))
-					g.getEdge(inNode, currentNode)
-				else
-					g.addEdge(inNode, currentNode)
-				g.setEdgeWeight(e, candidateIn.prob)
+				if (g.containsEdge(inNode, currentNode)) {
+					val e = g.getEdge(inNode, currentNode)
+					assert(g.getEdgeWeight(e) == candidateIn.prob)
+				}
+				else {
+					val e = g.addEdge(inNode, currentNode)
+					g.setEdgeWeight(e, candidateIn.prob)
+				}
 			}
 			candidate.out.foreach { candidateOut =>
 				val outNode = entityMap.get(candidateOut.entity) match {
@@ -205,11 +207,13 @@ class ClassificationProgram extends NoParamCoheelProgram {
 						g.addVertex(node)
 						node
 				}
-				val e = if (g.containsEdge(currentNode, outNode))
-					g.getEdge(currentNode, outNode)
-				else
-					g.addEdge(currentNode, outNode)
-				g.setEdgeWeight(e, candidateOut.prob)
+				if (g.containsEdge(currentNode, outNode)) {
+					val e = g.getEdge(currentNode, outNode)
+					assert(g.getEdgeWeight(e) == candidateOut.prob)
+				} else {
+					val e = g.addEdge(currentNode, outNode)
+					g.setEdgeWeight(e, candidateOut.prob)
+				}
 			}
 		}
 
@@ -250,17 +254,17 @@ class ClassificationProgram extends NoParamCoheelProgram {
 		}
 		g.removeAllVertices(neighbourSinks.asJava)
 
-		// remove all circles
-		val circles = g.vertexSet().asScala.filter(_.nodeType == NodeType.NEIGHBOUR).filter { node =>
-			val outNeighbours = g.outgoingEdgesOf(node)
-			if (outNeighbours.size != 1)
-				false
-			else {
-				val neighbour = g.getEdgeTarget(outNeighbours.asScala.head)
-				g.incomingEdgesOf(node).asScala.map(g.getEdgeSource).contains(neighbour)
-			}
-		}
-		g.removeAllVertices(circles.asJava)
+		// remove all circles, DEPRECATED: This was done earlier as an optimization, but was both unnecessary and wrong
+//		val circles = g.vertexSet().asScala.filter(_.nodeType == NodeType.NEIGHBOUR).filter { node =>
+//			val outNeighbours = g.outgoingEdgesOf(node)
+//			if (outNeighbours.size != 1)
+//				false
+//			else {
+//				val neighbour = g.getEdgeTarget(outNeighbours.asScala.head)
+//				g.incomingEdgesOf(node).asScala.map(g.getEdgeSource).contains(neighbour)
+//			}
+//		}
+//		g.removeAllVertices(circles.asJava)
 
 		g.vertexSet().asScala.foreach { node =>
 			g.addEdge(node, node)

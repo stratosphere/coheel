@@ -1,4 +1,4 @@
-package de.uni_potsdam.hpi.coheelExtractorTest
+package de.uni_potsdam.hpi.coheel
 
 import de.uni_potsdam.hpi.coheel.programs.ClassificationProgram
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
@@ -18,38 +18,38 @@ class RandomWalkTest extends FunSuite {
 		// Documentation of the graph see ./doc/random_walk
 		val s1 = ClassifierResultWithNeighbours("d1", NodeType.SEED, "s1",
 			List(
-				Neighbour("c6", 1.0),
-				Neighbour("c8", 1.0),
-				Neighbour("n4", 1.0),
-				Neighbour("n5", 1.0)),
+				Neighbour("c6", 1.00),
+				Neighbour("c8", 1.00),
+				Neighbour("n4", 0.05),
+				Neighbour("n5", 0.05)),
 			List(
-				Neighbour("s2", 1.0),
-				Neighbour("c1", 1.0),
-				Neighbour("n1", 1.0),
-				Neighbour("n2", 1.0),
-				Neighbour("n3", 1.0),
-				Neighbour("n4", 1.0))
+				Neighbour("s2", 0.25),
+				Neighbour("c1", 0.05),
+				Neighbour("n1", 0.10),
+				Neighbour("n2", 0.15),
+				Neighbour("n3", 0.20),
+				Neighbour("n4", 0.25))
 		)
 		val s2 = ClassifierResultWithNeighbours("d1", NodeType.SEED, "s2",
 			List(
-				Neighbour("s1", 1.0)),
+				Neighbour("s1", 0.25)),
 			List(
-				Neighbour("c4", 1.0))
+				Neighbour("c4", 1.00))
 		)
 		val c1 = ClassifierResultWithNeighbours("d1", NodeType.CANDIDATE, "c1",
 			List(
-				Neighbour("s1", 1.0)),
+				Neighbour("s1", 0.05)),
 			List()
 		)
 		val c2 = ClassifierResultWithNeighbours("d1", NodeType.CANDIDATE, "c2",
 			List(
-				Neighbour("n3", 1.0)),
+				Neighbour("n3", 0.30)),
 			List(
-				Neighbour("s1", 1.0))
+				Neighbour("s1", 1.00))
 		)
 		val c3 = ClassifierResultWithNeighbours("d1", NodeType.CANDIDATE, "c3",
 			List(
-				Neighbour("n3", 1.0)),
+				Neighbour("n3", 0.20)),
 			List()
 		)
 		val c4 = ClassifierResultWithNeighbours("d1", NodeType.CANDIDATE, "c4",
@@ -59,27 +59,27 @@ class RandomWalkTest extends FunSuite {
 		)
 		val c5 = ClassifierResultWithNeighbours("d1", NodeType.CANDIDATE, "c5",
 			List(
-				Neighbour("n6", 1.0)),
+				Neighbour("n6", 0.15)),
 			List(
-				Neighbour("n6", 1.0))
+				Neighbour("n6", 1.00))
 		)
 		val c6 = ClassifierResultWithNeighbours("d1", NodeType.CANDIDATE, "c6",
 			List(),
 			List(
-				Neighbour("s1", 1.0))
+				Neighbour("s1", 1.00))
 		)
 		val c7 = ClassifierResultWithNeighbours("d1", NodeType.CANDIDATE, "c7",
 			List(
 				Neighbour("n3", 1.0)),
 			List(
-				Neighbour("c8", 1.0),
-				Neighbour("n7", 1.0))
+				Neighbour("c8", 0.60),
+				Neighbour("n7", 0.40))
 		)
 		val c8 = ClassifierResultWithNeighbours("d1", NodeType.CANDIDATE, "c8",
 			List(
-				Neighbour("c7", 1.0)),
+				Neighbour("c7", 0.60)),
 			List(
-				Neighbour("s1", 1.0))
+				Neighbour("s1", 1.00))
 		)
 
 
@@ -103,6 +103,8 @@ class RandomWalkTest extends FunSuite {
 	val n3Node = RandomWalkNode("n3")
 	val n4Node = RandomWalkNode("n4")
 	val n5Node = RandomWalkNode("n5")
+	val n6Node = RandomWalkNode("n6")
+	val n7Node = RandomWalkNode("n7")
 	val nullNode  = RandomWalkNode("0")
 
 	test("RandomWalkNodes are only counted once") {
@@ -133,14 +135,38 @@ class RandomWalkTest extends FunSuite {
 		assert(!g.containsVertex(n1Node))
 		assert(!g.containsVertex(n2Node))
 		assert(g.containsEdge(s1Node, nullNode))
-		// TODO: Check weight of edge from S1 to 0
+	}
+
+	test("Weight of removed nodes N1 and N2 is added for S1") {
+		val e = g.getEdge(s1Node, nullNode)
+		assert(g.getEdgeWeight(e) === 0.25)
+	}
+
+	test("Null node only links to itself with 100 % prob") {
+		assert(g.outDegreeOf(nullNode) === 1)
+		val e = g.getEdge(nullNode, nullNode)
+		assert(g.getEdgeWeight(e) === 1.00)
+	}
+
+	test("Sink N7 is removed") {
+		assert(!g.containsVertex(n7Node))
+	}
+
+	test("Removed neighbours are replaced by nullNode edges") {
+		val e = g.getEdge(c7Node, nullNode)
+		assert(g.getEdgeWeight(e) === 0.40)
+	}
+
+	test("Fill remaining space of neighbours with nullNode edges") {
+		val e = g.getEdge(n4Node, nullNode)
+		assert(g.getEdgeWeight(e) === 0.95)
 	}
 
 	test("Candidate C1 directly reachable over seed S1") {
 		assert(g.containsVertex(c1Node))
 	}
 
-	test("Circle N4-S1 gets removed") {
+	ignore("Circle N4-S1 gets removed") {
 		assert(!g.containsVertex(n4Node))
 		assert(!g.containsEdge(n4Node, s1Node))
 	}
