@@ -1,9 +1,13 @@
 package de.uni_potsdam.hpi.coheel.programs
 
+import java.awt.Dimension
 import java.io.File
 import java.lang.Iterable
 import java.util.Date
+import javax.swing.{JApplet, JFrame}
 
+import com.mxgraph.layout.mxCircleLayout
+import com.mxgraph.swing.mxGraphComponent
 import de.uni_potsdam.hpi.coheel.datastructures.NewTrie
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
@@ -21,6 +25,9 @@ import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.util.Collector
 import org.apache.log4j.Logger
+import org.jgrapht.{WeightedGraph, ListenableGraph}
+import org.jgrapht.ext.JGraphXAdapter
+import org.jgrapht.graph.{ListenableDirectedWeightedGraph, DefaultEdge, DefaultWeightedEdge, SimpleDirectedWeightedGraph}
 import weka.classifiers.Classifier
 import weka.core.SerializationHelper
 
@@ -109,24 +116,20 @@ class ClassificationProgram extends NoParamCoheelProgram {
 				}
 			}
 
-		withNeighbours.groupBy("documentId")
-			.reduceGroup { candidatesIt =>
 
-				val candidates = candidatesIt.toList
-				val entities = new mutable.TreeSet[String]()
-
-				candidates.foreach { candidate =>
-					entities.add(candidate.candidateEntity)
-					candidate.in.foreach  { candidateIn  => entities.add(candidateIn.entity) }
-					candidate.out.foreach { candidateOut => entities.add(candidateOut.entity) }
-				}
-
-				val m = new OpenMapRealMatrix(1, 1)
+		withNeighbours.groupBy("documentId").reduceGroup { candidatesIt =>
+			val candidates = candidatesIt.toList
+			val g = buildGraph(candidates)
 
 
-				val entityNodeIdMapping = new DualHashBidiMap()
+			val m = new OpenMapRealMatrix(1, 1)
 
-			}
+
+			val entityNodeIdMapping = new DualHashBidiMap()
+
+
+			(1, 2)
+		}.writeAsTsv(randomWalkResultsPath)
 
 
 
@@ -154,6 +157,45 @@ class ClassificationProgram extends NoParamCoheelProgram {
 		// Write candidate classifier results for debugging
 		basicClassifierResults.writeAsTsv(classificationPath)
 
+	}
+
+	def buildGraph(candidates: List[ClassifierResultWithNeighbours]): WeightedGraph[RandomWalkNode, DefaultWeightedEdge] = {
+		val g = new ListenableDirectedWeightedGraph[RandomWalkNode, DefaultWeightedEdge](classOf[DefaultWeightedEdge])
+		// Make sure candidates and seeds are added first to the graph, so they already exist
+		candidates.foreach { candidate =>
+			g.addVertex(RandomWalkNode(candidate.candidateEntity).withNodeType(candidate.classifierType))
+		}
+
+		// Now also add the neighbours, hopefully also connecting existing seeds and neighbours
+		candidates.foreach { candidate =>
+			val currentNode = RandomWalkNode(candidate.candidateEntity)
+			candidate.in.foreach { candidateIn =>
+				val inNode = RandomWalkNode(candidateIn.entity)
+				g.addVertex(inNode)
+				val e = if (g.containsEdge(inNode, currentNode))
+					g.getEdge(inNode, currentNode)
+				else
+					g.addEdge(inNode, currentNode)
+				g.setEdgeWeight(e, candidateIn.prob)
+			}
+			candidate.out.foreach { candidateOut =>
+				val outNode = RandomWalkNode(candidateOut.entity)
+				g.addVertex(outNode)
+				val e = if (g.containsEdge(currentNode, outNode))
+					g.getEdge(currentNode, outNode)
+				else
+					g.addEdge(currentNode, outNode)
+				g.setEdgeWeight(e, candidateOut.prob)
+			}
+		}
+
+//		g.incomingEdgesOf()
+
+		// add stalling edges
+		g.vertexSet().asScala.foreach { n =>
+			g.addEdge(n, n)
+		}
+		g
 	}
 
 	def loadNeighbours(env: ExecutionEnvironment): DataSet[Neighbours] = {
@@ -261,10 +303,10 @@ class ClassificationFeatureLineReduceGroup extends RichGroupReduceFunction[Class
 			features.append(featureLine)
 		}
 		candidateClassifier.classifyResults(features).foreach { result =>
-			out.collect(ClassifierResult(result.model.documentId, "candidate", result.candidateEntity))
+			out.collect(ClassifierResult(result.model.documentId, NodeType.CANDIDATE, result.candidateEntity))
 		}
 		seedClassifier.classifyResults(features).foreach { result =>
-			out.collect(ClassifierResult(result.model.documentId, "seed", result.candidateEntity))
+			out.collect(ClassifierResult(result.model.documentId, NodeType.SEED, result.candidateEntity))
 		}
 	}
 

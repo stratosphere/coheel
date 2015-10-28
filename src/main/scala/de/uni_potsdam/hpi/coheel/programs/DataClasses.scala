@@ -1,6 +1,7 @@
 package de.uni_potsdam.hpi.coheel.programs
 
 import de.uni_potsdam.hpi.coheel.datastructures.TrieHit
+import de.uni_potsdam.hpi.coheel.programs.DataClasses.NodeType.NodeType
 import de.uni_potsdam.hpi.coheel.util.Util
 import scala.collection.mutable
 
@@ -110,11 +111,11 @@ object DataClasses {
 	 * @param classifierType Either "seed" or "candidate"
 	 * @param candidateEntity Candidate entity to link
 	 */
-	case class ClassifierResult(documentId: String, classifierType: String, candidateEntity: String)
+	case class ClassifierResult(documentId: String, classifierType: NodeType, candidateEntity: String)
 
 	case class ClassifierResultWithNeighbours(
 		 documentId: String,
-		 classifierType: String,
+		 classifierType: NodeType,
 		 candidateEntity: String,
 		 in: List[Neighbour],
 		 out: List[Neighbour])
@@ -123,5 +124,21 @@ object DataClasses {
 	def newId(): Int = {
 		currentId += 1
 		currentId
+	}
+
+	object NodeType extends Enumeration {
+		type NodeType = Value
+		val CANDIDATE, SEED, NEIGHBOUR = Value
+	}
+
+
+	case class RandomWalkNode(entity: String) {
+
+		var nodeType: NodeType = NodeType.NEIGHBOUR
+
+		def withNodeType(nodeType: NodeType) = {
+			this.nodeType = nodeType
+			this
+		}
 	}
 }
