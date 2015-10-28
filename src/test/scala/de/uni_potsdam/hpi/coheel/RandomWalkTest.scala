@@ -9,23 +9,12 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 import scala.collection.JavaConverters._
-import scala.io.Source
 
 @RunWith(classOf[JUnitRunner])
 class RandomWalkTest extends FunSuite {
 
-	test("RandomWalkNodes are only counted once") {
 
-		val g = new SimpleDirectedWeightedGraph[RandomWalkNode, DefaultWeightedEdge](classOf[DefaultWeightedEdge])
-
-		g.addVertex(RandomWalkNode("a").withNodeType(NodeType.SEED))
-		g.addVertex(RandomWalkNode("a").withNodeType(NodeType.CANDIDATE))
-		assert(g.vertexSet().size() === 1)
-		assert(g.vertexSet().asScala.head.nodeType == NodeType.SEED)
-	}
-
-
-	test("Graph building") {
+	val g = {
 		// Documentation of the graph see ./doc/random_walk
 		val s1 = ClassifierResultWithNeighbours("d1", NodeType.SEED, "s1",
 			List(
@@ -98,12 +87,79 @@ class RandomWalkTest extends FunSuite {
 			List(
 				s1, s2,
 				c1, c2, c3, c4, c5, c6, c7, c8))
+		g
+	}
+	val s1Node = RandomWalkNode("s1")
+	val s2Node = RandomWalkNode("s2")
+	val c1Node = RandomWalkNode("c1")
+	val c3Node = RandomWalkNode("c3")
+	val c5Node = RandomWalkNode("c5")
+	val c6Node = RandomWalkNode("c6")
+	val c7Node = RandomWalkNode("c7")
+	val c8Node = RandomWalkNode("c8")
+	val n1Node = RandomWalkNode("n1")
+	val n2Node = RandomWalkNode("n2")
+	val n3Node = RandomWalkNode("n3")
+	val n4Node = RandomWalkNode("n4")
+	val n5Node = RandomWalkNode("n5")
+	val nullNode  = RandomWalkNode("0")
+
+	test("RandomWalkNodes are only counted once") {
+		val g = new SimpleDirectedWeightedGraph[RandomWalkNode, DefaultWeightedEdge](classOf[DefaultWeightedEdge])
+
+		g.addVertex(RandomWalkNode("a").withNodeType(NodeType.SEED))
+		g.addVertex(RandomWalkNode("a").withNodeType(NodeType.CANDIDATE))
+		assert(g.vertexSet().size() === 1)
+		assert(g.vertexSet().asScala.head.nodeType == NodeType.SEED)
+	}
 
 
-		val s1Node = RandomWalkNode("s1")
-		assert(g.containsVertex(s1Node))
+	test("Candidate C3 reachable over neighbour N3") {
+		assert(g.containsVertex(c3Node))
+		assert(g.containsVertex(n3Node))
+	}
+
+	test("Unreachable candidate C5 is removed") {
+		assert(!g.containsVertex(c5Node))
+	}
+
+	test("Ingoing link from neighbour N5 to seed S1 gets removed") {
+		assert(!g.containsVertex(n5Node))
+		assert(!g.containsEdge(s1Node, n5Node))
+	}
+
+	test("Outgoing neighbour sinks N1 and N2 are removed and combined in 0") {
+		assert(!g.containsVertex(n1Node))
+		assert(!g.containsVertex(n2Node))
+		assert(g.containsEdge(s1Node, nullNode))
+		// TODO: Check weight of edge from S1 to 0
+	}
+
+	test("Candidate C1 directly reachable over seed S1") {
+		assert(g.containsVertex(c1Node))
+	}
+
+	test("Circle N4-S1 gets removed") {
+		assert(!g.containsVertex(n4Node))
+		assert(!g.containsEdge(n4Node, s1Node))
+	}
+
+	test("Ingoing link from candidate C6 to seed S1 gets removed, as C6 not reachable") {
+		assert(!g.containsVertex(c6Node))
+	}
+
+	test("Ingoing link from candidate C8 gets not removed if reachable by other candidate C7") {
+		assert(g.containsVertex(c7Node))
+		assert(g.containsVertex(c8Node))
+		assert(g.containsEdge(c7Node, c8Node))
+		assert(g.containsEdge(c8Node, s1Node))
+	}
+
+	test("Contains stalling edges") {
 		assert(g.containsEdge(s1Node, s1Node))
-
+		assert(g.containsEdge(c1Node, c1Node))
+		assert(g.containsEdge(n3Node, n3Node))
+		assert(g.containsEdge(nullNode, nullNode))
 	}
 
 }
