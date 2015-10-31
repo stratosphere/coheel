@@ -1,13 +1,9 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import java.awt.Dimension
 import java.io.File
 import java.lang.Iterable
 import java.util.Date
-import javax.swing.{JApplet, JFrame}
 
-import com.mxgraph.layout.mxCircleLayout
-import com.mxgraph.swing.mxGraphComponent
 import de.uni_potsdam.hpi.coheel.datastructures.NewTrie
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
@@ -17,23 +13,20 @@ import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier.POS_TAG_GROUPS
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import de.uni_potsdam.hpi.coheel.util.Util
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
-import org.apache.commons.collections.bidimap.DualHashBidiMap
 import org.apache.commons.collections4.BidiMap
-import org.apache.commons.math3.linear.OpenMapRealMatrix
+import org.apache.commons.collections4.bidimap.DualHashBidiMap
+import org.apache.commons.math3.linear.{RealMatrix, ArrayRealVector, RealVector, OpenMapRealMatrix}
 import org.apache.flink.api.common.functions.{Partitioner, RichFlatMapFunction, RichGroupReduceFunction}
 import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.util.Collector
 import org.apache.log4j.Logger
-import org.jgrapht.{WeightedGraph, ListenableGraph}
-import org.jgrapht.ext.JGraphXAdapter
 import org.jgrapht.graph._
 import weka.classifiers.Classifier
 import weka.core.SerializationHelper
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
-import scala.collection.mutable.ListBuffer
 import scala.io.Source
 import scala.util.Random
 
@@ -47,6 +40,8 @@ class ClassificationProgram extends NoParamCoheelProgram {
 
 	override def getDescription: String = "CohEEL Classification"
 	def log: Logger = Logger.getLogger(getClass)
+
+	val STALLING_EDGE_WEIGHT = 0.01
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_3).name("Documents")
@@ -120,13 +115,12 @@ class ClassificationProgram extends NoParamCoheelProgram {
 
 		withNeighbours.groupBy("documentId").reduceGroup { candidatesIt =>
 			val candidates = candidatesIt.toList
+
 			val g = buildGraph(candidates)
+			val (m, s, entityNodeMapping) = buildMatrix(g)
+			randomWalk(m, s, 100)
 
 
-			val m = new OpenMapRealMatrix(1, 1)
-
-
-			val entityNodeIdMapping = new DualHashBidiMap()
 
 
 			(1, 2)
@@ -280,13 +274,59 @@ class ClassificationProgram extends NoParamCoheelProgram {
 			if (node == nullNode)
 				g.setEdgeWeight(e, 1.00)
 			else
-				g.setEdgeWeight(e, 0.01)
+				g.setEdgeWeight(e, STALLING_EDGE_WEIGHT)
 		}
 
 		val prunedVertexCount = g.vertexSet().size()
 		val prunedEdgeCount   = g.edgeSet().size()
 		log.info(s"Unpruned Graph: ($unprunedVertexCount, $unprunedEdgeCount), Pruned Graph: ($prunedVertexCount, $prunedEdgeCount)")
 		g
+	}
+
+	def buildMatrix(g: DefaultDirectedWeightedGraph[RandomWalkNode, DefaultWeightedEdge]): (RealMatrix, RealVector, BidiMap[String, Int]) = {
+		val size = g.vertexSet().size()
+		val entityNodeIdMapping = new DualHashBidiMap[String, Int]()
+		val m = new OpenMapRealMatrix(size, size)
+
+		var currentEntityId = 0
+		val s: RealVector = new ArrayRealVector(size)
+		g.vertexSet().asScala.foreach { node =>
+			entityNodeIdMapping.put(node.entity, currentEntityId)
+			if (node.nodeType == NodeType.SEED)
+				s.setEntry(currentEntityId, 1.0)
+			currentEntityId += 1
+		}
+		val sum = s.getL1Norm
+		for (i <- 0 until size)
+			s.setEntry(i, s.getEntry(i) / sum)
+
+		g.vertexSet().asScala.foreach { node =>
+			val nodeId = entityNodeIdMapping.get(node.entity)
+			val outEdges = g.outgoingEdgesOf(node)
+			val edgeSum = outEdges.asScala.map(g.getEdgeWeight).sum
+			assert(edgeSum == 1.0 + STALLING_EDGE_WEIGHT)
+
+			outEdges.asScala.foreach { out =>
+				val outTarget = g.getEdgeTarget(out)
+				val outWeight = g.getEdgeWeight(out)
+				val outId = entityNodeIdMapping.get(outTarget.entity)
+				m.setEntry(nodeId, outId, outWeight / (1.0 + STALLING_EDGE_WEIGHT))
+			}
+		}
+		(m, s, entityNodeIdMapping)
+	}
+
+	def randomWalk(m: RealMatrix, s: RealVector, maxIt: Int): RealVector = {
+		var p = s
+		var oldP = s
+		val alpha = 0.15
+		var it = 0
+		do {
+			oldP = p
+			p = m.scalarMultiply(1 - alpha).preMultiply(p).add(s.mapMultiply(alpha))
+			it += 1
+		} while (it < maxIt)
+		p
 	}
 
 	def loadNeighbours(env: ExecutionEnvironment): DataSet[Neighbours] = {

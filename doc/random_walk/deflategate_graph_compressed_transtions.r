@@ -13,7 +13,7 @@ alpha <- .15
 norm_vec <- function(x) sqrt(sum(x^2))
 
 r <- s;
-for( i in 1:100) {
+for(i in 1:100) {
   q<-(1-alpha)*r %*% N + alpha*s;
   #message(i,": ",(r-q),"  ->  ",norm_vec(r-q));
   if(10^-8>=norm_vec(r-q)) { break; };
