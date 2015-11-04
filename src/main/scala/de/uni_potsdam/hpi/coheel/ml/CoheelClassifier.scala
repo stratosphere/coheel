@@ -66,7 +66,7 @@ class CoheelClassifier(classifier: Classifier) {
 	 * @param featureLine The features of all possible links.
 	 * @return The predicted link or None, if no link is predicted.
 	 */
-	def classifyResults(featureLine: mutable.ArrayBuffer[FeatureLine[ClassificationInfo]]): Option[FeatureLine[ClassificationInfo]] = {
+	def classifyResults(featureLine: mutable.ArrayBuffer[FeatureLine[ClassificationInfo]]): List[FeatureLine[ClassificationInfo]] = {
 		var positivePredictions = List[FeatureLine[ClassificationInfo]]()
 		featureLine.foreach { featureLine =>
 			assert(featureLine.features.size == NUMBER_OF_FEATURES)
@@ -76,11 +76,13 @@ class CoheelClassifier(classifier: Classifier) {
 				positivePredictions ::= featureLine
 			}
 		}
-		// TODO: Change to return only if there is _exactly_ one positive prediction
-		if (positivePredictions.size >= 1)
-			positivePredictions.headOption
-		else
-			None
+//		// TODO: Change to return only if there is _exactly_ one positive prediction
+//		if (positivePredictions.size >= 1)
+//			positivePredictions.headOption
+//		else
+//			None
+		// TODO: Currently returning all seeds!
+		positivePredictions
 	}
 
 	private def buildInstance(featureLine: FeatureLine[ClassificationInfo]): Instance = {
