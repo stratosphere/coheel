@@ -16,7 +16,7 @@ class RandomWalkGraphTest extends FunSuite {
 
 	val g = {
 		// Documentation of the graph see ./doc/random_walk
-		val s1 = ClassifierResultWithNeighbours("d1", NodeType.SEED, "s1",
+		val s1 = ClassifierResultWithNeighbours("d1", NodeTypes.SEED, "s1",
 			List(
 				Neighbour("c6", 1.00),
 				Neighbour("c8", 1.00),
@@ -30,52 +30,52 @@ class RandomWalkGraphTest extends FunSuite {
 				Neighbour("n3", 0.20),
 				Neighbour("n4", 0.25))
 		)
-		val s2 = ClassifierResultWithNeighbours("d1", NodeType.SEED, "s2",
+		val s2 = ClassifierResultWithNeighbours("d1", NodeTypes.SEED, "s2",
 			List(
 				Neighbour("s1", 0.25)),
 			List(
 				Neighbour("c4", 1.00))
 		)
-		val c1 = ClassifierResultWithNeighbours("d1", NodeType.CANDIDATE, "c1",
+		val c1 = ClassifierResultWithNeighbours("d1", NodeTypes.CANDIDATE, "c1",
 			List(
 				Neighbour("s1", 0.05)),
 			List()
 		)
-		val c2 = ClassifierResultWithNeighbours("d1", NodeType.CANDIDATE, "c2",
+		val c2 = ClassifierResultWithNeighbours("d1", NodeTypes.CANDIDATE, "c2",
 			List(
 				Neighbour("n3", 0.30)),
 			List(
 				Neighbour("s1", 1.00))
 		)
-		val c3 = ClassifierResultWithNeighbours("d1", NodeType.CANDIDATE, "c3",
+		val c3 = ClassifierResultWithNeighbours("d1", NodeTypes.CANDIDATE, "c3",
 			List(
 				Neighbour("n3", 0.20)),
 			List()
 		)
-		val c4 = ClassifierResultWithNeighbours("d1", NodeType.CANDIDATE, "c4",
+		val c4 = ClassifierResultWithNeighbours("d1", NodeTypes.CANDIDATE, "c4",
 			List(
 				Neighbour("s2", 1.0)),
 			List()
 		)
-		val c5 = ClassifierResultWithNeighbours("d1", NodeType.CANDIDATE, "c5",
+		val c5 = ClassifierResultWithNeighbours("d1", NodeTypes.CANDIDATE, "c5",
 			List(
 				Neighbour("n6", 0.15)),
 			List(
 				Neighbour("n6", 1.00))
 		)
-		val c6 = ClassifierResultWithNeighbours("d1", NodeType.CANDIDATE, "c6",
+		val c6 = ClassifierResultWithNeighbours("d1", NodeTypes.CANDIDATE, "c6",
 			List(),
 			List(
 				Neighbour("s1", 1.00))
 		)
-		val c7 = ClassifierResultWithNeighbours("d1", NodeType.CANDIDATE, "c7",
+		val c7 = ClassifierResultWithNeighbours("d1", NodeTypes.CANDIDATE, "c7",
 			List(
 				Neighbour("n3", 0.10)),
 			List(
 				Neighbour("c8", 0.60),
 				Neighbour("n7", 0.40))
 		)
-		val c8 = ClassifierResultWithNeighbours("d1", NodeType.CANDIDATE, "c8",
+		val c8 = ClassifierResultWithNeighbours("d1", NodeTypes.CANDIDATE, "c8",
 			List(
 				Neighbour("c7", 0.60)),
 			List(
@@ -110,10 +110,10 @@ class RandomWalkGraphTest extends FunSuite {
 	test("RandomWalkNodes are only counted once") {
 		val g = new SimpleDirectedWeightedGraph[RandomWalkNode, DefaultWeightedEdge](classOf[DefaultWeightedEdge])
 
-		g.addVertex(RandomWalkNode("a").withNodeType(NodeType.SEED))
-		g.addVertex(RandomWalkNode("a").withNodeType(NodeType.CANDIDATE))
+		g.addVertex(RandomWalkNode("a").withNodeType(NodeTypes.SEED))
+		g.addVertex(RandomWalkNode("a").withNodeType(NodeTypes.CANDIDATE))
 		assert(g.vertexSet().size() === 1)
-		assert(g.vertexSet().asScala.head.nodeType == NodeType.SEED)
+		assert(g.vertexSet().asScala.head.nodeType == NodeTypes.SEED)
 	}
 
 

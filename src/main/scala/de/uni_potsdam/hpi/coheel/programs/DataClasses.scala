@@ -116,8 +116,14 @@ object DataClasses {
 		 documentId: String,
 		 classifierType: NodeType,
 		 candidateEntity: String,
+		 trieHit: TrieHit,
 		 in: List[Neighbour],
 		 out: List[Neighbour])
+
+	object ClassifierResultWithNeighbours {
+		def apply(documentId: String, classifierType: NodeType, candidateEntity: String, in: List[Neighbour], out: List[Neighbour]): ClassifierResultWithNeighbours =
+			ClassifierResultWithNeighbours(documentId, classifierType, candidateEntity, null, in, out)
+	}
 
 	var currentId = 0
 	def newId(): Int = {
@@ -125,18 +131,20 @@ object DataClasses {
 		currentId
 	}
 
-	type NodeType = Int
-	object NodeType {
-		val CANDIDATE = 0
-		val SEED = 1
-		val NEIGHBOUR = 2
-		val NULL = 3
+	// My take at manually building enums
+	// Using Scala enums (1) is ugly, (2) actually did not workout because of serialization issues; apparently enums are not simple enums in Scala
+	trait NodeType
+	object NodeTypes {
+		object CANDIDATE extends NodeType { override def toString: String = "CANDIDATE" }
+		object SEED extends NodeType { override def toString: String = "SEED" }
+		object NEIGHBOUR extends NodeType { override def toString: String = "NEIGHBOUR" }
+		object NULL extends NodeType { override def toString: String = "NULL" }
 	}
 
 
 	case class RandomWalkNode(entity: String) {
 
-		var nodeType: NodeType = NodeType.NEIGHBOUR
+		var nodeType: NodeType = NodeTypes.NEIGHBOUR
 		var visited: Boolean = false
 		var isSink: Boolean = false
 

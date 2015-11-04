@@ -156,29 +156,29 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 		trieHitOutput.writeAsTsv(trieHitPath)
 
 		// Write raw features for debugging
-		features.reduceGroup { (classifiablesIt, out: Collector[(String, String, Double, Double, Int, Int)]) =>
+		features.reduceGroup { (classifiablesIt, out: Collector[(TrieHit, String, Double, Double)]) =>
 			classifiablesIt.foreach { classifiable =>
 				import classifiable._
-				out.collect((surfaceRepr, candidateEntity, surfaceProb, contextProb, info.trieHit.startIndex, info.trieHit.length))
+				out.collect((info.trieHit, candidateEntity, surfaceProb, contextProb))
 			}
 		}.writeAsTsv(rawFeaturesPath)
 
 		// Write candidate classifier results for debugging
 		basicClassifierResults.map { res =>
-			(res.documentId, res.classifierType, res.candidateEntity)
+			(res.documentId, res.classifierType, res.candidateEntity, res.trieHit)
 		}.writeAsTsv(classificationPath)
 
 	}
 
-	def buildGraph(candidatesAndSeeds: List[ClassifierResultWithNeighbours]): DefaultDirectedWeightedGraph[RandomWalkNode, DefaultWeightedEdge] = {
+	def buildGraph(entities: List[ClassifierResultWithNeighbours]): DefaultDirectedWeightedGraph[RandomWalkNode, DefaultWeightedEdge] = {
 		val g = new DefaultDirectedWeightedGraph[RandomWalkNode, DefaultWeightedEdge](classOf[DefaultWeightedEdge])
 
 		val entityMap = mutable.Map[String, RandomWalkNode]()
 		val connectedQueue = mutable.Queue[RandomWalkNode]()
 		// Make sure candidates and seeds are added first to the graph, so they already exist
-		candidatesAndSeeds.foreach { candidate =>
+		entities.foreach { candidate =>
 			val node = RandomWalkNode(candidate.candidateEntity).withNodeType(candidate.classifierType)
-			if (node.nodeType == NodeType.SEED) {
+			if (node.nodeType == NodeTypes.SEED) {
 				node.visited = true
 				connectedQueue.enqueue(node)
 			}
@@ -187,7 +187,7 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 		}
 
 		// Now also add the neighbours, hopefully also connecting existing seeds and neighbours
-		candidatesAndSeeds.foreach { candidate =>
+		entities.foreach { candidate =>
 			val currentNode = entityMap.get(candidate.candidateEntity).get
 			candidate.in.foreach { candidateIn =>
 				val inNode = entityMap.get(candidateIn.entity) match {
@@ -256,11 +256,11 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 		g.removeAllVertices(unreachableNodes.asJava)
 
 		// add 0 node
-		val nullNode = RandomWalkNode("0").withNodeType(NodeType.NULL)
+		val nullNode = RandomWalkNode("0").withNodeType(NodeTypes.NULL)
 		g.addVertex(nullNode)
 
 		// remove all neighbour sinks, and create corresponding links to the null node
-		val neighbourSinks = g.vertexSet().asScala.filter { n => n.isSink && n.nodeType == NodeType.NEIGHBOUR }
+		val neighbourSinks = g.vertexSet().asScala.filter { n => n.isSink && n.nodeType == NodeTypes.NEIGHBOUR }
 		neighbourSinks.foreach { node =>
 			g.incomingEdgesOf(node).asScala.foreach { in =>
 				val inNode = g.getEdgeSource(in)
@@ -277,7 +277,7 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 		}
 		g.removeAllVertices(neighbourSinks.asJava)
 
-		g.vertexSet().asScala.filter(_.nodeType == NodeType.NEIGHBOUR).foreach { node =>
+		g.vertexSet().asScala.filter(_.nodeType == NodeTypes.NEIGHBOUR).foreach { node =>
 			val edgeSum = g.outgoingEdgesOf(node).asScala.map { outNode => g.getEdgeWeight(outNode)}.sum
 			val e = g.addEdge(node, nullNode)
 			g.setEdgeWeight(e, 1.0 - edgeSum)
@@ -316,9 +316,9 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 		val s: RealVector = new ArrayRealVector(size)
 		g.vertexSet().asScala.foreach { node =>
 			entityNodeIdMapping.put(node.entity, currentEntityId)
-			if (node.nodeType == NodeType.CANDIDATE)
+			if (node.nodeType == NodeTypes.CANDIDATE)
 				candidateIndices += currentEntityId
-			if (node.nodeType == NodeType.SEED)
+			if (node.nodeType == NodeTypes.SEED)
 				s.setEntry(currentEntityId, 1.0)
 			currentEntityId += 1
 		}
@@ -464,10 +464,10 @@ class ClassificationFeatureLineReduceGroup extends RichGroupReduceFunction[Class
 			features.append(featureLine)
 		}
 		candidateClassifier.classifyResults(features).foreach { result =>
-			out.collect(ClassifierResult(result.model.documentId, NodeType.CANDIDATE, result.candidateEntity, trieHit))
+			out.collect(ClassifierResult(result.model.documentId, NodeTypes.CANDIDATE, result.candidateEntity, trieHit))
 		}
 		seedClassifier.classifyResults(features).foreach { result =>
-			out.collect(ClassifierResult(result.model.documentId, NodeType.SEED, result.candidateEntity, trieHit))
+			out.collect(ClassifierResult(result.model.documentId, NodeTypes.SEED, result.candidateEntity, trieHit))
 		}
 	}
 

@@ -1,10 +1,16 @@
 package de.uni_potsdam.hpi.coheel.datastructures
 
+import java.io.File
+
+import de.uni_potsdam.hpi.coheel.io.Sample
+import de.uni_potsdam.hpi.coheel.programs.CoheelProgram
+import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 import scala.collection.JavaConverters._
+import scala.io.Source
 
 @RunWith(classOf[JUnitRunner])
 class TrieTest extends FunSuite {
