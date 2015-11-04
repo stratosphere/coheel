@@ -4,6 +4,7 @@ import java.io.File
 import java.lang.Iterable
 import java.util.Date
 
+import de.uni_potsdam.hpi.coheel.Params
 import de.uni_potsdam.hpi.coheel.datastructures.{TrieHit, NewTrie}
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
@@ -93,11 +94,11 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 		val partitioned = tokenizedDocuments.partitionCustom(new DocumentPartitioner, "index")
 
 		val trieHits = partitioned
-			.flatMap(new ClassificationLinkFinderFlatMap(params.parallelism))
+			.flatMap(new ClassificationLinkFinderFlatMap(params))
 			.name("Possible links")
 
 		val features = FeatureProgramHelper.buildFeaturesPerGroup(this, trieHits)
-		val basicClassifierResults = features.reduceGroup(new ClassificationFeatureLineReduceGroup).name("Basic Classifier Results")
+		val basicClassifierResults = features.reduceGroup(new ClassificationFeatureLineReduceGroup(params)).name("Basic Classifier Results")
 
 
 		val preprocessedNeighbours: DataSet[Neighbours] = loadNeighbours(env)
@@ -425,22 +426,22 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 	}
 }
 
-class ClassificationLinkFinderFlatMap(parallelism: Int) extends RichFlatMapFunction[InputDocument, Classifiable[ClassificationInfo]] {
+class ClassificationLinkFinderFlatMap(params: Params) extends RichFlatMapFunction[InputDocument, Classifiable[ClassificationInfo]] {
 	var tokenHitCount: Int = 1
 
 	def log = Logger.getLogger(getClass)
 	var trie: NewTrie = _
 	var fileName: String = _
 
-	override def open(params: Configuration): Unit = {
+	override def open(conf: Configuration): Unit = {
 		val surfacesFile = if (CoheelProgram.runsOffline()) {
 //			new File("output/surface-probs.wiki")
 			new File("cluster-output/678910")
 		} else {
-			if (getRuntimeContext.getIndexOfThisSubtask < parallelism / 2)
-				new File("/home/hadoop10/data/coheel/12345")
+			if (getRuntimeContext.getIndexOfThisSubtask < params.parallelism / 2)
+				new File(params.config.getString("first_trie_half"))
 			else
-				new File("/home/hadoop10/data/coheel/678910")
+				new File(params.config.getString("second_trie_half"))
 		}
 		assert(surfacesFile.exists())
 		val surfaces = Source.fromFile(surfacesFile, "UTF-8").getLines().flatMap { line =>
@@ -478,15 +479,15 @@ class ClassificationLinkFinderFlatMap(parallelism: Int) extends RichFlatMapFunct
 	}
 }
 
-class ClassificationFeatureLineReduceGroup extends RichGroupReduceFunction[Classifiable[ClassificationInfo], ClassifierResult] {
+class ClassificationFeatureLineReduceGroup(params: Params) extends RichGroupReduceFunction[Classifiable[ClassificationInfo], ClassifierResult] {
 
 	def log = Logger.getLogger(getClass)
 	var seedClassifier: CoheelClassifier = null
 	var candidateClassifier: CoheelClassifier = null
 
-	override def open(params: Configuration): Unit = {
-		val seedPath = if (CoheelProgram.runsOffline()) "RandomForest-10FN.model" else "/home/hadoop10/data/coheel/RandomForest-10FN.model"
-		val candidatePath = if (CoheelProgram.runsOffline()) "RandomForest-10FP.model" else "/home/hadoop10/data/coheel/RandomForest-10FP.model"
+	override def open(conf: Configuration): Unit = {
+		val seedPath = if (CoheelProgram.runsOffline()) "RandomForest-10FN.model" else params.config.getString("seed_model")
+		val candidatePath = if (CoheelProgram.runsOffline()) "RandomForest-10FP.model" else params.config.getString("candidate_model")
 
 		log.info(s"Loading models with ${FreeMemory.get(true)} MB")
 

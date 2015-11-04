@@ -23,7 +23,8 @@ case class Params(dataSetConf: String = "chunk",
                   programName: String = "main",
                   doLogging: Boolean  = false,
                   parallelism: Int    = 10,
-                  configurationParams: Map[String, String] = Map()
+                  configurationParams: Map[String, String] = Map(),
+                  config: Config = null
 )
 
 /**
@@ -87,7 +88,7 @@ object FlinkProgramRunner {
 			val programName = params.programName
 			val program = programs(programName).newInstance()
 			program.configurationParams = params.configurationParams
-			runProgram(program, params)
+			runProgram(program, params.copy(config = config))
 		} getOrElse {
 			parser.showUsage
 		}
