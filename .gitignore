@@ -13,3 +13,4 @@ bin/file-concatenator/
 plots/**/data
 plots/**/raw-data
 plots/**/*.png
+credentials.csv
