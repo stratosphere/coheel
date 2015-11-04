@@ -36,7 +36,7 @@ class DocumentPartitioner extends Partitioner[Int] {
 		index
 	}
 }
-class ClassificationProgram extends NoParamCoheelProgram {
+class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 
 	override def getDescription: String = "CohEEL Classification"
 	def log: Logger = Logger.getLogger(getClass)
