@@ -4,7 +4,7 @@ import java.io.File
 import java.lang.Iterable
 import java.util.Date
 
-import de.uni_potsdam.hpi.coheel.datastructures.NewTrie
+import de.uni_potsdam.hpi.coheel.datastructures.{TrieHit, NewTrie}
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.io.Sample
@@ -73,20 +73,23 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 				val tags = tokenizer.getTags
 				if (isFirstHalf) {
 					out.collect(InputDocument(id, index, tokens, tags))
-					val randomIndex = secondHalf(random.nextInt(halfParallelism))
-					out.collect(InputDocument(id, randomIndex, tokens, tags))
-
-					log.info(s"Distributing to $index and $randomIndex")
+					if (!CoheelProgram.runsOffline()) {
+						val randomIndex = secondHalf(random.nextInt(halfParallelism))
+						out.collect(InputDocument(id, randomIndex, tokens, tags))
+						log.info(s"Distributing to $index and $randomIndex")
+					}
 				} else {
-					val randomIndex = firstHalf(random.nextInt(halfParallelism))
-					out.collect(InputDocument(id, randomIndex, tokens, tags))
+					if (!CoheelProgram.runsOffline()) {
+						val randomIndex = firstHalf(random.nextInt(halfParallelism))
+						out.collect(InputDocument(id, randomIndex, tokens, tags))
+						log.info(s"Distributing to $index and $randomIndex")
+					}
 					out.collect(InputDocument(id, index, tokens, tags))
-
-					log.info(s"Distributing to $index and $randomIndex")
 				}
 			}
 		})
 		val partitioned = tokenizedDocuments.partitionCustom(new DocumentPartitioner, "index")
+
 
 		val trieHits = partitioned
 			.flatMap(new ClassificationLinkFinderFlatMap(params.parallelism))
