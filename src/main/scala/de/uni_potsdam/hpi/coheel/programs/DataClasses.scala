@@ -114,7 +114,7 @@ object DataClasses {
 
 	case class ClassifierResultWithNeighbours(
 		 documentId: String,
-		 classifierType: NodeType,
+		 var classifierType: NodeType,
 		 candidateEntity: String,
 		 trieHit: TrieHit,
 		 in: List[Neighbour],

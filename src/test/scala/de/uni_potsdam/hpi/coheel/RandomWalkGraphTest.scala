@@ -85,7 +85,7 @@ class RandomWalkGraphTest extends FunSuite {
 
 		val classificationProgram = new ClassificationProgram()
 		val g = classificationProgram.buildGraph(
-			List(
+			Vector(
 				s1, s2,
 				c1, c2, c3, c4, c5, c6, c7, c8))
 		g

@@ -11,7 +11,7 @@ import de.uni_potsdam.hpi.coheel.io.Sample
 import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier
 import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier.POS_TAG_GROUPS
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
-import de.uni_potsdam.hpi.coheel.util.{Timer, PerformanceTimer, Util}
+import de.uni_potsdam.hpi.coheel.util.{Timer, Util}
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
 import org.apache.commons.collections4.BidiMap
 import org.apache.commons.collections4.bidimap.DualHashBidiMap
@@ -28,6 +28,7 @@ import weka.core.SerializationHelper
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.io.Source
+import scala.tools.nsc.io.Jar.WManifest.unenrichManifest
 import scala.util.Random
 
 
@@ -88,8 +89,8 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 				}
 			}
 		})
-		val partitioned = tokenizedDocuments.partitionCustom(new DocumentPartitioner, "index")
 
+		val partitioned = tokenizedDocuments.partitionCustom(new DocumentPartitioner, "index")
 
 		val trieHits = partitioned
 			.flatMap(new ClassificationLinkFinderFlatMap(params.parallelism))
@@ -109,36 +110,72 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 							classifierResult.documentId,
 							classifierResult.classifierType,
 							classifierResult.candidateEntity,
+							classifierResult.trieHit,
 							neighbours.in,
 							neighbours.out)
 				}
 			}
 
 
-		withNeighbours.groupBy("documentId").reduceGroup { entitiesIt =>
-			val entities = entitiesIt.toList
+		withNeighbours.groupBy("documentId").reduceGroup({ (entitiesIt, out: Collector[(String, TrieHit, String)]) =>
+			// entities contains only of SEEDs and CANDIDATEs
+			val entities = entitiesIt.toVector
 
-			Timer.start("buildGraph")
-			val g = buildGraph(entities)
-			log.info(s"buildGraph: ${Timer.end("buildGraph")} ms.")
+			// we start with the seeds as the final alignments, they are certain
+			var finalAlignments = entities.filter { entity => entity.classifierType == NodeTypes.SEED }
+//			var resolvedTrieHits = finalAlignments.map(_.trieHit).toSet
+//			var resolvedEntities = finalAlignments.map(_.candidateEntity)
 
-			Timer.start("buildMatrix")
-			val (m, s, entityNodeMapping, candidateIndices) = buildMatrix(g)
-			log.info(s"buildMatrix: ${Timer.end("buildMatrix")} ms.")
+			// get all the candidates
+			var candidates = entities.filter { entity =>  entity.classifierType == NodeTypes.CANDIDATE }
+			// filter all those candidates, which link to seed entities
+//			var resolvedCandidates = candidates.filter { candidate => resolvedEntities.contains(candidate.candidateEntity) }
+			// add them to fin
+//			finalAlignments ++= resolvedCandidates
+//			candidates = candidates.filter { candidate => !resolvedCandidates.contains(candidate) }
 
-			Timer.start("randomWalk")
-			val result = randomWalk(m, s, 100)
-			log.info(s"randomWalk: ${Timer.end("randomWalk")} ms.")
+			var candidatesRemaining = candidates.nonEmpty
+			if (!candidatesRemaining)
+				log.info("No candidates remaining before first round")
 
-			// find candidate with highest probability
-			val (maxValue, maxIdx) = result.toArray.zipWithIndex.filter { case (d, idx) => candidateIndices.contains(idx) }.maxBy(_._1)
+			var i = 1
+			while (candidatesRemaining) {
+				log.info(s"Start $i. round of random walk with seeds: ${entities.filter(_.candidateEntity == NodeTypes.SEED)}")
+				log.info(s"${candidates.size} candidates remaining")
+				Timer.start("buildGraph")
+				val g = buildGraph(entities)
+				log.info(s"Method buildGraph took ${Timer.end("buildGraph")} ms.")
 
+				Timer.start("buildMatrix")
+				val (m, s, entityNodeMapping, candidateIndices) = buildMatrix(g)
+				log.info(s"Method buildMatrix took ${Timer.end("buildMatrix")} ms.")
 
+				Timer.start("randomWalk")
+				val result = randomWalk(m, s, 100)
+				log.info(s"Method randomWalk took ${Timer.end("randomWalk")} ms.")
 
+				Timer.start("findHighest")
+				// find indices of the candidates with their probability
+				val candidateIndexProbs = result.toArray.zipWithIndex.filter { case (d, idx) => candidateIndices.contains(idx) }
+				candidatesRemaining = candidateIndexProbs.nonEmpty
+				if (candidatesRemaining) {
+					val (_, maxIdx) = candidateIndexProbs.maxBy(_._1)
+					val newEntity = entityNodeMapping.getKey(maxIdx)
+					log.info(s"Found new entity $newEntity")
+					log.info()
+					val (resolvedCandidates, remainingCandidates) = candidates.partition { can => can.candidateEntity == newEntity }
+					finalAlignments ++= resolvedCandidates
+					candidates = remainingCandidates
+					entities.foreach { entity => if (entity.candidateEntity == newEntity) entity.classifierType = NodeTypes.SEED }
 
+					candidatesRemaining = candidates.nonEmpty
+				}
+				log.info(s"Method findHighest took ${Timer.end("findHighest")} ms.")
+				i += 1
+			}
 
-			(1, 2)
-		}.writeAsTsv(randomWalkResultsPath)
+			finalAlignments.map { a => (a.documentId, a.trieHit, a.candidateEntity)}.foreach(out.collect)
+		}).writeAsTsv(randomWalkResultsPath)
 
 
 
@@ -170,20 +207,24 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 
 	}
 
-	def buildGraph(entities: List[ClassifierResultWithNeighbours]): DefaultDirectedWeightedGraph[RandomWalkNode, DefaultWeightedEdge] = {
+	def buildGraph(entities: Vector[ClassifierResultWithNeighbours]): DefaultDirectedWeightedGraph[RandomWalkNode, DefaultWeightedEdge] = {
 		val g = new DefaultDirectedWeightedGraph[RandomWalkNode, DefaultWeightedEdge](classOf[DefaultWeightedEdge])
 
 		val entityMap = mutable.Map[String, RandomWalkNode]()
 		val connectedQueue = mutable.Queue[RandomWalkNode]()
 		// Make sure candidates and seeds are added first to the graph, so they already exist
-		entities.foreach { candidate =>
-			val node = RandomWalkNode(candidate.candidateEntity).withNodeType(candidate.classifierType)
-			if (node.nodeType == NodeTypes.SEED) {
-				node.visited = true
-				connectedQueue.enqueue(node)
-			}
-			entityMap.put(candidate.candidateEntity, node)
-			assert(g.addVertex(node))
+		entities.filter(_.classifierType == NodeTypes.SEED).foreach { entity =>
+			val node = RandomWalkNode(entity.candidateEntity).withNodeType(NodeTypes.SEED)
+			// prepare connected components starting from the seeds
+			node.visited = true
+			connectedQueue.enqueue(node)
+			entityMap.put(entity.candidateEntity, node)
+			g.addVertex(node)
+		}
+		entities.filter(_.classifierType == NodeTypes.CANDIDATE).foreach { entity =>
+			val node = RandomWalkNode(entity.candidateEntity).withNodeType(NodeTypes.CANDIDATE)
+			entityMap.put(entity.candidateEntity, node)
+			g.addVertex(node)
 		}
 
 		// Now also add the neighbours, hopefully also connecting existing seeds and neighbours
@@ -348,11 +389,14 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 		var oldP = s
 		val alpha = 0.15
 		var it = 0
+		var diff = 0.0
 		do {
 			oldP = p
 			p = m.scalarMultiply(1 - alpha).preMultiply(p).add(s.mapMultiply(alpha))
 			it += 1
-		} while (it < maxIt || oldP.add(p.mapMultiply(-1)).getNorm < THETA)
+			diff = oldP.add(p.mapMultiply(-1)).getNorm
+		} while (it < maxIt && diff > THETA)
+		log.info(s"RandomWalk termininating with diff $diff after $it iterations")
 		p
 	}
 
@@ -456,18 +500,25 @@ class ClassificationFeatureLineReduceGroup extends RichGroupReduceFunction[Class
 	override def reduce(candidatesIt: Iterable[Classifiable[ClassificationInfo]], out: Collector[ClassifierResult]): Unit = {
 		val allCandidates = candidatesIt.asScala.toSeq
 		// TODO: Remove assert if performance problem
-		assert(allCandidates.map(_.info.trieHit).toSet.size == 1)
+		// Assertion: All candidates should come from the same trie hit
+		assert(allCandidates.groupBy { th => (th.info.trieHit.startIndex, th.info.trieHit.length) }.size == 1)
 		val trieHit = allCandidates.head.info.trieHit
 
 		val features = new mutable.ArrayBuffer[FeatureLine[ClassificationInfo]](allCandidates.size)
 		FeatureProgramHelper.applyCoheelFunctions(allCandidates) { featureLine =>
 			features.append(featureLine)
 		}
-		candidateClassifier.classifyResults(features).foreach { result =>
-			out.collect(ClassifierResult(result.model.documentId, NodeTypes.CANDIDATE, result.candidateEntity, trieHit))
-		}
+		var seedsFound = 0
 		seedClassifier.classifyResults(features).foreach { result =>
+			seedsFound += 1
 			out.collect(ClassifierResult(result.model.documentId, NodeTypes.SEED, result.candidateEntity, trieHit))
+		}
+		log.info(s"Found $seedsFound seeds")
+		// only emit candidates, if no seeds were found
+		if (seedsFound > 0) {
+			candidateClassifier.classifyResults(features).foreach { result =>
+				out.collect(ClassifierResult(result.model.documentId, NodeTypes.CANDIDATE, result.candidateEntity, trieHit))
+			}
 		}
 	}
 
