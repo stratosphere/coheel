@@ -15,11 +15,13 @@
 	</properties>
 
 	<dependencies>
+		<!--
 		<dependency>
 			<groupId>de.hpi.fgis</groupId>
 			<artifactId>utilities</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+		-->
 		<!-- Flink dependencies -->
 		<dependency>
 			<groupId>org.apache.flink</groupId>
@@ -157,11 +159,13 @@
 			<!--<artifactId>memory-measurer</artifactId>-->
 			<!--<version>1.0</version>-->
 		<!--</dependency>-->
+		<!--
 		<dependency>
 			<groupId>aho-corasick</groupId>
 			<artifactId>aho-corasick</artifactId>
 			<version>1.0</version>
 		</dependency>
+		-->
 	</dependencies>
 	<repositories>
 		<repository>
