@@ -32,7 +32,7 @@ object CoheelProgram {
 		if (split.length == 3)
 			Some(split(0))
 		else {
-			log.warn(s"Discarding '${split.deep}' because split size not correct")
+			log.warn(s"SurfaceProbs: Discarding '${split.deep}' because split size not correct")
 			log.warn(line)
 			None
 		}
@@ -181,7 +181,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 				if (split.length == 4)
 					out.collect((split(0), split(3).toFloat))
 				else {
-					log.warn(s"Discarding '${split.deep}' because split size not correct")
+					log.warn(s"SurfaceLinkProbs: Discarding '${split.deep}' because split size not correct")
 					log.warn(line)
 				}
 
@@ -195,7 +195,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 			// not clear, why lines without a count occur, but they do
 			try {
 				if (split.length != 3) {
-					log.warn(s"Discarding '${split.deep}' because split size not correct")
+					log.warn(s"SurfaceDocumentCounts: Discarding '${split.deep}' because split size not correct")
 					log.warn(line)
 					None
 				} else {
