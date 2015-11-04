@@ -187,4 +187,9 @@ class RandomWalkGraphTest extends FunSuite {
 		assert(g.containsEdge(nullNode, nullNode))
 	}
 
+	test("Building matrix works") {
+		val p = new ClassificationProgram
+		val (m, s, entityNodeIdMapping, candidateIndices) = p.buildMatrix(g)
+	}
+
 }

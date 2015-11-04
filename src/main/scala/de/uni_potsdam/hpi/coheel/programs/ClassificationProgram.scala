@@ -11,7 +11,7 @@ import de.uni_potsdam.hpi.coheel.io.Sample
 import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier
 import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier.POS_TAG_GROUPS
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
-import de.uni_potsdam.hpi.coheel.util.Util
+import de.uni_potsdam.hpi.coheel.util.{Timer, PerformanceTimer, Util}
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
 import org.apache.commons.collections4.BidiMap
 import org.apache.commons.collections4.bidimap.DualHashBidiMap
@@ -100,8 +100,7 @@ class ClassificationProgram extends NoParamCoheelProgram {
 		val withNeighbours = basicClassifierResults.join(preprocessedNeighbours)
 			.where("candidateEntity")
 			.equalTo("entity")
-			.map { joinResult =>
-				joinResult match {
+			.map { joinResult => joinResult match {
 					case (classifierResult, neighbours) =>
 						ClassifierResultWithNeighbours(
 							classifierResult.documentId,
@@ -113,12 +112,24 @@ class ClassificationProgram extends NoParamCoheelProgram {
 			}
 
 
-		withNeighbours.groupBy("documentId").reduceGroup { candidatesIt =>
-			val candidates = candidatesIt.toList
+		withNeighbours.groupBy("documentId").reduceGroup { entitiesIt =>
+			val entities = entitiesIt.toList
 
-			val g = buildGraph(candidates)
-			val (m, s, entityNodeMapping) = buildMatrix(g)
-			randomWalk(m, s, 100)
+			Timer.start("buildGraph")
+			val g = buildGraph(entities)
+			log.info(s"buildGraph: ${Timer.end("buildGraph")} ms.")
+
+			Timer.start("buildMatrix")
+			val (m, s, entityNodeMapping, candidateIndices) = buildMatrix(g)
+			log.info(s"buildMatrix: ${Timer.end("buildMatrix")} ms.")
+
+			Timer.start("randomWalk")
+			val result = randomWalk(m, s, 100)
+			log.info(s"randomWalk: ${Timer.end("randomWalk")} ms.")
+
+			// find candidate with highest probability
+			val (maxValue, maxIdx) = result.toArray.zipWithIndex.filter { case (d, idx) => candidateIndices.contains(idx) }.maxBy(_._1)
+
 
 
 
@@ -150,7 +161,9 @@ class ClassificationProgram extends NoParamCoheelProgram {
 		}.writeAsTsv(rawFeaturesPath)
 
 		// Write candidate classifier results for debugging
-		basicClassifierResults.writeAsTsv(classificationPath)
+		basicClassifierResults.map { res =>
+			(res.documentId, res.classifierType, res.candidateEntity)
+		}.writeAsTsv(classificationPath)
 
 	}
 
@@ -270,7 +283,6 @@ class ClassificationProgram extends NoParamCoheelProgram {
 		// add stalling edges
 		g.vertexSet().asScala.foreach { node =>
 			val e = g.addEdge(node, node)
-			// TODO: Think about default value
 			if (node == nullNode)
 				g.setEdgeWeight(e, 1.00)
 			else
@@ -283,7 +295,16 @@ class ClassificationProgram extends NoParamCoheelProgram {
 		g
 	}
 
-	def buildMatrix(g: DefaultDirectedWeightedGraph[RandomWalkNode, DefaultWeightedEdge]): (RealMatrix, RealVector, BidiMap[String, Int]) = {
+	/**
+	 * Builds a random walk matrix from a given graph.
+	 * @return Returns a four tuple of:
+	 *         <li>The random walk matrix with each row normalized to 1.0.
+	 *         <li>The vector of seed entries with sum 1. If there is a seed at index 2 and 4, and there are 5 entities, this is: [0, 0, 0.5, 0, 0.5]
+	 *         <li>The mapping between entity and index in the matrix
+	 *         <li>A set of all the indices of the candidates
+	 */
+	def buildMatrix(g: DefaultDirectedWeightedGraph[RandomWalkNode, DefaultWeightedEdge]): (RealMatrix, RealVector, BidiMap[String, Int], mutable.Set[Int]) = {
+		val candidateIndices = mutable.Set[Int]()
 		val size = g.vertexSet().size()
 		val entityNodeIdMapping = new DualHashBidiMap[String, Int]()
 		val m = new OpenMapRealMatrix(size, size)
@@ -292,6 +313,8 @@ class ClassificationProgram extends NoParamCoheelProgram {
 		val s: RealVector = new ArrayRealVector(size)
 		g.vertexSet().asScala.foreach { node =>
 			entityNodeIdMapping.put(node.entity, currentEntityId)
+			if (node.nodeType == NodeType.CANDIDATE)
+				candidateIndices += currentEntityId
 			if (node.nodeType == NodeType.SEED)
 				s.setEntry(currentEntityId, 1.0)
 			currentEntityId += 1
@@ -303,8 +326,8 @@ class ClassificationProgram extends NoParamCoheelProgram {
 		g.vertexSet().asScala.foreach { node =>
 			val nodeId = entityNodeIdMapping.get(node.entity)
 			val outEdges = g.outgoingEdgesOf(node)
-			val edgeSum = outEdges.asScala.map(g.getEdgeWeight).sum
-			assert(edgeSum == 1.0 + STALLING_EDGE_WEIGHT)
+			val edgeSum = outEdges.asScala.toList.map(g.getEdgeWeight).sum
+			assert(edgeSum - (1.0 + STALLING_EDGE_WEIGHT) < 0.0001)
 
 			outEdges.asScala.foreach { out =>
 				val outTarget = g.getEdgeTarget(out)
@@ -313,9 +336,10 @@ class ClassificationProgram extends NoParamCoheelProgram {
 				m.setEntry(nodeId, outId, outWeight / (1.0 + STALLING_EDGE_WEIGHT))
 			}
 		}
-		(m, s, entityNodeIdMapping)
+		(m, s, entityNodeIdMapping, candidateIndices)
 	}
 
+	val THETA = Math.pow(10, -8)
 	def randomWalk(m: RealMatrix, s: RealVector, maxIt: Int): RealVector = {
 		var p = s
 		var oldP = s
@@ -325,7 +349,7 @@ class ClassificationProgram extends NoParamCoheelProgram {
 			oldP = p
 			p = m.scalarMultiply(1 - alpha).preMultiply(p).add(s.mapMultiply(alpha))
 			it += 1
-		} while (it < maxIt)
+		} while (it < maxIt || oldP.add(p.mapMultiply(-1)).getNorm < THETA)
 		p
 	}
 
@@ -345,8 +369,7 @@ class ClassificationProgram extends NoParamCoheelProgram {
 		val preprocessedNeighbours = outgoingNeighbours.join(incomingNeighbours)
 			.where(0)
 			.equalTo(0)
-			.map { joinResult =>
-				joinResult match {
+			.map { joinResult => joinResult match {
 					case (out, in) => Neighbours(out._1, out._2, in._2)
 				}
 
@@ -429,15 +452,19 @@ class ClassificationFeatureLineReduceGroup extends RichGroupReduceFunction[Class
 
 	override def reduce(candidatesIt: Iterable[Classifiable[ClassificationInfo]], out: Collector[ClassifierResult]): Unit = {
 		val allCandidates = candidatesIt.asScala.toSeq
+		// TODO: Remove assert if performance problem
+		assert(allCandidates.map(_.info.trieHit).toSet.size == 1)
+		val trieHit = allCandidates.head.info.trieHit
+
 		val features = new mutable.ArrayBuffer[FeatureLine[ClassificationInfo]](allCandidates.size)
 		FeatureProgramHelper.applyCoheelFunctions(allCandidates) { featureLine =>
 			features.append(featureLine)
 		}
 		candidateClassifier.classifyResults(features).foreach { result =>
-			out.collect(ClassifierResult(result.model.documentId, NodeType.CANDIDATE, result.candidateEntity))
+			out.collect(ClassifierResult(result.model.documentId, NodeType.CANDIDATE, result.candidateEntity, trieHit))
 		}
 		seedClassifier.classifyResults(features).foreach { result =>
-			out.collect(ClassifierResult(result.model.documentId, NodeType.SEED, result.candidateEntity))
+			out.collect(ClassifierResult(result.model.documentId, NodeType.SEED, result.candidateEntity, trieHit))
 		}
 	}
 

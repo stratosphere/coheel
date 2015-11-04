@@ -63,7 +63,6 @@ object FeatureProgramHelper {
 							case None => 1.0 / modelSize
 						})
 					}.sum
-
 					classifiableWithCandidate.copy(contextProb = contextProb)
 			}
 		}.name("Classifiable with Context Probs")

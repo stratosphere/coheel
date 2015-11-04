@@ -1,7 +1,6 @@
 package de.uni_potsdam.hpi.coheel.programs
 
 import de.uni_potsdam.hpi.coheel.datastructures.TrieHit
-import de.uni_potsdam.hpi.coheel.programs.DataClasses.NodeType.NodeType
 import de.uni_potsdam.hpi.coheel.util.Util
 import scala.collection.mutable
 
@@ -111,7 +110,7 @@ object DataClasses {
 	 * @param classifierType Either "seed" or "candidate"
 	 * @param candidateEntity Candidate entity to link
 	 */
-	case class ClassifierResult(documentId: String, classifierType: NodeType, candidateEntity: String)
+	case class ClassifierResult(documentId: String, classifierType: NodeType, candidateEntity: String, trieHit: TrieHit)
 
 	case class ClassifierResultWithNeighbours(
 		 documentId: String,
@@ -126,9 +125,12 @@ object DataClasses {
 		currentId
 	}
 
-	object NodeType extends Enumeration {
-		type NodeType = Value
-		val CANDIDATE, SEED, NEIGHBOUR, NULL = Value
+	type NodeType = Int
+	object NodeType {
+		val CANDIDATE = 0
+		val SEED = 1
+		val NEIGHBOUR = 2
+		val NULL = 3
 	}
 
 
