@@ -123,7 +123,7 @@ object FlinkProgramRunner {
 					if (argument != null)
 						log.info(s"Current parameter: $argument")
 					program.makeProgram(env, params, argument)
-					FileUtils.writeStringToFile(new File("PLAN"), env.getExecutionPlan())
+					FileUtils.writeStringToFile(new File("plans/PLAN"), env.getExecutionPlan())
 					val configurationString = if (program.configurationParams.size > 0)
 						" " + program.configurationParams.toString().replace("Map(", "configuration-params = (")
 					else

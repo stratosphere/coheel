@@ -1,0 +1,59 @@
+================================================================================
+15677
+HashTrie with word-boundaries
+Time for adding   : 25887 ms
+Time for checking : 889 ms
+Total time        : 26777 ms
+Memory consumption: 3035 MB
+================================================================================
+15677
+Toni's trie implementation
+Time for adding   : 16912 ms
+Time for checking : 465 ms
+Total time        : 17377 ms
+Memory consumption: 1951 MB
+================================================================================
+15677
+New trie
+Time for adding   : 15556 ms
+Time for checking : 364 ms
+Total time        : 15920 ms
+Memory consumption: 1717 MB
+================================================================================
+
+
+
+
+
+================================================================================
+45993
+New trie
+Time for adding   : 831 ms
+Time for checking : 1244 ms
+Total time        : 2075 ms
+Memory consumption: 92 MB
+================================================================================
+45993
+Toni's trie implementation
+Time for adding   : 887 ms
+Time for checking : 6996 ms
+Total time        : 7883 ms
+Memory consumption: 122 MB
+================================================================================
+
+
+================================================================================
+45993
+Toni's trie implementation
+Time for adding   : 1011 ms
+Time for checking : 7986 ms
+Total time        : 8997 ms
+Memory consumption: 124 MB
+================================================================================
+45993
+New trie
+Time for adding   : 896 ms
+Time for checking : 1334 ms
+Total time        : 2230 ms
+Memory consumption: 107 MB
+================================================================================	

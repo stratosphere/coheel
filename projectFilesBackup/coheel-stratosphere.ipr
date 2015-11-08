@@ -64,13 +64,13 @@
     <file url="file://$PROJECT_DIR$/src/main/scala/de/uni_potsdam/hpi/coheel/programs/RedirectResolvingProgram.scala" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/scala/de/uni_potsdam/hpi/coheel/programs/WikipediaTrainingProgram.scala" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/scala/de/uni_potsdam/hpi/coheel/wiki/Extractor.scala" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/src/main/scala/de/uni_potsdam/hpi/coheel/wiki/SwebleUtils.scala" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/scala/de/uni_potsdam/hpi/coheel/wiki/PlainTextConverter.scala" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/scala/de/uni_potsdam/hpi/coheel/wiki/TokenizerHelper.scala" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/scala/de/uni_potsdam/hpi/coheel/wiki/WikiPageReader.scala" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/test/resources/manual_test_files/wikipedia_Kilobyte.xml" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/test/scala/de/uni_potsdam/hpi/coheel/ExtractorTest.scala" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/test/scala/de/uni_potsdam/hpi/coheel/TokenizerTest.scala" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/src/test/scala/de/uni_potsdam/hpi/coheel/TriePerformanceTest.scala" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/test/scala/de/uni_potsdam/hpi/coheel/datastructures/TriePerformanceTest.scala" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/test/scala/de/uni_potsdam/hpi/coheel/datastructures/TrieTest.scala" charset="UTF-8" />
   </component>
   <component name="EntryPointsManager">
@@ -279,6 +279,17 @@
       <JAVADOC />
       <SOURCES />
     </library>
+    <library name="Maven: aho-corasick:aho-corasick:1.0">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/aho-corasick/aho-corasick/1.0/aho-corasick-1.0.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/aho-corasick/aho-corasick/1.0/aho-corasick-1.0-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/aho-corasick/aho-corasick/1.0/aho-corasick-1.0-sources.jar!/" />
+      </SOURCES>
+    </library>
     <library name="Maven: com.amazonaws:aws-java-sdk:1.8.1">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/com/amazonaws/aws-java-sdk/1.8.1/aws-java-sdk-1.8.1.jar!/" />
@@ -288,6 +299,17 @@
       </JAVADOC>
       <SOURCES>
         <root url="jar://$MAVEN_REPOSITORY$/com/amazonaws/aws-java-sdk/1.8.1/aws-java-sdk-1.8.1-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: com.carrotsearch:hppc:0.6.0">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/com/carrotsearch/hppc/0.6.0/hppc-0.6.0.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/com/carrotsearch/hppc/0.6.0/hppc-0.6.0-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/com/carrotsearch/hppc/0.6.0/hppc-0.6.0-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: com.esotericsoftware.kryo:kryo:2.24.0">
@@ -356,26 +378,15 @@
         <root url="jar://$MAVEN_REPOSITORY$/com/github/scopt/scopt_2.10/3.2.0/scopt_2.10-3.2.0-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: com.google.code.findbugs:jsr305:1.3.9">
+    <library name="Maven: com.google.guava:guava:15.0">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/google/code/findbugs/jsr305/1.3.9/jsr305-1.3.9.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/com/google/guava/guava/15.0/guava-15.0.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/com/google/code/findbugs/jsr305/1.3.9/jsr305-1.3.9-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/com/google/guava/guava/15.0/guava-15.0-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/google/code/findbugs/jsr305/1.3.9/jsr305-1.3.9-sources.jar!/" />
-      </SOURCES>
-    </library>
-    <library name="Maven: com.google.guava:guava:11.0.2">
-      <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/google/guava/guava/11.0.2/guava-11.0.2.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/com/google/guava/guava/11.0.2/guava-11.0.2-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/google/guava/guava/11.0.2/guava-11.0.2-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/com/google/guava/guava/15.0/guava-15.0-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: com.google.protobuf:protobuf-java:2.5.0">
@@ -466,6 +477,28 @@
         <root url="jar://$MAVEN_REPOSITORY$/com/thoughtworks/paranamer/paranamer/2.3/paranamer-2.3-sources.jar!/" />
       </SOURCES>
     </library>
+    <library name="Maven: com.twitter:chill-java:0.5.1">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/com/twitter/chill-java/0.5.1/chill-java-0.5.1.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/com/twitter/chill-java/0.5.1/chill-java-0.5.1-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/com/twitter/chill-java/0.5.1/chill-java-0.5.1-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: com.twitter:chill_2.10:0.5.1">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/com/twitter/chill_2.10/0.5.1/chill_2.10-0.5.1.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/com/twitter/chill_2.10/0.5.1/chill_2.10-0.5.1-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/com/twitter/chill_2.10/0.5.1/chill_2.10-0.5.1-sources.jar!/" />
+      </SOURCES>
+    </library>
     <library name="Maven: com.typesafe:config:1.2.1">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/com/typesafe/config/1.2.1/config-1.2.1.jar!/" />
@@ -510,15 +543,15 @@
         <root url="jar://$MAVEN_REPOSITORY$/commons-cli/commons-cli/1.2/commons-cli-1.2-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: commons-codec:commons-codec:1.3">
+    <library name="Maven: commons-codec:commons-codec:1.4">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/commons-codec/commons-codec/1.3/commons-codec-1.3.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/commons-codec/commons-codec/1.4/commons-codec-1.4.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/commons-codec/commons-codec/1.3/commons-codec-1.3-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/commons-codec/commons-codec/1.4/commons-codec-1.4-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/commons-codec/commons-codec/1.3/commons-codec-1.3-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/commons-codec/commons-codec/1.4/commons-codec-1.4-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: commons-collections:commons-collections:3.2.1">
@@ -675,6 +708,17 @@
         <root url="jar://$MAVEN_REPOSITORY$/de/fau/cs/osr/utils/utils/0.3.0/utils-0.3.0-sources.jar!/" />
       </SOURCES>
     </library>
+    <library name="Maven: de.hpi.fgis:utilities:0.0.1-SNAPSHOT">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/de/hpi/fgis/utilities/0.0.1-SNAPSHOT/utilities-0.0.1-SNAPSHOT.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/de/hpi/fgis/utilities/0.0.1-SNAPSHOT/utilities-0.0.1-SNAPSHOT-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/de/hpi/fgis/utilities/0.0.1-SNAPSHOT/utilities-0.0.1-SNAPSHOT-sources.jar!/" />
+      </SOURCES>
+    </library>
     <library name="Maven: io.netty:netty-all:4.0.21.Final">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-all/4.0.21.Final/netty-all-4.0.21.Final.jar!/" />
@@ -730,15 +774,15 @@
         <root url="jar://$MAVEN_REPOSITORY$/javax/xml/bind/jaxb-api/2.2.2/jaxb-api-2.2.2-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: joda-time:joda-time:2.6">
+    <library name="Maven: joda-time:joda-time:2.7">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/joda-time/joda-time/2.6/joda-time-2.6.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/joda-time/joda-time/2.7/joda-time-2.7.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/joda-time/joda-time/2.6/joda-time-2.6-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/joda-time/joda-time/2.7/joda-time-2.7-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/joda-time/joda-time/2.6/joda-time-2.6-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/joda-time/joda-time/2.7/joda-time-2.7-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: junit:junit:4.11">
@@ -783,6 +827,17 @@
       </JAVADOC>
       <SOURCES>
         <root url="jar://$MAVEN_REPOSITORY$/net/sf/jopt-simple/jopt-simple/4.3/jopt-simple-4.3-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: org.ahocorasick:ahocorasick:0.2.4">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/ahocorasick/ahocorasick/0.2.4/ahocorasick-0.2.4.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/org/ahocorasick/ahocorasick/0.2.4/ahocorasick-0.2.4-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/ahocorasick/ahocorasick/0.2.4/ahocorasick-0.2.4-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: org.apache.avro:avro:1.7.6">
@@ -840,81 +895,81 @@
         <root url="jar://$MAVEN_REPOSITORY$/org/apache/commons/commons-math/2.1/commons-math-2.1-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.apache.flink:flink-clients:0.7.0-hadoop2-incubating">
+    <library name="Maven: org.apache.flink:flink-clients:0.8.0">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-clients/0.7.0-hadoop2-incubating/flink-clients-0.7.0-hadoop2-incubating.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-clients/0.8.0/flink-clients-0.8.0.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-clients/0.7.0-hadoop2-incubating/flink-clients-0.7.0-hadoop2-incubating-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-clients/0.8.0/flink-clients-0.8.0-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-clients/0.7.0-hadoop2-incubating/flink-clients-0.7.0-hadoop2-incubating-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-clients/0.8.0/flink-clients-0.8.0-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.apache.flink:flink-compiler:0.7.0-hadoop2-incubating">
+    <library name="Maven: org.apache.flink:flink-compiler:0.8.0">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-compiler/0.7.0-hadoop2-incubating/flink-compiler-0.7.0-hadoop2-incubating.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-compiler/0.8.0/flink-compiler-0.8.0.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-compiler/0.7.0-hadoop2-incubating/flink-compiler-0.7.0-hadoop2-incubating-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-compiler/0.8.0/flink-compiler-0.8.0-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-compiler/0.7.0-hadoop2-incubating/flink-compiler-0.7.0-hadoop2-incubating-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-compiler/0.8.0/flink-compiler-0.8.0-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.apache.flink:flink-core:0.7.0-hadoop2-incubating">
+    <library name="Maven: org.apache.flink:flink-core:0.8.0">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-core/0.7.0-hadoop2-incubating/flink-core-0.7.0-hadoop2-incubating.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-core/0.8.0/flink-core-0.8.0.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-core/0.7.0-hadoop2-incubating/flink-core-0.7.0-hadoop2-incubating-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-core/0.8.0/flink-core-0.8.0-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-core/0.7.0-hadoop2-incubating/flink-core-0.7.0-hadoop2-incubating-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-core/0.8.0/flink-core-0.8.0-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.apache.flink:flink-java:0.7.0-hadoop2-incubating">
+    <library name="Maven: org.apache.flink:flink-java:0.8.0">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-java/0.7.0-hadoop2-incubating/flink-java-0.7.0-hadoop2-incubating.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-java/0.8.0/flink-java-0.8.0.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-java/0.7.0-hadoop2-incubating/flink-java-0.7.0-hadoop2-incubating-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-java/0.8.0/flink-java-0.8.0-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-java/0.7.0-hadoop2-incubating/flink-java-0.7.0-hadoop2-incubating-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-java/0.8.0/flink-java-0.8.0-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.apache.flink:flink-runtime:0.7.0-hadoop2-incubating">
+    <library name="Maven: org.apache.flink:flink-runtime:0.8.0">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-runtime/0.7.0-hadoop2-incubating/flink-runtime-0.7.0-hadoop2-incubating.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-runtime/0.8.0/flink-runtime-0.8.0.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-runtime/0.7.0-hadoop2-incubating/flink-runtime-0.7.0-hadoop2-incubating-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-runtime/0.8.0/flink-runtime-0.8.0-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-runtime/0.7.0-hadoop2-incubating/flink-runtime-0.7.0-hadoop2-incubating-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-runtime/0.8.0/flink-runtime-0.8.0-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.apache.flink:flink-scala:0.7.0-hadoop2-incubating">
+    <library name="Maven: org.apache.flink:flink-scala:0.8.0">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-scala/0.7.0-hadoop2-incubating/flink-scala-0.7.0-hadoop2-incubating.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-scala/0.8.0/flink-scala-0.8.0.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-scala/0.7.0-hadoop2-incubating/flink-scala-0.7.0-hadoop2-incubating-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-scala/0.8.0/flink-scala-0.8.0-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-scala/0.7.0-hadoop2-incubating/flink-scala-0.7.0-hadoop2-incubating-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-scala/0.8.0/flink-scala-0.8.0-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.apache.flink:flink-shaded:0.7.0-hadoop2-incubating">
+    <library name="Maven: org.apache.flink:flink-shaded:0.8.0">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-shaded/0.7.0-hadoop2-incubating/flink-shaded-0.7.0-hadoop2-incubating.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-shaded/0.8.0/flink-shaded-0.8.0.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-shaded/0.7.0-hadoop2-incubating/flink-shaded-0.7.0-hadoop2-incubating-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-shaded/0.8.0/flink-shaded-0.8.0-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-shaded/0.7.0-hadoop2-incubating/flink-shaded-0.7.0-hadoop2-incubating-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-shaded/0.8.0/flink-shaded-0.8.0-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: org.apache.hadoop:hadoop-annotations:2.2.0">
@@ -1233,15 +1288,6 @@
       <JAVADOC />
       <SOURCES />
     </library>
-    <library name="Maven: org.scala-lang:scala-compiler-bundle:2.10.4">
-      <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/scala-lang/scala-compiler/2.10.4/scala-compiler-2.10.4.jar!/" />
-        <root url="jar://$MAVEN_REPOSITORY$/org/scala-lang/scala-library/2.10.4/scala-library-2.10.4.jar!/" />
-        <root url="jar://$MAVEN_REPOSITORY$/org/scala-lang/scala-reflect/2.10.4/scala-reflect-2.10.4.jar!/" />
-      </CLASSES>
-      <JAVADOC />
-      <SOURCES />
-    </library>
     <library name="Maven: org.scala-lang:scala-compiler:2.10.4">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/org/scala-lang/scala-compiler/2.10.4/scala-compiler-2.10.4.jar!/" />
@@ -1253,7 +1299,15 @@
         <root url="jar://$MAVEN_REPOSITORY$/org/scala-lang/scala-compiler/2.10.4/scala-compiler-2.10.4-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.scala-lang:scala-library:2.10.4">
+    <library name="Maven: org.scala-lang:scala-library:2.10.4" type="Scala">
+      <properties>
+        <option name="languageLevel" value="Scala_2_10" />
+        <compiler-classpath>
+          <root url="file://$MAVEN_REPOSITORY$/org/scala-lang/scala-compiler/2.10.4/scala-compiler-2.10.4.jar" />
+          <root url="file://$MAVEN_REPOSITORY$/org/scala-lang/scala-library/2.10.4/scala-library-2.10.4.jar" />
+          <root url="file://$MAVEN_REPOSITORY$/org/scala-lang/scala-reflect/2.10.4/scala-reflect-2.10.4.jar" />
+        </compiler-classpath>
+      </properties>
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/org/scala-lang/scala-library/2.10.4/scala-library-2.10.4.jar!/" />
       </CLASSES>
@@ -1273,6 +1327,17 @@
       </JAVADOC>
       <SOURCES>
         <root url="jar://$MAVEN_REPOSITORY$/org/scala-lang/scala-reflect/2.10.4/scala-reflect-2.10.4-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: org.scalamacros:quasiquotes_2.10:2.0.1">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/scalamacros/quasiquotes_2.10/2.0.1/quasiquotes_2.10-2.0.1.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/org/scalamacros/quasiquotes_2.10/2.0.1/quasiquotes_2.10-2.0.1-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/scalamacros/quasiquotes_2.10/2.0.1/quasiquotes_2.10-2.0.1-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: org.scalatest:scalatest_2.10:2.1.6">
@@ -1394,7 +1459,14 @@
       <JAVADOC />
       <SOURCES />
     </library>
-    <library name="scala-library">
+    <library name="scala-sdk" type="Scala">
+      <properties>
+        <compiler-classpath>
+          <root url="file://$MAVEN_REPOSITORY$/org/scala-lang/scala-compiler/2.10.4/scala-compiler-2.10.4.jar" />
+          <root url="file://$MAVEN_REPOSITORY$/org/scala-lang/scala-library/2.10.4/scala-library-2.10.4.jar" />
+          <root url="file://$MAVEN_REPOSITORY$/org/scala-lang/scala-reflect/2.10.4/scala-reflect-2.10.4.jar" />
+        </compiler-classpath>
+      </properties>
       <CLASSES>
         <root url="jar:///opt/scala-2.10.4/lib/scala-library.jar!/" />
         <root url="jar:///opt/scala-2.10.4/lib/scala-swing.jar!/" />
@@ -1411,4 +1483,3 @@
     </library>
   </component>
 </project>
-
