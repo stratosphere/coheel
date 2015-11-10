@@ -502,7 +502,14 @@ class ClassificationFeatureLineReduceGroup(params: Params) extends RichGroupRedu
 		val allCandidates = candidatesIt.asScala.toSeq
 		// TODO: Remove assert if performance problem
 		// Assertion: All candidates should come from the same trie hit
-		assert(allCandidates.groupBy { th => (th.info.trieHit.startIndex, th.info.trieHit.length) }.size == 1)
+		// assert(allCandidates.groupBy { th => (th.info.trieHit.startIndex, th.info.trieHit.length) }.size == 1)
+		if (allCandidates.groupBy { th => (th.info.trieHit.startIndex, th.info.trieHit.length) }.size != 1) {
+			log.error("More than one trie hit for feature line reducer")
+			log.error(allCandidates)
+			log.error(allCandidates.groupBy { th => (th.info.trieHit.startIndex, th.info.trieHit.length) })
+		}
+
+
 		val trieHit = allCandidates.head.info.trieHit
 
 		val features = new mutable.ArrayBuffer[FeatureLine[ClassificationInfo]](allCandidates.size)
