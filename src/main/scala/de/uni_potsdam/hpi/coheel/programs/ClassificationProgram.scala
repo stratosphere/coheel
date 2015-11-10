@@ -328,10 +328,14 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 		// add stalling edges
 		g.vertexSet().asScala.foreach { node =>
 			val e = g.addEdge(node, node)
-			if (node == nullNode)
-				g.setEdgeWeight(e, 1.00)
-			else
-				g.setEdgeWeight(e, STALLING_EDGE_WEIGHT)
+			if (e == null) {
+				log.error(s"$node apparently links to itself?")
+			} else {
+				if (node == nullNode)
+					g.setEdgeWeight(e, 1.00)
+				else
+					g.setEdgeWeight(e, STALLING_EDGE_WEIGHT)
+			}
 		}
 
 		val prunedVertexCount = g.vertexSet().size()
