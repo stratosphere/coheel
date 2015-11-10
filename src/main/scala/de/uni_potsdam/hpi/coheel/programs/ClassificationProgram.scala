@@ -122,9 +122,10 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 			// entities contains only of SEEDs and CANDIDATEs
 			val entities = entitiesIt.toVector
 
+			log.warn("BASIC NEIGHBOURS")
 			entities.foreach { entity =>
 				log.warn("--------------------------------------------------------")
-				log.warn(s"Entity: $entity")
+				log.warn(s"Entity: ${entity.candidateEntity} (${entity.classifierType}}) with ${entity.in.size} in neighbours and ${entity.out.size} out neighbours")
 				log.warn("In-Neighbours")
 				entity.in.foreach { in =>
 					log.warn(s"  ${in.entity}")
@@ -158,6 +159,10 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 				log.info(s"${candidates.size} candidates remaining")
 				Timer.start("buildGraph")
 				val g = buildGraph(entities)
+				log.warn("INNER LOOP")
+				g.vertexSet().asScala.foreach { e =>
+					log.warn(s"Entity: ${e.entity} (${e.nodeType}})")
+				}
 				/*
 				Error: org.apache.commons.math3.exception.NumberIsTooLargeException: 74,234,996,521 is larger than, or equal to, the maximum (2,147,483,647)
 				at org.apache.commons.math3.linear.OpenMapRealMatrix.<init>(OpenMapRealMatrix.java:67)
