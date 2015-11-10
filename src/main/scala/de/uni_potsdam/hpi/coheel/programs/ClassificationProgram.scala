@@ -122,6 +122,19 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 			// entities contains only of SEEDs and CANDIDATEs
 			val entities = entitiesIt.toVector
 
+			entities.foreach { entity =>
+				log.warn("--------------------------------------------------------")
+				log.warn(s"Entity: $entity")
+				log.warn("In-Neighbours")
+				entity.in.foreach { in =>
+					log.warn(s"  ${in.entity}")
+				}
+				println("Out-Neighbours")
+				entity.in.foreach { out =>
+					log.warn(s"  ${out.entity}")
+				}
+			}
+
 			// we start with the seeds as the final alignments, they are certain
 			var finalAlignments = entities.filter { entity => entity.classifierType == NodeTypes.SEED }
 //			var resolvedTrieHits = finalAlignments.map(_.trieHit).toSet
@@ -145,6 +158,19 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 				log.info(s"${candidates.size} candidates remaining")
 				Timer.start("buildGraph")
 				val g = buildGraph(entities)
+				/*
+				Error: org.apache.commons.math3.exception.NumberIsTooLargeException: 74,234,996,521 is larger than, or equal to, the maximum (2,147,483,647)
+				at org.apache.commons.math3.linear.OpenMapRealMatrix.<init>(OpenMapRealMatrix.java:67)
+				at de.uni_potsdam.hpi.coheel.programs.ClassificationProgram.buildMatrix(ClassificationProgram.scala:359)
+				at de.uni_potsdam.hpi.coheel.programs.ClassificationProgram$$anonfun$buildProgram$1.apply(ClassificationProgram.scala:151)
+				at de.uni_potsdam.hpi.coheel.programs.ClassificationProgram$$anonfun$buildProgram$1.apply(ClassificationProgram.scala:121)
+				at org.apache.flink.api.scala.GroupedDataSet$$anon$4.reduce(GroupedDataSet.scala:335)
+				at org.apache.flink.runtime.operators.GroupReduceDriver.run(GroupReduceDriver.java:125)
+				at org.apache.flink.runtime.operators.RegularPactTask.run(RegularPactTask.java:496)
+				at org.apache.flink.runtime.operators.RegularPactTask.invoke(RegularPactTask.java:362)
+				at org.apache.flink.runtime.taskmanager.Task.run(Task.java:559)
+				at java.lang.Thread.run(Thread.java:745)
+				*/
 				log.info(s"Method buildGraph took ${Timer.end("buildGraph")} ms.")
 
 				Timer.start("buildMatrix")
