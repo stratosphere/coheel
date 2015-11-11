@@ -2,7 +2,7 @@ package de.uni_potsdam.hpi.coheel.programs
 
 import de.uni_potsdam.hpi.coheel.datastructures.NewTrie
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
-import de.uni_potsdam.hpi.coheel.programs.DataClasses.Plaintext
+import de.uni_potsdam.hpi.coheel.programs.DataClasses.PlainText
 import de.uni_potsdam.hpi.coheel.util.Timer
 import org.apache.flink.api.common.functions.{RichMapFunction, RichFlatMapFunction}
 import org.apache.flink.api.scala._
@@ -112,14 +112,14 @@ class SurfaceEvaluationProgram extends CoheelProgram[Int] {
 	}
 }
 
-class SurfaceEvaluationFlatMap extends RichFlatMapFunction[Plaintext, (String, Evaluation)] {
+class SurfaceEvaluationFlatMap extends RichFlatMapFunction[PlainText, (String, Evaluation)] {
 
 	var trie: NewTrie = _
 
 	override def open(params: Configuration): Unit = {
 		trie = getRuntimeContext.getBroadcastVariableWithInitializer(SurfacesInTrieFlatMap.BROADCAST_SURFACES, new TrieWithProbBroadcastInitializer)
 	}
-	override def flatMap(plainText: Plaintext, out: Collector[(String, Evaluation)]): Unit = {
+	override def flatMap(plainText: PlainText, out: Collector[(String, Evaluation)]): Unit = {
 		// determine the actual surfaces, from the real wikipedia article
 		val actualSurfaces = plainText.linkString.split(CoheelProgram.LINK_SPLITTER).map(_.split(" ").toSeq).toSet
 

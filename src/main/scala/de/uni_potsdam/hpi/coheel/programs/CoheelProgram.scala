@@ -144,15 +144,13 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 		}.name("Filter-Normal-Pages")
 	}
 
-	def readPlainTexts: DataSet[Plaintext] = {
+	def readPlainTexts: DataSet[PlainText] = {
 		environment.readTextFile(plainTextsPath).name("Plain-Texts").flatMap { line =>
 			val split = line.split('\t')
-			// TODO: Change, once we only have plaintext files with 3 entries
-			if (split.length == 2)
-				Some(Plaintext(split(0), split(1), "\0"))
-			else if (split.length == 3)
-				Some(Plaintext(split(0), split(1), split(2)))
+			if (split.length == 3)
+				Some(PlainText(split(0), split(1), split(2)))
 			else
+				log.warn(s"Line does not follow plain text standard: $line")
 				None
 		}.name("Parsed Plain-Texts")
 	}
@@ -189,7 +187,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 		}).name("Parsed Surfaces with Probabilities")
 	}
 
-	def readSurfaceDocumentCounts: DataSet[SurfaceAsLinkCount] = {
+	def readSurfaceDocumentCounts(): DataSet[SurfaceAsLinkCount] = {
 		environment.readTextFile(surfaceDocumentCountsPath).name("Raw-Surface-Document-Counts").flatMap { line =>
 			val split = line.split('\t')
 			// not clear, why lines without a count occur, but they do

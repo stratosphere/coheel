@@ -5,7 +5,8 @@ import java.util.Date
 import de.uni_potsdam.hpi.coheel.datastructures.NewTrie
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
-import de.uni_potsdam.hpi.coheel.programs.DataClasses.{EntireTextSurfaceCounts, EntireTextSurfaces, Plaintext}
+import de.uni_potsdam.hpi.coheel.programs.DataClasses.{EntireTextSurfaceCounts, EntireTextSurfaces, PlainText}
+import org.apache.flink.api.java.aggregation.Aggregations
 import org.apache.flink.api.scala._
 import org.apache.flink.util.Collector
 
@@ -25,13 +26,13 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 			.withBroadcastSet(surfaces, SurfacesInTrieFlatMap.BROADCAST_SURFACES)
 			.name("Entire-Text-Surfaces-Along-With-Document")
 
-		val surfaceDocumentCounts = readSurfaceDocumentCounts
+		val surfaceDocumentCounts = readSurfaceDocumentCounts()
 
 		val entireTextSurfaceCounts = trieHits
 			.groupBy { _.surface }
 			.reduceGroup { group =>
 				val head = group.next().surface
-				EntireTextSurfaceCounts(head, group.size + 1)
+				EntireTextSurfaceCounts(head, group.size + 1) // + 1 because we already consumed one element
 			}
 			.name("Entire-Text-Surface-Counts")
 
@@ -41,7 +42,7 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 			.map { joinResult => joinResult match {
 				case (surfaceAsLinkCount, entireTextSurfaceCount) =>
 					(surfaceAsLinkCount.surface, surfaceAsLinkCount.count, entireTextSurfaceCount.count,
-						surfaceAsLinkCount.count.toDouble / entireTextSurfaceCount.count.toDouble)
+						surfaceAsLinkCount.count.toDouble / entireTextSurfaceCount.count.toDouble, param)
 			}
 		}.name("Surface-Link-Probs")
 
@@ -51,11 +52,11 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 	}
 }
 
-class FindEntireTextSurfacesFlatMap extends SurfacesInTrieFlatMap[Plaintext, EntireTextSurfaces] {
+class FindEntireTextSurfacesFlatMap extends SurfacesInTrieFlatMap[PlainText, EntireTextSurfaces] {
 	var lastChunk = new Date()
 	var i = 0
 	val OUTPUT_EVERY = if (CoheelProgram.runsOffline()) 1000 else 10000
-	override def flatMap(plainText: Plaintext, out: Collector[EntireTextSurfaces]): Unit = {
+	override def flatMap(plainText: PlainText, out: Collector[EntireTextSurfaces]): Unit = {
 		if (i % OUTPUT_EVERY == 0) {
 			val nextChunk = new Date()
 			val difference = nextChunk.getTime - lastChunk.getTime
@@ -66,7 +67,7 @@ class FindEntireTextSurfacesFlatMap extends SurfacesInTrieFlatMap[Plaintext, Ent
 		findEntireTextSurfaces(plainText, trie).foreach(out.collect)
 	}
 
-	def findEntireTextSurfaces(plainText: Plaintext, trie: NewTrie): Iterator[EntireTextSurfaces] = {
+	def findEntireTextSurfaces(plainText: PlainText, trie: NewTrie): Iterator[EntireTextSurfaces] = {
 		val text = plainText.plainText
 		trie.findAllIn(text).map { surface => EntireTextSurfaces(plainText.pageTitle, surface)}
 	}

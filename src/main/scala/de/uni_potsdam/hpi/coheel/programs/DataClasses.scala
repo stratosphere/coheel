@@ -59,7 +59,7 @@ object DataClasses {
 	case class SurfaceAsLinkCount(surface: String, count: Int)
 
 	// Surface Evaluation
-	case class Plaintext(pageTitle: String, plainText: String, linkString: String)
+	case class PlainText(pageTitle: String, plainText: String, linkString: String)
 
 	// Redirect resolving
 	case class ContextLinkWithOrig(from: String, origTo: String, to: String, prob: Double)
