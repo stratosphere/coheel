@@ -20,7 +20,7 @@ object DataClasses {
 	// Note: In contrast to InternalLink, this class does not contain a Node, because
 	// that should not be part of the interface of this class.
 	case class Link(surface: String, surfaceRepr: String, posTags: Vector[String], source: String, destination: String, id: Int = newId()) {
-		def fullId: String = s"$id-${Util.id(source)}-${Util.id(surface)}"
+		def fullId: String = s"L-$id-${Util.id(source)}-${Util.id(surface)}"
 	}
 
 	case class WordInDocument(document: String, word: String, count: Int)

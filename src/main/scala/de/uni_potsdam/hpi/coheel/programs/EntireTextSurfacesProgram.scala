@@ -20,14 +20,14 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 		val currentFile = if (runsOffline()) "" else s"/$param"
 		val surfaces = readSurfaces(currentFile)
 
-		val entireTextSurfaces = plainTexts
+		val trieHits = plainTexts
 			.flatMap(new FindEntireTextSurfacesFlatMap)
 			.withBroadcastSet(surfaces, SurfacesInTrieFlatMap.BROADCAST_SURFACES)
 			.name("Entire-Text-Surfaces-Along-With-Document")
 
 		val surfaceDocumentCounts = readSurfaceDocumentCounts
 
-		val entireTextSurfaceCounts = entireTextSurfaces
+		val entireTextSurfaceCounts = trieHits
 			.groupBy { _.surface }
 			.reduceGroup { group =>
 				val head = group.next().surface
@@ -46,7 +46,7 @@ class EntireTextSurfacesProgram extends CoheelProgram[Int] {
 		}.name("Surface-Link-Probs")
 
 
-		entireTextSurfaces.writeAsTsv(entireTextSurfacesPath + currentFile)
+		trieHits.writeAsTsv(entireTextSurfacesPath + currentFile)
 		surfaceLinkProbs.writeAsTsv(surfaceLinkProbsPath + currentFile)
 	}
 }
