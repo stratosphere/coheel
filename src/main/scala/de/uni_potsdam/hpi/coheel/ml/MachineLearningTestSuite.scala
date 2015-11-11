@@ -1,163 +1,138 @@
 package de.uni_potsdam.hpi.coheel.ml
 
-import java.io.{FileOutputStream, ObjectOutputStream, File}
+import java.io.File
 
 import de.uni_potsdam.hpi.coheel.util.Timer
-import org.apache.commons.io.FileUtils
+import weka.classifiers.CostMatrix
 import weka.classifiers.bayes.NaiveBayes
-import weka.classifiers.{CostMatrix, Evaluation}
-import weka.classifiers.functions.{Logistic, MultilayerPerceptron, SMO, SimpleLogistic}
+import weka.classifiers.functions.{Logistic, MultilayerPerceptron, SimpleLogistic}
 import weka.classifiers.meta.CostSensitiveClassifier
 import weka.classifiers.trees.{J48, RandomForest}
 import weka.core._
-import weka.filters.Filter
-import weka.filters.unsupervised.attribute.Remove
 
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.JavaConverters._
+import scala.collection.mutable
 import scala.io.Source
-import scala.util.{Success, Failure, Try, Random}
+import scala.util.{Failure, Random, Success, Try}
 
+
+case class TrainingData(id: String,
+                        surface: String,
+                        candidateEntity: String,
+                        source: String,
+                        destination: String)
+
+class CoheelInstance(weight: Double, val attValues: Array[Double], val info: TrainingData)
+	extends Instance(weight, attValues) {
+
+	def this(other: CoheelInstance) = this(other.weight(), other.toDoubleArray, other.info)
+
+	override def copy(): AnyRef = {
+		val result = new CoheelInstance(this)
+		result.m_Dataset = m_Dataset
+		result
+	}
+}
 
 object MachineLearningTestSuite {
 
-	val CLASS_INDEX = 16
+	val r = new Random(21011991)
 
-
-	val removeFilter = {
-		val remove = new Remove
-		remove.setAttributeIndices("1")
-		remove
-	}
+	val CLASS_INDEX = 15
 
 	def main(args: Array[String]) = {
-		println("Reading.")
-		val r = new Random(21011991)
-		val instanceGroups = readInstancesInGroups()
-		val groupsCount = instanceGroups.size
-		val trainingRatio = (groupsCount * 0.7).toInt
-		println(s"There are $groupsCount instance groups.")
+		val (train, test) = readTrainingDataAndBuildInstances()
+		val expected = test.enumerateInstances().asScala.flatMap { case instance: CoheelInstance =>
+			if (instance.classValue() == 1.0)
+				// trie hit id, and correct entity
+				Some((instance.info.id, instance.info.destination))
+			else
+				None
+		}.toSet
 
-		val randomOrder = r.shuffle(instanceGroups)
+		println("#" * 10 + " Test bare classifiers " + "#" * 10)
+		testClassifiers(train, test, expected)
 
-		println("Building separate training and validation set.")
-		val training = randomOrder.take(trainingRatio)
-		val fullTrainingInstances = buildInstances("train-full", training.flatten)
-		removeFilter.setInputFormat(fullTrainingInstances)
-		val test = randomOrder.drop(trainingRatio)
-		val fullTestInstances     = buildInstances("test-full", test.flatten)
 
-//		serializeGoodClassifier(fullTrainingInstances)
+		println("#" * 10 + " Test classifiers with logic on top " + "#" * 10)
+//		testCoheelClassifiers(train, test, expected)
 
-		println("Use all instances")
-		println("=" * 80)
-		runWithInstances(fullTrainingInstances, fullTestInstances)
-
-		val oneSampleTrainingInstances = buildInstances("train-one",
-			randomOrder.take(trainingRatio).map { group =>
-//				if (!group.exists { inst => inst.value(CLASS_INDEX) == 1.0 }) {
-//					group.foreach(println)
-//					System.exit(10)
-//				}
-				val positive = group.find { inst => inst.value(CLASS_INDEX) == 1.0 }.headOption
-				val negatives = group.filter { inst => inst.value(CLASS_INDEX) == 0.0 }
-				val negative = r.shuffle(negatives).headOption
-				positive.toBuffer ++ negative.toBuffer
-			}.flatten
-		)
-		println("Use only one negative example")
-		println("=" * 80)
-		runWithInstances(oneSampleTrainingInstances, fullTestInstances)
-
-		println("#" * 80)
-		println("#" * 80)
-		println("#" * 80)
-
-		println("Use all instances")
-		println("=" * 80)
-		runGroupWise(fullTrainingInstances, test)
-		println("Use only one negative example")
-		println("=" * 80)
-		runGroupWise(oneSampleTrainingInstances, test)
 
 		// missing values
-
 		// surface-link-at-all probability?
 		// context < 100 ==>  Missing value
 	}
 
-	def serializeGoodClassifier(fullTrainingInstances: Instances): Unit = {
-		println("Serialize good classifier")
-		println("=" * 80)
-		// Build classifier
-		val baseClassifier = new RandomForest
-		//		baseClassifier.setPrintTrees(true)
-		// Apply costs
-		val classifier = new CostSensitiveClassifier
-		classifier.setClassifier(baseClassifier)
-		classifier.setMinimizeExpectedCost(true)
-		val costMatrixFP = new CostMatrix(2)
-		costMatrixFP.setElement(0, 1, 10)
-		val costMatrixFN = new CostMatrix(2)
-		costMatrixFN.setElement(1, 0, 10)
-		classifier.setCostMatrix(costMatrixFN)
-		// Train
-		val filteredTraining = Filter.useFilter(fullTrainingInstances, removeFilter)
-		classifier.buildClassifier(filteredTraining)
-		// Serialize
-		SerializationHelper.write("RandomForest-10FN.model", classifier)
-		FileUtils.writeStringToFile(new File("model.as-string"), classifier.getClassifier.asInstanceOf[RandomForest].toString)
-		System.exit(1)
+	def readTrainingDataAndBuildInstances(): (Instances, Instances) = {
+		print("Reading .. "); Console.flush()
+		val instanceGroups = r.shuffle(readInstancesInGroups())
+		println("Done.")
+		val groupsCount = instanceGroups.size
+		val trainingRatio = (groupsCount * 0.7).toInt
+		val (trainSet, testSet) = instanceGroups.splitAt(trainingRatio)
+		println(s"There are $groupsCount instance groups, ${trainSet.size} in training and ${testSet.size} in test")
+		println()
+
+		val fullTrainingInstances = buildInstances("train", trainSet.flatten)
+		val fullTestInstances = buildInstances("test", testSet.flatten)
+		(fullTrainingInstances, fullTestInstances)
 	}
 
+
 	def buildInstance(split: Array[String]): Instance = {
-		val attValues = split.map(_.toDouble).array
-		val instance = new Instance(1.0, attValues)
+		val id = split(0)
+		val surface = split(1)
+		val candidateEntity = split(2)
+		val source = split(3)
+		val destination = split(4)
+		val attValues = split.slice(5, 5 + 15 + 1).map(_.toDouble)
+		val trainingData = TrainingData(id, surface, candidateEntity, source, destination)
+
+		val instance = new CoheelInstance(1.0, attValues, trainingData)
 		instance
 	}
 
-	def readInstancesInGroups(): ArrayBuffer[ArrayBuffer[Instance]] = {
-		val scoresFile = new File("cluster-output/raw-training-data.tsv")
-		val scoresSource = Source.fromFile(scoresFile)
-		val groups = ArrayBuffer[ArrayBuffer[Instance]]()
-		var currentGroup = ArrayBuffer[Instance]()
+	def readInstancesInGroups(): mutable.ArrayBuffer[mutable.ArrayBuffer[Instance]] = {
+		val groups = mutable.ArrayBuffer[mutable.ArrayBuffer[Instance]]()
+
+		val scoresSource = Source.fromFile(new File("output/training-data.wiki"))
+		var currentGroup = mutable.ArrayBuffer[Instance]()
 		var lastId: String = ""
 		val lines = scoresSource.getLines()
-		lines.drop(1)
-		var lineNr = 1
+
 		lines.foreach { line =>
 			val split = line.split("\t")
+			// id, surface, candidate entity, source, destination, 15 features, class
+			assert(split.length == 21)
 			val id = split.head
 			if (id != lastId && currentGroup.nonEmpty) {
-				groups += currentGroup.clone()
-				currentGroup.clear()
+				groups += currentGroup
+				currentGroup = mutable.ArrayBuffer[Instance]()
 				lastId = id
 			}
-			split(0) = lineNr.toString
-			lineNr += 1
 			currentGroup += buildInstance(split)
 		}
 		groups
 	}
 
-	def runWithInstances(training: Instances, test: Instances): Unit = {
-		val filteredTraining = Filter.useFilter(training, removeFilter)
-
+	def testClassifiers(train: Instances, test: Instances, expected: Set[(String, String)]): Unit = {
 		classifiers.foreach { case (name, classifier) =>
 			val runtimeTry = Try(Timer.timeFunction {
-				classifier.buildClassifier(filteredTraining)
+				classifier.buildClassifier(train)
 			})
 			runtimeTry match {
-				case Failure(e) =>
-					println(s"$name failed with ${e.getMessage}")
+				case Failure(e) => println(s"    $name failed with ${e.getMessage}")
 				case Success(runtime) =>
-					println(s"$name in ${msToMin(runtime.toInt)} min")
-					val evaluation = new Evaluation(filteredTraining)
-					val time = Timer.timeFunction {
-						classifier.buildClassifier(filteredTraining)
-						evaluation.evaluateModel(classifier, Filter.useFilter(test, removeFilter))
-
+					println(s"    $name in ${msToMin(runtime.toInt)} min")
+					val actual = mutable.Set[(String, String)]()
+					test.enumerateInstances().asScala.foreach { case instance: CoheelInstance =>
+						if (classifier.classifyInstance(instance) == 1.0) {
+							actual.add((instance.info.id, instance.info.candidateEntity))
+						}
 					}
-					System.out.println(f"P: ${evaluation.precision(1)}%.3f, R: ${evaluation.recall(1)}%.3f in ${msToMin(time.toInt)} min")
+					val precision = expected.intersect(actual).size.toDouble / actual.size
+					val recall = expected.intersect(actual).size.toDouble / expected.size
+					println(f"      P: $precision%.3f, R: $recall%.3f, F1: ${2 * precision * recall / (precision + recall)}.3f")
 			}
 		}
 		println("-" * 80)
@@ -167,74 +142,8 @@ object MachineLearningTestSuite {
 		t / (1000 * 60)
 	}
 
-	def runGroupWise(training: Instances, test: ArrayBuffer[ArrayBuffer[Instance]]) =  {
-		val filteredTraining = Filter.useFilter(training, removeFilter)
-
-		classifiers.foreach { case (name, classifier) =>
-			val runtimeTry = Try(Timer.timeFunction {
-				classifier.buildClassifier(filteredTraining)
-			})
-			runtimeTry match {
-				case Failure(e) =>
-					println(s"$name failed with ${e.getMessage}")
-				case Success(runtime) =>
-					println(s"$name in ${msToMin(runtime.toInt)} min")
-					var tp = 0
-					var fp = 0
-					var fn = 0
-					var tn = 0
-					val time = Timer.timeFunction {
-						test.foreach { group =>
-							var positiveCount = 0
-							var truePositiveCount = 0
-							var trueCount = 0
-
-							group.foreach { instance =>
-								val filteredInstance = {
-									removeFilter.input(instance); removeFilter.batchFinished(); removeFilter.output()
-								}
-								val pred = classifier.classifyInstance(filteredInstance)
-								val act = filteredInstance.classValue()
-								assert(act == filteredInstance.value(15))
-								if (pred == 1.0) {
-									positiveCount += 1
-									if (act == 1.0)
-										truePositiveCount += 1
-								}
-								if (act == 1.0)
-									trueCount += 1
-							}
-
-							// we found the one correct
-							if (positiveCount == 1 && truePositiveCount == 1)
-								tp += 1
-							// there is no true positive, but we predicted one
-							else if (positiveCount >= 1 && truePositiveCount == 0)
-								fp += 1
-							// there is a true positive, but we predicted no one or more than one
-							else if (positiveCount != 1 && trueCount == 1)
-								fn += 1
-							// there is none and we find none
-							else if (positiveCount == 0 && trueCount == 0)
-								tn += 1
-							else {
-								println("ERROR, printing all the instances")
-								group.foreach(println)
-								throw new RuntimeException(s"Uncovered case! positiveCount = $positiveCount, trueCount = $trueCount, truePositiveCount = $truePositiveCount")
-							}
-						}
-					}
-					val precision = tp.toDouble / (tp + fp)
-					val recall    = tp.toDouble / (tp + fn)
-					System.out.println(f"P: $precision%.3f, R: $recall%.3f in ${msToMin(time.toInt)} min")
-			}
-			println("-" * 80)
-		}
-	}
-
-
 	def classifiers = {
-		println("----------- Rebuilding classifiers")
+//		println("----------- Rebuilding classifiers")
 		val simpleLogistic = new SimpleLogistic
 		simpleLogistic.setHeuristicStop(0)
 		simpleLogistic.setMaxBoostingIterations(1500)
@@ -291,11 +200,38 @@ object MachineLearningTestSuite {
 	}
 
 	def buildInstances(name: String, instanceSeq: Seq[Instance]): Instances = {
-		val instances = new Instances(name, CoheelClassifier.FEATURE_DEFINITION, 10000)
+		val instances = new Instances(name, CoheelClassifier.FEATURE_DEFINITION, instanceSeq.size)
 		instanceSeq.foreach { inst =>
 			instances.add(inst)
 		}
 		instances.setClassIndex(CLASS_INDEX)
 		instances
 	}
+
+	/*
+	def serializeGoodClassifier(fullTrainingInstances: Instances): Unit = {
+		println("Serialize good classifier")
+		println("=" * 80)
+		// Build classifier
+		val baseClassifier = new RandomForest
+		//		baseClassifier.setPrintTrees(true)
+		// Apply costs
+		val classifier = new CostSensitiveClassifier
+		classifier.setClassifier(baseClassifier)
+		classifier.setMinimizeExpectedCost(true)
+		val costMatrixFP = new CostMatrix(2)
+		costMatrixFP.setElement(0, 1, 10)
+		val costMatrixFN = new CostMatrix(2)
+		costMatrixFN.setElement(1, 0, 10)
+		classifier.setCostMatrix(costMatrixFN)
+		// Train
+		val filteredTraining = Filter.useFilter(fullTrainingInstances, removeFilter)
+		classifier.buildClassifier(filteredTraining)
+		// Serialize
+		SerializationHelper.write("RandomForest-10FN.model", classifier)
+		FileUtils.writeStringToFile(new File("model.as-string"), classifier.getClassifier.asInstanceOf[RandomForest].toString)
+		System.exit(1)
+	}
+	*/
+
 }

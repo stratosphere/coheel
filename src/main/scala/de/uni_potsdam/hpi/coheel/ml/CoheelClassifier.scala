@@ -17,17 +17,8 @@ object CoheelClassifier {
 	)
 
 	val FEATURE_DEFINITION = {
-		val attrs = new FastVector(17)
-		attrs.addElement(new Attribute("id"))
-
-		attrs.addElement(new Attribute("NN"))
-		attrs.addElement(new Attribute("NNP"))
-		attrs.addElement(new Attribute("JJ"))
-		attrs.addElement(new Attribute("VB"))
-		attrs.addElement(new Attribute("CD"))
-		attrs.addElement(new Attribute("SYM"))
-		attrs.addElement(new Attribute("W"))
-
+		val attrs = new FastVector(16)
+		// basic features
 		attrs.addElement(new Attribute("prom"))
 		attrs.addElement(new Attribute("promRank"))
 		attrs.addElement(new Attribute("promDeltaTop"))
@@ -36,6 +27,15 @@ object CoheelClassifier {
 		attrs.addElement(new Attribute("contextRank"))
 		attrs.addElement(new Attribute("contextDeltaTop"))
 		attrs.addElement(new Attribute("contextDeltaSucc"))
+		// pos tags
+		attrs.addElement(new Attribute("NN"))
+		attrs.addElement(new Attribute("NNP"))
+		attrs.addElement(new Attribute("JJ"))
+		attrs.addElement(new Attribute("VB"))
+		attrs.addElement(new Attribute("CD"))
+		attrs.addElement(new Attribute("SYM"))
+		attrs.addElement(new Attribute("W"))
+
 		val classAttrValues = new FastVector(2)
 		classAttrValues.addElement("0.0")
 		classAttrValues.addElement("1.0")
