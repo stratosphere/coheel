@@ -42,13 +42,13 @@ class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 
 
 	/**
-	 * @param candidatesIt All link candidates with scores (all LinkWithScore's have the same id).
+	 * @param candidatesIt All link candidates with scores (all Classifiable's have the same id).
 	 */
 	def createTrainingDataGroupWise(candidatesIt: Iterator[Classifiable[TrainInfo]], out: Collector[String]): Unit = {
 		val allCandidates = candidatesIt.toSeq
 		FeatureProgramHelper.applyCoheelFunctions(allCandidates) { featureLine =>
 			import featureLine._
-			def stringInfo = List(id, surfaceRepr, candidateEntity) ::: featureLine.model.modelInfo
+			def stringInfo = List(id, surfaceRepr, candidateEntity) ::: featureLine.info.modelInfo
 			val output = s"${stringInfo.mkString("\t")}\t${featureLine.features.mkString("\t")}"
 			out.collect(output)
 		}
@@ -59,8 +59,9 @@ class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 
 class TrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage, Classifiable[TrainInfo]] {
 	var tokenHitCount: Int = 1
-	override def flatMap(wikiPage: FullInfoWikiPage, out: Collector[Classifiable[TrainInfo]]): Unit = {
 
+
+	override def flatMap(wikiPage: FullInfoWikiPage, out: Collector[Classifiable[TrainInfo]]): Unit = {
 		assert(wikiPage.tags.size == wikiPage.plainText.size)
 		wikiPage.links.foreach { case (index, link) =>
 			// In theory, the index of the link should be in the set of indices proposed by the trie:
@@ -85,6 +86,9 @@ class TrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage, Classi
 				out.collect(Classifiable[TrainInfo](link.fullId, link.surfaceRepr, context.toArray, info = TrainInfo(link.source, link.destination, POS_TAG_GROUPS.map { group => if (group.exists(link.posTags.contains(_))) 1.0 else 0.0 })))
 			}
 		}
+
+
+		// TODO: Should we also add wrong training instances, which are not linked at all?
 //		trie.findAllInWithTrieHit(wikiPage.plainText).foreach { tokenHit =>
 //			val context = Util.extractContext(wikiPage.plainText, tokenHit.startIndex)
 //

@@ -90,9 +90,17 @@ object DataClasses {
 	 * Keeps track of the features of an instance, and it's accompanying real-world information.
 	 * FeatureLine's are passed to the classifier, model can be used to identify which element was classified.
 	 */
-	case class FeatureLine[T <: Info](id: String, surfaceRepr: String, candidateEntity: String, model: T, features: Seq[Double])
+	case class FeatureLine[T <: Info](id: String, surfaceRepr: String, candidateEntity: String, info: T, features: Seq[Double])
 
 	// Classification
+	/**
+	 * Input Documents are used to represent the input to the classification. If the same document needs to be
+	 * distributed to multiple nodes, then we have several input documents.
+	 * @param id Unique id of the document
+	 * @param index Where to distribute this document to
+	 * @param tokens
+	 * @param tags
+	 */
 	case class InputDocument(id: String, index: Int, tokens: mutable.ArrayBuffer[String], tags: mutable.ArrayBuffer[String])
 	case class SurfaceProb(surface: String, destination: String, prob: Double)
 

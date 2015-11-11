@@ -46,6 +46,7 @@ object FeatureProgramHelper {
 			.name("Join: Classifiable With Surface Probs")
 			.map { joinResult => joinResult match {
 				case (classifiable, SurfaceProb(_, candidateEntity, surfaceProb)) =>
+					// enrich classifiable with possible candidate entities and their surface probabilities
 					classifiable.copy(candidateEntity = candidateEntity, surfaceProb = surfaceProb)
 			}
 		}.name("Classifiable with Candidates")

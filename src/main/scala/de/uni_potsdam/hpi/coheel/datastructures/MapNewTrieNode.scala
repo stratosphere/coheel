@@ -214,6 +214,7 @@ class NewTrie extends Trie {
 }
 
 case class TrieHit(s: String, prob: Float, startIndex: Int, length: Int)
+
 class FindAllInIterator[T](rootNode: MapNewTrieNode, tokens: mutable.Buffer[String], fun: TrieHit => T, allowDuplicates: Boolean) extends Iterator[T] {
 
 	val alreadySeen = mutable.Set[String]()

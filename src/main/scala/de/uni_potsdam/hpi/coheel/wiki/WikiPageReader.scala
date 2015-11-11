@@ -42,6 +42,10 @@ case class WikiPage(pageTitle: String,
 		!isDisambiguation && !isRedirect && !isList
 	}
 }
+
+/**
+ * Compared to the normal wiki page, this also stores the position of the links and the part of speech tags.
+ */
 case class FullInfoWikiPage(pageTitle: String,
                     ns: Int, redirect: String,
                     plainText: mutable.ArrayBuffer[String],

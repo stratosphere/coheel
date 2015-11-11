@@ -5,31 +5,26 @@ import java.lang.Iterable
 import java.util.Date
 
 import de.uni_potsdam.hpi.coheel.Params
-import de.uni_potsdam.hpi.coheel.datastructures.{TrieHit, NewTrie}
+import de.uni_potsdam.hpi.coheel.datastructures.{NewTrie, TrieHit}
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.io.Sample
 import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier
 import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier.POS_TAG_GROUPS
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
-import de.uni_potsdam.hpi.coheel.util.{Timer, Util}
+import de.uni_potsdam.hpi.coheel.util.Util
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
-import org.apache.commons.collections4.BidiMap
-import org.apache.commons.collections4.bidimap.DualHashBidiMap
-import org.apache.commons.math3.linear.{RealMatrix, ArrayRealVector, RealVector, OpenMapRealMatrix}
 import org.apache.flink.api.common.functions.{Partitioner, RichFlatMapFunction, RichGroupReduceFunction}
 import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.util.Collector
 import org.apache.log4j.Logger
-import org.jgrapht.graph._
 import weka.classifiers.Classifier
 import weka.core.SerializationHelper
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.io.Source
-import scala.tools.nsc.io.Jar.WManifest.unenrichManifest
 import scala.util.Random
 
 
@@ -47,7 +42,7 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_3).name("Documents")
 
-		val tokenizedDocuments = documents.flatMap(new RichFlatMapFunction[String, InputDocument] {
+		val inputDocuments = documents.flatMap(new RichFlatMapFunction[String, InputDocument] {
 			def log: Logger = Logger.getLogger(getClass)
 
 			var index: Int = -1
@@ -89,14 +84,15 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 			}
 		})
 
-		val partitioned = tokenizedDocuments.partitionCustom(new DocumentPartitioner, "index")
+		val partitionedDocuments = inputDocuments.partitionCustom(new DocumentPartitioner, "index")
 
-		val trieHits = partitioned
-			.flatMap(new ClassificationLinkFinderFlatMap(params))
+		val classifiables = partitionedDocuments
+			.flatMap(new PotentialEntityFinderFlatMap(params))
 			.name("Possible links")
 
-		val features = FeatureProgramHelper.buildFeaturesPerGroup(this, trieHits)
-		val basicClassifierResults = features.reduceGroup(new ClassificationFeatureLineReduceGroup(params)).name("Basic Classifier Results")
+		// fill the classifiables with all feature information
+		val featuresPerGroup = FeatureProgramHelper.buildFeaturesPerGroup(this, classifiables)
+		val basicClassifierResults = featuresPerGroup.reduceGroup(new ClassificationReduceGroup(params)).name("Basic Classifier Results")
 
 
 		val preprocessedNeighbours: DataSet[Neighbours] = loadNeighbours(env)
@@ -122,13 +118,13 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 		 * OUTPUT
 		 */
 		// Write trie hits for debugging
-		val trieHitOutput = trieHits.map { trieHit =>
+		val trieHitOutput = classifiables.map { trieHit =>
 			(trieHit.id, trieHit.surfaceRepr, trieHit.info.trieHit, trieHit.info.posTags.deep)
 		}
 		trieHitOutput.writeAsTsv(trieHitPath)
 
 		// Write raw features for debugging
-		features.reduceGroup { (classifiablesIt, out: Collector[(TrieHit, String, Double, Double)]) =>
+		featuresPerGroup.reduceGroup { (classifiablesIt, out: Collector[(TrieHit, String, Double, Double)]) =>
 			classifiablesIt.foreach { classifiable =>
 				import classifiable._
 				out.collect((info.trieHit, candidateEntity, surfaceProb, contextProb))
@@ -168,7 +164,7 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 	}
 }
 
-class ClassificationLinkFinderFlatMap(params: Params) extends RichFlatMapFunction[InputDocument, Classifiable[ClassificationInfo]] {
+class PotentialEntityFinderFlatMap(params: Params) extends RichFlatMapFunction[InputDocument, Classifiable[ClassificationInfo]] {
 	var tokenHitCount: Int = 1
 
 	def log = Logger.getLogger(getClass)
@@ -221,23 +217,23 @@ class ClassificationLinkFinderFlatMap(params: Params) extends RichFlatMapFunctio
 	}
 }
 
-class ClassificationFeatureLineReduceGroup(params: Params) extends RichGroupReduceFunction[Classifiable[ClassificationInfo], ClassifierResult] {
+class ClassificationReduceGroup(params: Params) extends RichGroupReduceFunction[Classifiable[ClassificationInfo], ClassifierResult] {
 
 	def log = Logger.getLogger(getClass)
 	var seedClassifier: CoheelClassifier = null
 	var candidateClassifier: CoheelClassifier = null
 
 	override def open(conf: Configuration): Unit = {
-		val seedPath = if (CoheelProgram.runsOffline()) "RandomForest-10FN.model" else params.config.getString("seed_model")
+		val seedPath      = if (CoheelProgram.runsOffline()) "RandomForest-10FN.model" else params.config.getString("seed_model")
 		val candidatePath = if (CoheelProgram.runsOffline()) "RandomForest-10FP.model" else params.config.getString("candidate_model")
 
 		log.info(s"Loading models with ${FreeMemory.get(true)} MB")
 
-		val d1 = new Date
+		val start = new Date
 		seedClassifier      = new CoheelClassifier(SerializationHelper.read(seedPath).asInstanceOf[Classifier])
 		candidateClassifier = new CoheelClassifier(SerializationHelper.read(candidatePath).asInstanceOf[Classifier])
 
-		log.info(s"Finished model with ${FreeMemory.get(true)} MB in ${(new Date().getTime - d1.getTime) / 1000} s")
+		log.info(s"Finished model with ${FreeMemory.get(true)} MB in ${(new Date().getTime - start.getTime) / 1000} s")
 	}
 
 	override def reduce(candidatesIt: Iterable[Classifiable[ClassificationInfo]], out: Collector[ClassifierResult]): Unit = {
@@ -260,13 +256,13 @@ class ClassificationFeatureLineReduceGroup(params: Params) extends RichGroupRedu
 		var seedsFound = 0
 		seedClassifier.classifyResults(features).foreach { result =>
 			seedsFound += 1
-			out.collect(ClassifierResult(result.model.documentId, NodeTypes.SEED, result.candidateEntity, trieHit))
+			out.collect(ClassifierResult(result.info.documentId, NodeTypes.SEED, result.candidateEntity, trieHit))
 		}
 		log.info(s"Found $seedsFound seeds")
 		// only emit candidates, if no seeds were found
 		if (seedsFound > 0) {
 			candidateClassifier.classifyResults(features).foreach { result =>
-				out.collect(ClassifierResult(result.model.documentId, NodeTypes.CANDIDATE, result.candidateEntity, trieHit))
+				out.collect(ClassifierResult(result.info.documentId, NodeTypes.CANDIDATE, result.candidateEntity, trieHit))
 			}
 		}
 	}

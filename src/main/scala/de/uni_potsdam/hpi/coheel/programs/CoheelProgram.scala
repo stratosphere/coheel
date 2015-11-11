@@ -131,7 +131,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 //			link text offsets tell, where the links start in the raw plain text
 			val linkTextOffsets = extractor.getLinks
 			val tokenizerResult = TokenizerHelper.tokenizeWithPositionInfo(rawPlainText, linkTextOffsets)
-			assert(tokenizerResult.getTags.size == tokenizerResult.getTags.size)
+
 			FullInfoWikiPage(wikiPage.pageTitle, wikiPage.ns, wikiPage.redirect,
 				tokenizerResult.getTokens, tokenizerResult.getTags, tokenizerResult.getLinkPositions, wikiPage.isDisambiguation, wikiPage.isList)
 		}, pageFilter)
@@ -159,11 +159,11 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 	def readSurfaces(subFile: String = ""): DataSet[String] = {
 		environment.readTextFile(surfaceDocumentCountsPath + subFile).name("Subset of Surfaces")
 			.flatMap(new RichFlatMapFunction[String, String] {
-			override def flatMap(line: String, out: Collector[String]): Unit = {
-				CoheelProgram.parseSurfaceProbsLine(line).foreach { surface =>
-					out.collect(surface)
+				override def flatMap(line: String, out: Collector[String]): Unit = {
+					CoheelProgram.parseSurfaceProbsLine(line).foreach { surface =>
+						out.collect(surface)
+					}
 				}
-			}
 		}).name("Parsed Surfaces")
 	}
 //	def getScores(): DataSet[(String, Array[String])] = {
