@@ -254,14 +254,14 @@ class ClassificationReduceGroup(params: Params) extends RichGroupReduceFunction[
 			features.append(featureLine)
 		}
 		var seedsFound = 0
-		seedClassifier.classifyResults(features).foreach { result =>
+		seedClassifier.classifyResultsWithSeedLogic(features).foreach { result =>
 			seedsFound += 1
 			out.collect(ClassifierResult(result.info.documentId, NodeTypes.SEED, result.candidateEntity, trieHit))
 		}
 		log.info(s"Found $seedsFound seeds")
 		// only emit candidates, if no seeds were found
 		if (seedsFound > 0) {
-			candidateClassifier.classifyResults(features).foreach { result =>
+			candidateClassifier.classifyResultsWithSeedLogic(features).foreach { result =>
 				out.collect(ClassifierResult(result.info.documentId, NodeTypes.CANDIDATE, result.candidateEntity, trieHit))
 			}
 		}

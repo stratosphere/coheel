@@ -6,6 +6,10 @@ import weka.core.{Instances, Attribute, FastVector, Instance}
 import scala.collection.mutable
 
 object CoheelClassifier {
+
+	val NUMBER_OF_FEATURES = 15
+	val POSITIVE_CLASS = 1.0
+
 	val POS_TAG_GROUPS = Array(
 		List("NN", "NNS"),
 		List("NNP", "NNPS"),
@@ -17,7 +21,7 @@ object CoheelClassifier {
 	)
 
 	val FEATURE_DEFINITION = {
-		val attrs = new FastVector(16)
+		val attrs = new FastVector(NUMBER_OF_FEATURES + 1)
 		// basic features
 		attrs.addElement(new Attribute("prom"))
 		attrs.addElement(new Attribute("promRank"))
@@ -43,46 +47,32 @@ object CoheelClassifier {
 		attrs.addElement(classAttr)
 		attrs
 	}
-	val FEATURE_DEFINITION_WITHOUT_ID = {
-		val newDefinition = FEATURE_DEFINITION.copy().asInstanceOf[FastVector]
-		// remove id
-		newDefinition.removeElementAt(0)
-//		// remove class attribute
-//		newDefinition.removeElementAt(newDefinition.size() - 1)
-		newDefinition
-	}
 }
 
 class CoheelClassifier(classifier: Classifier) {
 
-	val NUMBER_OF_FEATURES = 15
-	val POSITIVE_CLASS = 1.0
-
-	val instances = new Instances("Classification", CoheelClassifier.FEATURE_DEFINITION_WITHOUT_ID, 1)
-	instances.setClassIndex(NUMBER_OF_FEATURES)
+	val instances = new Instances("Classification", CoheelClassifier.FEATURE_DEFINITION, 1)
+	instances.setClassIndex(CoheelClassifier.NUMBER_OF_FEATURES)
 
 	/**
 	 * Classifies a given group of instances, which result from the same link/trie hit in the original text
 	 * @param featureLine The features of all possible links.
 	 * @return The predicted link or None, if no link is predicted.
 	 */
-	def classifyResults(featureLine: mutable.ArrayBuffer[FeatureLine[ClassificationInfo]]): List[FeatureLine[ClassificationInfo]] = {
+	def classifyResultsWithSeedLogic(featureLine: Seq[FeatureLine[ClassificationInfo]]): Option[FeatureLine[ClassificationInfo]] = {
 		var positivePredictions = List[FeatureLine[ClassificationInfo]]()
 		featureLine.foreach { featureLine =>
-			assert(featureLine.features.size == NUMBER_OF_FEATURES)
+			assert(featureLine.features.size == CoheelClassifier.NUMBER_OF_FEATURES || featureLine.features.size == CoheelClassifier.NUMBER_OF_FEATURES + 1)
 			val instance = buildInstance(featureLine)
 			instance.setDataset(instances)
-			if (classifier.classifyInstance(instance) == POSITIVE_CLASS) {
+			if (classifier.classifyInstance(instance) == CoheelClassifier.POSITIVE_CLASS) {
 				positivePredictions ::= featureLine
 			}
 		}
-//		// TODO: Change to return only if there is _exactly_ one positive prediction
-//		if (positivePredictions.size >= 1)
-//			positivePredictions.headOption
-//		else
-//			None
-		// TODO: Currently returning all seeds!
-		positivePredictions
+		if (positivePredictions.size == 1)
+			positivePredictions.headOption
+		else
+			None
 	}
 
 	private def buildInstance(featureLine: FeatureLine[ClassificationInfo]): Instance = {
