@@ -31,7 +31,7 @@ object DataClasses {
 		// number of words in the current model
 		val wordsInModel = model.values.sum
 		// number of distinct words in the entire corpus
-		val N = 100000
+		val N = 17964411
 		val denominator = wordsInModel + alpha * N
 
 		def prob(word: String): Double = {
