@@ -57,12 +57,8 @@ object FeatureProgramHelper {
 			.name("Join: Link Candidates with LMs")
 			.map { joinResult => joinResult match {
 				case (classifiableWithCandidate, languageModel) =>
-					val modelSize = languageModel.model.size
 					val contextProb = classifiableWithCandidate.context.map { word =>
-						Math.log(languageModel.model.get(word) match {
-							case Some(prob) => prob
-							case None => 1.0 / modelSize
-						})
+						Math.log(languageModel.prob(word))
 					}.sum
 					classifiableWithCandidate.copy(contextProb = contextProb)
 			}

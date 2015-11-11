@@ -242,7 +242,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 				val model = lineSplit(1).split(' ').flatMap { entrySplit =>
 					val wordSplit = entrySplit.split('\0')
 					if (wordSplit.length == 2)
-						Some(wordSplit(0), wordSplit(1).toDouble)
+						Some(wordSplit(0), wordSplit(1).toInt)
 					else
 						None
 				}.toMap

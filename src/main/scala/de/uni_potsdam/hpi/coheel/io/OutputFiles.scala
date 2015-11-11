@@ -80,9 +80,8 @@ class LanguageModelOutputFormat extends FileOutputFormat[LanguageModel]() {
 
 	override def writeRecord(record: LanguageModel): Unit = {
 		val sb = new StringBuilder
-		record.model.foreach { case (word, prob) =>
-			sb.append(s"$word=$prob")
-//			output.writeRecord((record.pageTitle, word, prob))
+		record.model.foreach { case (word, count) =>
+			sb.append(s"$word=$count")
 		}
 	}
 }

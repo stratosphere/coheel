@@ -24,7 +24,25 @@ object DataClasses {
 	}
 
 	case class WordInDocument(document: String, word: String, count: Int)
-	case class LanguageModel(pageTitle: String, model: Map[String, Double])
+	case class LanguageModel(pageTitle: String, model: Map[String, Int]) {
+
+		// smoothing factor
+		val alpha = 0.1
+		// number of words in the current model
+		val wordsInModel = model.values.sum
+		// number of distinct words in the entire corpus
+		val N = 100000
+		val denominator = wordsInModel + alpha * N
+
+		def prob(word: String): Double = {
+			model.get(word) match {
+				case Some(count) =>
+					(count + alpha) / denominator
+				case None =>
+					alpha / denominator
+			}
+		}
+	}
 	case class WordCounts(word: WordInDocument, count: Int)
 
 	case class LinkContextScore(id: Int, surfaceRepr: String, contextProb: Double)

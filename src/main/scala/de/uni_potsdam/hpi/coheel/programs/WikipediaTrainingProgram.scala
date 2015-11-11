@@ -155,11 +155,9 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 		}.name("Plain Texts with Links: Title-Text-Links")
 
 		val languageModels = wikiPages.map { wikiPage =>
-			val wordsInDoc = wikiPage.plainText.length
 			val groupedWords = wikiPage.plainText
 				.groupBy(identity)
-			val groupCount = groupedWords.size
-			val model = groupedWords.mapValues { v => (v.length + 1).toDouble / (wordsInDoc + groupCount) }
+			val model = groupedWords.mapValues { v => v.length }
 			LanguageModel(wikiPage.pageTitle, model)
 		}.name("Language Model: Document-Word-Prob")
 
@@ -175,13 +173,13 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 			val sb = new StringBuilder()
 			sb.append(lm.pageTitle)
 			var first = true
-			lm.model.foreach { case (word, prob) =>
+			lm.model.foreach { case (word, count) =>
 				assert(!word.contains(" "))
 				if (first) {
-					sb.append(s"\t$word\0$prob")
+					sb.append(s"\t$word\0$count")
 					first = false
 				} else {
-					sb.append(s" $word\0$prob")
+					sb.append(s" $word\0$count")
 				}
 			}
 			sb.toString()
