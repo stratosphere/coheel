@@ -21,7 +21,7 @@ class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 
 	override def buildProgram(env: ExecutionEnvironment, param: String): Unit = {
 		val wikiPages = readWikiPagesWithFullInfo { pageTitle =>
-			pageTitle.hashCode % SAMPLE_FRACTION == 0
+			pageTitle.hashCode % SAMPLE_FRACTION == 632
 		}
 
 		val currentFile = if (runsOffline()) "" else s"/$param"
