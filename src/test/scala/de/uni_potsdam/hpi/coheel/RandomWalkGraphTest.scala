@@ -1,6 +1,6 @@
 package de.uni_potsdam.hpi.coheel
 
-import de.uni_potsdam.hpi.coheel.programs.ClassificationProgram
+import de.uni_potsdam.hpi.coheel.programs.{RandomWalkReduceGroup, ClassificationProgram}
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import de.uni_potsdam.hpi.coheel.wiki.{Extractor, WikiPageReader}
 import org.jgrapht.graph.{DefaultWeightedEdge, SimpleDirectedWeightedGraph}
@@ -83,8 +83,8 @@ class RandomWalkGraphTest extends FunSuite {
 		)
 
 
-		val classificationProgram = new ClassificationProgram()
-		val g = classificationProgram.buildGraph(
+		val randomWalk = new RandomWalkReduceGroup()
+		val g = randomWalk.buildGraph(
 			Vector(
 				s1, s2,
 				c1, c2, c3, c4, c5, c6, c7, c8))
@@ -188,7 +188,7 @@ class RandomWalkGraphTest extends FunSuite {
 	}
 
 	test("Building matrix works") {
-		val p = new ClassificationProgram
+		val p = new RandomWalkReduceGroup
 		val (m, s, entityNodeIdMapping, candidateIndices) = p.buildMatrix(g)
 	}
 

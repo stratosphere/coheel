@@ -1,6 +1,6 @@
 package de.uni_potsdam.hpi.coheel
 
-import de.uni_potsdam.hpi.coheel.programs.ClassificationProgram
+import de.uni_potsdam.hpi.coheel.programs.{RandomWalkReduceGroup, ClassificationProgram}
 import org.apache.commons.math3.linear.{ArrayRealVector, RealMatrixChangingVisitor, Array2DRowRealMatrix, OpenMapRealMatrix}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -12,7 +12,7 @@ class RandomWalkTest extends FunSuite {
 
 
 	test("test") {
-		val p = new ClassificationProgram
+		val p = new RandomWalkReduceGroup
 		val m = new Array2DRowRealMatrix(Array(
 			Array(1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0),
 			Array(1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 2.0),
