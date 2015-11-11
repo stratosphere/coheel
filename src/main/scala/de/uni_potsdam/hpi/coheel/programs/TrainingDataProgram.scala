@@ -37,6 +37,7 @@ class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 		val trainingData = featuresPerGroup.reduceGroup(createTrainingDataGroupWise _).name("Training Data")
 
 		// TODO: Also join surface link probs
+		// NOTE: If you change this, also change the data format description in the machine learning suite
 		trainingData.writeAsText(trainingDataPath + currentFile, FileSystem.WriteMode.OVERWRITE)
 	}
 

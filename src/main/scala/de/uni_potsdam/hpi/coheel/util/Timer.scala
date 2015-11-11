@@ -12,6 +12,14 @@ object Timer {
 		time
 	}
 
+//	def timeFunction[R](block: => R): (R, Double) = {
+//		val start = System.nanoTime()
+//		val result = block
+//		val end = System.nanoTime()
+//		val time = (end - start) / 1000 / 1000
+//		(result, time)
+//	}
+
 	val ON = true
 
 	var timesSum = mutable.LinkedHashMap[String, Long]().withDefaultValue(0L)
