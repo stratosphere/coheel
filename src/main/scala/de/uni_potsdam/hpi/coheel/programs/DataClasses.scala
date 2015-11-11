@@ -97,11 +97,14 @@ object DataClasses {
 	 * Input Documents are used to represent the input to the classification. If the same document needs to be
 	 * distributed to multiple nodes, then we have several input documents.
 	 * @param id Unique id of the document
-	 * @param index Where to distribute this document to
-	 * @param tokens
-	 * @param tags
+	 * @param replication Tells the replication number of this document. If we need to distribute the input text to
+	 *                    two different machines, we will create two InputDocuments. The first will have the replication
+	 *                    number 0, the second the replication number 1.
+	 * @param index Where to distribute this document to. This number must be between 0 and number of nodes - 1
+	 * @param tokens The tokens in this document.
+	 * @param tags The corresponding tags. This Seq has the same length as the tokens Seq.
 	 */
-	case class InputDocument(id: String, index: Int, tokens: mutable.ArrayBuffer[String], tags: mutable.ArrayBuffer[String])
+	case class InputDocument(id: String, replication: Int, index: Int, tokens: mutable.ArrayBuffer[String], tags: mutable.ArrayBuffer[String])
 	case class SurfaceProb(surface: String, destination: String, prob: Double)
 
 	case class Neighbour(entity: String, prob: Double)

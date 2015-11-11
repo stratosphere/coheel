@@ -67,19 +67,19 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 				val tokens = tokenizer.getTokens
 				val tags = tokenizer.getTags
 				if (isFirstHalf) {
-					out.collect(InputDocument(id, index, tokens, tags))
+					out.collect(InputDocument(id, 0, index, tokens, tags))
 					if (!CoheelProgram.runsOffline()) {
 						val randomIndex = secondHalf(random.nextInt(halfParallelism))
-						out.collect(InputDocument(id, randomIndex, tokens, tags))
+						out.collect(InputDocument(id, 1, randomIndex, tokens, tags))
 						log.info(s"Distributing to $index and $randomIndex")
 					}
 				} else {
 					if (!CoheelProgram.runsOffline()) {
 						val randomIndex = firstHalf(random.nextInt(halfParallelism))
-						out.collect(InputDocument(id, randomIndex, tokens, tags))
+						out.collect(InputDocument(id, 0, randomIndex, tokens, tags))
 						log.info(s"Distributing to $index and $randomIndex")
 					}
-					out.collect(InputDocument(id, index, tokens, tags))
+					out.collect(InputDocument(id, 1, index, tokens, tags))
 				}
 			}
 		})
@@ -205,7 +205,7 @@ class PotentialEntityFinderFlatMap(params: Params) extends RichFlatMapFunction[I
 			contextOption.foreach { case context =>
 				val tags = document.tags.slice(trieHit.startIndex, trieHit.startIndex + trieHit.length).toArray
 				// TH for trie hit
-				val id = s"TH-${document.id}-$tokenHitCount"
+				val id = s"TH-${document.id}-${document.replication}-$tokenHitCount"
 				out.collect(Classifiable(id, trieHit.s, context.toArray, info = ClassificationInfo(document.id, trieHit, POS_TAG_GROUPS.map { group => if (group.exists(tags.contains(_))) 1.0 else 0.0 })))
 				tokenHitCount += 1
 			}
