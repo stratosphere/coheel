@@ -149,9 +149,10 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 			val split = line.split('\t')
 			if (split.length == 3)
 				Some(PlainText(split(0), split(1), split(2)))
-			else
+			else {
 				log.warn(s"Line does not follow plain text standard: $line")
 				None
+			}
 		}.name("Parsed Plain-Texts")
 	}
 	def readSurfaces(subFile: String = ""): DataSet[String] = {
