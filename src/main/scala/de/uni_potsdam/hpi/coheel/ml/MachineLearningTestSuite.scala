@@ -4,6 +4,7 @@ import java.io.File
 
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{ClassificationInfo, FeatureLine}
 import de.uni_potsdam.hpi.coheel.util.Timer
+import org.apache.commons.io.FileUtils
 import weka.classifiers.CostMatrix
 import weka.classifiers.bayes.NaiveBayes
 import weka.classifiers.functions.{Logistic, MultilayerPerceptron, SimpleLogistic}
@@ -41,6 +42,9 @@ object MachineLearningTestSuite {
 
 	def main(args: Array[String]) = {
 		val (train, test) = readTrainingDataAndBuildInstances()
+
+		serializeGoodClassifier(train)
+
 		val expected = test.enumerateInstances().asScala.flatMap { case instance: CoheelInstance =>
 			if (instance.classValue() == 1.0)
 				// trie hit id, and correct entity
@@ -247,30 +251,29 @@ object MachineLearningTestSuite {
 		instances
 	}
 
-	/*
-	def serializeGoodClassifier(fullTrainingInstances: Instances): Unit = {
+	def serializeGoodClassifier(train: Instances): Unit = {
 		println("Serialize good classifier")
 		println("=" * 80)
 		// Build classifier
 		val baseClassifier = new RandomForest
-		//		baseClassifier.setPrintTrees(true)
 		// Apply costs
 		val classifier = new CostSensitiveClassifier
 		classifier.setClassifier(baseClassifier)
 		classifier.setMinimizeExpectedCost(true)
+
 		val costMatrixFP = new CostMatrix(2)
 		costMatrixFP.setElement(0, 1, 10)
-		val costMatrixFN = new CostMatrix(2)
-		costMatrixFN.setElement(1, 0, 10)
-		classifier.setCostMatrix(costMatrixFN)
+		classifier.setCostMatrix(costMatrixFP)
+
+//		val costMatrixFN = new CostMatrix(2)
+//		costMatrixFN.setElement(1, 0, 10)
+//		classifier.setCostMatrix(costMatrixFN)
 		// Train
-		val filteredTraining = Filter.useFilter(fullTrainingInstances, removeFilter)
-		classifier.buildClassifier(filteredTraining)
+		classifier.buildClassifier(train)
 		// Serialize
-		SerializationHelper.write("RandomForest-10FN.model", classifier)
+		SerializationHelper.write("RandomForest-10FP.model", classifier)
 		FileUtils.writeStringToFile(new File("model.as-string"), classifier.getClassifier.asInstanceOf[RandomForest].toString)
 		System.exit(1)
 	}
-	*/
 
 }
