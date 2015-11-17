@@ -55,7 +55,8 @@ class CoheelClassifier(classifier: Classifier) {
 	instances.setClassIndex(CoheelClassifier.NUMBER_OF_FEATURES)
 
 	/**
-	 * Classifies a given group of instances, which result from the same link/trie hit in the original text
+	 * Classifies a given group of instances, which result from the same link/trie hit in the original text.
+	 * Only if exactly one true prediction is given, the function returns a result.
 	 * @param featureLine The features of all possible links.
 	 * @return The predicted link or None, if no link is predicted.
 	 */
@@ -73,6 +74,22 @@ class CoheelClassifier(classifier: Classifier) {
 			positivePredictions.headOption
 		else
 			None
+	}
+
+	/**
+	 * Classifies a given group of instances, which result from the same link/trie hit in the original text, using candidate logic.
+	 */
+	def classifyResultsWithCandidateLogic(featureLine: Seq[FeatureLine[ClassificationInfo]]): List[FeatureLine[ClassificationInfo]] = {
+		var positivePredictions = List[FeatureLine[ClassificationInfo]]()
+		featureLine.foreach { featureLine =>
+			assert(featureLine.features.size == CoheelClassifier.NUMBER_OF_FEATURES || featureLine.features.size == CoheelClassifier.NUMBER_OF_FEATURES + 1)
+			val instance = buildInstance(featureLine)
+			instance.setDataset(instances)
+			if (classifier.classifyInstance(instance) == CoheelClassifier.POSITIVE_CLASS) {
+				positivePredictions ::= featureLine
+			}
+		}
+		positivePredictions
 	}
 
 	private def buildInstance(featureLine: FeatureLine[ClassificationInfo]): Instance = {

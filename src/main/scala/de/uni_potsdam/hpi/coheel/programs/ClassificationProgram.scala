@@ -224,8 +224,8 @@ class ClassificationReduceGroup(params: Params) extends RichGroupReduceFunction[
 	var candidateClassifier: CoheelClassifier = null
 
 	override def open(conf: Configuration): Unit = {
-		val seedPath      = if (CoheelProgram.runsOffline()) "RandomForest-10FN.model" else params.config.getString("seed_model")
-		val candidatePath = if (CoheelProgram.runsOffline()) "RandomForest-10FP.model" else params.config.getString("candidate_model")
+		val seedPath      = if (CoheelProgram.runsOffline()) "RandomForest-10FP_15-11-15.model" else params.config.getString("seed_model")
+		val candidatePath = if (CoheelProgram.runsOffline()) "J48-10FN_15-11-15.model" else params.config.getString("candidate_model")
 
 		log.info(s"Loading models with ${FreeMemory.get(true)} MB")
 
@@ -261,7 +261,7 @@ class ClassificationReduceGroup(params: Params) extends RichGroupReduceFunction[
 		log.info(s"Found $seedsFound seeds")
 		// only emit candidates, if no seeds were found
 		if (seedsFound > 0) {
-			candidateClassifier.classifyResultsWithSeedLogic(features).foreach { result =>
+			candidateClassifier.classifyResultsWithCandidateLogic(features).foreach { result =>
 				out.collect(ClassifierResult(result.info.documentId, NodeTypes.CANDIDATE, result.candidateEntity, trieHit))
 			}
 		}
