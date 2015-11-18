@@ -12,7 +12,7 @@ import org.apache.flink.util.Collector
 class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 
 	val SAMPLE_FRACTION = if (runsOffline()) 100 else 5000
-	val SAMPLE_NUMBER = if (runsOffline()) 0 else 632
+	val SAMPLE_NUMBER = if (runsOffline()) 0 else 3786
 
 	val arguments = if (runsOffline()) List("") else List("12345", "678910")
 	override def getDescription = "Wikipedia Extraction: Build training data"
