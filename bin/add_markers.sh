@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 for var in "$@"; do
 	echo "Delete up to first occurrence of <page>"
 	sed -n '/<page>/,$p' $var > $var.tmp1
