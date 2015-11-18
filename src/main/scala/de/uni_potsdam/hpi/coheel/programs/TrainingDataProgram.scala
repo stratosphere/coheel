@@ -15,20 +15,21 @@ import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier.POS_TAG_GROUPS
 class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 
 	val SAMPLE_FRACTION = if (runsOffline()) 100 else 5000
+	val SAMPLE_NUMBER = -3786
 
 	val arguments = if (runsOffline()) List("") else List("12345", "678910")
 	override def getDescription = "Wikipedia Extraction: Build training data"
 
 	override def buildProgram(env: ExecutionEnvironment, param: String): Unit = {
 		val wikiPages = readWikiPagesWithFullInfo { pageTitle =>
-			pageTitle.hashCode % SAMPLE_FRACTION == 632
+			pageTitle.hashCode % SAMPLE_FRACTION == SAMPLE_NUMBER
 		}
 
 		val currentFile = if (runsOffline()) "" else s"/$param"
 		val surfaces = readSurfaces(currentFile)
 
 		val classifiables = wikiPages
-			.flatMap(new TrainingDataFlatMap)
+			.flatMap(new LinksAsTrainingDataFlatMap)
 			.withBroadcastSet(surfaces, SurfacesInTrieFlatMap.BROADCAST_SURFACES)
 			.name("Links and possible links")
 
@@ -38,7 +39,7 @@ class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 
 		// TODO: Also join surface link probs
 		// NOTE: If you change this, also change the data format description in the machine learning suite
-		trainingData.writeAsText(trainingDataPath + currentFile, FileSystem.WriteMode.OVERWRITE)
+		trainingData.writeAsText(trainingDataPath + s"/$SAMPLE_NUMBER/$currentFile", FileSystem.WriteMode.OVERWRITE)
 	}
 
 
@@ -58,7 +59,7 @@ class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 }
 
 
-class TrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage, Classifiable[TrainInfo]] {
+class LinksAsTrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage, Classifiable[TrainInfo]] {
 	var tokenHitCount: Int = 1
 
 
@@ -77,12 +78,7 @@ class TrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage, Classi
 			// TODO: This could be solved by taking the link tokenization directly from the plain text, however, this would
 			//       require quite a bit of rewriting.
 
-//			val context = for {
-//				text <- Util.extractContext(wikiPage.plainText, index, CONTEXT_SPREADING)
-//				pos  <- Util.extractContext(wikiPage.tags, index, CONTEXT_SPREADING)
-//			} yield (text, pos)
 			val contextOption = Util.extractContext(wikiPage.plainText, index)
-
 
 			contextOption.foreach { context =>
 				out.collect(Classifiable[TrainInfo](link.fullId, link.surfaceRepr, context.toArray, info = TrainInfo(link.source, link.destination, POS_TAG_GROUPS.map { group => if (group.exists(link.posTags.contains(_))) 1.0 else 0.0 })))

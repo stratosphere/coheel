@@ -21,4 +21,10 @@ object Sample {
 		  |showed that he was much more popular with the German people than Merkel.
 		""".stripMargin
 
+	val ANGELA_MERKEL_SAMPLE_TEXT_4 =
+		"""
+		  |Merkel has been described as the de facto leader of the European Union, and was ranked as the world's second most powerful
+		  |person by Forbes magazine in 2012 and 2015, the highest ranking ever achieved by a woman.
+		""".stripMargin
+
 }

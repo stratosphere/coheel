@@ -88,7 +88,7 @@ object MachineLearningTestSuite {
 		val candidateEntity = split(2)
 		val source = split(3)
 		val destination = split(4)
-		val attValues = split.slice(5, 5 + 15 + 1).map(_.toDouble)
+		val attValues = split.slice(5, 5 + CoheelClassifier.NUMBER_OF_FEATURES + 1).map(_.toDouble)
 		val trainingData = TrainingData(id, surface, candidateEntity, source, destination)
 
 		val instance = new CoheelInstance(1.0, attValues, trainingData)
@@ -131,7 +131,7 @@ object MachineLearningTestSuite {
 					val actual = mutable.Set[(String, String)]()
 					val classificationTime = Timer.timeFunction {
 						test.enumerateInstances().asScala.foreach { case instance: CoheelInstance =>
-							if (classifier.classifyInstance(instance) == 1.0) {
+							if (classifier.classifyInstance(instance) == CoheelClassifier.POSITIVE_CLASS) {
 								actual.add((instance.info.id, instance.info.candidateEntity))
 							}
 						}
