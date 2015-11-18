@@ -99,6 +99,7 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 		val withNeighbours = basicClassifierResults.join(preprocessedNeighbours)
 			.where("candidateEntity")
 			.equalTo("entity")
+			.name("Join With Neighbours")
 			.map { joinResult => joinResult match {
 					case (classifierResult, neighbours) =>
 						ClassifierResultWithNeighbours(
@@ -112,14 +113,14 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 			}
 
 
-		withNeighbours.groupBy("documentId").reduceGroup(new RandomWalkReduceGroup).writeAsTsv(randomWalkResultsPath)
+		withNeighbours.groupBy("documentId").reduceGroup(new RandomWalkReduceGroup).name("Random Walk").writeAsTsv(randomWalkResultsPath)
 
 		/*
 		 * OUTPUT
 		 */
 		// Write trie hits for debugging
 		val trieHitOutput = classifiables.map { trieHit =>
-			(trieHit.id, trieHit.surfaceRepr, trieHit.info.trieHit, trieHit.info.posTags.deep, s">>>${trieHit.context}<<<")
+			(trieHit.id, trieHit.surfaceRepr, trieHit.info.trieHit, trieHit.info.posTags.deep, s">>>${trieHit.context.mkString(" ")}<<<")
 		}
 		trieHitOutput.writeAsTsv(trieHitPath)
 
@@ -258,12 +259,20 @@ class ClassificationReduceGroup(params: Params) extends RichGroupReduceFunction[
 			seedsFound += 1
 			out.collect(ClassifierResult(result.info.documentId, NodeTypes.SEED, result.candidateEntity, trieHit))
 		}
-		log.info(s"Found $seedsFound seeds")
+		log.info(s"Classification for trie hit $trieHit")
+		log.info("Features:")
+		allCandidates.foreach { candidate =>
+			log.info(s"    $candidate")
+		}
+		log.info(s"Found #seeds: $seedsFound")
 		// only emit candidates, if no seeds were found
 		if (seedsFound > 0) {
+			var candidatesFound = 0
 			candidateClassifier.classifyResultsWithCandidateLogic(features).foreach { result =>
+				candidatesFound += 1
 				out.collect(ClassifierResult(result.info.documentId, NodeTypes.CANDIDATE, result.candidateEntity, trieHit))
 			}
+			log.info(s"Found #candidates: $candidatesFound")
 		}
 	}
 

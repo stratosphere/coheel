@@ -134,8 +134,8 @@ object MachineLearningTestSuite {
 						}
 					}
 					val precision = if (actual.size != 0) expected.intersect(actual).size.toDouble / actual.size else 0.0
-					val recall = expected.intersect(actual).size.toDouble / expected.size
-					println(f"      P: $precision%.3f, R: $recall%.3f, F1: ${2 * precision * recall / (precision + recall)}%.3f")
+					val recall    =                       expected.intersect(actual).size.toDouble / expected.size
+					println(f"      P: $precision%.3f, R: $recall%.3f, F1: ${2 * precision * recall / (precision + recall)}%.3f, Actual Size: ${actual.size}, Expected Size: ${expected.size}")
 			}
 		}
 		println("-" * 80)
