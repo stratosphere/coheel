@@ -259,10 +259,10 @@ class ClassificationReduceGroup(params: Params) extends RichGroupReduceFunction[
 			seedsFound += 1
 			out.collect(ClassifierResult(result.info.documentId, NodeTypes.SEED, result.candidateEntity, trieHit))
 		}
-		log.info(s"Classification for trie hit $trieHit")
+		log.info(s"Classification for $trieHit")
 		log.info("Features:")
 		allCandidates.foreach { candidate =>
-			log.info(s"    $candidate")
+			log.info(f"    ${candidate.candidateEntity}%.30s ${candidate.surfaceProb}%.3f ${candidate.contextProb}%.0f")
 		}
 		log.info(s"Found #seeds: $seedsFound")
 		// only emit candidates, if no seeds were found
