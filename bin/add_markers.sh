@@ -7,4 +7,6 @@ for var in "$@"; do
 	awk '/<\/page>/{print;print "<MARKER />";next}1' $var.tmp1 > $var.tmp2
 	echo "Remove last two lines"
 	head -n -2 $var.tmp2 > $var.tmp3
+	rm $var.tmp1 $var.tmp2
+	mv $var.tmp3 $var
 done
