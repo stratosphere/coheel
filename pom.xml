@@ -258,6 +258,7 @@
 							<jvmArgs>
 								<jvmArg>-Xms7g</jvmArg>
 								<jvmArg>-Xmx7g</jvmArg>
+								<jvmArg>-verbosegc</jvmArg>
 							</jvmArgs>
 						</launcher>
 						<launcher>

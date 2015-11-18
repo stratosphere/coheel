@@ -43,7 +43,7 @@ object MachineLearningTestSuite {
 	def main(args: Array[String]) = {
 		val (train, test) = readTrainingDataAndBuildInstances()
 
-		serializeGoodClassifier(train)
+//		serializeGoodClassifier(train)
 
 		val expected = test.enumerateInstances().asScala.flatMap { case instance: CoheelInstance =>
 			if (instance.classValue() == 1.0)
@@ -68,8 +68,8 @@ object MachineLearningTestSuite {
 
 	def readTrainingDataAndBuildInstances(): (Instances, Instances) = {
 		print("Reading .. "); Console.flush()
-		val trainSet = r.shuffle(readInstancesInGroups("632"))
-		val testSet  = r.shuffle(readInstancesInGroups("3782"))
+		val trainSet = r.shuffle(readInstancesInGroups("000"))
+		val testSet  = r.shuffle(readInstancesInGroups("001"))
 		println("Done.")
 		println(s"There are ${trainSet.size} instance groups in training and ${testSet.size} in test")
 		println()
@@ -93,10 +93,10 @@ object MachineLearningTestSuite {
 		instance
 	}
 
-	def readInstancesInGroups(str: String): mutable.ArrayBuffer[mutable.ArrayBuffer[Instance]] = {
+	def readInstancesInGroups(suffix: String): mutable.ArrayBuffer[mutable.ArrayBuffer[Instance]] = {
 		val groups = mutable.ArrayBuffer[mutable.ArrayBuffer[Instance]]()
 
-		val scoresSource = Source.fromFile(new File("output/training-data.wiki"))
+		val scoresSource = Source.fromFile(new File(s"output/training-data-$suffix.wiki"))
 		var currentGroup = mutable.ArrayBuffer[Instance]()
 		var lastId: String = ""
 		val lines = scoresSource.getLines()
@@ -200,14 +200,14 @@ object MachineLearningTestSuite {
 		nb2.setUseSupervisedDiscretization(false)
 
 		val base = List(
-			new Logistic,
-			new J48,
-			new SimpleLogistic,
+//			new Logistic,
+			new RandomForest,
+			new J48
+//			new SimpleLogistic,
 //			simpleLogistic,
-			new MultilayerPerceptron,
-			nb1,
-			nb2,
-			new RandomForest
+//			new MultilayerPerceptron,
+//			nb1,
+//			nb2,
 //			new SMO
 		)
 		base.flatMap { classifier =>
