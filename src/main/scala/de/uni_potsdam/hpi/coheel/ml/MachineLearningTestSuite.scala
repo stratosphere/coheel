@@ -125,14 +125,17 @@ object MachineLearningTestSuite {
 			})
 			runtimeTry match {
 				case Failure(e) => println(s"    $name failed with ${e.getMessage}")
-				case Success(runtime) =>
-					println(s"    $name in ${msToMin(runtime.toInt)} min")
+				case Success(trainingTime) =>
+					println(s"    $name in ${msToMin(trainingTime.toInt)} min")
 					val actual = mutable.Set[(String, String)]()
-					test.enumerateInstances().asScala.foreach { case instance: CoheelInstance =>
-						if (classifier.classifyInstance(instance) == 1.0) {
-							actual.add((instance.info.id, instance.info.candidateEntity))
+					val classificationTime = Timer.timeFunction {
+						test.enumerateInstances().asScala.foreach { case instance: CoheelInstance =>
+							if (classifier.classifyInstance(instance) == 1.0) {
+								actual.add((instance.info.id, instance.info.candidateEntity))
+							}
 						}
 					}
+					println(s"      Classification Time: ${msToMin(classificationTime.toInt)}")
 					val precision = if (actual.size != 0) expected.intersect(actual).size.toDouble / actual.size else 0.0
 					val recall    =                       expected.intersect(actual).size.toDouble / expected.size
 					println(f"      P: $precision%.3f, R: $recall%.3f, F1: ${2 * precision * recall / (precision + recall)}%.3f, Actual Size: ${actual.size}, Expected Size: ${expected.size}")
