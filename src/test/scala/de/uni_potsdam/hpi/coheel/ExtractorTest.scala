@@ -68,6 +68,9 @@ class ExtractorTest extends FunSuite {
 		assert(links.exists { _.surface == "\"ABC\" (song)" })
 		assert(links.exists { _.surface == "\"" })
 	}
+	test("uppercase the first letter") {
+		assert(links.exists { _.destination == "Wrinkle ridge" })
+	}
 	ignore("parsing bold text at beginning of article") {
 		assert(links.exists { _.surface == "Aldrovandia phalacra" })
 		assert(links.exists { _.surface == "Hawaiian halosaurid" })
@@ -93,7 +96,7 @@ class ExtractorTest extends FunSuite {
 			link.surface == "Information theory" && link.destination == "Information theory"
 		})
 		assert(links.exists { link =>
-			link.surface == "Antwort" && link.destination == "wikt:antwort"
+			link.surface == "Antwort" && link.destination == "Wikt:antwort"
 		})
 	}
 	test("parsing an internal link with different label '[[Computer data storage|digital information]]'") {
@@ -124,7 +127,7 @@ class ExtractorTest extends FunSuite {
 
 	test("all links are found") {
 		// add +2 when using bold text extraction
-		assert(links.size === 67 /* hand-counted :) */)
+		assert(links.size === 68 /* hand-counted :) */)
 	}
 
 	test("just print links") {

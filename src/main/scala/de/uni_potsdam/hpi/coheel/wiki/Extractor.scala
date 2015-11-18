@@ -96,6 +96,7 @@ class Extractor(val wikiPage: WikiPage, val surfaceRepr: String => String) {
 			.flatMap(removeAnchorLinks)
 			.flatMap(trimWhitespace)
 			.flatMap(filterExternalLinks)
+			.flatMap(uppercaseFirstLetter)
 //			.flatMap(debugPrintAllLinks)
 			.flatMap(toLink)
 			.flatMap(filterEmptySurfaceRepr)
@@ -196,6 +197,11 @@ class Extractor(val wikiPage: WikiPage, val surfaceRepr: String => String) {
 		if (link.destination.toLowerCase.startsWith("http://"))
 			None
 		else Some(link)
+	}
+
+	private def uppercaseFirstLetter(link: LinkWithNode): Option[LinkWithNode] = {
+		link.destination = link.destination.substring(0, 1).toUpperCase + link.destination.substring(1)
+		Some(link)
 	}
 
 	/**
