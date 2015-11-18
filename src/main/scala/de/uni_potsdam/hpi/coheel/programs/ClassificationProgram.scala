@@ -61,7 +61,7 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 			}
 			override def flatMap(text: String, out: Collector[InputDocument]): Unit = {
 				val tokenizer = TokenizerHelper.tokenizeWithPositionInfo(text, null)
-				val id = Util.id(text).toString
+				val id = Util.id(text)
 				log.info(s"Reading document $id on index $index")
 
 				val tokens = tokenizer.getTokens

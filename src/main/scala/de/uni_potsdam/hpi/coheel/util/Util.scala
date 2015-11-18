@@ -32,8 +32,10 @@ object Util {
 		}
 	}
 
-	def id(s: String): Long = {
-		MurmurHash3.stringHash(s).toLong - Int.MinValue
+	def id(s: String): String = {
+		// make sure, its at least zero
+		val hash = MurmurHash3.stringHash(s).toLong + Int.MaxValue + 1
+		f"$hash%010d"
 	}
 
 }
