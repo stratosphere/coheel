@@ -53,13 +53,8 @@ object MachineLearningTestSuite {
 				None
 		}.toSet
 
-		println("#" * 10 + " Test bare classifiers " + "#" * 10)
-		testClassifiers(train, test, expected)
-
-
-		println("#" * 10 + " Test classifiers with logic on top " + "#" * 10)
+		println("#" * 10 + " Test classifiers " + "#" * 10)
 		testCoheelClassifiers(train, test, expected)
-
 
 		// missing values
 		// surface-link-at-all probability?
@@ -116,9 +111,9 @@ object MachineLearningTestSuite {
 		groups
 	}
 
-	def testClassifiers(train: Instances, test: Instances, expected: Set[(String, String)]): Unit = {
+	def testCoheelClassifiers(train: Instances, test: Instances, expected: Set[(String, String)]): Unit = {
 		classifiers.foreach { case (name, classifier) =>
-
+			println(new java.util.Date)
 			val runtimeTry = Try(Timer.timeFunction {
 				classifier.buildClassifier(train)
 			})
@@ -126,58 +121,48 @@ object MachineLearningTestSuite {
 				case Failure(e) => println(s"    $name failed with ${e.getMessage}")
 				case Success(trainingTime) =>
 					println(s"    $name in ${msToMin(trainingTime.toInt)} min")
-					val actual = mutable.Set[(String, String)]()
-					val classificationTime = Timer.timeFunction {
-						test.enumerateInstances().asScala.foreach { case instance: CoheelInstance =>
-							if (classifier.classifyInstance(instance) == CoheelClassifier.POSITIVE_CLASS) {
-								actual.add((instance.info.id, instance.info.candidateEntity))
-							}
-						}
-					}
-					println(s"      Classification Time: ${msToMin(classificationTime.toInt)} min")
-					val precision = if (actual.size != 0) expected.intersect(actual).size.toDouble / actual.size else 0.0
-					val recall    =                       expected.intersect(actual).size.toDouble / expected.size
-					println(f"      P: $precision%.3f, R: $recall%.3f, F1: ${2 * precision * recall / (precision + recall)}%.3f, Actual Size: ${actual.size}, Expected Size: ${expected.size}")
-			}
-		}
-		println("-" * 80)
-	}
 
-	def testCoheelClassifiers(train: Instances, test: Instances, expected: Set[(String, String)]): Unit = {
-		classifiers.foreach { case (name, classifier) =>
-			val runtimeTry = Try(Timer.timeFunction {
-				classifier.buildClassifier(train)
-			})
-			runtimeTry match {
-				case Failure(e) => println(s"    $name failed with ${e.getMessage}")
-				case Success(runtime) =>
-					println(s"    $name in ${msToMin(runtime.toInt)} min")
+					val actualSeed = mutable.Set[(String, String)]()
+					val actualCand = mutable.Set[(String, String)]()
 
-					val actual = mutable.Set[(String, String)]()
 					// collect instances in groups of same trie hit
 					val instances = test.enumerateInstances().asScala.map { case instance: CoheelInstance => instance }.toList
 					val instancesGroup = instances.groupBy { instance => instance.info.id }
 					// build coheel classifier, which implements special group logic on top of classifier results
-					val coheelClassifier = new CoheelClassifier(classifier)
+					val seedClassifier = new CoheelClassifier(classifier)
+					val candidateClassifier = new CoheelClassifier(classifier)
 
-					instancesGroup.values.foreach { group =>
-						val featureLines = group.map { instance =>
-							FeatureLine[ClassificationInfo](
-								instance.info.id,
-								instance.info.surface,
-								instance.info.candidateEntity,
-								ClassificationInfo(null, null, null),
-								instance.attValues)
-						}.toSeq
-						coheelClassifier.classifyResultsWithSeedLogic(featureLines).foreach { seed =>
-							// collect a result if there is one
-							actual.add((seed.id, seed.candidateEntity))
+					val classificationTime = Timer.timeFunction {
+						instancesGroup.values.foreach { group =>
+							val featureLines = group.map { instance =>
+								FeatureLine[ClassificationInfo](
+									instance.info.id,
+									instance.info.surface,
+									instance.info.candidateEntity,
+									ClassificationInfo(null, null, null),
+									instance.attValues)
+							}.toSeq
+							candidateClassifier.classifyResultsWithCandidateLogic(featureLines).foreach { candidate =>
+								actualCand.add((candidate.id, candidate.candidateEntity))
+							}
+							seedClassifier.classifyResultsWithSeedLogic(featureLines).foreach { seed =>
+								// collect a result if there is one
+								actualSeed.add((seed.id, seed.candidateEntity))
+							}
 						}
 					}
 
-					val precision = if (actual.size != 0) expected.intersect(actual).size.toDouble / actual.size else 0.0
-					val recall = expected.intersect(actual).size.toDouble / expected.size
-					println(f"      P: $precision%.3f, R: $recall%.3f, F1: ${2 * precision * recall / (precision + recall)}%.3f")
+					val precisionCand = if (actualCand.size != 0) expected.intersect(actualCand).size.toDouble / actualCand.size else -1.0
+					val recallCand = expected.intersect(actualCand).size.toDouble / expected.size
+					val f1Cand = 2 * precisionCand * recallCand / (precisionCand + recallCand)
+
+					val precisionSeed = if (actualSeed.size != 0) expected.intersect(actualSeed).size.toDouble / actualSeed.size else -1.0
+					val recallSeed = expected.intersect(actualSeed).size.toDouble / expected.size
+					val f1Seed = 2 * precisionSeed * recallSeed / (precisionSeed + recallSeed)
+
+					println(s"      Classification Time: ${msToMin(classificationTime.toInt)} min")
+					println(f"      P: $precisionCand%.3f, R: $recallCand%.3f, F1: $f1Cand%.3f (CANDIDATE)")
+					println(f"      P: $precisionSeed%.3f, R: $recallSeed%.3f, F1: $f1Seed%.3f (SEED)")
 			}
 		}
 		println("-" * 80)
