@@ -8,6 +8,7 @@ import de.uni_potsdam.hpi.coheel.wiki.FullInfoWikiPage
 import org.apache.flink.api.scala.{ExecutionEnvironment, _}
 import org.apache.flink.core.fs.FileSystem
 import org.apache.flink.util.Collector
+import org.apache.log4j.Logger
 
 class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 
@@ -17,9 +18,15 @@ class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 	val arguments = if (runsOffline()) List("") else List("12345", "678910")
 	override def getDescription = "Wikipedia Extraction: Build training data"
 
+	def log: Logger = Logger.getLogger(getClass)
+
 	override def buildProgram(env: ExecutionEnvironment, param: String): Unit = {
 		val wikiPages = readWikiPagesWithFullInfo { pageTitle =>
-			Math.abs(pageTitle.hashCode) % SAMPLE_FRACTION == SAMPLE_NUMBER
+			val hashCode = Math.abs(pageTitle.hashCode)
+			val hashCodeModulo = hashCode % SAMPLE_FRACTION
+			val isInSample = hashCodeModulo == SAMPLE_NUMBER
+			log.info(f"$pageTitle%40s $hashCode%15s $hashCodeModulo%5s $isInSample")
+			isInSample
 		}
 
 		val currentFile = if (runsOffline()) "" else s"/$param"
