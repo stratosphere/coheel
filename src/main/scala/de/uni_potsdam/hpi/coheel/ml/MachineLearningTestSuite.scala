@@ -68,12 +68,10 @@ object MachineLearningTestSuite {
 
 	def readTrainingDataAndBuildInstances(): (Instances, Instances) = {
 		print("Reading .. "); Console.flush()
-		val instanceGroups = r.shuffle(readInstancesInGroups())
+		val trainSet = r.shuffle(readInstancesInGroups("632"))
+		val testSet  = r.shuffle(readInstancesInGroups("3782"))
 		println("Done.")
-		val groupsCount = instanceGroups.size
-		val trainingRatio = (groupsCount * 0.7).toInt
-		val (trainSet, testSet) = instanceGroups.splitAt(trainingRatio)
-		println(s"There are $groupsCount instance groups, ${trainSet.size} in training and ${testSet.size} in test")
+		println(s"There are ${trainSet.size} instance groups in training and ${testSet.size} in test")
 		println()
 
 		val fullTrainingInstances = buildInstances("train", trainSet.flatten)
@@ -95,7 +93,7 @@ object MachineLearningTestSuite {
 		instance
 	}
 
-	def readInstancesInGroups(): mutable.ArrayBuffer[mutable.ArrayBuffer[Instance]] = {
+	def readInstancesInGroups(str: String): mutable.ArrayBuffer[mutable.ArrayBuffer[Instance]] = {
 		val groups = mutable.ArrayBuffer[mutable.ArrayBuffer[Instance]]()
 
 		val scoresSource = Source.fromFile(new File("output/training-data.wiki"))

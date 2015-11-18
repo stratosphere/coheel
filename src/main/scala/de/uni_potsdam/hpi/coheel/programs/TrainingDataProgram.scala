@@ -1,32 +1,31 @@
 package de.uni_potsdam.hpi.coheel.programs
 
+import de.uni_potsdam.hpi.coheel.io.OutputFiles._
+import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier.POS_TAG_GROUPS
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import de.uni_potsdam.hpi.coheel.util.Util
-import de.uni_potsdam.hpi.coheel.wiki.{TokenizerHelper, FullInfoWikiPage, WikiPage}
-import org.apache.flink.api.common.operators.base.JoinOperatorBase.JoinHint
-import org.apache.flink.api.scala.ExecutionEnvironment
-import de.uni_potsdam.hpi.coheel.io.OutputFiles._
+import de.uni_potsdam.hpi.coheel.wiki.FullInfoWikiPage
+import org.apache.flink.api.scala.{ExecutionEnvironment, _}
 import org.apache.flink.core.fs.FileSystem
 import org.apache.flink.util.Collector
-import org.apache.flink.api.scala._
-import scala.collection.mutable
-import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier.POS_TAG_GROUPS
 
 class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 
 	val SAMPLE_FRACTION = if (runsOffline()) 100 else 5000
-	val SAMPLE_NUMBER = -3786
+	val SAMPLE_NUMBER = if (runsOffline()) 0 else 632
 
 	val arguments = if (runsOffline()) List("") else List("12345", "678910")
 	override def getDescription = "Wikipedia Extraction: Build training data"
 
 	override def buildProgram(env: ExecutionEnvironment, param: String): Unit = {
 		val wikiPages = readWikiPagesWithFullInfo { pageTitle =>
-			pageTitle.hashCode % SAMPLE_FRACTION == SAMPLE_NUMBER
+			Math.abs(pageTitle.hashCode) % SAMPLE_FRACTION == SAMPLE_NUMBER
 		}
 
 		val currentFile = if (runsOffline()) "" else s"/$param"
 		val surfaces = readSurfaces(currentFile)
+
+		wikiPages.map { wikiPage => wikiPage.pageTitle }.writeAsText(trainingDataPagesPath + s"-$SAMPLE_NUMBER.wiki/$currentFile", FileSystem.WriteMode.OVERWRITE)
 
 		val classifiables = wikiPages
 			.flatMap(new LinksAsTrainingDataFlatMap)
@@ -39,7 +38,7 @@ class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 
 		// TODO: Also join surface link probs
 		// NOTE: If you change this, also change the data format description in the machine learning suite
-		trainingData.writeAsText(trainingDataPath + s"/$SAMPLE_NUMBER/$currentFile", FileSystem.WriteMode.OVERWRITE)
+		trainingData.writeAsText(trainingDataPath + s"-$SAMPLE_NUMBER.wiki/$currentFile", FileSystem.WriteMode.OVERWRITE)
 	}
 
 
@@ -65,7 +64,6 @@ class LinksAsTrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage,
 
 	override def flatMap(wikiPage: FullInfoWikiPage, out: Collector[Classifiable[TrainInfo]]): Unit = {
 		assert(wikiPage.tags.size == wikiPage.plainText.size)
-		log.info(s"Learning from wiki page '${wikiPage.pageTitle}'")
 		wikiPage.links.foreach { case (index, link) =>
 			// In theory, the index of the link should be in the set of indices proposed by the trie:
 			//    assert(hitPoints.contains(index))
