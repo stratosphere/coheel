@@ -174,8 +174,8 @@ class PotentialEntityFinderFlatMap(params: Params) extends RichFlatMapFunction[I
 
 	override def open(conf: Configuration): Unit = {
 		val surfacesFile = if (CoheelProgram.runsOffline()) {
-//			new File("output/surface-probs.wiki")
-			new File("cluster-output/678910")
+			new File("output/surface-probs.wiki")
+//			new File("cluster-output/678910")
 		} else {
 			if (getRuntimeContext.getIndexOfThisSubtask < params.parallelism / 2)
 				new File(params.config.getString("first_trie_half"))
