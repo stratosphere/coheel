@@ -25,7 +25,7 @@ class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 			val hashCode = Math.abs(pageTitle.hashCode)
 			val hashCodeModulo = hashCode % SAMPLE_FRACTION
 			val isInSample = hashCodeModulo == SAMPLE_NUMBER
-			log.info(f"$pageTitle%40s $hashCode%15s $hashCodeModulo%5s $isInSample")
+			log.info(f"${"<" +pageTitle + ">"}%40s $hashCode%15s $hashCodeModulo%5s $isInSample")
 			isInSample
 		}
 
