@@ -29,14 +29,11 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 	 */
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val wikiPages = readWikiPages
-		if (!configurationParams.contains(ConfigurationParams.ONLY_WIKIPAGES)) {
-			buildLinkPlans(wikiPages)
-			buildLanguageModelPlan(wikiPages)
-		} else {
-			wikiPages.map { wikiPage =>
-				(wikiPage.pageTitle, wikiPage.isDisambiguation, wikiPage.isList, wikiPage.isRedirect, wikiPage.ns, if (wikiPage.isNormalPage) "normal" else "special")
-			}.writeAsTsv(wikiPagesPath)
-		}
+		buildLinkPlans(wikiPages)
+		buildLanguageModelPlan(wikiPages)
+		wikiPages.map { wikiPage =>
+			(wikiPage.pageTitle, wikiPage.isDisambiguation, wikiPage.isList, wikiPage.isRedirect, wikiPage.ns, if (wikiPage.isNormalPage) "normal" else "special")
+		}.writeAsTsv(wikiPagesPath)
 	}
 
 	/**
@@ -119,6 +116,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 		val redirects = wikiPages
 			.filter { wikiPage => wikiPage.isRedirect }
 			.map { wikiPage => (wikiPage.pageTitle, wikiPage.redirect) }
+
 
 		allPageLinks.map { link => (link.fullId, link.surfaceRepr, link.surface, link.source, link.destination) }.writeAsTsv(allLinksPath)
 		surfaceCountHistogram.writeAsTsv(surfaceCountHistogramPath)
