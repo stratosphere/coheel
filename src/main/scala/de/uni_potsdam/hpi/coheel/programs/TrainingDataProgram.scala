@@ -64,6 +64,7 @@ class TrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage, Classi
 
 	override def flatMap(wikiPage: FullInfoWikiPage, out: Collector[Classifiable[TrainInfo]]): Unit = {
 		assert(wikiPage.tags.size == wikiPage.plainText.size)
+		log.info(s"Learning from wiki page '${wikiPage.pageTitle}'")
 		wikiPage.links.foreach { case (index, link) =>
 			// In theory, the index of the link should be in the set of indices proposed by the trie:
 			//    assert(hitPoints.contains(index))

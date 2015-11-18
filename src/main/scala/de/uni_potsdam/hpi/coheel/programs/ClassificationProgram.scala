@@ -266,7 +266,7 @@ class ClassificationReduceGroup(params: Params) extends RichGroupReduceFunction[
 		}
 		log.info(s"Found #seeds: $seedsFound")
 		// only emit candidates, if no seeds were found
-		if (seedsFound > 0) {
+		if (seedsFound == 0) {
 			var candidatesFound = 0
 			candidateClassifier.classifyResultsWithCandidateLogic(features).foreach { result =>
 				candidatesFound += 1
