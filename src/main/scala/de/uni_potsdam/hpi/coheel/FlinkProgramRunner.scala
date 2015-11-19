@@ -19,8 +19,8 @@ import scala.collection.immutable.ListMap
 /**
  * Command line parameter configuration
  */
-case class Params(dataSetConf: String = "chunk",
-                  programName: String = "main",
+case class Params(dataSetConf: String = "local",
+                  programName: String = "extract-main",
                   doLogging: Boolean  = false,
                   parallelism: Int    = 10,
                   configurationParams: Map[String, String] = Map(),
@@ -49,16 +49,14 @@ object FlinkProgramRunner {
 		, "surface-evaluation" -> classOf[SurfaceEvaluationProgram]
 		, "classification" -> classOf[ClassificationProgram]
 		, "redirects" -> classOf[RedirectResolvingProgram]
-		, "page-rank" -> classOf[PageRankProgram]
-		, "best-practices" -> classOf[BestPracticesProgram]
 	)
 
 	val parser = new scopt.OptionParser[Params]("bin/run") {
 		head("CohEEL", "0.0.1")
 		opt[String]('d', "dataset") required() action { (x, c) =>
-			c.copy(dataSetConf = x) } text "specifies the dataset to use, either 'full' or 'chunk'" validate { x =>
-			if (List("full", "chunk", "chunk_cluster", "full_cluster").contains(x)) success
-			else failure("dataset must be either 'full', 'chunk' or 'chunk_cluster', 'full_cluster'") }
+			c.copy(dataSetConf = x) } text "specifies the dataset to use, either 'local', 'cluster_tenem' or 'cluster_aws'" validate { x =>
+			if (List("local", "cluster_tenem", "cluster_aws").contains(x)) success
+			else failure("dataset unknown") }
 		opt[String]('p', "program") required() action { (x, c) =>
 			c.copy(programName = x) } text "specifies the program to run" validate { x =>
 			if (programs.contains(x))
