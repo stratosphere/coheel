@@ -116,31 +116,25 @@ object FlinkProgramRunner {
 			log.info(StringUtils.repeat('#', 140))
 
 			log.info("Starting ..")
-			try {
-				program.arguments.foreach { argument =>
-					if (argument != null)
-						log.info(s"Current parameter: $argument")
-					program.makeProgram(env, params, argument)
-					FileUtils.writeStringToFile(new File("plans/PLAN"), env.getExecutionPlan())
-					val configurationString = if (program.configurationParams.size > 0)
-						" " + program.configurationParams.toString().replace("Map(", "configuration-params = (")
-					else
-						""
-					val paramsString = if (argument == null) "" else s" current-param = $argument"
-					FileUtils.write(new File("PLAN"), env.getExecutionPlan())
-					env.getConfig.disableSysoutLogging()
-					val result = env.execute(s"${program.getDescription} (dataset = ${config.getString("name")}$paramsString$configurationString)")
-					val accResults = result.getAllAccumulatorResults.asScala
-					accResults.foreach { case (acc, obj) =>
-						println(acc)
-					}
-					log.info(s"Net runtime: ${result.getNetRuntime / 1000} s")
-					Timer.printAll()
+			program.arguments.foreach { argument =>
+				if (argument != null)
+					log.info(s"Current parameter: $argument")
+				program.makeProgram(env, params, argument)
+				FileUtils.writeStringToFile(new File("plans/PLAN"), env.getExecutionPlan())
+				val configurationString = if (program.configurationParams.size > 0)
+					" " + program.configurationParams.toString().replace("Map(", "configuration-params = (")
+				else
+					""
+				val paramsString = if (argument == null) "" else s" current-param = $argument"
+				FileUtils.write(new File("PLAN"), env.getExecutionPlan())
+				env.getConfig.disableSysoutLogging()
+				val result = env.execute(s"${program.getDescription} (dataset = ${config.getString("name")}$paramsString$configurationString)")
+				val accResults = result.getAllAccumulatorResults.asScala
+				accResults.foreach { case (acc, obj) =>
+					println(acc)
 				}
-			} catch {
-				case e: ProgramInvocationException =>
-					if (e.getMessage.contains("canceled"))
-						println("Stopping .. Program has been canceled.")
+				log.info(s"Net runtime: ${result.getNetRuntime / 1000} s")
+				Timer.printAll()
 			}
 		}
 		println(s"Took ${runtime / 1000} s.")
