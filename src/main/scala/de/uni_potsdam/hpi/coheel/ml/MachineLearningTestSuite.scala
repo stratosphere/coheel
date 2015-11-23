@@ -26,7 +26,7 @@ case class TrainingData(id: String,
                         destination: String)
 
 class CoheelInstance(weight: Double, val attValues: Array[Double], val info: TrainingData)
-	extends Instance(weight, attValues) {
+	extends DenseInstance(weight, attValues) {
 
 	def this(other: CoheelInstance) = this(other.weight(), other.toDoubleArray, other.info)
 

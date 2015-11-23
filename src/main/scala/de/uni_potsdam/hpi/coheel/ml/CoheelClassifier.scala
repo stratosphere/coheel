@@ -1,9 +1,13 @@
 package de.uni_potsdam.hpi.coheel.ml
 
+import java.util
+
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{ClassificationInfo, FeatureLine}
 import weka.classifiers.Classifier
-import weka.core.{Instances, Attribute, FastVector, Instance}
-import scala.collection.mutable
+import weka.core.Attribute
+import weka.core.Instances
+import weka.core.Instance
+import weka.core.DenseInstance
 
 object CoheelClassifier {
 
@@ -21,30 +25,30 @@ object CoheelClassifier {
 	)
 
 	val FEATURE_DEFINITION = {
-		val attrs = new FastVector(NUMBER_OF_FEATURES + 1)
+		val attrs = new util.ArrayList[Attribute](NUMBER_OF_FEATURES + 1)
 		// basic features
-		attrs.addElement(new Attribute("prom"))
-		attrs.addElement(new Attribute("promRank"))
-		attrs.addElement(new Attribute("promDeltaTop"))
-		attrs.addElement(new Attribute("promDeltaSucc"))
-		attrs.addElement(new Attribute("context"))
-		attrs.addElement(new Attribute("contextRank"))
-		attrs.addElement(new Attribute("contextDeltaTop"))
-		attrs.addElement(new Attribute("contextDeltaSucc"))
+		attrs.add(new Attribute("prom"))
+		attrs.add(new Attribute("promRank"))
+		attrs.add(new Attribute("promDeltaTop"))
+		attrs.add(new Attribute("promDeltaSucc"))
+		attrs.add(new Attribute("context"))
+		attrs.add(new Attribute("contextRank"))
+		attrs.add(new Attribute("contextDeltaTop"))
+		attrs.add(new Attribute("contextDeltaSucc"))
 		// pos tags
-		attrs.addElement(new Attribute("NN"))
-		attrs.addElement(new Attribute("NNP"))
-		attrs.addElement(new Attribute("JJ"))
-		attrs.addElement(new Attribute("VB"))
-		attrs.addElement(new Attribute("CD"))
-		attrs.addElement(new Attribute("SYM"))
-		attrs.addElement(new Attribute("W"))
+		attrs.add(new Attribute("NN"))
+		attrs.add(new Attribute("NNP"))
+		attrs.add(new Attribute("JJ"))
+		attrs.add(new Attribute("VB"))
+		attrs.add(new Attribute("CD"))
+		attrs.add(new Attribute("SYM"))
+		attrs.add(new Attribute("W"))
 
-		val classAttrValues = new FastVector(2)
-		classAttrValues.addElement("0.0")
-		classAttrValues.addElement("1.0")
+		val classAttrValues = new util.ArrayList[String](2)
+		classAttrValues.add("0.0")
+		classAttrValues.add("1.0")
 		val classAttr = new Attribute("class", classAttrValues)
-		attrs.addElement(classAttr)
+		attrs.add(classAttr)
 		attrs
 	}
 }
@@ -94,7 +98,7 @@ class CoheelClassifier(classifier: Classifier) {
 
 	private def buildInstance(featureLine: FeatureLine[ClassificationInfo]): Instance = {
 		val attValues = featureLine.features.toArray
-		val instance = new Instance(1.0, attValues)
+		val instance = new DenseInstance(1.0, attValues)
 		instance
 	}
 }
