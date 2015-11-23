@@ -5,6 +5,7 @@ import java.io.File
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{ClassificationInfo, FeatureLine}
 import de.uni_potsdam.hpi.coheel.util.Timer
 import org.apache.commons.io.FileUtils
+import hr.irb.fastRandomForest.FastRandomForest
 import weka.classifiers.CostMatrix
 import weka.classifiers.bayes.NaiveBayes
 import weka.classifiers.functions.{Logistic, MultilayerPerceptron, SimpleLogistic}
@@ -186,6 +187,7 @@ object MachineLearningTestSuite {
 
 		val base = List(
 //			new Logistic,
+			new FastRandomForest,
 			new RandomForest,
 			new J48
 //			new SimpleLogistic,
