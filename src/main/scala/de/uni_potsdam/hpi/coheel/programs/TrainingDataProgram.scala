@@ -35,7 +35,9 @@ class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 			.withBroadcastSet(surfaces, SurfacesInTrieFlatMap.BROADCAST_SURFACES)
 			.name("Links and possible links")
 
-		classifiables.writeAsTsv(trainingDataClassifiablesPath +  s"-$SAMPLE_NUMBER.wiki/$currentFile")
+		classifiables.map { c =>
+			(c.id, c.surfaceRepr, c.info, c.info.posTags.deep, c.context.deep)
+		}.writeAsTsv(trainingDataClassifiablesPath +  s"-$SAMPLE_NUMBER.wiki/$currentFile")
 
 		val featuresPerGroup = FeatureProgramHelper.buildFeaturesPerGroup(this, classifiables)
 
