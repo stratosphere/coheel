@@ -34,6 +34,8 @@ object OutputFiles {
 	lazy val trainingDataPath                 = s"$location://${outputPath}training-data"
 	lazy val trainingDataPagesPath            = s"$location://${outputPath}training-data-pages"
 	lazy val bestPracticesPath                = s"$location://${outputPath}best-practices.wiki"
+	lazy val debug1Path                       = s"$location://${outputPath}debug1.wiki"
+	lazy val debug2Path                       = s"$location://${outputPath}debug2.wiki"
 
 	lazy val surfaceEvaluationPerDocumentPath = s"$location://${outputPath}surface-evaluation-per-document.wiki"
 	lazy val surfaceEvaluationPerSubsetPath   = s"$location://${outputPath}surface-evaluation-per-subset.wiki"

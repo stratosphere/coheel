@@ -4,6 +4,8 @@ import de.uni_potsdam.hpi.coheel.ml.SecondOrderFeatures
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.scala._
+import de.uni_potsdam.hpi.coheel.io.OutputFiles._
+import org.apache.flink.core.fs.FileSystem
 
 import scala.reflect.ClassTag
 
@@ -51,6 +53,10 @@ object FeatureProgramHelper {
 			}
 		}.name("Classifiable with Candidates")
 
+		classifiablesWithCandidates.map { c =>
+			(c.id, c.surfaceRepr, c.candidateEntity, c.surfaceProb, c.info, c.context.deep)
+		} .writeAsTsv(debug1Path)
+
 		val baseScores = classifiablesWithCandidates.join(languageModels)
 			.where("candidateEntity")
 			.equalTo("pageTitle")
@@ -63,6 +69,10 @@ object FeatureProgramHelper {
 					classifiableWithCandidate.copy(contextProb = contextProb)
 			}
 		}.name("Classifiable with Context Probs")
+
+		classifiablesWithCandidates.map { c =>
+			(c.id, c.surfaceRepr, c.candidateEntity, c.surfaceProb, c.info, c.contextProb)
+		}.writeAsTsv(debug2Path)
 
 		val trainingData = baseScores.groupBy(_.id)
 
