@@ -22,11 +22,6 @@ class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 
 	override def buildProgram(env: ExecutionEnvironment, param: String): Unit = {
 		val wikiPages = readWikiPagesWithFullInfo { pageTitle =>
-//			val hashCode = Math.abs(pageTitle.hashCode)
-//			val hashCodeModulo = hashCode % SAMPLE_FRACTION
-//			val isInSample = hashCodeModulo == SAMPLE_NUMBER
-//			log.info(f"${"<" +pageTitle + ">"}%40s $hashCode%15s $hashCodeModulo%5s $isInSample")
-//			isInSample
 			Math.abs(pageTitle.hashCode) % SAMPLE_FRACTION == SAMPLE_NUMBER
 		}
 
@@ -39,6 +34,8 @@ class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 			.flatMap(new LinksAsTrainingDataFlatMap)
 			.withBroadcastSet(surfaces, SurfacesInTrieFlatMap.BROADCAST_SURFACES)
 			.name("Links and possible links")
+
+		classifiables.writeAsTsv(trainingDataClassifiablesPath +  s"-$SAMPLE_NUMBER.wiki/$currentFile")
 
 		val featuresPerGroup = FeatureProgramHelper.buildFeaturesPerGroup(this, classifiables)
 
