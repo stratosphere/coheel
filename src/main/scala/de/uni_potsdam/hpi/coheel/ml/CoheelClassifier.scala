@@ -94,14 +94,15 @@ class CoheelClassifier(classifier: Classifier) {
 				"L-0468265056-00002089-4156867526",
 				"L-0468265056-00002090-1482103611",
 				"L-0468265056-00002091-0312499337"
-				).contains(featureLine.id)) {
-				println("O" * 80)
+			).contains(featureLine.id)) {
 				println("Feature Line:")
 				println(featureLine)
 				println("Features:")
 				println(featureLine.features.toArray.deep)
 				println("Classification")
 				println(classifier.classifyInstance(instance))
+				println("Correct")
+				println(instance.classValue() == classifier.classifyInstance(instance))
 				println("O" * 80)
 			}
 			if (classifier.classifyInstance(instance) == CoheelClassifier.POSITIVE_CLASS) {

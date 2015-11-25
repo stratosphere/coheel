@@ -164,6 +164,8 @@ object MachineLearningTestSuite {
 					println(s"      Classification Time: ${msToMin(classificationTime.toInt)} min")
 					println(f"      P: $precisionCand%.3f, R: $recallCand%.3f, F1: $f1Cand%.3f (CANDIDATE)")
 					println(f"      P: $precisionSeed%.3f, R: $recallSeed%.3f, F1: $f1Seed%.3f (SEED)")
+					SerializationHelper.write("Modell.model", classifier)
+					println(s"      WROTE TO DISK")
 			}
 		}
 		println("-" * 80)
@@ -223,8 +225,8 @@ object MachineLearningTestSuite {
 			val baseClassifierName = classifier.getClass.getSimpleName
 			List(
 				(baseClassifierName, classifier),
-				(s"$baseClassifierName with 10 x FN cost, minimize expected cost = true", cost1),
-				(s"$baseClassifierName with 10 x FN cost, minimize expected cost = false", cost2),
+//				(s"$baseClassifierName with 10 x FN cost, minimize expected cost = true", cost1),
+//				(s"$baseClassifierName with 10 x FN cost, minimize expected cost = false", cost2),
 				(s"$baseClassifierName with 10 x FP cost, minimize expected cost = true", cost3),
 				(s"$baseClassifierName with 10 x FP cost, minimize expected cost = false", cost4)
 			)
