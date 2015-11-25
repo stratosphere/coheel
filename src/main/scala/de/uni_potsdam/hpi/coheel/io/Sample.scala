@@ -18,7 +18,10 @@ object Sample {
 		  |the alliance between CDU/CSU and the FDP led by Angela Merkel achieved a majority in parliament, but the CDU/CSU had a stronger
 		  |popular electoral lead by one percentage point. Since the SPD had been trailing the CDU by more than 15 points only weeks before
 		  |the election, this outcome was a surprise and was mainly attributed to Schröder's charisma and prowess as a campaigner; polls consistently
-		  |showed that he was much more popular with the German people than Merkel.
+		  |showed that he was much more popular with the German people than Merkel. On election night, both Schröder and Merkel claimed victory
+		  |and chancellorship, but after initially ruling out a grand coalition with Merkel, Schröder and Müntefering entered negotiations with
+		  |her and the CSU's Edmund Stoiber. On 10 October, it was announced that the parties had agreed to form a grand coalition. Schröder agreed
+		  |to cede the chancellorship to Merkel, but the SPD would hold the majority of government posts.
 		""".stripMargin
 
 	val ANGELA_MERKEL_SAMPLE_TEXT_4 =
