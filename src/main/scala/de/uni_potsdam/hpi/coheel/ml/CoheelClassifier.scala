@@ -73,6 +73,22 @@ class CoheelClassifier(classifier: Classifier) {
 			if (classifier.classifyInstance(instance) == CoheelClassifier.POSITIVE_CLASS) {
 				positivePredictions ::= featureLine
 			}
+			if (List(
+				"L-0468265056-00002088-2281324111",
+				"L-0468265056-00002089-4156867526",
+				"L-0468265056-00002090-1482103611",
+				"L-0468265056-00002091-0312499337"
+			).contains(featureLine.id) || featureLine.id.startsWith("TH-")) {
+				println("Feature Line:")
+				println(featureLine)
+				println("Features:")
+				println(featureLine.features.toArray.deep)
+				println("Classification")
+				println(classifier.classifyInstance(instance))
+				println("Correct")
+				println(instance.classValue() == classifier.classifyInstance(instance))
+				println("O" * 80)
+			}
 		}
 		if (positivePredictions.size == 1)
 			positivePredictions.headOption
@@ -89,22 +105,6 @@ class CoheelClassifier(classifier: Classifier) {
 			assert(featureLine.features.size == CoheelClassifier.NUMBER_OF_FEATURES || featureLine.features.size == CoheelClassifier.NUMBER_OF_FEATURES + 1)
 			val instance = buildInstance(featureLine)
 			instance.setDataset(instances)
-			if (List(
-				"L-0468265056-00002088-2281324111",
-				"L-0468265056-00002089-4156867526",
-				"L-0468265056-00002090-1482103611",
-				"L-0468265056-00002091-0312499337"
-			).contains(featureLine.id)) {
-				println("Feature Line:")
-				println(featureLine)
-				println("Features:")
-				println(featureLine.features.toArray.deep)
-				println("Classification")
-				println(classifier.classifyInstance(instance))
-				println("Correct")
-				println(instance.classValue() == classifier.classifyInstance(instance))
-				println("O" * 80)
-			}
 			if (classifier.classifyInstance(instance) == CoheelClassifier.POSITIVE_CLASS) {
 				positivePredictions ::= featureLine
 			}

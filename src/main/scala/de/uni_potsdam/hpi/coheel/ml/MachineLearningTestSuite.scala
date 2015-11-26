@@ -189,9 +189,9 @@ object MachineLearningTestSuite {
 
 		val base = List(
 //			new Logistic,
-			new FastRandomForest,
-			new J48,
-			new RandomForest
+			new FastRandomForest
+//			new J48,
+//			new RandomForest
 //			new SimpleLogistic,
 //			simpleLogistic,
 //			new MultilayerPerceptron,

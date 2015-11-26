@@ -226,7 +226,9 @@ class ClassificationReduceGroup(params: Params) extends RichGroupReduceFunction[
 
 	override def open(conf: Configuration): Unit = {
 		val seedPath      = if (CoheelProgram.runsOffline()) "RandomForest-10FP_15-11-15.model" else params.config.getString("seed_model")
+		log.info(s"Seed path is $seedPath")
 		val candidatePath = if (CoheelProgram.runsOffline()) "J48-10FN_15-11-15.model" else params.config.getString("candidate_model")
+		log.info(s"Candidate path is $candidatePath")
 
 		log.info(s"Loading models with ${FreeMemory.get(true)} MB")
 
