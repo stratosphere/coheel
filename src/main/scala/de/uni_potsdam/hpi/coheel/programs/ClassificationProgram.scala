@@ -14,6 +14,7 @@ import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier.POS_TAG_GROUPS
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import de.uni_potsdam.hpi.coheel.util.Util
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
+import hr.irb.fastRandomForest.FastRandomForest
 import org.apache.flink.api.common.functions.{Partitioner, RichFlatMapFunction, RichGroupReduceFunction}
 import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
@@ -234,8 +235,8 @@ class ClassificationReduceGroup(params: Params) extends RichGroupReduceFunction[
 		log.warn(s"Using Version ${SerialVersionAccess.get()}")
 
 		val start = new Date
-		seedClassifier      = new CoheelClassifier(SerializationHelper.read(seedPath).asInstanceOf[Classifier])
-		candidateClassifier = new CoheelClassifier(SerializationHelper.read(candidatePath).asInstanceOf[Classifier])
+		seedClassifier      = new CoheelClassifier(SerializationHelper.read(seedPath).asInstanceOf[FastRandomForest])
+		candidateClassifier = new CoheelClassifier(SerializationHelper.read(candidatePath).asInstanceOf[FastRandomForest])
 
 		log.info(s"Finished model with ${FreeMemory.get(true)} MB in ${(new Date().getTime - start.getTime) / 1000} s")
 	}
