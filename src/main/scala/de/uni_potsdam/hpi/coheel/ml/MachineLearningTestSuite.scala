@@ -64,8 +64,8 @@ object MachineLearningTestSuite {
 
 	def readTrainingDataAndBuildInstances(): (Instances, Instances) = {
 		print("Reading .. "); Console.flush()
-		val trainSet = r.shuffle(readInstancesInGroups("000"))
-		val testSet  = r.shuffle(readInstancesInGroups("001"))
+		val trainSet = r.shuffle(readInstancesInGroups("632"))
+		val testSet  = r.shuffle(readInstancesInGroups("3786b"))
 		println("Done.")
 		println(s"There are ${trainSet.size} instance groups in training and ${testSet.size} in test")
 		println()
@@ -113,6 +113,7 @@ object MachineLearningTestSuite {
 	}
 
 	def testCoheelClassifiers(train: Instances, test: Instances, expected: Set[(String, String)]): Unit = {
+		var i = 1
 		classifiers.foreach { case (name, classifier) =>
 			println(new java.util.Date)
 			val runtimeTry = Try(Timer.timeFunction {
@@ -164,8 +165,10 @@ object MachineLearningTestSuite {
 					println(s"      Classification Time: ${msToMin(classificationTime.toInt)} min")
 					println(f"      P: $precisionCand%.3f, R: $recallCand%.3f, F1: $f1Cand%.3f (CANDIDATE)")
 					println(f"      P: $precisionSeed%.3f, R: $recallSeed%.3f, F1: $f1Seed%.3f (SEED)")
-					SerializationHelper.write("Modell.model", classifier)
-					println(s"      WROTE TO DISK")
+					val fileName = s"model$i.model"
+					SerializationHelper.write(fileName, classifier)
+					println(s"      Written to disk as $fileName")
+					i += 1
 			}
 		}
 		println("-" * 80)
@@ -262,7 +265,7 @@ object MachineLearningTestSuite {
 		// Train
 		classifier.buildClassifier(train)
 		// Serialize
-		SerializationHelper.write("RandomForest-10FP.model", classifier)
+		SerializationHelper.write("model.model", classifier)
 		FileUtils.writeStringToFile(new File("model.as-string"), classifier.getClassifier.asInstanceOf[RandomForest].toString)
 		System.exit(1)
 	}
