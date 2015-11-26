@@ -13,6 +13,7 @@ import org.apache.flink.configuration.GlobalConfiguration
 import org.apache.log4j.Logger
 import com.typesafe.config.{Config, ConfigFactory}
 import de.uni_potsdam.hpi.coheel.programs._
+import weka.classifiers.meta.SerialVersionAccess
 import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
 
@@ -78,7 +79,7 @@ object FlinkProgramRunner {
 	var params: Params = _
 
 	def main(args: Array[String]): Unit = {
-
+		println(SerialVersionAccess.get())
 		// Parse the arguments
 		parser.parse(args, Params()) map { params =>
 			this.params = params

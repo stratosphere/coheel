@@ -20,6 +20,7 @@ import org.apache.flink.configuration.Configuration
 import org.apache.flink.util.Collector
 import org.apache.log4j.Logger
 import weka.classifiers.Classifier
+import weka.classifiers.meta.SerialVersionAccess
 import weka.core.SerializationHelper
 
 import scala.collection.JavaConverters._
@@ -229,8 +230,8 @@ class ClassificationReduceGroup(params: Params) extends RichGroupReduceFunction[
 		log.info(s"Seed path is $seedPath")
 		val candidatePath = if (CoheelProgram.runsOffline()) "J48-10FN_15-11-15.model" else params.config.getString("candidate_model")
 		log.info(s"Candidate path is $candidatePath")
-
 		log.info(s"Loading models with ${FreeMemory.get(true)} MB")
+		log.warn(s"Using Version ${SerialVersionAccess.get()}")
 
 		val start = new Date
 		seedClassifier      = new CoheelClassifier(SerializationHelper.read(seedPath).asInstanceOf[Classifier])

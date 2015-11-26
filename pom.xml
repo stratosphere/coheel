@@ -274,10 +274,6 @@
 							</jvmArgs>
 						</launcher>
 						<launcher>
-							<id>Test</id>
-							<mainClass>weka.classifiers.meta.Test</mainClass>
-						</launcher>
-						<launcher>
 							<id>MachineLearningTestSuite</id>
 							<mainClass>de.uni_potsdam.hpi.coheel.ml.MachineLearningTestSuite</mainClass>
 							<jvmArgs>
