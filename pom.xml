@@ -279,7 +279,9 @@
 							<jvmArgs>
 								<jvmArg>-Xms10g</jvmArg>
 								<jvmArg>-Xmx10g</jvmArg>
+								<!--
 								<jvmArg>-verbosegc</jvmArg>
+								-->
 							</jvmArgs>
 						</launcher>
 					</launchers>
