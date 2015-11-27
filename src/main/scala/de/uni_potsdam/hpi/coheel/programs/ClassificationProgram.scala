@@ -235,8 +235,8 @@ class ClassificationReduceGroup(params: Params) extends RichGroupReduceFunction[
 		log.warn(s"Using Version ${SerialVersionAccess.get()}")
 
 		val start = new Date
-		seedClassifier      = new CoheelClassifier(SerializationHelper.read(seedPath).asInstanceOf[FastRandomForest])
-		candidateClassifier = new CoheelClassifier(SerializationHelper.read(candidatePath).asInstanceOf[FastRandomForest])
+		seedClassifier      = new CoheelClassifier(SerializationHelper.read(seedPath).asInstanceOf[Classifier])
+		candidateClassifier = new CoheelClassifier(SerializationHelper.read(candidatePath).asInstanceOf[Classifier])
 
 		log.info(s"Finished model with ${FreeMemory.get(true)} MB in ${(new Date().getTime - start.getTime) / 1000} s")
 	}
