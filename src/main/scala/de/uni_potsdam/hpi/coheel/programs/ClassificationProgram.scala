@@ -40,7 +40,6 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 	override def getDescription: String = "CohEEL Classification"
 	def log: Logger = Logger.getLogger(getClass)
 
-
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_4).name("Documents")
 
