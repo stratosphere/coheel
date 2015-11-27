@@ -76,7 +76,16 @@ object DataClasses {
 	 * For example, at classification time, we need to keep track of the trie hit information, at training time we need to keep track of the gold standard.
 	 * This abstraction is done with an Info object, see below.
 	 */
-	case class Classifiable[T <: Info](id: String, surfaceRepr: String, context: Array[String], candidateEntity: String = "", surfaceProb: Double = -1.0, contextProb: Double = -1.0, info: T)
+	case class Classifiable[T <: Info](id: String, surfaceRepr: String, context: Array[String], candidateEntity: String = "", surfaceProb: Double = -1.0, contextProb: Double = -1.0, info: T) {
+
+		def withCandidateEntityAndSurfaceProb(newCandidateEntity: String, newSurfaceProb: Double): Classifiable[T] = {
+			Classifiable[T](id, surfaceRepr, context, newCandidateEntity, newSurfaceProb, contextProb, info)
+		}
+
+		def withContextProb(newContextProb: Double): Classifiable[T] = {
+			Classifiable[T](id, surfaceRepr, context, candidateEntity, surfaceProb, newContextProb, info)
+		}
+	}
 
 
 	/**

@@ -40,20 +40,20 @@ object FeatureProgramHelper {
 		val languageModels = prg.readLanguageModels()
 
 
-		val classifiablesWithCandidates = classifiables.join(surfaceProbs)
+		val classifiablesWithCandidates: DataSet[DataClasses.Classifiable[T]] = classifiables.join(surfaceProbs)
 			.where { classifiable => classifiable.surfaceRepr }
 			.equalTo { surfaceProb => surfaceProb.surface }
 			.name("Join: Classifiable With Surface Probs")
 			.map { joinResult => joinResult match {
 				case (classifiable, SurfaceProb(_, candidateEntity, surfaceProb)) =>
 					// enrich classifiable with possible candidate entities and their surface probabilities
-					classifiable.copy(candidateEntity = candidateEntity, surfaceProb = surfaceProb)
+					classifiable.withCandidateEntityAndSurfaceProb(candidateEntity, surfaceProb)
 			}
 		}.name("Classifiable with Candidates")
 
-		classifiablesWithCandidates.map { c =>
-			(c.id, c.surfaceRepr, c.candidateEntity, c.surfaceProb, c.info, c.context.deep)
-		} .writeAsTsv(debug1Path)
+//		classifiablesWithCandidates.map { c =>
+//			(c.id, c.surfaceRepr, c.candidateEntity, c.surfaceProb, c.info, c.context.deep)
+//		} .writeAsTsv(debug1Path)
 
 		val baseScores = classifiablesWithCandidates.join(languageModels)
 			.where("candidateEntity")
@@ -64,13 +64,13 @@ object FeatureProgramHelper {
 					val contextProb = classifiableWithCandidate.context.map { word =>
 						Math.log(languageModel.prob(word))
 					}.sum
-					classifiableWithCandidate.copy(contextProb = contextProb)
+					classifiableWithCandidate.withContextProb(contextProb)
 			}
 		}.name("Classifiable with Context Probs")
 
-		classifiablesWithCandidates.map { c =>
-			(c.id, c.surfaceRepr, c.candidateEntity, c.surfaceProb, c.info, c.contextProb)
-		}.writeAsTsv(debug2Path)
+//		classifiablesWithCandidates.map { c =>
+//			(c.id, c.surfaceRepr, c.candidateEntity, c.surfaceProb, c.info, c.contextProb)
+//		}.writeAsTsv(debug2Path)
 
 		val trainingData = baseScores.groupBy(_.id)
 
