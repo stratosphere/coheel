@@ -1,6 +1,7 @@
 package de.uni_potsdam.hpi.coheel
 
-import java.io.File
+import java.io.{ObjectOutputStream, FileOutputStream, File}
+import java.nio.ByteBuffer
 
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.util.Timer
@@ -79,6 +80,19 @@ object FlinkProgramRunner {
 	var params: Params = _
 
 	def main(args: Array[String]): Unit = {
+//		val l = -720658209263002404L
+////		val l = -110658209263002404L
+//		val fileOut = new FileOutputStream("long2")
+//		val out = new ObjectOutputStream(fileOut)
+//		out.writeObject(l)
+//		out.close()
+//		fileOut.close()
+//
+//		println(ByteBuffer.allocate(8).putLong(l).array().map("%02X" format _).mkString(" "))
+//
+//		System.exit(1)
+
+
 		println(SerialVersionAccess.get())
 		// Parse the arguments
 		parser.parse(args, Params()) map { params =>
