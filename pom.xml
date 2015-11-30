@@ -70,7 +70,7 @@
 		<dependency>
 			<groupId>nz.ac.waikato.cms.weka</groupId>
 			<artifactId>weka-dev</artifactId>
-			<version>3.7.10</version>
+			<version>3.7.13</version>
 		</dependency>
 		<!-- Guava for utilities like range map (good point for removing if space/dependency issues) -->
 		<!--There's a shaded guava dependency in Flink, we'll use that one for now.-->
