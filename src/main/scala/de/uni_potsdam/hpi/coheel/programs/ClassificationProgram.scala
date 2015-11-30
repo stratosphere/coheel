@@ -50,7 +50,7 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 			var random: Random = null
 			val parallelism = params.parallelism
 			println(s"Basing distribution on parallelism $parallelism")
-			log.info(s"Basing distribution on parallelism $parallelism")
+			log.warn(s"Basing distribution on parallelism $parallelism")
 			val halfParallelism = if (CoheelProgram.runsOffline()) 1 else parallelism / 2
 			val firstHalf  = if (runsOffline()) List(0) else List.range(0, halfParallelism)
 			val secondHalf = if (runsOffline()) List(0) else List.range(halfParallelism, parallelism)

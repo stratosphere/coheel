@@ -85,8 +85,8 @@ class CoheelClassifier(classifier: Classifier) {
 				println(featureLine.features.toArray.deep)
 				println("Classification")
 				println(classifier.classifyInstance(instance))
-				println("Correct")
-				println(instance.classValue() == classifier.classifyInstance(instance))
+//				println("Correct")
+//				println(instance.classValue() == classifier.classifyInstance(instance))
 				println("O" * 80)
 			}
 		}
