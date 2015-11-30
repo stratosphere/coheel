@@ -42,8 +42,6 @@ object MachineLearningTestSuite {
 	val r = new Random(21011991)
 
 	def main(args: Array[String]) = {
-		println(SerialVersionAccess.get())
-
 		val (train, test) = readTrainingDataAndBuildInstances()
 
 //		serializeGoodClassifier(train)
