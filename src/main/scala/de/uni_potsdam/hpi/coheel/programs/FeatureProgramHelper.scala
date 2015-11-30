@@ -16,8 +16,9 @@ import scala.reflect.ClassTag
 object FeatureProgramHelper {
 
 	def applyCoheelFunctions[T <: Info](allCandidates: Seq[Classifiable[T]])(featureLineIteratorFunction: FeatureLine[T] => Unit): Unit = {
-		val surfaceOrder = allCandidates.sortBy(-_.surfaceProb)
-		val contextOrder = allCandidates.sortBy(-_.contextProb)
+		val allCandidatesWithIndex = allCandidates.zipWithIndex
+		val surfaceOrder = allCandidatesWithIndex.sortBy(-_._1.surfaceProb)
+		val contextOrder = allCandidatesWithIndex.sortBy(-_._1.contextProb)
 		val surfaceRank = SecondOrderFeatures.rank.apply(surfaceOrder)(_.surfaceProb)
 		val surfaceDeltaTops = SecondOrderFeatures.deltaTop.apply(surfaceOrder)(_.surfaceProb)
 		val surfaceDeltaSuccs = SecondOrderFeatures.deltaSucc.apply(surfaceOrder)(_.surfaceProb)
@@ -25,7 +26,7 @@ object FeatureProgramHelper {
 		val contextDeltaTops = SecondOrderFeatures.deltaTop.apply(contextOrder)(_.contextProb)
 		val contextDeltaSuccs = SecondOrderFeatures.deltaSucc.apply(contextOrder)(_.contextProb)
 
-		surfaceOrder.zipWithIndex.foreach { case (classifiable, i) =>
+		allCandidatesWithIndex.foreach { case (classifiable, i) =>
 			import classifiable._
 			val features = List(
 				surfaceProb, surfaceRank(i), surfaceDeltaTops(i), surfaceDeltaSuccs(i),
