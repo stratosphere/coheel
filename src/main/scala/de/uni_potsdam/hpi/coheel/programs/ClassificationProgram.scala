@@ -41,7 +41,7 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 	def log: Logger = Logger.getLogger(getClass)
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
-		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_4).name("Documents")
+		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_3).name("Documents")
 
 		val inputDocuments = documents.flatMap(new RichFlatMapFunction[String, InputDocument] {
 			def log: Logger = Logger.getLogger(getClass)
@@ -49,6 +49,7 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 			var index: Int = -1
 			var random: Random = null
 			val parallelism = params.parallelism
+			println(s"Basing distribution on parallelism $parallelism")
 			log.info(s"Basing distribution on parallelism $parallelism")
 			val halfParallelism = if (CoheelProgram.runsOffline()) 1 else parallelism / 2
 			val firstHalf  = if (runsOffline()) List(0) else List.range(0, halfParallelism)
@@ -238,7 +239,7 @@ class ClassificationReduceGroup(params: Params) extends RichGroupReduceFunction[
 //		candidateClassifier = new CoheelClassifier(SerializationHelper.read(candidatePath).asInstanceOf[Classifier])
 		candidateClassifier = seedClassifier
 
-		log.info(s"Finished model with ${FreeMemory.get(true)} MB in ${(new Date().getTime - start.getTime) / 1000} s")
+		log.info(s"Finished model loading with ${FreeMemory.get(true)} MB in ${(new Date().getTime - start.getTime) / 1000} s")
 	}
 
 	override def reduce(candidatesIt: Iterable[Classifiable[ClassificationInfo]], out: Collector[ClassifierResult]): Unit = {
