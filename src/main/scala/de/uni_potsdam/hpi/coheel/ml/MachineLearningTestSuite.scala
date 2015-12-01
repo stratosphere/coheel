@@ -64,7 +64,7 @@ object MachineLearningTestSuite {
 
 	def readTrainingDataAndBuildInstances(): (Instances, Instances) = {
 		print("Reading .. "); Console.flush()
-		val trainSet = r.shuffle(readInstancesInGroups("632"))
+		val trainSet = r.shuffle(readInstancesInGroups("632a"))
 		val testSet  = r.shuffle(readInstancesInGroups("3786b"))
 		println("Done.")
 		println(s"There are ${trainSet.size} instance groups in training and ${testSet.size} in test")

@@ -74,10 +74,10 @@ class CoheelClassifier(classifier: Classifier) {
 				positivePredictions ::= featureLine
 			}
 			if (List(
-				"L-0468265056-00002088-2281324111",
-				"L-0468265056-00002089-4156867526",
-				"L-0468265056-00002090-1482103611",
-				"L-0468265056-00002091-0312499337"
+				"L-0468265056-00000626-2281324111",
+				"L-0468265056-00000627-4156867526",
+				"L-0468265056-00000628-1482103611",
+				"L-0468265056-00000629-0312499337"
 			).contains(featureLine.id) || featureLine.id.startsWith("TH-")) {
 				println("Feature Line:")
 				println(featureLine)
