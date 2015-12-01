@@ -192,9 +192,9 @@ object MachineLearningTestSuite {
 
 		val base = List(
 //			new Logistic,
-//			() => new FastRandomForest
-			() => new J48
-//			new RandomForest
+			() => new FastRandomForest,
+//			() => new J48
+			() => new RandomForest
 //			new SimpleLogistic,
 //			simpleLogistic,
 //			new MultilayerPerceptron,
@@ -229,10 +229,10 @@ object MachineLearningTestSuite {
 			val baseClassifierName = baseClassifier.getClass.getSimpleName
 			List(
 				(baseClassifierName, baseClassifier),
-//				(s"$baseClassifierName with 10 x FN cost, minimize expected cost = true", cost1),
+				(s"$baseClassifierName with 10 x FN cost, minimize expected cost = true", cost1),
 //				(s"$baseClassifierName with 10 x FN cost, minimize expected cost = false", cost2),
-				(s"$baseClassifierName with 10 x FP cost, minimize expected cost = true", cost3),
-				(s"$baseClassifierName with 10 x FP cost, minimize expected cost = false", cost4)
+				(s"$baseClassifierName with 10 x FP cost, minimize expected cost = true", cost3)
+//				(s"$baseClassifierName with 10 x FP cost, minimize expected cost = false", cost4)
 			)
 		}
 	}
