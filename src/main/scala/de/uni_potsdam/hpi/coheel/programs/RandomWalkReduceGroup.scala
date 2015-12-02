@@ -34,11 +34,11 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 			log.warn(s"Entity: ${entity.candidateEntity} (${entity.classifierType}) from '${entity.trieHit.s}' with ${entity.in.size} in neighbours and ${entity.out.size} out neighbours")
 			log.warn("In-Neighbours")
 			entity.in.foreach { in =>
-				log.warn(s"I ${in.entity}")
+				log.warn(s"I ${in.entity} ${in.prob}")
 			}
 			log.warn("Out-Neighbours")
 			entity.out.foreach { out =>
-				log.warn(s"O ${out.entity}")
+				log.warn(s"O ${out.entity} ${out.prob}")
 			}
 		}
 
@@ -64,9 +64,6 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 			Timer.start("buildGraph")
 			val g = buildGraph(entities)
 			log.warn("Random Walk INNER LOOP")
-			g.vertexSet().asScala.foreach { e =>
-//				log.warn(s"Entity: ${e.entity} (${e.nodeType})")
-			}
 			log.info(s"Method buildGraph took ${Timer.end("buildGraph")} ms.")
 
 			Timer.start("buildMatrix")
@@ -209,8 +206,9 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		}
 		g.removeAllVertices(neighbourSinks.asJava)
 
+		// for neighbour nodes, we do not necesa
 		g.vertexSet().asScala.filter(_.nodeType == NodeTypes.NEIGHBOUR).foreach { node =>
-			val edgeSum = g.outgoingEdgesOf(node).asScala.map { outNode => g.getEdgeWeight(outNode)}.sum
+			val edgeSum = g.outgoingEdgesOf(node).asScala.map { outNode => g.getEdgeWeight(outNode) }.sum
 			val e = g.addEdge(node, nullNode)
 			g.setEdgeWeight(e, 1.0 - edgeSum)
 		}

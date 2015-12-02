@@ -83,9 +83,9 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 					out.collect(InputDocument(id, 1, index, tokens, tags))
 				}
 			}
-		})
+		}).name("Input-Documents")
 
-		val partitionedDocuments = inputDocuments.partitionCustom(new DocumentPartitioner, "index")
+		val partitionedDocuments = inputDocuments.partitionCustom(new DocumentPartitioner, "index").name("Partitioned-Documents")
 
 		val classifiables = partitionedDocuments
 			.flatMap(new PotentialEntityFinderFlatMap(params))
@@ -142,26 +142,25 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 
 
 	def loadNeighbours(env: ExecutionEnvironment): DataSet[Neighbours] = {
-		val contextLinks = env.readTextFile(contextLinkProbsPath).map { line =>
+		val contextLinks = env.readTextFile(contextLinkProbsPath).name("ContextLinkProbs-Path").map { line =>
 			val split = line.split('\t')
 			ContextLink(split(0), split(1), split(2).toDouble)
-		}
+		}.name("ContextLinks")
 		val outgoingNeighbours = contextLinks.groupBy("from").reduceGroup { grouped =>
 			val asList = grouped.toList
 			(asList.head.from, asList.map { contextLink => Neighbour(contextLink.to, contextLink.prob) })
-		}
+		}.name("Outgoing Neighbours")
 		val incomingNeighbours = contextLinks.groupBy("to").reduceGroup { grouped =>
 			val asList = grouped.toList
 			(asList.head.to, asList.map { contextLink => Neighbour(contextLink.from, contextLink.prob) })
-		}
+		}.name("Incoming Neighbours")
 		val preprocessedNeighbours = outgoingNeighbours.join(incomingNeighbours)
 			.where(0)
 			.equalTo(0)
 			.map { joinResult => joinResult match {
 					case (out, in) => Neighbours(out._1, out._2, in._2)
 				}
-
-		}
+		}.name("All-Neighbours")
 		preprocessedNeighbours
 	}
 }

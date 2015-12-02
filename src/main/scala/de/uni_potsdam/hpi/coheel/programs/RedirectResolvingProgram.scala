@@ -12,12 +12,12 @@ class RedirectResolvingProgram extends NoParamCoheelProgram {
 		val redirects    = env.readTextFile(redirectPath).map { line =>
 			val split = line.split('\t')
 			Redirect(split(0), split(1))
-		}.filter { redirect => redirect.from != null && redirect.to != null }.name("Redirects")
+		}.name("Redirects")
 
 		val contextLinks = env.readTextFile(contextLinkProbsPath).map { line =>
 			val split = line.split('\t')
 			ContextLinkWithOrig(split(0), split(1), split(1), split(2).toDouble)
-		}.filter { link => link.from != null && link.origTo != null }.name("Context-Links")
+		}.name("Context-Links")
 
 		def iterate(s: DataSet[ContextLinkWithOrig], ws: DataSet[ContextLinkWithOrig]): (DataSet[ContextLinkWithOrig], DataSet[ContextLinkWithOrig]) = {
 			val resolvedRedirects = redirects.join(ws)
@@ -25,8 +25,7 @@ class RedirectResolvingProgram extends NoParamCoheelProgram {
 				.equalTo { _.to }
 				.map { joinResult => joinResult match {
 					case (redirect, contextLink) =>
-						val cl = contextLink.copy(to = redirect.to)
-						cl
+						contextLink.copy(to = redirect.to)
 				}
 			}.name("Resolved-Redirects-From-Iteration")
 			(resolvedRedirects, resolvedRedirects)
