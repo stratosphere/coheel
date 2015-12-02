@@ -11,7 +11,7 @@ import weka.core.DenseInstance
 
 object CoheelClassifier {
 
-	val NUMBER_OF_FEATURES = 15
+	val NUMBER_OF_FEATURES = 15 // excluding class attribute
 	val POSITIVE_CLASS = 1.0
 
 	val POS_TAG_GROUPS = Array(
@@ -83,9 +83,8 @@ class CoheelClassifier(classifier: Classifier) {
 				println(featureLine)
 				println("Classification")
 				print(classifier.classifyInstance(instance))
-				if (!instance.classIsMissing()) {
-					println(" " + instance.classValue() == classifier.classifyInstance(instance))
-				}
+				val s = if (instance.numAttributes() == CoheelClassifier.NUMBER_OF_FEATURES) "" else " " + (instance.classValue() == classifier.classifyInstance(instance))
+				println(s)
 				println("O" * 80)
 			}
 		}
