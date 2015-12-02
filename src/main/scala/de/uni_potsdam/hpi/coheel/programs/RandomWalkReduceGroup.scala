@@ -271,7 +271,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 			val outEdges = g.outgoingEdgesOf(node)
 			val edgeSum = outEdges.asScala.toList.map(g.getEdgeWeight).sum
 			// edgeSum should always sum up to 1.0 + STALLING_EDGE_WEIGHT
-			assert(Math.abs(edgeSum - (1.0 + STALLING_EDGE_WEIGHT)) < 0.0000000001, () => {
+			assert(Math.abs(edgeSum - (1.0 + STALLING_EDGE_WEIGHT)) < 0.0000000001, {
 				val outNeighbours = outEdges.asScala.toList.map { e =>
 					val target = g.getEdgeTarget(e).entity
 					val weight = g.getEdgeWeight(e)

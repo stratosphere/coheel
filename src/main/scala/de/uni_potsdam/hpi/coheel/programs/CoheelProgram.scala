@@ -238,13 +238,6 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 		}.name("Reading language models")
 	}
 
-	def readContextLinks(): DataSet[ContextLink] = {
-		environment.readTextFile(contextLinkProbsPath).map { line =>
-			val split = line.split('\t')
-			ContextLink(split(0), split(1), split(2).toDouble)
-		}
-	}
-
 	def runsOffline(): Boolean = {
 		CoheelProgram.runsOffline()
 	}
