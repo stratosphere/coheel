@@ -5,47 +5,42 @@ import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier.POS_TAG_GROUPS
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import de.uni_potsdam.hpi.coheel.util.Util
 import de.uni_potsdam.hpi.coheel.wiki.FullInfoWikiPage
+import org.apache.flink.api.common.functions.RichFlatMapFunction
 import org.apache.flink.api.scala.{ExecutionEnvironment, _}
 import org.apache.flink.core.fs.FileSystem
 import org.apache.flink.util.Collector
 import org.apache.log4j.Logger
 
-class TrainingDataProgram extends CoheelProgram[String] with Serializable {
+class TrainingDataProgram extends NoParamCoheelProgram with Serializable {
 
 	val SAMPLE_FRACTION = if (runsOffline()) 100 else 5000
 	val SAMPLE_NUMBER = if (runsOffline()) 0 else 3786
 
-	val arguments = if (runsOffline()) List("") else List("12345", "678910")
 	override def getDescription = "Wikipedia Extraction: Build training data"
 
 	def log: Logger = Logger.getLogger(getClass)
 
-	override def buildProgram(env: ExecutionEnvironment, param: String): Unit = {
+	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val wikiPages = readWikiPagesWithFullInfo { pageTitle =>
 			Math.abs(pageTitle.hashCode) % SAMPLE_FRACTION == SAMPLE_NUMBER
 		}
 
-		val currentFile = if (runsOffline()) "" else s"/$param"
-		val surfaces = readSurfaces(currentFile)
-
-		wikiPages.map { wikiPage => wikiPage.pageTitle }.writeAsText(trainingDataPagesPath + s"-$SAMPLE_NUMBER.wiki/$currentFile", FileSystem.WriteMode.OVERWRITE)
+		wikiPages.map { wikiPage => wikiPage.pageTitle }.writeAsText(trainingDataPagesPath + s"-$SAMPLE_NUMBER.wiki", FileSystem.WriteMode.OVERWRITE)
 
 		val classifiables = wikiPages
 			.flatMap(new LinksAsTrainingDataFlatMap)
-			.withBroadcastSet(surfaces, SurfacesInTrieFlatMap.BROADCAST_SURFACES)
 			.name("Links and possible links")
 
 		classifiables.map { c =>
 			(c.id, c.surfaceRepr, c.info, c.info.posTags.deep, c.context.deep)
-		}.writeAsTsv(trainingDataClassifiablesPath +  s"-$SAMPLE_NUMBER.wiki/$currentFile")
+		}.writeAsTsv(trainingDataClassifiablesPath +  s"-$SAMPLE_NUMBER.wiki")
 
 		val featuresPerGroup = FeatureProgramHelper.buildFeaturesPerGroup(this, classifiables)
 
 		val trainingData = featuresPerGroup.reduceGroup(createTrainingDataGroupWise _).name("Training Data")
 
 		// TODO: Also join surface link probs
-		// NOTE: If you change this, also change the data format description in the machine learning suite
-		trainingData.writeAsText(trainingDataPath + s"-$SAMPLE_NUMBER.wiki/$currentFile", FileSystem.WriteMode.OVERWRITE)
+		trainingData.writeAsText(trainingDataPath + s"-$SAMPLE_NUMBER.wiki", FileSystem.WriteMode.OVERWRITE)
 	}
 
 
@@ -61,13 +56,11 @@ class TrainingDataProgram extends CoheelProgram[String] with Serializable {
 			out.collect(output)
 		}
 	}
-
 }
 
 
-class LinksAsTrainingDataFlatMap extends SurfacesInTrieFlatMap[FullInfoWikiPage, Classifiable[TrainInfo]] {
+class LinksAsTrainingDataFlatMap extends RichFlatMapFunction[FullInfoWikiPage, Classifiable[TrainInfo]] {
 	var tokenHitCount: Int = 1
-
 
 	override def flatMap(wikiPage: FullInfoWikiPage, out: Collector[Classifiable[TrainInfo]]): Unit = {
 		assert(wikiPage.tags.size == wikiPage.plainText.size)
