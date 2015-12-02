@@ -81,12 +81,11 @@ class CoheelClassifier(classifier: Classifier) {
 			).contains(featureLine.id) || featureLine.id.startsWith("TH-")) {
 				println("Feature Line:")
 				println(featureLine)
-				println("Features:")
-				println(featureLine.features.toArray.deep)
 				println("Classification")
-				println(classifier.classifyInstance(instance))
-//				println("Correct")
-//				println(instance.classValue() == classifier.classifyInstance(instance))
+				print(classifier.classifyInstance(instance))
+				if (!instance.classIsMissing()) {
+					println(" " + instance.classValue() == classifier.classifyInstance(instance))
+				}
 				println("O" * 80)
 			}
 		}
