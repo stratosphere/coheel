@@ -1,9 +1,12 @@
 package de.uni_potsdam.hpi.coheel.programs
 
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
-import de.uni_potsdam.hpi.coheel.programs.DataClasses.{ContextLinkWithOrig, Redirect}
+import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import org.apache.flink.api.common.functions.RichJoinFunction
+import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.scala._
+
+import scala.reflect.ClassTag
 
 class RedirectResolvingProgram extends NoParamCoheelProgram {
 
@@ -15,32 +18,43 @@ class RedirectResolvingProgram extends NoParamCoheelProgram {
 			Redirect(split(0), split(1))
 		}.name("Redirects")
 
+		val surfaceProbs = readSurfaceProbs().map { surfaceProb =>
+			import surfaceProb._
+			SurfaceProbResolving(surface, destination, prob)
+		}
+
 		val contextLinks = env.readTextFile(contextLinkProbsPath).map { line =>
 			val split = line.split('\t')
-			ContextLinkWithOrig(split(0), split(1), split(1), split(2).toDouble)
+			ContextLinkResolving(split(0), split(1), split(2).toDouble)
 		}.name("Context-Links")
 
-		def iterate(ds: DataSet[ContextLinkWithOrig]): DataSet[ContextLinkWithOrig] = {
+		def iterate[T <: ThingToResolve[T] : TypeInformation : ClassTag](ds: DataSet[T]): DataSet[T] = {
 			val resolvedRedirects = ds.leftOuterJoin(redirects)
 				.where { _.to }
 				.equalTo { _.from }
-				.apply(new RichJoinFunction[ContextLinkWithOrig, Redirect, ContextLinkWithOrig] {
-					override def join(contextLink: ContextLinkWithOrig, redirect: Redirect): ContextLinkWithOrig = {
+				.apply(new RichJoinFunction[T, Redirect, T] {
+					override def join(contextLink: T, redirect: Redirect): T= {
 						if (redirect == null)
 							contextLink
 						else
-							contextLink.copy(to = redirect.to)
+							contextLink.updateTo(redirect.to)
 					}
 				}).name("Resolved-Redirects-From-Iteration")
 			resolvedRedirects
 		}
 
-
-		// resolve redirects via delta iteration
-		val resolvedRedirects = contextLinks.iterate(3)(iterate)
+		val resolvedContextLinks = contextLinks.iterate(3)(iterate)
 			.map { cl => (cl.from, cl.to, cl.prob) }
-			.name("Final-Redirect-Result")
+			.name("Final-Resolved-Context-Links")
 
-		resolvedRedirects.writeAsTsv(resolvedRedirectsPath)
+		val resolvedSurfaceProbs = surfaceProbs.iterate(3)(iterate)
+			.groupBy("surface", "destination")
+			.reduce { (sp1, sp2) =>
+				sp1.copy(prob = sp1.prob + sp2.prob)
+			}
+			.name("Final-Resolved-Surface-Probs")
+
+		resolvedContextLinks.writeAsTsv(contextLinkProbsResolvedPath)
+		resolvedSurfaceProbs.writeAsTsv(surfaceProbsResolvedPath)
 	}
 }

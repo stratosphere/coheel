@@ -62,7 +62,17 @@ object DataClasses {
 	case class PlainText(pageTitle: String, plainText: String, linkString: String)
 
 	// Redirect resolving
-	case class ContextLinkWithOrig(from: String, origTo: String, to: String, prob: Double)
+	trait ThingToResolve[T] {
+		def to: String
+		def updateTo(s: String): T
+	}
+	case class ContextLinkResolving(from: String, to: String, prob: Double)  extends ThingToResolve[ContextLinkResolving] {
+		override def updateTo(s: String): ContextLinkResolving = this.copy(to = s)
+	}
+	case class SurfaceProbResolving(surface: String, destination: String, prob: Double) extends ThingToResolve[SurfaceProbResolving] {
+		override def to: String = destination
+		override def updateTo(s: String): SurfaceProbResolving = this.copy(destination = s)
+	}
 	case class Redirect(from: String, to: String)
 
 	// Training
