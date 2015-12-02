@@ -2,6 +2,7 @@ package de.uni_potsdam.hpi.coheel.programs
 
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{ContextLinkWithOrig, Redirect}
+import org.apache.flink.api.common.functions.RichJoinFunction
 import org.apache.flink.api.scala._
 
 class RedirectResolvingProgram extends NoParamCoheelProgram {
@@ -19,25 +20,26 @@ class RedirectResolvingProgram extends NoParamCoheelProgram {
 			ContextLinkWithOrig(split(0), split(1), split(1), split(2).toDouble)
 		}.name("Context-Links")
 
-		def iterate(s: DataSet[ContextLinkWithOrig], ws: DataSet[ContextLinkWithOrig]): (DataSet[ContextLinkWithOrig], DataSet[ContextLinkWithOrig]) = {
-			val resolvedRedirects = redirects.join(ws)
-				.where { _.from }
-				.equalTo { _.to }
-				.map { joinResult => joinResult match {
-					case (redirect, contextLink) =>
-						contextLink.copy(to = redirect.to)
-				}
-			}.name("Resolved-Redirects-From-Iteration")
-			(resolvedRedirects, resolvedRedirects)
+		def iterate(ds: DataSet[ContextLinkWithOrig]): DataSet[ContextLinkWithOrig] = {
+			val resolvedRedirects = ds.leftOuterJoin(redirects)
+				.where { _.to }
+				.equalTo { _.from }
+				.apply(new RichJoinFunction[ContextLinkWithOrig, Redirect, ContextLinkWithOrig] {
+					override def join(contextLink: ContextLinkWithOrig, redirect: Redirect): ContextLinkWithOrig = {
+						if (redirect == null)
+							contextLink
+						else
+							contextLink.copy(to = redirect.to)
+					}
+				}).name("Resolved-Redirects-From-Iteration")
+			resolvedRedirects
 		}
 
 
 		// resolve redirects via delta iteration
-		val resolvedRedirects = contextLinks
-			.iterateDelta(contextLinks, 5, Array("from", "origTo"), true)(iterate)
-		.name("Resolved-Redirects")
-		.map { cl => (cl.from, cl.to, cl.prob) }
-		.name("Final-Redirect-Result")
+		val resolvedRedirects = contextLinks.iterate(3)(iterate)
+			.map { cl => (cl.from, cl.to, cl.prob) }
+			.name("Final-Redirect-Result")
 
 		resolvedRedirects.writeAsTsv(resolvedRedirectsPath)
 	}
