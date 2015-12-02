@@ -142,10 +142,10 @@ class RandomWalkGraphTest extends FunSuite {
 		assert(g.getEdgeWeight(e) === 0.25)
 	}
 
-	test("Null node only links to itself with 100 % prob") {
+	test("Null node only links to itself with 100 + STALLING % prob") {
 		assert(g.outDegreeOf(nullNode) === 1)
 		val e = g.getEdge(nullNode, nullNode)
-		assert(g.getEdgeWeight(e) === 1.00)
+		assert(g.getEdgeWeight(e) === 1.00 + RandomWalkReduceGroup.STALLING_EDGE_WEIGHT)
 	}
 
 	test("Sink N7 is removed") {

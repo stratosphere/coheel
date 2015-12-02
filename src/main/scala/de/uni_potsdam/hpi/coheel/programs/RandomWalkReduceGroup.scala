@@ -15,10 +15,14 @@ import org.jgrapht.graph.{DefaultWeightedEdge, DefaultDirectedWeightedGraph}
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
+object RandomWalkReduceGroup {
+	val STALLING_EDGE_WEIGHT = 0.01
+}
+
 class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWithNeighbours, (String, TrieHit, String)] {
+	import RandomWalkReduceGroup._
 
 	def log: Logger = Logger.getLogger(getClass)
-	val STALLING_EDGE_WEIGHT = 0.01
 
 	override def reduce(entitiesIt: Iterable[ClassifierResultWithNeighbours], out: Collector[(String, TrieHit, String)]): Unit = {
 		// entities contains only of SEEDs and CANDIDATEs
@@ -30,11 +34,11 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 			log.warn(s"Entity: ${entity.candidateEntity} (${entity.classifierType}) from '${entity.trieHit.s}' with ${entity.in.size} in neighbours and ${entity.out.size} out neighbours")
 			log.warn("In-Neighbours")
 			entity.in.foreach { in =>
-				log.warn(s"  ${in.entity}")
+				log.warn(s"I ${in.entity}")
 			}
-			println("Out-Neighbours")
-			entity.in.foreach { out =>
-				log.warn(s"  ${out.entity}")
+			log.warn("Out-Neighbours")
+			entity.out.foreach { out =>
+				log.warn(s"O ${out.entity}")
 			}
 		}
 
@@ -59,9 +63,9 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 			log.info(s"${candidates.size} candidates remaining")
 			Timer.start("buildGraph")
 			val g = buildGraph(entities)
-			log.warn("INNER LOOP")
+			log.warn("Random Walk INNER LOOP")
 			g.vertexSet().asScala.foreach { e =>
-				log.warn(s"Entity: ${e.entity} (${e.nodeType}})")
+//				log.warn(s"Entity: ${e.entity} (${e.nodeType})")
 			}
 			log.info(s"Method buildGraph took ${Timer.end("buildGraph")} ms.")
 
@@ -160,28 +164,24 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 			}
 		}
 
+		val unprunedVertexCount = g.vertexSet().size()
+		val unprunedEdgeCount   = g.edgeSet().size
+
 		// run connected components/connectivity algorithm starting from the seeds
 		// unreachable nodes can then be removed
 		while (connectedQueue.nonEmpty) {
 			val n = connectedQueue.dequeue()
-			//			println(s"${n.entity}")
 			val outNeighbours = g.outgoingEdgesOf(n)
 			if (outNeighbours.isEmpty)
 				n.isSink = true
 			outNeighbours.asScala.foreach { out =>
 				val target = g.getEdgeTarget(out)
-				//				println(s"  -> ${target.entity}")
 				if (!target.visited) {
 					target.visited = true
 					connectedQueue.enqueue(target)
 				}
 			}
-			//			println(s"Neighbours: ${g.vertexSet().asScala.filter(!_.visited).toList.sortBy(_.entity)}")
-			//			println()
 		}
-
-		val unprunedVertexCount = g.vertexSet().size()
-		val unprunedEdgeCount   = g.edgeSet().size
 
 		// remove all the unreachable nodes
 		val unreachableNodes = g.vertexSet().asScala.filter(!_.visited)
@@ -222,9 +222,13 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 				log.error(s"$node apparently links to itself?")
 			} else {
 				if (node == nullNode)
-					g.setEdgeWeight(e, 1.00)
-				else
-					g.setEdgeWeight(e, STALLING_EDGE_WEIGHT)
+					g.setEdgeWeight(e, 1.0 + STALLING_EDGE_WEIGHT)
+				else {
+					if (node.isSink)
+						g.setEdgeWeight(e, 1.0 + STALLING_EDGE_WEIGHT)
+					else
+						g.setEdgeWeight(e, STALLING_EDGE_WEIGHT)
+				}
 			}
 		}
 
@@ -266,7 +270,16 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 			val nodeId = entityNodeIdMapping.get(node.entity)
 			val outEdges = g.outgoingEdgesOf(node)
 			val edgeSum = outEdges.asScala.toList.map(g.getEdgeWeight).sum
-			assert(edgeSum - (1.0 + STALLING_EDGE_WEIGHT) < 0.0001, s"Node $node has edgeSum = $edgeSum")
+			// edgeSum should always sum up to 1.0 + STALLING_EDGE_WEIGHT
+			assert(Math.abs(edgeSum - (1.0 + STALLING_EDGE_WEIGHT)) < 0.0000000001, () => {
+				val outNeighbours = outEdges.asScala.toList.map { e =>
+					val target = g.getEdgeTarget(e).entity
+					val weight = g.getEdgeWeight(e)
+					s"${node.entity} --$weight--> $target"
+				}.mkString("\n")
+
+				s"$outNeighbours\nNode $node (${node.nodeType}, ${node.isSink}, ${node.visited}) has outgoing edgeSum = $edgeSum"
+			})
 
 			outEdges.asScala.foreach { out =>
 				val outTarget = g.getEdgeTarget(out)

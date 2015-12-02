@@ -264,7 +264,7 @@ class ClassificationReduceGroup(params: Params) extends RichGroupReduceFunction[
 			out.collect(ClassifierResult(result.info.documentId, NodeTypes.SEED, result.candidateEntity, trieHit))
 		}
 		log.info(s"Classification for $trieHit")
-		log.info("Features:")
+		log.info("Candidates:")
 		allCandidates.foreach { candidate =>
 			log.info(f"    ${candidate.candidateEntity}%.30s ${candidate.surfaceProb}%.3f ${candidate.contextProb}%.0f")
 		}
