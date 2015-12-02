@@ -48,18 +48,6 @@ object CoheelProgram {
 		}
 	}
 
-	def workerId(): Int = {
-		val addr = InetAddress.getLocalHost
-		val hostname = addr.getHostName
-		assert(hostname.contains("tenem"))
-		if (hostname == "tenemhead2")
-			0
-		else {
-			val tenemId = hostname.slice(hostname.length - 2, hostname.length).toInt
-			tenemId
-		}
-	}
-
 	val LINK_SPLITTER = "\0"
 }
 abstract class CoheelProgram[T]() extends ProgramDescription {
