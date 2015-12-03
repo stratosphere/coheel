@@ -26,7 +26,8 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 
 	override def reduce(entitiesIt: Iterable[ClassifierResultWithNeighbours], out: Collector[(String, TrieHit, String)]): Unit = {
 		// entities contains only of SEEDs and CANDIDATEs
-		val entities = entitiesIt.asScala.toVector
+		// TODO: Best idea to remove the duplicates?
+		val entities = entitiesIt.asScala.groupBy(_.candidateEntity).map(_._2.head).toVector
 
 		log.warn("BASIC NEIGHBOURS")
 		entities.foreach { entity =>
