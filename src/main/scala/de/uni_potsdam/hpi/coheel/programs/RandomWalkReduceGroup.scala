@@ -169,6 +169,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		// unreachable nodes can then be removed
 		while (connectedQueue.nonEmpty) {
 			val n = connectedQueue.dequeue()
+			assert(n.visited)
 			val outNeighbours = g.outgoingEdgesOf(n)
 			if (outNeighbours.isEmpty)
 				n.isSink = true
@@ -176,6 +177,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 				val target = g.getEdgeTarget(out)
 				if (!target.visited) {
 					target.visited = true
+					assert(g.vertexSet().asScala.find(_.entity == target.entity).get.visited, s"Visited not set for $target")
 					connectedQueue.enqueue(target)
 				}
 			}
@@ -207,7 +209,8 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		}
 		g.removeAllVertices(neighbourSinks.asJava)
 
-		// for neighbour nodes, we do not necesa
+		// for neighbour nodes, we do not necessarily have all the outgoing nodes
+		// therefore, we need to use the remaining weight by directing it to the null node
 		g.vertexSet().asScala.filter(_.nodeType == NodeTypes.NEIGHBOUR).foreach { node =>
 			val edgeSum = g.outgoingEdgesOf(node).asScala.map { outNode => g.getEdgeWeight(outNode) }.sum
 			val e = g.addEdge(node, nullNode)
@@ -219,6 +222,8 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 			val e = g.addEdge(node, node)
 			if (e == null) {
 				log.error(s"$node apparently links to itself?")
+				val existingEdge = g.getEdge(node, node)
+				g.setEdgeWeight(existingEdge, g.getEdgeWeight(existingEdge) + STALLING_EDGE_WEIGHT)
 			} else {
 				if (node == nullNode)
 					g.setEdgeWeight(e, 1.0 + STALLING_EDGE_WEIGHT)
