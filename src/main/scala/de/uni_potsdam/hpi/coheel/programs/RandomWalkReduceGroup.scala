@@ -212,7 +212,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		// for neighbour nodes, we do not necessarily have all the outgoing nodes
 		// therefore, we need to use the remaining weight by directing it to the null node
 		g.vertexSet().asScala.filter(_.nodeType == NodeTypes.NEIGHBOUR).foreach { node =>
-			val edgeSum = g.outgoingEdgesOf(node).asScala.map { outNode => g.getEdgeWeight(outNode) }.sum
+			val edgeSum = g.outgoingEdgesOf(node).asScala.toIterator.map { outNode => g.getEdgeWeight(outNode) }.sum
 			val e = g.addEdge(node, nullNode)
 			g.setEdgeWeight(e, 1.0 - edgeSum)
 		}
