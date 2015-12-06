@@ -2,6 +2,12 @@ Question for Toni:
 What happens when a candidate occurs multiple times in the same text?
 And one is right and one is wrong?
 
+When to stop:
+Previously, we stopped because there was an NER before.
+Now we need to find some other stoppage criteria.
+
+
+
 Test if with constant set helps for the training data program
 
 Consider worst case document

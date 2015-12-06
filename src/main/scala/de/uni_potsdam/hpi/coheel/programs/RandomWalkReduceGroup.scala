@@ -91,7 +91,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 
 				candidatesRemaining = candidates.nonEmpty
 			}
-			log.info(s"Method findHighest took ${Timer.end("findHighest")} ms.")
+			Timer.logResult(log, "findHighest")
 			i += 1
 		}
 
@@ -105,6 +105,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 
 		val entityMap = mutable.Map[String, RandomWalkNode]()
 		val connectedQueue = mutable.Queue[RandomWalkNode]()
+		Timer.start("addSeeds")
 		// Make sure candidates and seeds are added first to the graph, so they already exist
 		entities.filter(_.classifierType == NodeTypes.SEED).foreach { entity =>
 			val node = RandomWalkNode(entity.candidateEntity).withNodeType(NodeTypes.SEED)
@@ -114,12 +115,16 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 			entityMap.put(entity.candidateEntity, node)
 			g.addVertex(node)
 		}
+		Timer.logResult(log, "addSeeds")
+		Timer.start("addCandidates")
 		entities.filter(_.classifierType == NodeTypes.CANDIDATE).foreach { entity =>
 			val node = RandomWalkNode(entity.candidateEntity).withNodeType(NodeTypes.CANDIDATE)
 			entityMap.put(entity.candidateEntity, node)
 			g.addVertex(node)
 		}
+		Timer.logResult(log, "addCandidates")
 
+		Timer.start("addNeighbours")
 		// Now also add the neighbours, hopefully also connecting existing seeds and neighbours
 		entities.foreach { candidate =>
 			val currentNode = entityMap.get(candidate.candidateEntity).get
@@ -161,10 +166,12 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 				}
 			}
 		}
+		Timer.logResult(log, "addNeighbours")
 
 		val unprunedVertexCount = g.vertexSet().size()
 		val unprunedEdgeCount   = g.edgeSet().size
 
+		Timer.start("connectedComponents")
 		// run connected components/connectivity algorithm starting from the seeds
 		// unreachable nodes can then be removed
 		while (connectedQueue.nonEmpty) {
@@ -177,20 +184,23 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 				val target = g.getEdgeTarget(out)
 				if (!target.visited) {
 					target.visited = true
-					assert(g.vertexSet().asScala.find(_.entity == target.entity).get.visited, s"Visited not set for $target")
 					connectedQueue.enqueue(target)
 				}
 			}
 		}
+		Timer.logResult(log, "connectedComponents")
 
+		Timer.start("removeUnreachable")
 		// remove all the unreachable nodes
 		val unreachableNodes = g.vertexSet().asScala.filter(!_.visited)
 		g.removeAllVertices(unreachableNodes.asJava)
+		Timer.logResult(log, "removeUnreachable")
 
 		// add 0 node
 		val nullNode = RandomWalkNode("0").withNodeType(NodeTypes.NULL)
 		g.addVertex(nullNode)
 
+		Timer.start("removeNeighbourSinks")
 		// remove all neighbour sinks, and create corresponding links to the null node
 		val neighbourSinks = g.vertexSet().asScala.filter { n => n.isSink && n.nodeType == NodeTypes.NEIGHBOUR }
 		neighbourSinks.foreach { node =>
@@ -208,7 +218,9 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 			}
 		}
 		g.removeAllVertices(neighbourSinks.asJava)
+		Timer.logResult(log, "removeNeighbourSinks")
 
+		Timer.start("fillNeighbours")
 		// for neighbour nodes, we do not necessarily have all the outgoing nodes
 		// therefore, we need to use the remaining weight by directing it to the null node
 		g.vertexSet().asScala.filter(_.nodeType == NodeTypes.NEIGHBOUR).foreach { node =>
@@ -216,7 +228,9 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 			val e = g.addEdge(node, nullNode)
 			g.setEdgeWeight(e, 1.0 - edgeSum)
 		}
+		Timer.logResult(log, "fillNeighbours")
 
+		Timer.start("addStallingEdges")
 		// add stalling edges
 		g.vertexSet().asScala.foreach { node =>
 			val e = g.addEdge(node, node)
@@ -235,6 +249,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 				}
 			}
 		}
+		Timer.logResult(log, "addStallingEdges")
 
 		val prunedVertexCount = g.vertexSet().size()
 		val prunedEdgeCount   = g.edgeSet().size()
@@ -276,6 +291,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 			val edgeSum = outEdges.asScala.toList.map(g.getEdgeWeight).sum
 			// edgeSum should always sum up to 1.0 + STALLING_EDGE_WEIGHT
 			assert(Math.abs(edgeSum - (1.0 + STALLING_EDGE_WEIGHT)) < 0.0000000001, {
+				throw new RuntimeException("Should not be called")
 				val outNeighbours = outEdges.asScala.toList.map { e =>
 					val target = g.getEdgeTarget(e).entity
 					val weight = g.getEdgeWeight(e)

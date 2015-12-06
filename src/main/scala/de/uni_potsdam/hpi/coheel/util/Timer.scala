@@ -1,5 +1,7 @@
 package de.uni_potsdam.hpi.coheel.util
 
+import org.apache.log4j.Logger
+
 import scala.collection.mutable
 
 object Timer {
@@ -39,7 +41,10 @@ object Timer {
 		val timeSoFar = timesSum(name)
 		timesSum += (name -> (timeDiff + timeSoFar))
 		timeDiff
+	}
 
+	def logResult(log: Logger, name: String): Unit = {
+		log.info(s"Method $name took ${Timer.end(name)} ms.")
 	}
 
 	def time(): Long = {
