@@ -10,12 +10,12 @@ import org.apache.flink.api.java.aggregation.Aggregations
 import org.apache.flink.api.scala._
 import org.apache.flink.util.Collector
 
-class EntireTextSurfacesProgram extends CoheelProgram[Int] {
+class EntireTextSurfacesProgram extends CoheelProgram[String] {
 
-	val arguments = if (runsOffline()) List(-1) else 1 to 10
+	val arguments = if (runsOffline()) List(-1) else List("12345", "678910")
 	override def getDescription = "Wikipedia Extraction: Entire Text Surfaces"
 
-	override def buildProgram(env: ExecutionEnvironment, param: Int): Unit = {
+	override def buildProgram(env: ExecutionEnvironment, param: String): Unit = {
 		val plainTexts = readPlainTexts
 
 		val currentFile = if (runsOffline()) "" else s"/$param"
