@@ -190,9 +190,11 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		}
 		Timer.logResult(log, "connectedComponents")
 
-		Timer.start("removeUnreachable")
+		Timer.start("findUnreachable")
 		// remove all the unreachable nodes
 		val unreachableNodes = g.vertexSet().asScala.filter(!_.visited)
+		Timer.logResult(log, "findUnreachable")
+		Timer.start("removeUnreachable")
 		g.removeAllVertices(unreachableNodes.asJava)
 		Timer.logResult(log, "removeUnreachable")
 
