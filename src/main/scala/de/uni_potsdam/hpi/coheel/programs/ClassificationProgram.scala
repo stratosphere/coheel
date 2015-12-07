@@ -173,8 +173,8 @@ class PotentialEntityFinderFlatMap(params: Params) extends RichFlatMapFunction[I
 	var fileName: String = _
 
 	override def open(conf: Configuration): Unit = {
-		val surfacesFile = if (CoheelProgram.runsOffline()) {
-			new File("output/surface-probs.wiki")
+		val surfaceLinkProbsFile = if (CoheelProgram.runsOffline()) {
+			new File("output/surface-link-probs.wiki")
 //			new File("cluster-output/678910")
 		} else {
 			if (getRuntimeContext.getIndexOfThisSubtask < params.parallelism / 2)
@@ -182,16 +182,25 @@ class PotentialEntityFinderFlatMap(params: Params) extends RichFlatMapFunction[I
 			else
 				new File(params.config.getString("second_trie_half"))
 		}
-		assert(surfacesFile.exists())
-		val surfaces = Source.fromFile(surfacesFile, "UTF-8").getLines().flatMap { line =>
-			CoheelProgram.parseSurfaceProbsLine(line)
+		assert(surfaceLinkProbsFile.exists())
+		val surfaces = Source.fromFile(surfaceLinkProbsFile, "UTF-8").getLines().flatMap { line =>
+			val split = line.split('\t')
+			if (split.length == 5)
+				Some(split(0), split(3).toFloat)
+			else {
+				log.warn(s"SurfaceLinkProbs: Discarding '${split.deep}' because split size not correct")
+				log.warn(line)
+				None
+			}
 		}
-		log.info(s"On subtask id #${getRuntimeContext.getIndexOfThisSubtask} with file ${surfacesFile.getName}")
+		log.info(s"On subtask id #${getRuntimeContext.getIndexOfThisSubtask} with file ${surfaceLinkProbsFile.getName}")
 		log.info(s"Building trie with ${FreeMemory.get(true)} MB")
 		val d1 = new Date
 		trie = new NewTrie
-		surfaces.foreach { surface =>
-			trie.add(surface)
+		surfaces.foreach { case (surface, prob) =>
+			// TODO: Determine heuristic for this value
+			if (prob > 0.1)
+				trie.add(surface, prob)
 		}
 		log.info(s"Finished trie with ${FreeMemory.get(true)} MB in ${(new Date().getTime - d1.getTime) / 1000} s")
 	}

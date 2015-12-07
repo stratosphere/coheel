@@ -27,18 +27,6 @@ object CoheelLogger {
 object CoheelProgram {
 	import CoheelLogger._
 
-	def parseSurfaceProbsLine(line: String): Option[String] = {
-		val split = line.split('\t')
-		if (split.length == 3)
-			Some(split(0))
-		else {
-			log.warn(s"SurfaceProbs: Discarding '${split.deep}' because split size not correct")
-			log.warn(line)
-			None
-		}
-
-	}
-
 	def runsOffline(): Boolean = {
 		if (FlinkProgramRunner.config == null) {
 			false
@@ -143,16 +131,6 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 			}
 		}.name("Parsed Plain-Texts")
 	}
-	def readSurfaces(subFile: String = ""): DataSet[String] = {
-		environment.readTextFile(surfaceDocumentCountsPath + subFile).name("Subset of Surfaces")
-			.flatMap(new RichFlatMapFunction[String, String] {
-				override def flatMap(line: String, out: Collector[String]): Unit = {
-					CoheelProgram.parseSurfaceProbsLine(line).foreach { surface =>
-						out.collect(surface)
-					}
-				}
-		}).name("Parsed Surfaces")
-	}
 //	def getScores(): DataSet[(String, Array[String])] = {
 //		environment.readTextFile(scoresPath).name("Scores")
 //		.map { line =>
@@ -165,7 +143,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 			.flatMap(new RichFlatMapFunction[String, (String, Float)] {
 			override def flatMap(line: String, out: Collector[(String, Float)]): Unit = {
 				val split = line.split('\t')
-				if (split.length == 4)
+				if (split.length == 5)
 					out.collect((split(0), split(3).toFloat))
 				else {
 					log.warn(s"SurfaceLinkProbs: Discarding '${split.deep}' because split size not correct")
@@ -198,6 +176,21 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 		}.name("Surface-Document-Counts")
 	}
 
+
+	def readSurfaces(subFile: String = ""): DataSet[String] = {
+		environment.readTextFile(surfaceDocumentCountsPath + subFile).name("Subset of Surfaces")
+			.flatMap(new RichFlatMapFunction[String, String] {
+			override def flatMap(line: String, out: Collector[String]): Unit = {
+				val split = line.split('\t')
+				if (split.length == 3)
+					out.collect(split(0))
+				else {
+					log.warn(s"SurfaceProbs: Discarding '${split.deep}' because split size not correct")
+					log.warn(line)
+				}
+			}
+		}).name("Parsed Surfaces")
+	}
 
 	def readSurfaceProbs(threshold: Double = 0.0): DataSet[SurfaceProb] = {
 		environment.readTextFile(surfaceProbsPath).flatMap { line =>
