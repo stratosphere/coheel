@@ -199,7 +199,7 @@ class PotentialEntityFinderFlatMap(params: Params) extends RichFlatMapFunction[I
 		trie = new NewTrie
 		surfaces.foreach { case (surface, prob) =>
 			// TODO: Determine heuristic for this value
-			if (prob > 0.1)
+			if (prob > 0.01)
 				trie.add(surface, prob)
 		}
 		log.info(s"Finished trie with ${FreeMemory.get(true)} MB in ${(new Date().getTime - d1.getTime) / 1000} s")
