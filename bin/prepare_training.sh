@@ -1,0 +1,29 @@
+#!/bin/bash
+
+set -e
+
+echo "This script is to be run after the wikipedia extraction."
+echo "It downloads the surface document counts, concatenates them to two files 12345 and 678910."
+echo "These files are then uploaded to surface-document-counts-halfs.wiki and"
+echo "can then be used for populating tries."
+
+echo "Downloading .."
+$HADOOP_HOME/bin/hdfs dfs -copyToLocal hdfs://tenemhead2/home/stefan.bunk/results/surface-document-counts.wiki
+
+echo "Catting .."
+cat surface-document-counts.wiki/{1,2,3,4,5}  > 12345
+cat surface-document-counts.wiki/{6,7,8,9,10} > 678910
+
+echo "Statistics:"
+ls -lisah 12345 678910
+wc -l 12345 678910
+
+echo "Uploading .."
+$HADOOP_HOME/bin/hdfs dfs -copyFromLocal 12345  hdfs://tenemhead2/home/stefan.bunk/results/surface-document-counts-halfs.wiki
+$HADOOP_HOME/bin/hdfs dfs -copyFromLocal 678910 hdfs://tenemhead2/home/stefan.bunk/results/surface-document-counts-halfs.wiki
+
+echo "Removing local files"
+rm 12345
+rm 678910
+rm -r surface-document-counts.wiki
+
