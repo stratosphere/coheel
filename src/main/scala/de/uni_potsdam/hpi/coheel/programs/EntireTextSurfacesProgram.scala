@@ -31,8 +31,8 @@ class EntireTextSurfacesProgram extends CoheelProgram[String] {
 		val entireTextSurfaceCounts = trieHits
 			.groupBy { _.surface }
 			.reduceGroup { group =>
-				val head = group.next().surface
-				EntireTextSurfaceCounts(head, group.size + 1) // + 1 because we already consumed one element
+				val surface = group.next().surface
+				EntireTextSurfaceCounts(surface, group.size + 1) // + 1 because we already consumed one element from the iterator
 			}
 			.name("Entire-Text-Surface-Counts")
 
@@ -46,8 +46,8 @@ class EntireTextSurfacesProgram extends CoheelProgram[String] {
 			}
 		}.name("Surface-Link-Probs")
 
-
-		trieHits.writeAsTsv(entireTextSurfacesPath + currentFile)
+		trieHits.writeAsTsv(trieHitPath + currentFile)
+		entireTextSurfaceCounts.writeAsTsv(entireTextSurfacesPath + currentFile)
 		surfaceLinkProbs.writeAsTsv(surfaceLinkProbsPath + currentFile)
 	}
 }
