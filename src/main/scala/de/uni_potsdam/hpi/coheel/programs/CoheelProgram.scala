@@ -178,7 +178,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 
 
 	def readSurfaces(subFile: String = ""): DataSet[String] = {
-		environment.readTextFile(surfaceDocumentCountsPath + subFile).name("Subset of Surfaces")
+		environment.readTextFile(surfaceDocumentCountsHalfsPath + subFile).name("Subset of Surfaces")
 			.flatMap(new RichFlatMapFunction[String, String] {
 			override def flatMap(line: String, out: Collector[String]): Unit = {
 				val split = line.split('\t')
