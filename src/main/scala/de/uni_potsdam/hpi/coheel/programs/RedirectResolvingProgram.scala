@@ -44,6 +44,10 @@ class RedirectResolvingProgram extends NoParamCoheelProgram {
 		}
 
 		val resolvedContextLinks = contextLinks.iterate(3)(iterate)
+			.groupBy("from", "to")
+			.reduce { (cl1, cl2) =>
+				cl1.copy(prob = cl1.prob + cl2.prob)
+			}
 			.map { cl => (cl.from, cl.to, cl.prob) }
 			.name("Final-Resolved-Context-Links")
 
