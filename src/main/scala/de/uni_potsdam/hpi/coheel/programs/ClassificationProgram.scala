@@ -199,7 +199,7 @@ class PotentialEntityFinderFlatMap(params: Params) extends RichFlatMapFunction[I
 		trie = new NewTrie
 		surfaces.foreach { case (surface, prob) =>
 			// TODO: Determine heuristic for this value
-			if (prob > 0.01)
+			if (prob > 0.1)
 				trie.add(surface, prob)
 		}
 		log.info(s"Finished trie with ${FreeMemory.get(true)} MB in ${(new Date().getTime - d1.getTime) / 1000} s")
@@ -234,9 +234,9 @@ class ClassificationReduceGroup(params: Params) extends RichGroupReduceFunction[
 	var candidateClassifier: CoheelClassifier = null
 
 	override def open(conf: Configuration): Unit = {
-		val seedPath      = if (CoheelProgram.runsOffline()) "RandomForest-10FP_15-11-15.model" else params.config.getString("seed_model")
+		val seedPath      = if (CoheelProgram.runsOffline()) "RandomForest-SEED-and-CANDIDATE.model" else params.config.getString("seed_model")
 		log.info(s"Seed path is $seedPath")
-		val candidatePath = if (CoheelProgram.runsOffline()) "J48-10FN_15-11-15.model" else params.config.getString("candidate_model")
+		val candidatePath = if (CoheelProgram.runsOffline()) "RandomForest-SEED-and-CANDIDATE.model" else params.config.getString("candidate_model")
 		log.info(s"Candidate path is $candidatePath")
 		log.info(s"Loading models with ${FreeMemory.get(true)} MB")
 		log.warn(s"Using Version ${SerialVersionAccess.get()}")
