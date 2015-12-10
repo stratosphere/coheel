@@ -166,7 +166,12 @@ object DataClasses {
 		 candidateEntity: String,
 		 trieHit: TrieHit,
 		 in: List[Neighbour],
-		 out: List[Neighbour])
+		 out: List[Neighbour]) {
+
+		def shortToString(): String = {
+			s"($classifierType, '$candidateEntity', $trieHit)"
+		}
+	}
 
 	object ClassifierResultWithNeighbours {
 		def apply(documentId: String, classifierType: NodeType, candidateEntity: String, in: List[Neighbour], out: List[Neighbour]): ClassifierResultWithNeighbours =
