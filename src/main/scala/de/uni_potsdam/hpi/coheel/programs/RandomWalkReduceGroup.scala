@@ -24,10 +24,14 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 
 	def log: Logger = Logger.getLogger(getClass)
 
+	def anyCandidates(entities: Vector[DataClasses.ClassifierResultWithNeighbours]): Boolean = {
+		entities.exists { entity => entity.classifierType == NodeTypes.CANDIDATE }
+	}
+
 	override def reduce(entitiesIt: Iterable[ClassifierResultWithNeighbours], out: Collector[(String, TrieHit, String)]): Unit = {
 		// entities contains only of SEEDs and CANDIDATEs
 		// TODO: Best idea to remove the duplicates?
-		val entities = entitiesIt.asScala.groupBy(_.candidateEntity).map(_._2.head).toVector
+		var entities = entitiesIt.asScala.groupBy(_.candidateEntity).map(_._2.head).toVector
 
 		log.warn("BASIC NEIGHBOURS")
 		entities.foreach { entity =>
@@ -45,23 +49,19 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 
 		// we start with the seeds as the final alignments, they are certain
 		var finalAlignments = entities.filter { entity => entity.classifierType == NodeTypes.SEED }
+		var alignedTrieHits = finalAlignments.map(_.trieHit).toSet
+		entities = entities.filter { x => x.classifierType != NodeTypes.SEED && !alignedTrieHits.contains(x.trieHit) }
 
-		// get all the candidates
-		var candidates = entities.filter { entity => entity.classifierType == NodeTypes.CANDIDATE }
-		// filter all those candidates, which link to seed entities
-		//			var resolvedCandidates = candidates.filter { candidate => resolvedEntities.contains(candidate.candidateEntity) }
-		// add them to fin
-		//			finalAlignments ++= resolvedCandidates
-		//			candidates = candidates.filter { candidate => !resolvedCandidates.contains(candidate) }
-
-		var candidatesRemaining = candidates.nonEmpty
+		// get all the candidates from yet un-aligned trie hit
+//		var candidates = entities.filter { entity => entity.classifierType == NodeTypes.CANDIDATE && !alignedTrieHits.contains(entity.trieHit) }
+		var candidatesRemaining = anyCandidates(entities)
 		if (!candidatesRemaining)
 			log.info("No candidates remaining before first round")
 
 		var i = 1
 		while (candidatesRemaining) {
 			log.info(s"Start $i. round of random walk with seeds: ${entities.filter(_.candidateEntity == NodeTypes.SEED)}")
-			log.info(s"${candidates.size} candidates remaining")
+			log.info(s"${entities.count(_.classifierType == NodeTypes.CANDIDATE)} candidates remaining") // TODO: Performance
 			Timer.start("buildGraph")
 			val g = buildGraph(entities)
 			log.warn("Random Walk INNER LOOP")
@@ -80,16 +80,25 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 			val candidateIndexProbs = result.toArray.zipWithIndex.filter { case (d, idx) => candidateIndices.contains(idx) }
 			candidatesRemaining = candidateIndexProbs.nonEmpty
 			if (candidatesRemaining) {
+				// find best entity
 				val (_, maxIdx) = candidateIndexProbs.maxBy(_._1)
 				val newEntity = entityNodeMapping.getKey(maxIdx)
-				log.info(s"Found new entity $newEntity")
-				log.info()
-				val (resolvedCandidates, remainingCandidates) = candidates.partition { can => can.candidateEntity == newEntity }
-				finalAlignments ++= resolvedCandidates
-				candidates = remainingCandidates
-				entities.foreach { entity => if (entity.candidateEntity == newEntity) entity.classifierType = NodeTypes.SEED }
 
-				candidatesRemaining = candidates.nonEmpty
+				// find out all classifiables with this best entity
+				val resolvedEntities = entities.filter { ent => ent.candidateEntity == newEntity }
+				// set all classifiables with this entity to seed entities
+				resolvedEntities.foreach { entity => entity.classifierType = NodeTypes.SEED }
+
+				log.info(s"Found new entity $newEntity")
+				// determine the newly resolved trie hits and add them to all resolved trie hits
+				val resolvedTrieHits = resolvedEntities.map(_.trieHit).toSet
+				log.info(s"Resolved trie hits: $resolvedTrieHits")
+				alignedTrieHits ++= resolvedTrieHits
+
+				finalAlignments ++= resolvedEntities
+				entities = entities.filter { entity => entity.classifierType != NodeTypes.SEED && !resolvedTrieHits.contains(entity.trieHit) }
+
+				candidatesRemaining = anyCandidates(entities)
 			}
 			Timer.logResult(log, "findHighest")
 			i += 1
