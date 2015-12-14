@@ -199,7 +199,7 @@ class PotentialEntityFinderFlatMap(params: Params) extends RichFlatMapFunction[I
 		trie = new NewTrie
 		surfaces.foreach { case (surface, prob) =>
 			// TODO: Determine heuristic for this value
-			if (prob > 0.1)
+			if (prob > 0.05)
 				trie.add(surface, prob)
 		}
 		log.info(s"Finished trie with ${FreeMemory.get(true)} MB in ${(new Date().getTime - d1.getTime) / 1000} s")
@@ -214,10 +214,13 @@ class PotentialEntityFinderFlatMap(params: Params) extends RichFlatMapFunction[I
 
 			contextOption.foreach { case context =>
 				val tags = document.tags.slice(trieHit.startIndex, trieHit.startIndex + trieHit.length).toArray
+				val containsNoun = tags.exists { t => t.startsWith("N")}
 				// TH for trie hit
-				val id = s"TH-${document.id}-${document.replication}-$tokenHitCount"
-				out.collect(Classifiable(id, trieHit.s, context.toArray, info = ClassificationInfo(document.id, trieHit, POS_TAG_GROUPS.map { group => if (group.exists(tags.contains(_))) 1.0 else 0.0 })))
-				tokenHitCount += 1
+				if (containsNoun) {
+					val id = s"TH-${document.id}-${document.replication}-$tokenHitCount"
+					out.collect(Classifiable(id, trieHit.s, context.toArray, info = ClassificationInfo(document.id, trieHit, POS_TAG_GROUPS.map { group => if (group.exists(tags.contains(_))) 1.0 else 0.0 })))
+					tokenHitCount += 1
+				}
 			}
 		}
 	}
