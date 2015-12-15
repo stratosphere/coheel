@@ -14,7 +14,6 @@ import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier.POS_TAG_GROUPS
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import de.uni_potsdam.hpi.coheel.util.Util
 import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
-import hr.irb.fastRandomForest.FastRandomForest
 import org.apache.flink.api.common.functions.{Partitioner, RichFlatMapFunction, RichGroupReduceFunction}
 import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
