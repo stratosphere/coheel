@@ -155,7 +155,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 	}
 
 	def readSurfaceDocumentCounts(): DataSet[SurfaceAsLinkCount] = {
-		environment.readTextFile(surfaceDocumentCountsPath).name("Raw-Surface-Document-Counts").flatMap { line =>
+		environment.readTextFile(surfaceDocumentCountsHalfsPath).name("Raw-Surface-Document-Counts").flatMap { line =>
 			val split = line.split('\t')
 			// not clear, why lines without a count occur, but they do
 			try {
