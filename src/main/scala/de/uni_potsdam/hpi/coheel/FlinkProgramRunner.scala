@@ -111,7 +111,7 @@ object FlinkProgramRunner {
 			else {
 				val classPath = System.getProperty("java.class.path")
 				val dependencies = "target/coheel_stratosphere-0.1-SNAPSHOT.jar" :: classPath.split(':').filter(p => p.contains(".m2/")).toList
-				ExecutionEnvironment.createRemoteEnvironment(config.getString("job_manager_host"), config.getInt("job_manager_host"), params.parallelism, dependencies: _*)
+				ExecutionEnvironment.createRemoteEnvironment(config.getString("job_manager_host"), config.getInt("job_manager_port"), params.parallelism, dependencies: _*)
 			}
 
 			log.info("# " + StringUtils.rightPad(s"Degree of parallelism: ${env.getParallelism}", 136) + " #")
