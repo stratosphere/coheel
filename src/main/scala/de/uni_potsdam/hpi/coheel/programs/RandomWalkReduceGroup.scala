@@ -35,7 +35,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		// different trie hit
 		var entities = entitiesIt.asScala.toVector
 
-		log.warn("BASIC NEIGHBOURS")
+		log.info("BASIC NEIGHBOURS")
 		// For printing out the neighbours, it suffices to group by candidate entity, as the entity determines the neighbours.
 		entities.groupBy(_.candidateEntity).map { case (entity, classifiables) =>
 			classifiables.find(_.classifierType == NodeTypes.SEED) match {
@@ -45,15 +45,15 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 					classifiables.head
 			}
 		}.toVector.foreach { entity =>
-			log.warn("--------------------------------------------------------")
-			log.warn(s"Entity: ${entity.candidateEntity} (${entity.classifierType}) from '${entity.trieHit.s}' with ${entity.in.size} in neighbours and ${entity.out.size} out neighbours")
-			log.warn("In-Neighbours")
+			log.info("--------------------------------------------------------")
+			log.info(s"Entity: ${entity.candidateEntity} (${entity.classifierType}) from '${entity.trieHit.s}' with ${entity.in.size} in neighbours and ${entity.out.size} out neighbours")
+			log.info("In-Neighbours")
 			entity.in.foreach { in =>
-				log.warn(s"I ${in.entity} ${in.prob}")
+				log.info(s"I ${in.entity} ${in.prob}")
 			}
-			log.warn("Out-Neighbours")
+			log.info("Out-Neighbours")
 			entity.out.foreach { out =>
-				log.warn(s"O ${out.entity} ${out.prob}")
+				log.info(s"O ${out.entity} ${out.prob}")
 			}
 		}
 

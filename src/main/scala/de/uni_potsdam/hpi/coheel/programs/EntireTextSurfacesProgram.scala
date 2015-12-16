@@ -69,7 +69,6 @@ class FindEntireTextSurfacesFlatMap extends SurfacesInTrieFlatMap[PlainText, Ent
 
 	def findEntireTextSurfaces(plainText: PlainText, trie: NewTrie): Iterator[EntireTextSurfaces] = {
 		val text = plainText.plainText
-		// TODO: Apparently, pygmalion is out.collect'ed here, even though it's not a full surface on node/file 8. Only run with argument 8 above and check
 		trie.findAllIn(text).map { surface => EntireTextSurfaces(plainText.pageTitle, surface)}
 	}
 }

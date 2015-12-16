@@ -118,6 +118,7 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 		/*
 		 * OUTPUT
 		 */
+		inputDocuments.writeAsTsv(inputDocumentsPath)
 		// Write trie hits for debugging
 		val trieHitOutput = classifiables.map { trieHit =>
 			(trieHit.id, trieHit.surfaceRepr, trieHit.info.trieHit, trieHit.info.posTags.deep, s">>>${trieHit.context.mkString(" ")}<<<")
@@ -198,8 +199,10 @@ class PotentialEntityFinderFlatMap(params: Params) extends RichFlatMapFunction[I
 		trie = new NewTrie
 		surfaces.foreach { case (surface, prob) =>
 			// TODO: Determine heuristic for this value
-			if (prob > 0.05)
+			if (prob > 0.05) {
+				println(s"Adding $surface with prob $prob")
 				trie.add(surface, prob)
+			}
 		}
 		log.info(s"Finished trie with ${FreeMemory.get(true)} MB in ${(new Date().getTime - d1.getTime) / 1000} s")
 	}
@@ -219,6 +222,9 @@ class PotentialEntityFinderFlatMap(params: Params) extends RichFlatMapFunction[I
 					val id = s"TH-${document.id}-${document.replication}-$tokenHitCount"
 					out.collect(Classifiable(id, trieHit.s, context.toArray, info = ClassificationInfo(document.id, trieHit, POS_TAG_GROUPS.map { group => if (group.exists(tags.contains(_))) 1.0 else 0.0 })))
 					tokenHitCount += 1
+				}
+				else {
+					log.warn(s"Removing $trieHit in >>${context.mkString(" ")}<< because it contains no noun")
 				}
 			}
 		}
@@ -241,7 +247,6 @@ class ClassificationReduceGroup(params: Params) extends RichGroupReduceFunction[
 		val candidatePath = if (CoheelProgram.runsOffline()) "RandomForest-SEED-and-CANDIDATE.model" else params.config.getString("candidate_model")
 		log.info(s"Candidate path is $candidatePath")
 		log.info(s"Loading models with ${FreeMemory.get(true)} MB")
-		log.warn(s"Using Version ${SerialVersionAccess.get()}")
 
 		val start = new Date
 		seedClassifier      = new CoheelClassifier(SerializationHelper.read(seedPath).asInstanceOf[Classifier])
