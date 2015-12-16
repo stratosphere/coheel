@@ -88,7 +88,8 @@ object FlinkProgramRunner {
 	def runProgram[T](program: CoheelProgram[T] with ProgramDescription, params: Params): Unit = {
 		log.info(StringUtils.repeat('#', 140))
 		log.info("# " + StringUtils.center(program.getDescription, 136) + " #")
-		log.info("# " + StringUtils.rightPad(s"Job Manager: ${config.getString("job_manager_host")}:${config.getString("job_manager_port")}", 136) + " #")
+		if (!CoheelProgram.runsOffline())
+			log.info("# " + StringUtils.rightPad(s"Job Manager: ${config.getString("job_manager_host")}:${config.getString("job_manager_port")}", 136) + " #")
 		log.info("# " + StringUtils.rightPad(s"Configuration: ${params.configName}", 136) + " #")
 		log.info("# " + StringUtils.rightPad(s"Base Path: ${program.wikipediaDumpFilesPath}", 136) + " #")
 		log.info("# " + StringUtils.rightPad(s"Output Folder: ${config.getString("output_files_dir")}", 136) + " #")
