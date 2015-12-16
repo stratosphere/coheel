@@ -146,7 +146,7 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 
 
 	def loadNeighbours(env: ExecutionEnvironment): DataSet[Neighbours] = {
-		val contextLinks = env.readTextFile(contextLinkProbsResolvedPath).name("ContextLinkProbs-Path").map { line =>
+		val contextLinks = env.readTextFile(contextLinkProbsPath).name("ContextLinkProbs-Path").map { line =>
 			val split = line.split('\t')
 			ContextLink(split(0), split(1), split(2).toDouble)
 		}.name("ContextLinks")

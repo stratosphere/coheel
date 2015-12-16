@@ -17,9 +17,7 @@ object OutputFiles {
 	lazy val outputPath = FlinkProgramRunner.config.getString("output_files_dir")
 
 	lazy val surfaceProbsPath                 = s"${outputPath}surface-probs.wiki"
-	lazy val surfaceProbsResolvedPath         = s"${outputPath}surface-probs-resolved.wiki"
 	lazy val contextLinkProbsPath             = s"${outputPath}context-link-probs.wiki"
-	lazy val contextLinkProbsResolvedPath     = s"${outputPath}context-link-probs-resolved.wiki"
 	lazy val languageModelsPath               = s"${outputPath}language-model-probs.wiki"
 	lazy val documentWordCountsPath           = s"${outputPath}document-word-counts.wiki"
 	lazy val redirectPath                     = s"${outputPath}redirects.wiki"

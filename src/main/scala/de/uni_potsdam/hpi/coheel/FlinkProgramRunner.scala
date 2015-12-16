@@ -49,7 +49,6 @@ object FlinkProgramRunner {
 		, "training-data" -> classOf[TrainingDataProgram]
 		, "surface-evaluation" -> classOf[SurfaceEvaluationProgram]
 		, "classification" -> classOf[ClassificationProgram]
-		, "redirects" -> classOf[RedirectResolvingProgram]
 	)
 
 	val parser = new scopt.OptionParser[Params]("coheel") {

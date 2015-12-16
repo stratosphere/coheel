@@ -5,8 +5,9 @@ import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.ml.SecondOrderFeatures
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import de.uni_potsdam.hpi.coheel.wiki._
-import org.apache.flink.api.common.functions.RichMapFunction
+import org.apache.flink.api.common.functions.{RichJoinFunction, RichMapFunction}
 import org.apache.flink.api.common.operators.base.JoinOperatorBase.JoinHint
+import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.aggregation.Aggregations
 import org.apache.flink.api.scala._
 import org.apache.flink.core.fs.FileSystem
@@ -14,6 +15,7 @@ import org.apache.flink.util.Collector
 
 import scala.StringBuilder
 import scala.collection.mutable
+import scala.reflect.ClassTag
 
 class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 
@@ -42,8 +44,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 	 *   <li> the plan who counts how often one document links to another
 	 *   <li> the plan who counts how often a link occurs under a certain surface
 	 */
-	def buildLinkPlans(wikiPages: DataSet[WikiPage]):
-		(DataSet[(String, String, Double)], DataSet[(String, String)]) = {
+	def buildLinkPlans(wikiPages: DataSet[WikiPage]): Unit = {
 		val normalPages = wikiPages.filter { !_.isDisambiguation }
 
 		val normalPageLinks = linksFrom(normalPages)
@@ -84,12 +85,12 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 			.groupBy(0, 1)
 			.sum(2).name("Surface-LinkTo-Counts")
 		// join them together and calculate the probabilities
-		val surfaceProbs = surfaceCounts.join(surfaceLinkCounts)
+		val surfaceProbsUnresolved = surfaceCounts.join(surfaceLinkCounts)
 			.where { _.surfaceRepr }
 			.equalTo { _.surface }
 			.map { joinResult => joinResult match {
 				case (surfaceCount, surfaceLinkCount) =>
-					(surfaceCount.surfaceRepr, surfaceLinkCount.destination,
+					SurfaceProbResolving(surfaceCount.surfaceRepr, surfaceLinkCount.destination,
 					 surfaceLinkCount.count / surfaceCount.count.toDouble)
 			}
 		}
@@ -103,29 +104,65 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 			.map { link => ContextLinkCounts(link.source, link.destination, 1) }
 			.groupBy(0, 1)
 			.sum(2)
-		val contextLinkProbabilities = linkCounts.join(contextLinkCounts)
+		val contextLinksUnresolved = linkCounts.join(contextLinkCounts)
 			.where     { _.source }
 			.equalTo { _.source }
 			.map { joinResult => joinResult match {
 				case (linkCount, surfaceLinkCount) =>
-				(linkCount.source, surfaceLinkCount.destination, surfaceLinkCount.count.toDouble / linkCount.count)
+				ContextLinkResolving(linkCount.source, surfaceLinkCount.destination, surfaceLinkCount.count.toDouble / linkCount.count)
 			}
 		}
 
 		// save redirects (to - from)
 		val redirects = wikiPages
 			.filter { wikiPage => wikiPage.isRedirect }
-			.map { wikiPage => (wikiPage.pageTitle, wikiPage.redirect) }
+			.map { wikiPage => Redirect(wikiPage.pageTitle, wikiPage.redirect) }
+
+
+
+		def iterate[T <: ThingToResolve[T] : TypeInformation : ClassTag](ds: DataSet[T]): DataSet[T] = {
+			val resolvedRedirects = ds.leftOuterJoin(redirects)
+				.where { _.to }
+				.equalTo { _.from }
+				.apply(new RichJoinFunction[T, Redirect, T] {
+					override def join(contextLink: T, redirect: Redirect): T= {
+						if (redirect == null)
+							contextLink
+						else
+							contextLink.updateTo(redirect.to)
+					}
+				}).name("Resolved-Redirects-From-Iteration")
+			resolvedRedirects
+		}
+
+		val contextLinks = contextLinksUnresolved.iterate(3)(iterate)
+			.groupBy("from", "to")
+			.reduce { (cl1, cl2) =>
+				cl1.copy(prob = cl1.prob + cl2.prob)
+			}
+			.map { cl => (cl.from, cl.to, cl.prob) }
+			.name("Final-Resolved-Context-Links")
+
+		val surfaceProbs = surfaceProbsUnresolved.iterate(3)(iterate)
+			.groupBy("surface", "destination")
+			.reduce { (sp1, sp2) =>
+				sp1.copy(prob = sp1.prob + sp2.prob)
+			}
+			.name("Final-Resolved-Surface-Probs")
+
+		contextLinks.writeAsTsv(contextLinkProbsPath)
+		surfaceProbs.writeAsTsv(surfaceProbsPath)
+
+
+
 
 
 		allPageLinks.map { link => (link.fullId, link.surfaceRepr, link.surface, link.source, link.destination) }.writeAsTsv(allLinksPath)
 		surfaceCountHistogram.writeAsTsv(surfaceCountHistogramPath)
-		surfaceProbs.writeAsTsv(surfaceProbsPath)
-		contextLinkProbabilities.writeAsTsv(contextLinkProbsPath)
+		surfaceProbsUnresolved.writeAsTsv(surfaceProbsPath)
+		contextLinksUnresolved.writeAsTsv(contextLinkProbsPath)
 		redirects.writeAsTsv(redirectPath)
 		surfaceDocumentCounts.writeAsTsv(surfaceDocumentCountsPath)
-
-		(surfaceProbs, redirects)
 	}
 
 	def linksFrom(pages: DataSet[WikiPage]): DataSet[Link] = {
