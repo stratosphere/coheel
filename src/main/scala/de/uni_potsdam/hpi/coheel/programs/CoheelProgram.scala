@@ -4,7 +4,7 @@ import java.net.InetAddress
 
 import de.uni_potsdam.hpi.coheel.{Params, FlinkProgramRunner}
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
-import de.uni_potsdam.hpi.coheel.io.{IteratorReader, WikiPageInputFormat}
+import de.uni_potsdam.hpi.coheel.io.{OutputFiles, IteratorReader, WikiPageInputFormat}
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import de.uni_potsdam.hpi.coheel.util.Util
 import de.uni_potsdam.hpi.coheel.wiki._
@@ -25,14 +25,12 @@ object CoheelLogger {
 	val log: Logger = Logger.getLogger(getClass)
 }
 object CoheelProgram {
-	import CoheelLogger._
-
 	def runsOffline(): Boolean = {
 		if (FlinkProgramRunner.config == null) {
 			false
 		} else {
 			val fileType = FlinkProgramRunner.config.getString("type")
-			fileType == "file"
+			fileType == "local"
 		}
 	}
 
@@ -41,9 +39,12 @@ object CoheelProgram {
 abstract class CoheelProgram[T]() extends ProgramDescription {
 
 	import CoheelLogger._
-	lazy val dumpFile = new Path(FlinkProgramRunner.config.getString("base_path"))
-	lazy val wikipediaFilesPath = if (dumpFile.isAbsolute) dumpFile.toUri.toString
-		else dumpFile.makeQualified(new LocalFileSystem).toUri.toString
+	lazy val basePath = new Path(FlinkProgramRunner.config.getString("base_path"))
+//	lazy val wikipediaDumpFilesPath = s"${OutputFiles.protocol}://" + if (basePath.isAbsolute) basePath.toUri.toString
+	lazy val wikipediaDumpFilesPath = if (basePath.isAbsolute)
+			basePath.toUri.toString
+		else
+			basePath.makeQualified(new LocalFileSystem).toUri.toString
 
 	var environment: ExecutionEnvironment = null
 	var params: Params = null
@@ -61,7 +62,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 		buildProgram(env, param)
 	}
 
-	private lazy val wikiInput = environment.readFile(new WikiPageInputFormat, wikipediaFilesPath)
+	private lazy val wikiInput = environment.readFile(new WikiPageInputFormat, wikipediaDumpFilesPath)
 	private def readRawWikiPages[S : TypeInformation : ClassTag](fun: Extractor => S, pageFilter: String => Boolean = _ => true): DataSet[S] = {
 		wikiInput.mapPartition { (linesIt: Iterator[String], out: Collector[S]) =>
 			val reader = new IteratorReader(List("<foo>").iterator ++ linesIt ++ List("</foo>").iterator)

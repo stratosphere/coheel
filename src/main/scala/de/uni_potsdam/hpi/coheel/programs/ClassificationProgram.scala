@@ -95,7 +95,10 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 		val basicClassifierResults = featuresPerGroup.reduceGroup(new ClassificationReduceGroup(params)).name("Basic Classifier Results")
 
 
-		val preprocessedNeighbours: DataSet[Neighbours] = loadNeighbours(env)
+//		val preprocessedNeighbours = env.readCsvFile(neighboursPath, fieldDelimiter = "\t") //loadNeighbours(env)
+		val preprocessedNeighbours = loadNeighbours(env)
+
+
 		val withNeighbours = basicClassifierResults.join(preprocessedNeighbours)
 			.where("candidateEntity")
 			.equalTo("entity")

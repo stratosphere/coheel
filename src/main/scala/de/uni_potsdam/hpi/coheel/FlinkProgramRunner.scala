@@ -4,6 +4,7 @@ import java.io.{ObjectOutputStream, FileOutputStream, File}
 import java.nio.ByteBuffer
 
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
+import de.uni_potsdam.hpi.coheel.io.OutputFiles
 import de.uni_potsdam.hpi.coheel.util.Timer
 import org.apache.commons.io.FileUtils
 import org.apache.commons.lang3.StringUtils
@@ -21,10 +22,9 @@ import scala.collection.immutable.ListMap
 /**
  * Command line parameter configuration
  */
-case class Params(dataSetConf: String = "local",
+case class Params(configName: String = "local",
                   programName: String = "extract-main",
                   parallelism: Int    = 10,
-                  configurationParams: Map[String, String] = Map(),
                   config: Config = null
 )
 
@@ -55,7 +55,7 @@ object FlinkProgramRunner {
 	val parser = new scopt.OptionParser[Params]("coheel") {
 		head("CohEEL", "0.0.1")
 		opt[String]('c', "configuration") required() action { (x, c) =>
-			c.copy(dataSetConf = x) } text "specifies the configuration file to use, either 'local', 'cluster_tenem' or 'cluster_aws'" validate { x =>
+			c.copy(configName = x) } text "specifies the configuration file to use, either 'local', 'cluster_tenem' or 'cluster_aws'" validate { x =>
 			if (List("local", "cluster_tenem", "cluster_aws").contains(x)) success
 			else failure("configuration unknown") }
 		opt[String]('p', "program") required() action { (x, c) =>
@@ -77,7 +77,7 @@ object FlinkProgramRunner {
 		// Parse the arguments
 		parser.parse(args, Params()) map { params =>
 			this.params = params
-			config = ConfigFactory.load(params.dataSetConf)
+			config = ConfigFactory.load(params.configName)
 			val programName = params.programName
 			val program = programs(programName).newInstance()
 			runProgram(program, params.copy(config = config))
@@ -89,14 +89,14 @@ object FlinkProgramRunner {
 	def runProgram[T](program: CoheelProgram[T] with ProgramDescription, params: Params): Unit = {
 		log.info(StringUtils.repeat('#', 140))
 		log.info("# " + StringUtils.center(program.getDescription, 136) + " #")
-		log.info("# " + StringUtils.rightPad(s"Job manager: ${config.getString("job_manager_host")}:${config.getString("job_manager_port")}", 136) + " #")
-		log.info("# " + StringUtils.rightPad(s"Dataset: ${config.getString("name")}", 136) + " #")
-		log.info("# " + StringUtils.rightPad(s"Base Path: ${config.getString("base_path")}", 136) + " #")
+		log.info("# " + StringUtils.rightPad(s"Job Manager: ${config.getString("job_manager_host")}:${config.getString("job_manager_port")}", 136) + " #")
+		log.info("# " + StringUtils.rightPad(s"Configuration: ${params.configName}", 136) + " #")
+		log.info("# " + StringUtils.rightPad(s"Base Path: ${program.wikipediaDumpFilesPath}", 136) + " #")
 		log.info("# " + StringUtils.rightPad(s"Output Folder: ${config.getString("output_files_dir")}", 136) + " #")
 		log.info("# " + StringUtils.rightPad(s"Free Memory: ${FreeMemory.get(true)} MB", 136) + " #")
 
 		val runtime = Timer.timeFunction {
-			val env = if (config.getString("type") == "file") {
+			val env = if (config.getString("type") == "local") {
 				GlobalConfiguration.loadConfiguration("conf")
 				ExecutionEnvironment.createLocalEnvironment(1)
 			}
@@ -118,7 +118,7 @@ object FlinkProgramRunner {
 				val paramsString = if (argument == null) "" else s" current-param = $argument"
 				FileUtils.write(new File("PLAN"), env.getExecutionPlan())
 				env.getConfig.disableSysoutLogging()
-				val result = env.execute(s"${program.getDescription} (dataset = ${config.getString("name")}$paramsString)")
+				val result = env.execute(s"${program.getDescription} (configuration = ${params.configName}$paramsString)")
 				val accResults = result.getAllAccumulatorResults.asScala
 				accResults.foreach { case (acc, obj) =>
 					println(acc)
