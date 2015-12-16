@@ -119,6 +119,7 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 		 * OUTPUT
 		 */
 		inputDocuments.writeAsTsv(inputDocumentsPath)
+		preprocessedNeighbours.writeAsTsv(neighboursPath)
 		// Write trie hits for debugging
 		val trieHitOutput = classifiables.map { trieHit =>
 			(trieHit.id, trieHit.surfaceRepr, trieHit.info.trieHit, trieHit.info.posTags.deep, s">>>${trieHit.context.mkString(" ")}<<<")
