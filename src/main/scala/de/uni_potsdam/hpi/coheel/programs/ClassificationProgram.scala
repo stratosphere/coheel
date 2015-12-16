@@ -118,7 +118,7 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 		/*
 		 * OUTPUT
 		 */
-		inputDocuments.writeAsTsv(inputDocumentsPath)
+		inputDocuments.filter(_.replication == 0).writeAsTsv(inputDocumentsPath)
 		preprocessedNeighbours.writeAsTsv(neighboursPath)
 		// Write trie hits for debugging
 		val trieHitOutput = classifiables.map { trieHit =>
@@ -201,7 +201,7 @@ class PotentialEntityFinderFlatMap(params: Params) extends RichFlatMapFunction[I
 		surfaces.foreach { case (surface, prob) =>
 			// TODO: Determine heuristic for this value
 			if (prob > 0.05) {
-				println(s"Adding $surface with prob $prob")
+//				println(s"Adding $surface with prob $prob")
 				trie.add(surface, prob)
 			}
 		}
