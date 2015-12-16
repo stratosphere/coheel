@@ -23,7 +23,6 @@ import scala.collection.immutable.ListMap
  */
 case class Params(dataSetConf: String = "local",
                   programName: String = "extract-main",
-                  doLogging: Boolean  = false,
                   parallelism: Int    = 10,
                   configurationParams: Map[String, String] = Map(),
                   config: Config = null
@@ -53,25 +52,20 @@ object FlinkProgramRunner {
 		, "redirects" -> classOf[RedirectResolvingProgram]
 	)
 
-	val parser = new scopt.OptionParser[Params]("bin/run") {
+	val parser = new scopt.OptionParser[Params]("coheel") {
 		head("CohEEL", "0.0.1")
-		opt[String]('d', "dataset") required() action { (x, c) =>
-			c.copy(dataSetConf = x) } text "specifies the dataset to use, either 'local', 'cluster_tenem' or 'cluster_aws'" validate { x =>
+		opt[String]('c', "configuration") required() action { (x, c) =>
+			c.copy(dataSetConf = x) } text "specifies the configuration file to use, either 'local', 'cluster_tenem' or 'cluster_aws'" validate { x =>
 			if (List("local", "cluster_tenem", "cluster_aws").contains(x)) success
-			else failure("dataset unknown") }
+			else failure("configuration unknown") }
 		opt[String]('p', "program") required() action { (x, c) =>
 			c.copy(programName = x) } text "specifies the program to run" validate { x =>
 			if (programs.contains(x))
 				success
 			else
 				failure("program must be one of the following: " + programs.keys.mkString(", ")) }
-		opt[Unit]('l', "logging") action { case (_, c) =>
-			c.copy(doLogging = true) }
-		opt[Int]('p', "parallelism") action { (x, c) =>
+		opt[Int]("parallelism") action { (x, c) =>
 			c.copy(parallelism = x) } text "specifies the degree of parallelism for Flink"
-		note("Parameters starting with X denote special parameters for certain programs:")
-		opt[Unit]("X" + ConfigurationParams.ONLY_WIKIPAGES) text "Only run wiki page extraction" action { (x, c) =>
-			c.copy(configurationParams = c.configurationParams + (ConfigurationParams.ONLY_WIKIPAGES -> "true")) }
 		help("help") text "prints this usage text"
 	}
 
@@ -86,7 +80,6 @@ object FlinkProgramRunner {
 			config = ConfigFactory.load(params.dataSetConf)
 			val programName = params.programName
 			val program = programs(programName).newInstance()
-			program.configurationParams = params.configurationParams
 			runProgram(program, params.copy(config = config))
 		} getOrElse {
 			parser.showUsage
@@ -101,7 +94,6 @@ object FlinkProgramRunner {
 		log.info("# " + StringUtils.rightPad(s"Base Path: ${config.getString("base_path")}", 136) + " #")
 		log.info("# " + StringUtils.rightPad(s"Output Folder: ${config.getString("output_files_dir")}", 136) + " #")
 		log.info("# " + StringUtils.rightPad(s"Free Memory: ${FreeMemory.get(true)} MB", 136) + " #")
-		log.info("# " + StringUtils.rightPad(s"Configuration Params: ${program.configurationParams}", 136) + " #")
 
 		val runtime = Timer.timeFunction {
 			val env = if (config.getString("type") == "file") {
@@ -123,14 +115,10 @@ object FlinkProgramRunner {
 					log.info(s"Current parameter: $argument")
 				program.makeProgram(env, params, argument)
 				FileUtils.writeStringToFile(new File("plans/PLAN"), env.getExecutionPlan())
-				val configurationString = if (program.configurationParams.size > 0)
-					" " + program.configurationParams.toString().replace("Map(", "configuration-params = (")
-				else
-					""
 				val paramsString = if (argument == null) "" else s" current-param = $argument"
 				FileUtils.write(new File("PLAN"), env.getExecutionPlan())
 				env.getConfig.disableSysoutLogging()
-				val result = env.execute(s"${program.getDescription} (dataset = ${config.getString("name")}$paramsString$configurationString)")
+				val result = env.execute(s"${program.getDescription} (dataset = ${config.getString("name")}$paramsString)")
 				val accResults = result.getAllAccumulatorResults.asScala
 				accResults.foreach { case (acc, obj) =>
 					println(acc)

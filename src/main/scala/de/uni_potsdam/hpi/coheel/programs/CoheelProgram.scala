@@ -50,8 +50,6 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 
 	val arguments: Seq[T]
 
-	var configurationParams: Map[String, String] = _
-
 	def buildProgram(env: ExecutionEnvironment, param: T): Unit
 
 	def makeProgram(env: ExecutionEnvironment, params: Params): Unit = {
