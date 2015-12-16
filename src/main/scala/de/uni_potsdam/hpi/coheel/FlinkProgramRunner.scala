@@ -96,6 +96,7 @@ object FlinkProgramRunner {
 	def runProgram[T](program: CoheelProgram[T] with ProgramDescription, params: Params): Unit = {
 		log.info(StringUtils.repeat('#', 140))
 		log.info("# " + StringUtils.center(program.getDescription, 136) + " #")
+		log.info("# " + StringUtils.rightPad(s"Job manager: ${config.getString("job_manager_host")}:${config.getString("job_manager_port")}", 136) + " #")
 		log.info("# " + StringUtils.rightPad(s"Dataset: ${config.getString("name")}", 136) + " #")
 		log.info("# " + StringUtils.rightPad(s"Base Path: ${config.getString("base_path")}", 136) + " #")
 		log.info("# " + StringUtils.rightPad(s"Output Folder: ${config.getString("output_files_dir")}", 136) + " #")
@@ -110,7 +111,7 @@ object FlinkProgramRunner {
 			else {
 				val classPath = System.getProperty("java.class.path")
 				val dependencies = "target/coheel_stratosphere-0.1-SNAPSHOT.jar" :: classPath.split(':').filter(p => p.contains(".m2/")).toList
-				ExecutionEnvironment.createRemoteEnvironment(config.getString("job_manager_host"), 6123, params.parallelism, dependencies: _*)
+				ExecutionEnvironment.createRemoteEnvironment(config.getString("job_manager_host"), config.getInt("job_manager_port"), params.parallelism, dependencies: _*)
 			}
 
 			log.info("# " + StringUtils.rightPad(s"Degree of parallelism: ${env.getParallelism}", 136) + " #")
