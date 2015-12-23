@@ -17,7 +17,7 @@ if [ $? -eq 0 ]; then
 	echo " Done."
 	echo "Running .."
 	echo "--------------------------------------------------------------------------" | tee target/run-output
-	mvn -q scala:run -Dlauncher=ProgramRunner -DaddArgs="$PARAMS"                     | tee -a target/run-output
+	2>&1 mvn -q scala:run -Dlauncher=ProgramRunner -DaddArgs="$PARAMS"                | tee -a target/run-output
 	echo "--------------------------------------------------------------------------" | tee -a target/run-output
 else
 	echo " Failed."
