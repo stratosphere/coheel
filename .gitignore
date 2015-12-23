@@ -15,4 +15,3 @@ plots/**/raw-data
 plots/**/*.png
 credentials.csv
 model*.model
-*.iml
