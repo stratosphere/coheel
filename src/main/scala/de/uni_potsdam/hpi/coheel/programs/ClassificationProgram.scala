@@ -17,6 +17,7 @@ import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
 import org.apache.flink.api.common.functions.{Partitioner, RichFlatMapFunction, RichGroupReduceFunction}
 import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
+import org.apache.flink.core.fs.FileSystem
 import org.apache.flink.util.Collector
 import org.apache.log4j.Logger
 import weka.classifiers.Classifier
@@ -38,6 +39,11 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 
 	override def getDescription: String = "CohEEL Classification"
 	def log: Logger = Logger.getLogger(getClass)
+
+
+	// Select, which neighbours file to use
+	val NEIGHBOURS_FILE: Option[String] = None
+//	val NEIGHBOURS_FILE: Option[String] = Some(neighboursPath)
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val documentStrings = (1 to 6).map { x =>
@@ -99,9 +105,10 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 		val basicClassifierResults = featuresPerGroup.reduceGroup(new ClassificationReduceGroup(params)).name("Basic Classifier Results")
 
 
-//		val preprocessedNeighbours = env.readCsvFile(neighboursPath, fieldDelimiter = "\t") //loadNeighbours(env)
-		val preprocessedNeighbours = loadNeighbours(env)
-
+		val preprocessedNeighbours = NEIGHBOURS_FILE match {
+			case Some(file) => loadNeighboursFromHdfs(env, file)
+			case None => buildNeighbours(env)
+		}
 
 		val withNeighbours = basicClassifierResults.join(preprocessedNeighbours)
 			.where("candidateEntity")
@@ -119,14 +126,21 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 				}
 			}
 
-
 		withNeighbours.groupBy("documentId").reduceGroup(new RandomWalkReduceGroup).name("Random Walk").writeAsTsv(randomWalkResultsPath)
 
 		/*
 		 * OUTPUT
 		 */
 		inputDocuments.filter(_.replication == 0).writeAsTsv(inputDocumentsPath)
-		preprocessedNeighbours.writeAsTsv(neighboursPath)
+
+		if (NEIGHBOURS_FILE.isEmpty) {
+			preprocessedNeighbours.map { neighbours =>
+				val inString = neighbours.in.map { n => s"${n.entity}\0${n.prob}" }.mkString("\0")
+				val outString = neighbours.out.map { n => s"${n.entity}\0${n.prob}" }.mkString("\0")
+				s"${neighbours.entity}\t$inString\t$outString"
+			}.writeAsText(neighboursPath, FileSystem.WriteMode.OVERWRITE)
+		}
+
 		// Write trie hits for debugging
 		val trieHitOutput = classifiables.map { trieHit =>
 			(trieHit.id, trieHit.surfaceRepr, trieHit.info.trieHit, trieHit.info.posTags.deep, s">>>${trieHit.context.mkString(" ")}<<<")
@@ -149,7 +163,7 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 	}
 
 
-	def loadNeighbours(env: ExecutionEnvironment): DataSet[Neighbours] = {
+	def buildNeighbours(env: ExecutionEnvironment): DataSet[Neighbours] = {
 		val contextLinks = env.readTextFile(contextLinkProbsPath).name("ContextLinkProbs-Path").map { line =>
 			val split = line.split('\t')
 			ContextLink(split(0), split(1), split(2).toDouble)
@@ -162,14 +176,23 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 			val asList = grouped.toList
 			(asList.head.to, asList.map { contextLink => Neighbour(contextLink.from, contextLink.prob) })
 		}.name("Incoming Neighbours")
-		val preprocessedNeighbours = outgoingNeighbours.join(incomingNeighbours)
+		val preprocessedNeighbours = incomingNeighbours.join(outgoingNeighbours)
 			.where(0)
 			.equalTo(0)
 			.map { joinResult => joinResult match {
-					case (out, in) => Neighbours(out._1, out._2, in._2)
+					case (in, out) => Neighbours(in._1, in._2, out._2)
 				}
 		}.name("All-Neighbours")
 		preprocessedNeighbours
+	}
+
+	def loadNeighboursFromHdfs(env: ExecutionEnvironment, neighboursPath: String): DataSet[Neighbours] = {
+		env.readTextFile(neighboursPath).map { neighboursLine =>
+			val Array(entity, inString, outString) = neighboursLine.split('\t')
+			val inNeighbours = inString.split("\0").grouped(2).map { case Array(ent, prob) => Neighbour(ent, prob.toDouble) }.toSeq
+			val outNeighbours = outString.split("\0").grouped(2).map { case Array(ent, prob) => Neighbour(ent, prob.toDouble) }.toSeq
+			Neighbours(entity, inNeighbours, outNeighbours)
+		}.name("All-Neighbours")
 	}
 }
 
@@ -190,7 +213,6 @@ class PotentialEntityFinderFlatMap(params: Params) extends RichFlatMapFunction[I
 			else
 				new File(params.config.getString("second_trie_half"))
 		}
-		assert(surfaceLinkProbsFile.exists())
 		val surfaces = Source.fromFile(surfaceLinkProbsFile, "UTF-8").getLines().flatMap { line =>
 			val split = line.split('\t')
 			if (split.length == 5)

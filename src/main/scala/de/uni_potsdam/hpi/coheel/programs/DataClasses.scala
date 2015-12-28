@@ -146,7 +146,7 @@ object DataClasses {
 
 	case class Neighbour(entity: String, prob: Double)
 
-	case class Neighbours(entity: String, out: List[Neighbour], in: List[Neighbour])
+	case class Neighbours(entity: String, in: Seq[Neighbour], out: Seq[Neighbour])
 
 	/**
 	 * All candidates of one document.
@@ -165,8 +165,8 @@ object DataClasses {
 		 var classifierType: NodeType,
 		 candidateEntity: String,
 		 trieHit: TrieHit,
-		 in: List[Neighbour],
-		 out: List[Neighbour]) {
+		 in: Seq[Neighbour],
+		 out: Seq[Neighbour]) {
 
 		def shortToString(): String = {
 			s"($classifierType, '$candidateEntity', $trieHit)"
@@ -174,7 +174,7 @@ object DataClasses {
 	}
 
 	object ClassifierResultWithNeighbours {
-		def apply(documentId: String, classifierType: NodeType, candidateEntity: String, in: List[Neighbour], out: List[Neighbour]): ClassifierResultWithNeighbours =
+		def apply(documentId: String, classifierType: NodeType, candidateEntity: String, in: Seq[Neighbour], out: Seq[Neighbour]): ClassifierResultWithNeighbours =
 			ClassifierResultWithNeighbours(documentId, classifierType, candidateEntity, null, in, out)
 	}
 
