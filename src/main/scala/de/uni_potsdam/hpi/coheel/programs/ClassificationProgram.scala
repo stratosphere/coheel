@@ -40,7 +40,11 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 	def log: Logger = Logger.getLogger(getClass)
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
-		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_3).name("Documents")
+		val documentStrings = (1 to 6).map { x =>
+			Source.fromFile(s"src/main/resources/classification-documents/$x", "UTF-8").mkString
+		}
+//		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_3).name("Documents")
+		val documents = env.fromCollection(documentStrings).name("Documents")
 
 		val inputDocuments = documents.flatMap(new RichFlatMapFunction[String, InputDocument] {
 			def log: Logger = Logger.getLogger(getClass)
