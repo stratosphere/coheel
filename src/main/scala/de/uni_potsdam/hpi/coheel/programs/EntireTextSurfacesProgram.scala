@@ -12,7 +12,7 @@ import org.apache.flink.util.Collector
 
 class EntireTextSurfacesProgram extends CoheelProgram[String] {
 
-	val arguments = if (runsOffline()) List("") else List("12345", "678910")
+	val arguments = if (runsOffline()) List("1") else List("12345", "678910")
 	override def getDescription = "Wikipedia Extraction: Entire Text Surfaces"
 
 	override def buildProgram(env: ExecutionEnvironment, param: String): Unit = {

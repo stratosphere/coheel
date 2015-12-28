@@ -228,7 +228,7 @@ class PotentialEntityFinderFlatMap(params: Params) extends RichFlatMapFunction[I
 					tokenHitCount += 1
 				}
 				else {
-					log.warn(s"Removing $trieHit in >>${context.mkString(" ")}<< because it contains no noun")
+					log.warn(s"Removing because no noun: $trieHit in >>${context.slice(20, 30).mkString(" ")}<<")
 				}
 			}
 		}
