@@ -1,15 +1,21 @@
 package de.uni_potsdam.hpi.coheel.programs
 
+import java.lang.Iterable
+
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier.POS_TAG_GROUPS
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import de.uni_potsdam.hpi.coheel.util.Util
 import de.uni_potsdam.hpi.coheel.wiki.FullInfoWikiPage
-import org.apache.flink.api.common.functions.RichFlatMapFunction
+import org.apache.flink.api.common.functions.{BroadcastVariableInitializer, RichGroupReduceFunction, RichFlatMapFunction}
 import org.apache.flink.api.scala.{ExecutionEnvironment, _}
+import org.apache.flink.configuration.Configuration
 import org.apache.flink.core.fs.FileSystem
 import org.apache.flink.util.Collector
 import org.apache.log4j.Logger
+import scala.collection.JavaConverters._
+import scala.collection.mutable
+
 
 class TrainingDataProgram extends NoParamCoheelProgram with Serializable {
 
@@ -27,6 +33,12 @@ class TrainingDataProgram extends NoParamCoheelProgram with Serializable {
 
 		wikiPages.map { wikiPage => wikiPage.pageTitle }.writeAsText(trainingDataPagesPath + s"-$SAMPLE_NUMBER.wiki", FileSystem.WriteMode.OVERWRITE)
 
+		val linkDestinationsPerEntity = wikiPages.map { wp =>
+			LinkDestinations(wp.pageTitle, wp.links.values.map { l =>
+				l.destination
+			}.toSeq)
+		}
+
 		val classifiables = wikiPages
 			.flatMap(new LinksAsTrainingDataFlatMap)
 			.name("Links and possible links")
@@ -35,29 +47,63 @@ class TrainingDataProgram extends NoParamCoheelProgram with Serializable {
 			(c.id, c.surfaceRepr, c.info, c.info.posTags.deep, c.context.deep)
 		}.writeAsTsv(trainingDataClassifiablesPath +  s"-$SAMPLE_NUMBER.wiki")
 
+		// Fill classifiables with candidates, surface probs and context probs
 		val featuresPerGroup = FeatureProgramHelper.buildFeaturesPerGroup(this, classifiables)
 
-		val trainingData = featuresPerGroup.reduceGroup(createTrainingDataGroupWise _).name("Training Data")
+		val trainingData = featuresPerGroup
+			.reduceGroup(new TrainingDataGroupedGroupReduce)
+			.withBroadcastSet(linkDestinationsPerEntity, TrainingDataGroupedGroupReduce.BROADCAST_LINK_DESTINATIONS_PER_ENTITY)
+			.name("Training Data")
 
 		// TODO: Also join surface link probs
 		trainingData.writeAsText(trainingDataPath + s"-$SAMPLE_NUMBER.wiki", FileSystem.WriteMode.OVERWRITE)
 	}
+}
 
+class LinkDestinationsInitializer extends BroadcastVariableInitializer[LinkDestinations, mutable.Map[String, Seq[String]]] {
+
+	override def initializeBroadcastVariable(destinations: Iterable[LinkDestinations]): mutable.Map[String, Seq[String]] = {
+		val destinationsMap = mutable.Map[String, Seq[String]]()
+		destinations.asScala.foreach { dest =>
+			destinationsMap += dest.entity -> dest.destinations
+		}
+		destinationsMap
+	}
+}
+
+object TrainingDataGroupedGroupReduce {
+	val BROADCAST_LINK_DESTINATIONS_PER_ENTITY = "linkDestinationsPerEntity"
+}
+class TrainingDataGroupedGroupReduce extends RichGroupReduceFunction[Classifiable[TrainInfo], String] {
+	var linkDestinationsPerEntity: mutable.Map[String, Seq[String]] = _
+	override def open(params: Configuration): Unit = {
+		linkDestinationsPerEntity = getRuntimeContext.getBroadcastVariableWithInitializer(
+			TrainingDataGroupedGroupReduce.BROADCAST_LINK_DESTINATIONS_PER_ENTITY,
+			new LinkDestinationsInitializer)
+	}
 
 	/**
-	 * @param candidatesIt All link candidates with scores (all Classifiable's have the same id).
-	 */
-	def createTrainingDataGroupWise(candidatesIt: Iterator[Classifiable[TrainInfo]], out: Collector[String]): Unit = {
-		val allCandidates = candidatesIt.toSeq
+	  * @param candidatesIt All link candidates with scores (all Classifiable's have the same id).
+	  */
+	override def reduce(candidatesIt: Iterable[Classifiable[TrainInfo]], out: Collector[String]): Unit = {
+		val allCandidates = candidatesIt.asScala.toSeq
 		FeatureProgramHelper.applyCoheelFunctions(allCandidates) { featureLine =>
+			// TODO: This information is available
+			featureLine.info.source
+			featureLine.candidateEntity
+			// What's missing: How to know all the links (entities) of the source entity, to filter
+			// the bad candidates out here
+			// The filtering must be done here, after the second order functions have been run
+
 			import featureLine._
 			def stringInfo = List(id, surfaceRepr, candidateEntity) ::: featureLine.info.modelInfo
 			val output = s"${stringInfo.mkString("\t")}\t${featureLine.features.mkString("\t")}"
+			// TODO: Here filter feature lines with a candidate entity, which is also a link in the source
+			// TODO: Take care, that not all links are filtered out (not the original), i.e. only do this for trie hits
 			out.collect(output)
 		}
 	}
 }
-
 
 class LinksAsTrainingDataFlatMap extends RichFlatMapFunction[FullInfoWikiPage, Classifiable[TrainInfo]] {
 	var tokenHitCount: Int = 1

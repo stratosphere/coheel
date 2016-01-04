@@ -97,6 +97,8 @@ object DataClasses {
 		}
 	}
 
+	case class LinkDestinations(entity: String, destinations: Seq[String])
+
 
 	/**
 	 * Tracks extra information, both about the model of an instance and about further features, which are not directly linked to second order functions.

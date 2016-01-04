@@ -42,8 +42,8 @@ object FeatureProgramHelper {
 
 
 		val classifiablesWithCandidates: DataSet[DataClasses.Classifiable[T]] = classifiables.join(surfaceProbs)
-			.where { classifiable => classifiable.surfaceRepr }
-			.equalTo { surfaceProb => surfaceProb.surface }
+			.where("surfaceRepr")
+			.equalTo("surface")
 			.name("Join: Classifiable With Surface Probs")
 			.map { joinResult => joinResult match {
 				case (classifiable, SurfaceProb(_, candidateEntity, surfaceProb)) =>
