@@ -3,6 +3,7 @@ package de.uni_potsdam.hpi.coheel.programs
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.io.{IteratorReader, WikiPageInputFormat}
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
+import de.uni_potsdam.hpi.coheel.util.Timer
 import de.uni_potsdam.hpi.coheel.wiki._
 import de.uni_potsdam.hpi.coheel.{FlinkProgramRunner, Params}
 import org.apache.flink.api.common.ProgramDescription
@@ -70,7 +71,9 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 			filteredWikiPages.foreach { wikiPage =>
 				Try {
 					val extractor = new Extractor(wikiPage, s => TokenizerHelper.tokenize(s).mkString(" ") )
+					Timer.start("EXTRACTION")
 					extractor.extract()
+					Timer.end("EXTRACTION")
 					fun(extractor)
 				} match {
 					case Success(parsedPage) =>

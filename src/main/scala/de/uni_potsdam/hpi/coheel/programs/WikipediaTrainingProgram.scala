@@ -82,23 +82,17 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 					}
 			}
 
-		// calculate context link counts only for non-disambiguation pages
-		val linkCounts = normalPageLinks
-			.map { link => LinkCounts(link.source, 1) }
-			.groupBy(0)
-			.sum(1)
-		val contextLinkCounts = normalPageLinks
-			.map { link => ContextLinkCounts(link.source, link.destination, 1) }
-			.groupBy(0, 1)
-			.sum(2)
-		val contextLinksUnresolved = linkCounts.join(contextLinkCounts)
-			.where     { _.source }
-			.equalTo { _.source }
-			.map { joinResult => joinResult match {
-				case (linkCount, surfaceLinkCount) =>
-				ContextLinkResolving(linkCount.source, surfaceLinkCount.destination, surfaceLinkCount.count.toDouble / linkCount.count)
+		val contextLinkCountsUnresolved = normalPageLinks
+			.groupBy("source")
+			.reduceGroup { (linksIt, out: Collector[ContextLinkCountsResolving]) =>
+				val links = linksIt.toSeq
+				val from = links.head.source
+				links
+					.groupBy(_.destination)
+					.foreach { case (destination, destGroup) =>
+						out.collect(ContextLinkCountsResolving(from, destination, destGroup.size))
+					}
 			}
-		}
 
 		// save redirects (to - from)
 		val redirects = wikiPages
@@ -120,12 +114,16 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 			resolvedRedirects
 		}
 
-		val contextLinks = contextLinksUnresolved.iterate(3)(iterate)
-			.groupBy("from", "to")
-			.reduce { (cl1, cl2) =>
-				cl1.copy(prob = cl1.prob + cl2.prob)
+		val contextLinks = contextLinkCountsUnresolved.iterate(3)(iterate)
+			.groupBy("from")
+			.reduceGroup { (fromLinksIt, out: Collector[(String, String, Double)]) =>
+				val fromLinks = fromLinksIt.toSeq
+				val from = fromLinks.head.from
+				val allCount = fromLinks.map(_.count).sum
+				fromLinks.groupBy(_.to).foreach { case (to, toGroup) =>
+					out.collect((from, to, toGroup.map(_.count).sum.toDouble / allCount))
+				}
 			}
-			.map { cl => (cl.from, cl.to, cl.prob) }
 			.name("Final-Resolved-Context-Links")
 
 		val surfaceProbs = surfaceDestinationCountsUnresolved.iterate(3)(iterate)
@@ -144,7 +142,6 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 		surfaceProbs.writeAsTsv(surfaceProbsPath)
 
 		allPageLinks.map { link => (link.fullId, link.surfaceRepr, link.surface, link.source, link.destination) }.writeAsTsv(allLinksPath)
-		contextLinksUnresolved.writeAsTsv(contextLinkProbsPath)
 		redirects.writeAsTsv(redirectPath)
 		surfaceDocumentCounts.writeAsTsv(surfaceDocumentCountsPath)
 	}

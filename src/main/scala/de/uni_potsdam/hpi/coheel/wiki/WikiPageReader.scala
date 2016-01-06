@@ -130,6 +130,7 @@ class WikiPageReader {
 			readNextPage()
 
 			def readNextPage(): Unit = {
+				Timer.start("XML")
 				redirectTitle = ""
 				var foundNextPage = false
 				var pagePassedFilter = true
@@ -154,6 +155,7 @@ class WikiPageReader {
 				hasMorePages = streamReader.hasNext
 				if (!hasMorePages)
 					reader.close()
+				Timer.end("XML")
 			}
 
 			def hasNext = hasMorePages

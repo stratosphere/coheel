@@ -66,12 +66,8 @@ object DataClasses {
 		def to: String
 		def updateTo(s: String): T
 	}
-	case class ContextLinkResolving(from: String, to: String, prob: Double)  extends ThingToResolve[ContextLinkResolving] {
-		override def updateTo(s: String): ContextLinkResolving = this.copy(to = s)
-	}
-	case class SurfaceProbResolving(surface: String, destination: String, prob: Double) extends ThingToResolve[SurfaceProbResolving] {
-		override def to: String = destination
-		override def updateTo(s: String): SurfaceProbResolving = this.copy(destination = s)
+	case class ContextLinkCountsResolving(from: String, to: String, count: Int) extends ThingToResolve[ContextLinkCountsResolving] {
+		override def updateTo(s: String): ContextLinkCountsResolving = this.copy(to = s)
 	}
 	case class SurfaceLinkCountsResolving(surface: String, destination: String, count: Int) extends ThingToResolve[SurfaceLinkCountsResolving] {
 		override def to: String = destination
