@@ -34,10 +34,10 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 
 	override def getDescription: String = "CohEEL Classification"
 
-
 	// Select, which neighbours file to use
 	val NEIGHBOURS_FILE: Option[String] = None
-//	val NEIGHBOURS_FILE: Option[String] = Some(neighboursPath)
+//	val NEIGHBOURS_FILE: Option[String] = Some(fullNeighboursPath)
+//	val NEIGHBOURS_FILE: Option[String] = Some(reciprocalNeighboursPath)
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val documentStrings = (1 to 6).map { x =>
@@ -63,7 +63,7 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 
 		val preprocessedNeighbours = NEIGHBOURS_FILE match {
 			case Some(file) => loadNeighboursFromHdfs(env, file)
-			case None => buildNeighbours(env)
+			case None => buildReciprocalNeighbours(env)
 		}
 
 		val withNeighbours = basicClassifierResults.join(preprocessedNeighbours)
@@ -90,11 +90,7 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 		inputDocuments.filter(_.replication == 0).writeAsTsv(inputDocumentsPath)
 
 		if (NEIGHBOURS_FILE.isEmpty) {
-			preprocessedNeighbours.map { neighbours =>
-				val inString = neighbours.in.map { n => s"${n.entity}\0${n.prob}" }.mkString("\0")
-				val outString = neighbours.out.map { n => s"${n.entity}\0${n.prob}" }.mkString("\0")
-				s"${neighbours.entity}\t$inString\t$outString"
-			}.writeAsText(neighboursPath, FileSystem.WriteMode.OVERWRITE)
+			preprocessedNeighbours.map(serializeNeighboursToString _).writeAsText(fullNeighboursPath, FileSystem.WriteMode.OVERWRITE)
 		}
 
 		// Write trie hits for debugging
@@ -118,7 +114,25 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 
 	}
 
-	def buildNeighbours(env: ExecutionEnvironment): DataSet[Neighbours] = {
+	def serializeNeighboursToString(neighbours: Neighbours): String = {
+		val inString = neighbours.in.map { n => s"${n.entity}\0${n.prob}" }.mkString("\0")
+		val outString = neighbours.out.map { n => s"${n.entity}\0${n.prob}" }.mkString("\0")
+		s"${neighbours.entity}\t$inString\t$outString"
+	}
+
+	def buildReciprocalNeighbours(env: ExecutionEnvironment): DataSet[Neighbours] = {
+		val fullNeighbours = buildFullNeighbours(env)
+		fullNeighbours.map { neighbours =>
+			import neighbours._
+			val inSet  = in.map(_.entity).toSet
+			val outSet = out.map(_.entity).toSet
+			val intersection = inSet.intersect(outSet)
+
+			Neighbours(entity, in.filter { x => intersection.contains(x.entity) }, out.filter { x => intersection.contains(x.entity) })
+		}
+	}
+
+	def buildFullNeighbours(env: ExecutionEnvironment): DataSet[Neighbours] = {
 		val contextLinks = env.readTextFile(contextLinkProbsPath).name("ContextLinkProbs-Path").map { line =>
 			val split = line.split('\t')
 			ContextLink(split(0), split(1), split(2).toDouble)
@@ -131,14 +145,14 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 			val asList = grouped.toList
 			(asList.head.to, asList.map { contextLink => Neighbour(contextLink.from, contextLink.prob) })
 		}.name("Incoming Neighbours")
-		val preprocessedNeighbours = incomingNeighbours.join(outgoingNeighbours)
+		val fullNeighbours = incomingNeighbours.join(outgoingNeighbours)
 			.where(0)
 			.equalTo(0)
 			.map { joinResult => joinResult match {
 					case (in, out) => Neighbours(in._1, in._2, out._2)
-				}
+			}
 		}.name("All-Neighbours")
-		preprocessedNeighbours
+		fullNeighbours
 	}
 
 	def loadNeighboursFromHdfs(env: ExecutionEnvironment, neighboursPath: String): DataSet[Neighbours] = {
