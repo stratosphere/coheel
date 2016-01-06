@@ -1,13 +1,10 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import java.net.InetAddress
-
-import de.uni_potsdam.hpi.coheel.{Params, FlinkProgramRunner}
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
-import de.uni_potsdam.hpi.coheel.io.{OutputFiles, IteratorReader, WikiPageInputFormat}
+import de.uni_potsdam.hpi.coheel.io.{IteratorReader, WikiPageInputFormat}
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
-import de.uni_potsdam.hpi.coheel.util.Util
 import de.uni_potsdam.hpi.coheel.wiki._
+import de.uni_potsdam.hpi.coheel.{FlinkProgramRunner, Params}
 import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.common.functions.RichFlatMapFunction
 import org.apache.flink.api.common.typeinfo.TypeInformation
@@ -88,19 +85,19 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 
 	def readWikiPages: DataSet[WikiPage] = {
 		readRawWikiPages { extractor =>
-			val wikiPage = extractor.wikiPage
+			val rawWikiPage = extractor.rawWikiPage
 			val rawPlainText = extractor.getPlainText
 			val tokens = TokenizerHelper.tokenize(rawPlainText)
 			// TODO: extractor.getLinks.asMapOfRanges().values().asScala.toArray???
-			WikiPage(wikiPage.pageTitle, wikiPage.ns, wikiPage.redirect,
-				tokens, extractor.getLinks.asMapOfRanges().values().asScala.toArray, wikiPage.isDisambiguation, wikiPage.isList)
+			WikiPage(rawWikiPage.pageTitle, rawWikiPage.ns, rawWikiPage.redirect,
+				tokens, extractor.getLinks.asMapOfRanges().values().asScala.toArray, rawWikiPage.isDisambiguation)
 		}
 
 	}
 
 	def readWikiPagesWithFullInfo(pageFilter: String => Boolean): DataSet[FullInfoWikiPage] = {
 		readRawWikiPages({ extractor =>
-			val wikiPage = extractor.wikiPage
+			val wikiPage = extractor.rawWikiPage
 
 			val rawPlainText = extractor.getPlainText
 //			link text offsets tell, where the links start in the raw plain text
@@ -108,15 +105,8 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 			val tokenizerResult = TokenizerHelper.tokenizeWithPositionInfo(rawPlainText, linkTextOffsets)
 
 			FullInfoWikiPage(wikiPage.pageTitle, wikiPage.ns, wikiPage.redirect,
-				tokenizerResult.getTokens, tokenizerResult.getTags, tokenizerResult.getLinkPositions, wikiPage.isDisambiguation, wikiPage.isList)
+				tokenizerResult.getTokens, tokenizerResult.getTags, tokenizerResult.getLinkPositions, wikiPage.isDisambiguation)
 		}, pageFilter)
-	}
-
-
-	def filterNormalPages(wikiPages: DataSet[WikiPage]): DataSet[WikiPage] = {
-		wikiPages.filter { wikiPage =>
-			wikiPage.isNormalPage
-		}.name("Filter-Normal-Pages")
 	}
 
 	def readPlainTexts: DataSet[PlainText] = {
@@ -130,13 +120,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 			}
 		}.name("Parsed Plain-Texts")
 	}
-//	def getScores(): DataSet[(String, Array[String])] = {
-//		environment.readTextFile(scoresPath).name("Scores")
-//		.map { line =>
-//			val values = line.split('\t')
-//			(values(1), values)
-//		}
-//	}
+
 	def readSurfaceLinkProbs(subFile: String = ""): DataSet[(String, Float)] = {
 		environment.readTextFile(surfaceLinkProbsPath + subFile).name("Subset of Surfaces with Probabilities")
 			.flatMap(new RichFlatMapFunction[String, (String, Float)] {

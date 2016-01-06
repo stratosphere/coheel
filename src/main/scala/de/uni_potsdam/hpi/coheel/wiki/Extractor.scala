@@ -10,8 +10,8 @@ import scala.collection.mutable
 import org.sweble.wikitext.engine._
 import scala.collection.JavaConversions._
 
-class Extractor(val wikiPage: WikiPage, val surfaceRepr: String => String) {
-	val rootNode = getCompiledWikiPage(wikiPage)
+class Extractor(val rawWikiPage: RawWikiPage, val surfaceRepr: String => String) {
+	val rootNode = getCompiledWikiPage(rawWikiPage)
 
 	val wikiTraversal = new WikiPageTraversal(this)
 
@@ -74,13 +74,13 @@ class Extractor(val wikiPage: WikiPage, val surfaceRepr: String => String) {
 //	}
 
 
-	private def getCompiledWikiPage(wikiPage: WikiPage): EngPage = {
+	private def getCompiledWikiPage(rawWikiPage: RawWikiPage): EngPage = {
 		val config = DefaultConfigEnWp.generate()
 		val compiler = new WtEngineImpl(config)
-		val pageTitle = PageTitle.make(config, wikiPage.pageTitle)
+		val pageTitle = PageTitle.make(config, rawWikiPage.pageTitle)
 		val pageId = new PageId(pageTitle, 0)
 
-		val page = compiler.postprocess(pageId, wikiPage.source, null).getPage
+		val page = compiler.postprocess(pageId, rawWikiPage.source, null).getPage
 
 		page
 	}
@@ -208,7 +208,7 @@ class Extractor(val wikiPage: WikiPage, val surfaceRepr: String => String) {
 	 * Translates an internal link to an link, that can be exposed to the user.
 	 */
 	private def toLink(link: LinkWithNode): Option[Link] = {
-		Some(Link(link.text, surfaceRepr(link.text), Vector(), wikiPage.pageTitle, link.destination))
+		Some(Link(link.text, surfaceRepr(link.text), Vector(), rawWikiPage.pageTitle, link.destination))
 	}
 
 	/**

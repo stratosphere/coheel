@@ -50,11 +50,11 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 		val normalPageLinks = linksFrom(normalPages)
 		val allPageLinks    = linksFrom(wikiPages)
 
-		val groupedByLinkText = allPageLinks
+		val groupedBySurface = allPageLinks
 			.groupBy { link => link.surfaceRepr }
 
 		// counts in how many documents a surface occurs
-		val surfaceDocumentCounts = groupedByLinkText
+		val surfaceDocumentCounts = groupedBySurface
 			.reduceGroup { linksWithSameText =>
 				var surfaceRepr: String = null
 				// Count each link on one source page only once, i.e. if a surface occurs twice on a page
@@ -72,7 +72,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 			}
 
 		// count how often a surface occurs
-		val surfaceCounts = groupedByLinkText
+		val surfaceCounts = groupedBySurface
 			.reduceGroup { group =>
 				val links = group.toList
 				SurfaceCounts(links.head.surfaceRepr, links.size)

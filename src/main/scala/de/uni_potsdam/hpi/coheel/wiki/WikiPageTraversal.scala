@@ -79,7 +79,7 @@ class WikiPageTraversal(protected val extractor: Extractor) {
 						val sourceStart = sourceString.take(templateBlackList.map(_.length).max)
 						if (sourceString.nonEmpty) {
 							val isBlackListed = templateBlackList.exists(sourceStart.toLowerCase.startsWith)
-							val templatePage = WikiPage.fromSource(extractor.wikiPage.pageTitle, sourceString)
+							val templatePage = RawWikiPage.fromSource(extractor.rawWikiPage.pageTitle, sourceString)
 							val newExtractor = new Extractor(templatePage, extractor.surfaceRepr)
 							nodeStack.push(NodeTraversalItem(newExtractor.rootNode, 0, isBlackListed))
 						}
