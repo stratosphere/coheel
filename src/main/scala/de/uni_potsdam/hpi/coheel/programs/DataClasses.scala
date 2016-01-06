@@ -73,6 +73,10 @@ object DataClasses {
 		override def to: String = destination
 		override def updateTo(s: String): SurfaceProbResolving = this.copy(destination = s)
 	}
+	case class SurfaceLinkCountsResolving(surface: String, destination: String, count: Int) extends ThingToResolve[SurfaceLinkCountsResolving] {
+		override def to: String = destination
+		override def updateTo(s: String): SurfaceLinkCountsResolving = this.copy(destination = s)
+	}
 	case class Redirect(from: String, to: String)
 
 	// Training

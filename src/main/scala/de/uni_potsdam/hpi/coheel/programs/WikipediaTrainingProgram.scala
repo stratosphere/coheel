@@ -71,29 +71,16 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 				(surfaceRepr, list.minBy(_.surface).surface, count)
 			}
 
-		// count how often a surface occurs
-		val surfaceCounts = groupedBySurface
-			.reduceGroup { group =>
-				val links = group.toList
-				SurfaceCounts(links.head.surfaceRepr, links.size)
+		val surfaceDestinationCountsUnresolved = groupedBySurface
+			.reduceGroup { (groupIt, out: Collector[SurfaceLinkCountsResolving]) =>
+				val group = groupIt.toList
+				val surface = group.head.surfaceRepr
+				group
+					.groupBy(_.destination)
+					.foreach { case (destination, destGroup) =>
+						out.collect(SurfaceLinkCountsResolving(surface, destination, destGroup.size))
+					}
 			}
-		val surfaceCountHistogram = surfaceCounts.map { surfaceCount => (surfaceCount.count, 1) }.groupBy(0).sum(1)
-
-		// count how often a surface occurs with a certain destination
-		val surfaceLinkCounts = allPageLinks
-			.map { link => SurfaceLinkCounts(link.surfaceRepr, link.destination, 1) }
-			.groupBy(0, 1)
-			.sum(2).name("Surface-LinkTo-Counts")
-		// join them together and calculate the probabilities
-		val surfaceProbsUnresolved = surfaceCounts.join(surfaceLinkCounts)
-			.where { _.surfaceRepr }
-			.equalTo { _.surface }
-			.map { joinResult => joinResult match {
-				case (surfaceCount, surfaceLinkCount) =>
-					SurfaceProbResolving(surfaceCount.surfaceRepr, surfaceLinkCount.destination,
-					 surfaceLinkCount.count / surfaceCount.count.toDouble)
-			}
-		}
 
 		// calculate context link counts only for non-disambiguation pages
 		val linkCounts = normalPageLinks
@@ -141,19 +128,22 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 			.map { cl => (cl.from, cl.to, cl.prob) }
 			.name("Final-Resolved-Context-Links")
 
-		val surfaceProbs = surfaceProbsUnresolved.iterate(3)(iterate)
-			.groupBy("surface", "destination")
-			.reduce { (sp1, sp2) =>
-				sp1.copy(prob = sp1.prob + sp2.prob)
+		val surfaceProbs = surfaceDestinationCountsUnresolved.iterate(3)(iterate)
+			.groupBy("surface")
+			.reduceGroup { (groupIt, out: Collector[(String, String, Double)]) =>
+				val surfaceGroup = groupIt.toSeq
+				val surface = surfaceGroup.head.surface
+				val size = surfaceGroup.map(_.count).sum
+				surfaceGroup.groupBy(_.destination)
+					.foreach { case (destination, destinationGroup) =>
+						out.collect((surface, destination, destinationGroup.map(_.count).sum.toDouble / size))
+					}
 			}
-			.name("Final-Resolved-Surface-Probs")
 
 		contextLinks.writeAsTsv(contextLinkProbsPath)
 		surfaceProbs.writeAsTsv(surfaceProbsPath)
 
 		allPageLinks.map { link => (link.fullId, link.surfaceRepr, link.surface, link.source, link.destination) }.writeAsTsv(allLinksPath)
-		surfaceCountHistogram.writeAsTsv(surfaceCountHistogramPath)
-		surfaceProbsUnresolved.writeAsTsv(surfaceProbsPath)
 		contextLinksUnresolved.writeAsTsv(contextLinkProbsPath)
 		redirects.writeAsTsv(redirectPath)
 		surfaceDocumentCounts.writeAsTsv(surfaceDocumentCountsPath)
