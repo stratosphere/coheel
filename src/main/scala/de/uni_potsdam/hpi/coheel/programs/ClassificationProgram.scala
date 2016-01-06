@@ -49,59 +49,21 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 		val documentStrings = (1 to 6).map { x =>
 			Source.fromFile(s"src/main/resources/classification-documents/$x", "UTF-8").mkString
 		}
-//		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_3).name("Documents")
-		val documents = env.fromCollection(documentStrings).name("Documents")
+		val documents = if (runsOffline())
+				env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_3).name("Documents")
+			else
+				env.fromCollection(documentStrings).name("Documents")
 
-		val inputDocuments = documents.flatMap(new RichFlatMapFunction[String, InputDocument] {
-			def log: Logger = Logger.getLogger(getClass)
-
-			var index: Int = -1
-			var random: Random = null
-			val parallelism = params.parallelism
-			log.info(s"Basing distribution on parallelism $parallelism")
-			val halfParallelism = if (CoheelProgram.runsOffline()) 1 else parallelism / 2
-			val firstHalf  = if (runsOffline()) List(0) else List.range(0, halfParallelism)
-			val secondHalf = if (runsOffline()) List(0) else List.range(halfParallelism, parallelism)
-			var isFirstHalf: Boolean = true
-
-			override def open(params: Configuration): Unit = {
-				index = getRuntimeContext.getIndexOfThisSubtask
-				isFirstHalf = firstHalf contains index
-				random = new Random()
-			}
-			override def flatMap(text: String, out: Collector[InputDocument]): Unit = {
-				val tokenizer = TokenizerHelper.tokenizeWithPositionInfo(text, null)
-				val id = Util.id(text)
-				log.info(s"Reading document $id on index $index")
-
-				val tokens = tokenizer.getTokens
-				val tags = tokenizer.getTags
-				if (isFirstHalf) {
-					out.collect(InputDocument(id, 0, index, tokens, tags))
-					if (!CoheelProgram.runsOffline()) {
-						val randomIndex = secondHalf(random.nextInt(halfParallelism))
-						out.collect(InputDocument(id, 1, randomIndex, tokens, tags))
-						log.info(s"Distributing to $index and $randomIndex")
-					}
-				} else {
-					if (!CoheelProgram.runsOffline()) {
-						val randomIndex = firstHalf(random.nextInt(halfParallelism))
-						out.collect(InputDocument(id, 0, randomIndex, tokens, tags))
-						log.info(s"Distributing to $index and $randomIndex")
-					}
-					out.collect(InputDocument(id, 1, index, tokens, tags))
-				}
-			}
-		}).name("Input-Documents")
+		val inputDocuments = documents.flatMap(new InputDocumentDistributorFlatMap(params, runsOffline())).name("Input-Documents")
 
 		val partitionedDocuments = inputDocuments.partitionCustom(new DocumentPartitioner, "index").name("Partitioned-Documents")
 
 		val classifiables = partitionedDocuments
-			.flatMap(new PotentialEntityFinderFlatMap(params))
+			.flatMap(new RunTrieOverDocumentsFlatMap(params))
 			.name("Possible links")
 
 		// fill the classifiables with all feature information
-		val featuresPerGroup = FeatureProgramHelper.buildFeaturesPerGroup(this, classifiables)
+		val featuresPerGroup = FeatureHelper.buildFeaturesPerGroup(this, classifiables)
 		val basicClassifierResults = featuresPerGroup.reduceGroup(new ClassificationReduceGroup(params)).name("Basic Classifier Results")
 
 
@@ -162,7 +124,6 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 
 	}
 
-
 	def buildNeighbours(env: ExecutionEnvironment): DataSet[Neighbours] = {
 		val contextLinks = env.readTextFile(contextLinkProbsPath).name("ContextLinkProbs-Path").map { line =>
 			val split = line.split('\t')
@@ -196,46 +157,8 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 	}
 }
 
-class PotentialEntityFinderFlatMap(params: Params) extends RichFlatMapFunction[InputDocument, Classifiable[ClassificationInfo]] {
+class RunTrieOverDocumentsFlatMap(params: Params) extends ReadTrieFromDiskFlatMap[InputDocument, Classifiable[ClassificationInfo]](params) {
 	var tokenHitCount: Int = 1
-
-	def log = Logger.getLogger(getClass)
-	var trie: NewTrie = _
-	var fileName: String = _
-
-	override def open(conf: Configuration): Unit = {
-		val surfaceLinkProbsFile = if (CoheelProgram.runsOffline()) {
-			new File("output/surface-link-probs.wiki")
-//			new File("cluster-output/678910")
-		} else {
-			if (getRuntimeContext.getIndexOfThisSubtask < params.parallelism / 2)
-				new File(params.config.getString("first_trie_half"))
-			else
-				new File(params.config.getString("second_trie_half"))
-		}
-		val surfaces = Source.fromFile(surfaceLinkProbsFile, "UTF-8").getLines().flatMap { line =>
-			val split = line.split('\t')
-			if (split.length == 5)
-				Some(split(0), split(3).toFloat)
-			else {
-				log.warn(s"SurfaceLinkProbs: Discarding '${split.deep}' because split size not correct")
-				log.warn(line)
-				None
-			}
-		}
-		log.info(s"On subtask id #${getRuntimeContext.getIndexOfThisSubtask} with file ${surfaceLinkProbsFile.getName}")
-		log.info(s"Building trie with ${FreeMemory.get(true)} MB")
-		val d1 = new Date
-		trie = new NewTrie
-		surfaces.foreach { case (surface, prob) =>
-			// TODO: Determine heuristic for this value
-			if (prob > 0.05) {
-//				println(s"Adding $surface with prob $prob")
-				trie.add(surface, prob)
-			}
-		}
-		log.info(s"Finished trie with ${FreeMemory.get(true)} MB in ${(new Date().getTime - d1.getTime) / 1000} s")
-	}
 
 	override def flatMap(document: InputDocument, out: Collector[Classifiable[ClassificationInfo]]): Unit = {
 		trie.findAllInWithTrieHit(document.tokens).foreach { trieHit =>
@@ -258,10 +181,6 @@ class PotentialEntityFinderFlatMap(params: Params) extends RichFlatMapFunction[I
 				}
 			}
 		}
-	}
-
-	override def close(): Unit = {
-		trie = null
 	}
 }
 
@@ -300,7 +219,7 @@ class ClassificationReduceGroup(params: Params) extends RichGroupReduceFunction[
 		val trieHit = allCandidates.head.info.trieHit
 
 		val features = new mutable.ArrayBuffer[FeatureLine[ClassificationInfo]](allCandidates.size)
-		FeatureProgramHelper.applyCoheelFunctions(allCandidates) { featureLine =>
+		FeatureHelper.applyCoheelFunctions(allCandidates) { featureLine =>
 			features.append(featureLine)
 		}
 		var seedsFound = 0

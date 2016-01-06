@@ -1,7 +1,10 @@
 package de.uni_potsdam.hpi.coheel.programs
 
 import java.lang.Iterable
+import java.util.Date
 
+import de.uni_potsdam.hpi.coheel.datastructures.NewTrie
+import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier.POS_TAG_GROUPS
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
@@ -48,7 +51,7 @@ class TrainingDataProgram extends NoParamCoheelProgram with Serializable {
 		}.writeAsTsv(trainingDataClassifiablesPath +  s"-$SAMPLE_NUMBER.wiki")
 
 		// Fill classifiables with candidates, surface probs and context probs
-		val featuresPerGroup = FeatureProgramHelper.buildFeaturesPerGroup(this, classifiables)
+		val featuresPerGroup = FeatureHelper.buildFeaturesPerGroup(this, classifiables)
 
 		val trainingData = featuresPerGroup
 			.reduceGroup(new TrainingDataGroupedGroupReduce)
@@ -75,6 +78,7 @@ object TrainingDataGroupedGroupReduce {
 	val BROADCAST_LINK_DESTINATIONS_PER_ENTITY = "linkDestinationsPerEntity"
 }
 class TrainingDataGroupedGroupReduce extends RichGroupReduceFunction[Classifiable[TrainInfo], String] {
+	def log = Logger.getLogger(getClass)
 	var linkDestinationsPerEntity: mutable.Map[String, Seq[String]] = _
 	override def open(params: Configuration): Unit = {
 		linkDestinationsPerEntity = getRuntimeContext.getBroadcastVariableWithInitializer(

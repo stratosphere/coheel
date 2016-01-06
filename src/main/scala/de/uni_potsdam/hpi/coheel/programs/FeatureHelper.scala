@@ -13,7 +13,7 @@ import scala.reflect.ClassTag
  * Helper routines for creating the features.
  * This can be used both from the training data generator and the classifier.
  */
-object FeatureProgramHelper {
+object FeatureHelper {
 
 	def applyCoheelFunctions[T <: Info](allCandidates: Seq[Classifiable[T]])(featureLineIteratorFunction: FeatureLine[T] => Unit): Unit = {
 		val allCandidatesWithIndex = allCandidates.zipWithIndex

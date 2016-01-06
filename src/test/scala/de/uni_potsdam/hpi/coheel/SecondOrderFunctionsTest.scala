@@ -1,7 +1,7 @@
 package de.uni_potsdam.hpi.coheel
 
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{Classifiable, ClassificationInfo}
-import de.uni_potsdam.hpi.coheel.programs.FeatureProgramHelper
+import de.uni_potsdam.hpi.coheel.programs.FeatureHelper
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -16,7 +16,7 @@ class SecondOrderFunctionsTest extends FunSuite {
 			Classifiable("0", "foo", Array(), "3", 0.30, -400, ClassificationInfo(null, null, Array())),
 			Classifiable("0", "foo", Array(), "4", 0.05, -800, ClassificationInfo(null, null, Array()))
 		)
-		FeatureProgramHelper.applyCoheelFunctions(classifiables) { featureLine =>
+		FeatureHelper.applyCoheelFunctions(classifiables) { featureLine =>
 			println(featureLine)
 		}
 	}

@@ -35,6 +35,10 @@ class TrieWithProbBroadcastInitializer extends BroadcastVariableInitializer[(Str
 object SurfacesInTrieFlatMap {
 	val BROADCAST_SURFACES = "surfaces"
 }
+
+/**
+  * Abstract base class for flatmaps needing access to the trie, whose values were broadcasted.
+  */
 abstract class SurfacesInTrieFlatMap[I, O] extends RichFlatMapFunction[I, O] {
 	def log = Logger.getLogger(getClass)
 	var trie: NewTrie = _

@@ -22,7 +22,7 @@ class SurfaceLinkProbsProgram extends CoheelProgram[String] {
 		val surfaces = readSurfaces(currentFile)
 
 		val trieHits = plainTexts
-			.flatMap(new FindEntireTextSurfacesFlatMap)
+			.flatMap(new RunTrieOverPlainTextFlatMap)
 			.withBroadcastSet(surfaces, SurfacesInTrieFlatMap.BROADCAST_SURFACES)
 			.name("Entire-Text-Surfaces-Along-With-Document")
 
@@ -52,7 +52,7 @@ class SurfaceLinkProbsProgram extends CoheelProgram[String] {
 	}
 }
 
-class FindEntireTextSurfacesFlatMap extends SurfacesInTrieFlatMap[PlainText, EntireTextSurfaces] {
+class RunTrieOverPlainTextFlatMap extends SurfacesInTrieFlatMap[PlainText, EntireTextSurfaces] {
 	var lastChunk = new Date()
 	var i = 0
 	val OUTPUT_EVERY = if (CoheelProgram.runsOffline()) 1000 else 10000
