@@ -2,7 +2,7 @@
 
 set -e
 
-echo "This script is to be run after the wikipedia extraction."
+echo "This script is to be run after the wikipedia extraction and before the surface link probs program."
 echo "It downloads the surface document counts, concatenates them to two files 12345 and 678910."
 echo "These files are then uploaded to surface-document-counts-halfs.wiki and"
 echo "can then be used for populating tries."
