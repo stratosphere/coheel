@@ -8,7 +8,6 @@ import de.uni_potsdam.hpi.coheel.datastructures.NewTrie
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import org.apache.flink.api.common.functions.RichFlatMapFunction
 import org.apache.flink.configuration.Configuration
-import org.apache.log4j.Logger
 
 import scala.io.Source
 
@@ -16,7 +15,7 @@ import scala.io.Source
   * Abstract base class for flatmaps which need to build the trie based on data on the disk
   */
 abstract class ReadTrieFromDiskFlatMap[IN, OUT](params: Params) extends RichFlatMapFunction[IN, OUT] {
-	def log = Logger.getLogger(getClass)
+	import CoheelLogger._
 	var trie: NewTrie = _
 
 	override def open(conf: Configuration): Unit = {

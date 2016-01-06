@@ -15,7 +15,6 @@ import org.apache.flink.api.scala.{ExecutionEnvironment, _}
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.core.fs.FileSystem
 import org.apache.flink.util.Collector
-import org.apache.log4j.Logger
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
@@ -27,7 +26,6 @@ class TrainingDataProgram extends NoParamCoheelProgram with Serializable {
 
 	override def getDescription = "Wikipedia Extraction: Build training data"
 
-	def log: Logger = Logger.getLogger(getClass)
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val wikiPages = readWikiPagesWithFullInfo { pageTitle =>
@@ -80,7 +78,7 @@ object TrainingDataGroupedGroupReduce {
 	val BROADCAST_LINK_DESTINATIONS_PER_ENTITY = "linkDestinationsPerEntity"
 }
 class TrainingDataGroupedGroupReduce extends RichGroupReduceFunction[Classifiable[TrainInfo], String] {
-	def log = Logger.getLogger(getClass)
+	import CoheelLogger._
 	var linkDestinationsPerEntity: mutable.Map[String, Seq[String]] = _
 	override def open(params: Configuration): Unit = {
 		linkDestinationsPerEntity = getRuntimeContext.getBroadcastVariableWithInitializer(

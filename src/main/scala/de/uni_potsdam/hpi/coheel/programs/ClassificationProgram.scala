@@ -1,11 +1,10 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import java.io.File
 import java.lang.Iterable
 import java.util.Date
 
 import de.uni_potsdam.hpi.coheel.Params
-import de.uni_potsdam.hpi.coheel.datastructures.{NewTrie, TrieHit}
+import de.uni_potsdam.hpi.coheel.datastructures.TrieHit
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.io.Sample
@@ -13,21 +12,17 @@ import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier
 import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier.POS_TAG_GROUPS
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import de.uni_potsdam.hpi.coheel.util.Util
-import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
-import org.apache.flink.api.common.functions.{Partitioner, RichFlatMapFunction, RichGroupReduceFunction}
+import org.apache.flink.api.common.functions.{Partitioner, RichGroupReduceFunction}
 import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.core.fs.FileSystem
 import org.apache.flink.util.Collector
-import org.apache.log4j.Logger
 import weka.classifiers.Classifier
-import weka.classifiers.meta.SerialVersionAccess
 import weka.core.SerializationHelper
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.io.Source
-import scala.util.Random
 
 
 class DocumentPartitioner extends Partitioner[Int] {
@@ -38,7 +33,6 @@ class DocumentPartitioner extends Partitioner[Int] {
 class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 
 	override def getDescription: String = "CohEEL Classification"
-	def log: Logger = Logger.getLogger(getClass)
 
 
 	// Select, which neighbours file to use
@@ -159,6 +153,7 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 
 class RunTrieOverDocumentsFlatMap(params: Params) extends ReadTrieFromDiskFlatMap[InputDocument, Classifiable[ClassificationInfo]](params) {
 	var tokenHitCount: Int = 1
+	import CoheelLogger._
 
 	override def flatMap(document: InputDocument, out: Collector[Classifiable[ClassificationInfo]]): Unit = {
 		trie.findAllInWithTrieHit(document.tokens).foreach { trieHit =>
@@ -186,7 +181,7 @@ class RunTrieOverDocumentsFlatMap(params: Params) extends ReadTrieFromDiskFlatMa
 
 class ClassificationReduceGroup(params: Params) extends RichGroupReduceFunction[Classifiable[ClassificationInfo], ClassifierResult] {
 
-	def log = Logger.getLogger(getClass)
+	import CoheelLogger._
 	var seedClassifier: CoheelClassifier = null
 	var candidateClassifier: CoheelClassifier = null
 

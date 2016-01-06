@@ -77,6 +77,7 @@ class SurfaceLinkProbsProgram extends CoheelProgram[String] {
 }
 
 class RunTrieOverPlainTextFlatMap extends SurfacesInTrieFlatMap[PlainText, EntireTextSurfaces] {
+	import CoheelLogger._
 	var lastChunk = new Date()
 	var i = 0
 	val OUTPUT_EVERY = if (CoheelProgram.runsOffline()) 1000 else 10000

@@ -3,15 +3,15 @@ package de.uni_potsdam.hpi.coheel.programs
 import java.lang.Iterable
 
 import de.uni_potsdam.hpi.coheel.datastructures.TrieHit
-import de.uni_potsdam.hpi.coheel.programs.DataClasses.{RandomWalkNode, NodeTypes, ClassifierResultWithNeighbours}
+import de.uni_potsdam.hpi.coheel.programs.DataClasses.{ClassifierResultWithNeighbours, NodeTypes, RandomWalkNode}
+import de.uni_potsdam.hpi.coheel.util.Timer
 import org.apache.commons.collections4.BidiMap
 import org.apache.commons.collections4.bidimap.DualHashBidiMap
-import org.apache.commons.math3.linear.{ArrayRealVector, OpenMapRealMatrix, RealVector, RealMatrix}
-import org.apache.log4j.Logger
-import de.uni_potsdam.hpi.coheel.util.Timer
+import org.apache.commons.math3.linear.{ArrayRealVector, OpenMapRealMatrix, RealMatrix, RealVector}
 import org.apache.flink.api.common.functions.RichGroupReduceFunction
 import org.apache.flink.util.Collector
-import org.jgrapht.graph.{DefaultWeightedEdge, DefaultDirectedWeightedGraph}
+import org.jgrapht.graph.{DefaultDirectedWeightedGraph, DefaultWeightedEdge}
+
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
@@ -20,9 +20,8 @@ object RandomWalkReduceGroup {
 }
 
 class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWithNeighbours, (String, TrieHit, String)] {
+	import CoheelLogger._
 	import RandomWalkReduceGroup._
-
-	def log: Logger = Logger.getLogger(getClass)
 
 	def anyCandidates(entities: Vector[DataClasses.ClassifierResultWithNeighbours]): Boolean = {
 		entities.exists { entity => entity.classifierType == NodeTypes.CANDIDATE }

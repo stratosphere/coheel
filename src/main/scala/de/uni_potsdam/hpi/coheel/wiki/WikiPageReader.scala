@@ -1,10 +1,12 @@
 package de.uni_potsdam.hpi.coheel.wiki
 
-import java.io.{Reader, StringReader, BufferedReader}
-import javax.xml.stream.{XMLStreamConstants, XMLInputFactory}
-import org.apache.commons.lang3.StringEscapeUtils
-import org.apache.log4j.Logger
+import java.io.{BufferedReader, Reader, StringReader}
+import javax.xml.stream.{XMLInputFactory, XMLStreamConstants}
+
+import de.uni_potsdam.hpi.coheel.programs.CoheelLogger
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
+import org.apache.commons.lang3.StringEscapeUtils
+
 import scala.collection.mutable
 
 /**
@@ -68,7 +70,7 @@ object WikiPage {
 
 class WikiPageReader {
 
-	val log = Logger.getLogger(getClass)
+	import CoheelLogger._
 
 	val factory = XMLInputFactory.newInstance()
 	def xmlToWikiPages(s: String): Iterator[WikiPage] = {
