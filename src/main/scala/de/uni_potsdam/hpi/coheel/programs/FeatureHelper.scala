@@ -32,7 +32,8 @@ object FeatureHelper {
 			import classifiable._
 			val features = List(
 				surfaceProb, surfaceRank(i), surfaceDeltaTops(i), surfaceDeltaSuccs(i),
-				contextProb, contextRank(i), contextDeltaTops(i), contextDeltaSuccs(i)
+				contextProb, contextRank(i), contextDeltaTops(i), contextDeltaSuccs(i),
+				surfaceLinkProb
 			) ::: classifiable.info.furtherFeatures(classifiable)
 			featureLineIteratorFunction(FeatureLine[T](id, surfaceRepr, candidateEntity, classifiable.info, features))
 		}

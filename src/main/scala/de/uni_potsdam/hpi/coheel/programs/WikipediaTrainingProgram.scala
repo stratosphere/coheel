@@ -41,8 +41,8 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 	/**
 	 * Builds two plans:
 	 * <ul>
-	 *   <li> the plan who counts how often one document links to another
-	 *   <li> the plan who counts how often a link occurs under a certain surface
+	 *   <li> the plan which counts how often one document links to another
+	 *   <li> the plan which counts how often a link occurs under a certain surface
 	 */
 	def buildLinkPlans(wikiPages: DataSet[WikiPage]): Unit = {
 		val normalPages = wikiPages.filter { !_.isDisambiguation }
@@ -118,8 +118,6 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 			.filter { wikiPage => wikiPage.isRedirect }
 			.map { wikiPage => Redirect(wikiPage.pageTitle, wikiPage.redirect) }
 
-
-
 		def iterate[T <: ThingToResolve[T] : TypeInformation : ClassTag](ds: DataSet[T]): DataSet[T] = {
 			val resolvedRedirects = ds.leftOuterJoin(redirects)
 				.where { _.to }
@@ -152,10 +150,6 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 
 		contextLinks.writeAsTsv(contextLinkProbsPath)
 		surfaceProbs.writeAsTsv(surfaceProbsPath)
-
-
-
-
 
 		allPageLinks.map { link => (link.fullId, link.surfaceRepr, link.surface, link.source, link.destination) }.writeAsTsv(allLinksPath)
 		surfaceCountHistogram.writeAsTsv(surfaceCountHistogramPath)
