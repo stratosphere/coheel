@@ -63,7 +63,7 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 			.name("Possible links")
 
 		// fill the classifiables with all feature information
-		val featuresPerGroup = FeatureHelper.buildFeaturesPerGroup(this, classifiables)
+		val featuresPerGroup = FeatureHelper.buildFeaturesPerGroup(env, classifiables)
 		val basicClassifierResults = featuresPerGroup.reduceGroup(new ClassificationReduceGroup(params)).name("Basic Classifier Results")
 
 

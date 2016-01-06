@@ -148,7 +148,6 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 					log.warn(s"SurfaceLinkProbs: Discarding '${split.deep}' because split size not correct")
 					log.warn(line)
 				}
-
 			}
 		}).name("Parsed Surfaces with Probabilities")
 	}
@@ -173,61 +172,6 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 					None
 			}
 		}.name("Surface-Document-Counts")
-	}
-
-
-	def readSurfaces(subFile: String = ""): DataSet[String] = {
-		environment.readTextFile(surfaceDocumentCountsHalfsPath + subFile).name("Subset of Surfaces")
-			.flatMap(new RichFlatMapFunction[String, String] {
-			override def flatMap(line: String, out: Collector[String]): Unit = {
-				val split = line.split('\t')
-				if (split.length == 3)
-					out.collect(split(0))
-				else {
-					log.warn(s"SurfaceProbs: Discarding '${split.deep}' because split size not correct")
-					log.warn(line)
-				}
-			}
-		}).name("Parsed Surfaces")
-	}
-
-	def readSurfaceProbs(threshold: Double = 0.0): DataSet[SurfaceProb] = {
-		environment.readTextFile(surfaceProbsPath).flatMap { line =>
-			val split = line.split('\t')
-			if (split.length > 1) {
-				val tokens = split(0).split(' ')
-				if (tokens.nonEmpty) {
-					val prob = split(2).toDouble
-					if (prob > threshold)
-						Some(SurfaceProb(split(0), split(1), prob))
-					else
-						None
-				}
-				else
-					None
-			}
-			else None
-		}.name("Read surface probs")
-	}
-
-	def readLanguageModels(): DataSet[LanguageModel] = {
-		environment.readTextFile(languageModelsPath).flatMap { line =>
-			val lineSplit = line.split('\t')
-			val pageTitle = lineSplit(0)
-			if (lineSplit.length < 2) {
-				log.warn(s"$pageTitle not long enough: $line")
-				None
-			} else {
-				val model = lineSplit(1).split(' ').flatMap { entrySplit =>
-					val wordSplit = entrySplit.split('\0')
-					if (wordSplit.length == 2)
-						Some(wordSplit(0), wordSplit(1).toInt)
-					else
-						None
-				}.toMap
-				Some(LanguageModel(pageTitle, model))
-			}
-		}.name("Reading language models")
 	}
 
 	def runsOffline(): Boolean = {

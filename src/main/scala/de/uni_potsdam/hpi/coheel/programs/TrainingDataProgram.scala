@@ -34,7 +34,9 @@ class TrainingDataProgram extends NoParamCoheelProgram with Serializable {
 			Math.abs(pageTitle.hashCode) % SAMPLE_FRACTION == SAMPLE_NUMBER
 		}
 
-		wikiPages.map { wikiPage => wikiPage.pageTitle }.writeAsText(trainingDataPagesPath + s"-$SAMPLE_NUMBER.wiki", FileSystem.WriteMode.OVERWRITE)
+		wikiPages
+			.map { wikiPage => wikiPage.pageTitle }
+			.writeAsText(trainingDataPagesPath + s"-$SAMPLE_NUMBER.wiki", FileSystem.WriteMode.OVERWRITE)
 
 		val linkDestinationsPerEntity = wikiPages.map { wp =>
 			LinkDestinations(wp.pageTitle, wp.links.values.map { l =>
@@ -51,7 +53,7 @@ class TrainingDataProgram extends NoParamCoheelProgram with Serializable {
 		}.writeAsTsv(trainingDataClassifiablesPath +  s"-$SAMPLE_NUMBER.wiki")
 
 		// Fill classifiables with candidates, surface probs and context probs
-		val featuresPerGroup = FeatureHelper.buildFeaturesPerGroup(this, classifiables)
+		val featuresPerGroup = FeatureHelper.buildFeaturesPerGroup(env, classifiables)
 
 		val trainingData = featuresPerGroup
 			.reduceGroup(new TrainingDataGroupedGroupReduce)

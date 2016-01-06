@@ -15,6 +15,8 @@ import scala.reflect.ClassTag
  */
 object FeatureHelper {
 
+	import CoheelLogger._
+
 	def applyCoheelFunctions[T <: Info](allCandidates: Seq[Classifiable[T]])(featureLineIteratorFunction: FeatureLine[T] => Unit): Unit = {
 		val allCandidatesWithIndex = allCandidates.zipWithIndex
 		val surfaceOrder = allCandidatesWithIndex.sortBy(-_._1.surfaceProb)
@@ -36,10 +38,9 @@ object FeatureHelper {
 		}
 	}
 
-	def buildFeaturesPerGroup[T <: Info : TypeInformation : ClassTag](prg: CoheelProgram[_], classifiables: DataSet[Classifiable[T]]): GroupedDataSet[Classifiable[T]] = {
-		val surfaceProbs = prg.readSurfaceProbs()
-		val languageModels = prg.readLanguageModels()
-
+	def buildFeaturesPerGroup[T <: Info : TypeInformation : ClassTag](env: ExecutionEnvironment, classifiables: DataSet[Classifiable[T]]): GroupedDataSet[Classifiable[T]] = {
+		val surfaceProbs = readSurfaceProbs(env)
+		val languageModels = readLanguageModels(env)
 
 		val classifiablesWithCandidates: DataSet[DataClasses.Classifiable[T]] = classifiables.join(surfaceProbs)
 			.where("surfaceRepr")
@@ -76,6 +77,45 @@ object FeatureHelper {
 		val trainingData = baseScores.groupBy(_.id)
 
 		trainingData
+	}
+
+	private def readSurfaceProbs(env: ExecutionEnvironment, threshold: Double = 0.0): DataSet[SurfaceProb] = {
+		env.readTextFile(surfaceProbsPath).flatMap { line =>
+			val split = line.split('\t')
+			if (split.length > 1) {
+				val tokens = split(0).split(' ')
+				if (tokens.nonEmpty) {
+					val prob = split(2).toDouble
+					if (prob > threshold)
+						Some(SurfaceProb(split(0), split(1), prob))
+					else
+						None
+				}
+				else
+					None
+			}
+			else None
+		}.name("Read surface probs")
+	}
+
+	private def readLanguageModels(env: ExecutionEnvironment): DataSet[LanguageModel] = {
+		env.readTextFile(languageModelsPath).flatMap { line =>
+			val lineSplit = line.split('\t')
+			val pageTitle = lineSplit(0)
+			if (lineSplit.length < 2) {
+				log.warn(s"$pageTitle not long enough: $line")
+				None
+			} else {
+				val model = lineSplit(1).split(' ').flatMap { entrySplit =>
+					val wordSplit = entrySplit.split('\0')
+					if (wordSplit.length == 2)
+						Some(wordSplit(0), wordSplit(1).toInt)
+					else
+						None
+				}.toMap
+				Some(LanguageModel(pageTitle, model))
+			}
+		}.name("Reading language models")
 	}
 
 }

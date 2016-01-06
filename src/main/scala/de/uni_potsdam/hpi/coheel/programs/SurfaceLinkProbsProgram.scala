@@ -6,11 +6,20 @@ import de.uni_potsdam.hpi.coheel.datastructures.NewTrie
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{EntireTextSurfaceCounts, EntireTextSurfaces, PlainText}
-import org.apache.flink.api.java.aggregation.Aggregations
+import org.apache.flink.api.common.functions.RichFlatMapFunction
 import org.apache.flink.api.scala._
 import org.apache.flink.util.Collector
 
+/**
+  * Calculates the surface link probs.
+  * This needs the surface documents file in two halfs under the
+  * `surfaceDocumentCountsHalfsPath` path. This file can be created
+  * with bin/prepare-surface-link-probs-program.sh.
+  */
 class SurfaceLinkProbsProgram extends CoheelProgram[String] {
+
+	import CoheelLogger._
+
 
 	val arguments = if (runsOffline()) List("1") else List("12345", "678910")
 	override def getDescription = "Wikipedia Extraction: Entire Text Surfaces"
@@ -49,6 +58,21 @@ class SurfaceLinkProbsProgram extends CoheelProgram[String] {
 		trieHits.writeAsTsv(trieHitPath + currentFile)
 		entireTextSurfaceCounts.writeAsTsv(entireTextSurfacesPath + currentFile)
 		surfaceLinkProbs.writeAsTsv(surfaceLinkProbsPath + currentFile)
+	}
+
+	def readSurfaces(subFile: String = ""): DataSet[String] = {
+		environment.readTextFile(surfaceDocumentCountsHalfsPath + subFile).name("Subset of Surfaces")
+			.flatMap(new RichFlatMapFunction[String, String] {
+				override def flatMap(line: String, out: Collector[String]): Unit = {
+					val split = line.split('\t')
+					if (split.length == 3)
+						out.collect(split(0))
+					else {
+						log.warn(s"SurfaceProbs: Discarding '${split.deep}' because split size not correct")
+						log.warn(line)
+					}
+				}
+			}).name("Parsed Surfaces")
 	}
 }
 
