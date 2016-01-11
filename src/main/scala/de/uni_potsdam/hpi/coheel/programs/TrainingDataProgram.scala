@@ -118,7 +118,7 @@ class TrainingDataGroupReduce extends RichGroupReduceFunction[Classifiable[Train
 				if (!linkDestinations.contains(featureLine.candidateEntity))
 					out.collect(output)
 				else {
-					log.info(s"Not output surface `${featureLine.surfaceRepr}` with candidate '${featureLine.candidateEntity}' from ${featureLine.info.modelInfo}")
+					log.info(s"Do not output surface `${featureLine.surfaceRepr}` with candidate '${featureLine.candidateEntity}' from ${featureLine.info.modelInfo}")
 				}
 			} else {
 				// we have a link, just output it
@@ -130,6 +130,8 @@ class TrainingDataGroupReduce extends RichGroupReduceFunction[Classifiable[Train
 
 class LinksAsTrainingDataFlatMap(params: Params) extends ReadTrieFromDiskFlatMap[FullInfoWikiPage, Classifiable[TrainInfo]](params) {
 	var trieHitCount: Int = 1
+	var nrLinks = 0
+	var nrLinksFiltered = 0
 	import CoheelLogger._
 
 	override def flatMap(wikiPage: FullInfoWikiPage, out: Collector[Classifiable[TrainInfo]]): Unit = {
@@ -172,6 +174,7 @@ class LinksAsTrainingDataFlatMap(params: Params) extends ReadTrieFromDiskFlatMap
 			val contextOption = Util.extractContext(wikiPage.plainText, index)
 
 			val containsResult = trie.contains(link.surfaceRepr)
+			nrLinks += 1
 			if (containsResult.asEntry) {
 				contextOption.foreach { context =>
 					out.collect(
@@ -182,8 +185,14 @@ class LinksAsTrainingDataFlatMap(params: Params) extends ReadTrieFromDiskFlatMap
 							surfaceLinkProb = containsResult.prob,
 							info = TrainInfo(link.source, link.destination, POS_TAG_GROUPS.map { group => if (group.exists(link.posTags.contains(_))) 1.0 else 0.0 })))
 				}
+			} else {
+				nrLinksFiltered += 1
 			}
 		}
+	}
+
+	override def close(): Unit = {
+		log.info(s"LinksAsTrainingDataFlatMap summary: # Links filtered/# Links: $nrLinksFiltered/$nrLinks = ${nrLinksFiltered.toDouble * 100 / nrLinks} %")
 	}
 }
 
