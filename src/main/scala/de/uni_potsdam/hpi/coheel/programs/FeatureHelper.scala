@@ -5,7 +5,6 @@ import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.scala._
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
-import org.apache.flink.core.fs.FileSystem
 
 import scala.reflect.ClassTag
 
@@ -32,8 +31,8 @@ object FeatureHelper {
 			import classifiable._
 			val features = List(
 				surfaceProb, surfaceRank(i), surfaceDeltaTops(i), surfaceDeltaSuccs(i),
-				contextProb, contextRank(i), contextDeltaTops(i), contextDeltaSuccs(i),
-				surfaceLinkProb
+				contextProb, contextRank(i), contextDeltaTops(i), contextDeltaSuccs(i)
+//				surfaceLinkProb
 			) ::: classifiable.info.furtherFeatures(classifiable)
 			featureLineIteratorFunction(FeatureLine[T](id, surfaceRepr, candidateEntity, classifiable.info, features))
 		}

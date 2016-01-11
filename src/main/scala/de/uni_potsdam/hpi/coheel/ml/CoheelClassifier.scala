@@ -11,7 +11,7 @@ import weka.core.DenseInstance
 
 object CoheelClassifier {
 
-	val NUMBER_OF_FEATURES = 16 // excluding class attribute
+	val NUMBER_OF_FEATURES = 15 // excluding class attribute
 	val POSITIVE_CLASS = 1.0
 
 	val POS_TAG_GROUPS = Array(
@@ -35,7 +35,7 @@ object CoheelClassifier {
 		attrs.add(new Attribute("contextRank"))
 		attrs.add(new Attribute("contextDeltaTop"))
 		attrs.add(new Attribute("contextDeltaSucc"))
-		attrs.add(new Attribute("surfaceLinkProb"))
+//		attrs.add(new Attribute("surfaceLinkProb"))
 		// pos tags
 		attrs.add(new Attribute("NN"))
 		attrs.add(new Attribute("NNP"))

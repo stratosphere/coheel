@@ -40,12 +40,13 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 //	val NEIGHBOURS_FILE: Option[String] = Some(reciprocalNeighboursPath)
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
-		val documentStrings = (1 to 6).map { x =>
+		val documentStrings = List(4, 6).map { x =>
 			Source.fromFile(s"src/main/resources/classification-documents/$x", "UTF-8").mkString
 		}
 		val documents = if (runsOffline())
 				env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_3).name("Documents")
 			else
+//				env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_3).name("Documents")
 				env.fromCollection(documentStrings).name("Documents")
 
 		val inputDocuments = documents.flatMap(new InputDocumentDistributorFlatMap(params, runsOffline())).name("Input-Documents")
@@ -63,7 +64,7 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 
 		val preprocessedNeighbours = NEIGHBOURS_FILE match {
 			case Some(file) => loadNeighboursFromHdfs(env, file)
-			case None => buildReciprocalNeighbours(env)
+			case None => buildFullNeighbours(env)
 		}
 
 		val withNeighbours = basicClassifierResults.join(preprocessedNeighbours)

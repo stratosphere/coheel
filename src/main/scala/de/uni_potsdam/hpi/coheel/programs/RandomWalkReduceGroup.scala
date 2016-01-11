@@ -33,6 +33,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		// One trie hit may have many candidate entities (obviously), and also one candidate entity may come from many
 		// different trie hit
 		var entities = entitiesIt.asScala.toVector
+		log.info(s"Handling document id: ${entities.head.documentId}")
 
 		log.info("BASIC NEIGHBOURS")
 		// For printing out the neighbours, it suffices to group by candidate entity, as the entity determines the neighbours.
