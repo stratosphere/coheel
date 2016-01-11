@@ -176,7 +176,7 @@ class LinksAsTrainingDataFlatMap(params: Params) extends ReadTrieFromDiskFlatMap
 				contextOption.foreach { context =>
 					out.collect(
 						Classifiable[TrainInfo](
-							link.fullId,
+							link.id,
 							link.surfaceRepr,
 							context.toArray,
 							surfaceLinkProb = containsResult.prob,

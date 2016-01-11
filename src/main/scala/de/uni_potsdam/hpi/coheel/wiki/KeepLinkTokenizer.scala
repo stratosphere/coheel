@@ -49,7 +49,7 @@ class KeepLinkTokenizer(positionInfo: TreeRangeMap[Integer, Link], tagger: Maxen
 			val link = entry.getValue
 			// check, whether a new link started, then build a new index, use old link offset otherwise
 			// last index in the tokens array is the index of the link in the new tokenized output array
-			if (currentLink == null || currentLink.fullId != link.fullId) {
+			if (currentLink == null || currentLink.id != link.id) {
 				currentTokenArrayIndex = tokens.size - 1
 				currentLink = link
 			}

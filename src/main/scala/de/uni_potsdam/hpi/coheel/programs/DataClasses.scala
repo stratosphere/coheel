@@ -14,13 +14,13 @@ object DataClasses {
 	 *      application.
 	 * @param source The page the link is on, e.g. 'Germany'
 	 * @param destination The link's destination, e.g. 'Angela Merkel'
-	 * @param id An auto-incrementing id for a link. Note: This field alone is no key, because ids are generated at each node.
-	 *           Therefore, only (id, source) makes a key. Therefore, see the fullId method, which returns an unique string id.
+	 * @param pos Position of the link in the text. Use for generating a unique id.
+	  *           See the fullId method, which returns an unique string id.
 	 */
 	// Note: In contrast to InternalLink, this class does not contain a Node, because
 	// that should not be part of the interface of this class.
-	case class Link(surface: String, surfaceRepr: String, posTags: Vector[String], source: String, destination: String, id: Int = newId()) {
-		def fullId: String = f"L-${Util.id(source)}-$id%08d-${Util.id(surface)}"
+	case class Link(surface: String, surfaceRepr: String, posTags: Vector[String], source: String, destination: String, pos: Int) {
+		def id: String = f"L-${Util.id(source)}-$pos%08d-${Util.id(surface)}"
 	}
 
 	case class WordInDocument(document: String, word: String, count: Int)

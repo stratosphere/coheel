@@ -86,7 +86,7 @@ class Extractor(val rawWikiPage: RawWikiPage, val surfaceRepr: String => String)
 	}
 
 
-	protected[wiki] def extractPotentialLink(node: WtNode): Option[Link] = {
+	protected[wiki] def extractPotentialLink(node: WtNode, pos: Int): Option[Link] = {
 		val link: Option[LinkWithNode] = Some(new LinkWithNode(node))
 		link
 			.flatMap(filterNonLinks)
@@ -98,7 +98,7 @@ class Extractor(val rawWikiPage: RawWikiPage, val surfaceRepr: String => String)
 			.flatMap(filterExternalLinks)
 			.flatMap(uppercaseFirstLetter)
 //			.flatMap(debugPrintAllLinks)
-			.flatMap(toLink)
+			.flatMap(toLink(pos, _))
 			.flatMap(filterEmptySurfaceRepr)
 	}
 
@@ -207,8 +207,8 @@ class Extractor(val rawWikiPage: RawWikiPage, val surfaceRepr: String => String)
 	/**
 	 * Translates an internal link to an link, that can be exposed to the user.
 	 */
-	private def toLink(link: LinkWithNode): Option[Link] = {
-		Some(Link(link.text, surfaceRepr(link.text), Vector(), rawWikiPage.pageTitle, link.destination))
+	private def toLink(pos: Int, link: LinkWithNode): Option[Link] = {
+		Some(Link(link.text, surfaceRepr(link.text), Vector(), rawWikiPage.pageTitle, link.destination, pos))
 	}
 
 	/**

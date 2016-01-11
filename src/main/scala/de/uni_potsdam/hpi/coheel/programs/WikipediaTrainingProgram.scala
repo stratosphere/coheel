@@ -141,7 +141,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 		contextLinks.writeAsTsv(contextLinkProbsPath)
 		surfaceProbs.writeAsTsv(surfaceProbsPath)
 
-		allPageLinks.map { link => (link.fullId, link.surfaceRepr, link.surface, link.source, link.destination) }.writeAsTsv(allLinksPath)
+		allPageLinks.map { link => (link.id, link.surfaceRepr, link.surface, link.source, link.destination) }.writeAsTsv(allLinksPath)
 		redirects.writeAsTsv(redirectPath)
 		surfaceDocumentCounts.writeAsTsv(surfaceDocumentCountsPath)
 	}
