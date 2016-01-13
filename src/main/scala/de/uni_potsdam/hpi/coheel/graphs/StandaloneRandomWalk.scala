@@ -1,0 +1,76 @@
+package de.uni_potsdam.hpi.coheel.graphs
+
+import java.io.File
+import de.uni_potsdam.hpi.coheel.datastructures.TrieHit
+import de.uni_potsdam.hpi.coheel.programs.DataClasses.{Neighbour, NodeTypes, ClassifierResultWithNeighbours}
+import de.uni_potsdam.hpi.coheel.programs.RandomWalkReduceGroup
+
+import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
+import scala.io.Source
+import scala.collection.JavaConverters._
+
+
+
+object StandaloneRandomWalk {
+
+	def main(args: Array[String]): Unit = {
+		val l = readOfflineFile()
+		println("Done")
+
+		val p = new RandomWalkReduceGroup()
+		p.reduce(l.toIterable.asJava, null)
+	}
+
+	def readOfflineFile(): mutable.ArrayBuffer[ClassifierResultWithNeighbours] = {
+		val l = new ArrayBuffer[ClassifierResultWithNeighbours]()
+		var c: ClassifierResultWithNeighbours = null
+		Source.fromFile(new File("offline")).getLines().foreach { line =>
+			if (line.startsWith("I,")) {
+				val split = line.split(',')
+				val s = split.slice(1, split.length - 1).mkString(",")
+				val n = Neighbour(s, split.last.toFloat)
+				c.in.asInstanceOf[ArrayBuffer[Neighbour]].+=:(n)
+			} else if (line.startsWith("O,")) {
+				val split = line.split(',')
+				val s = split.slice(1, split.length - 1).mkString(",")
+				val n = Neighbour(s, split.last.toFloat)
+				c.out.asInstanceOf[ArrayBuffer[Neighbour]].+=:(n)
+			} else if (line.startsWith("-------")) {
+				if (c != null) {
+					l += c
+				}
+			} else {
+				val classifierType = if (line.contains(",SEED,"))
+					NodeTypes.SEED
+				else if (line.contains(",CANDIDATE,"))
+					NodeTypes.CANDIDATE
+				else
+					throw new Exception(s"Unknown type in '$line'")
+
+
+				var offset = line.indexOf(",SEED,")
+				if (offset == -1)
+					offset = line.indexOf(",CANDIDATE,")
+				val candidateEntity = line.substring(0, offset)
+
+				val trieHit = parseTrieHit(line)
+				c = ClassifierResultWithNeighbours("1", classifierType, candidateEntity, trieHit, mutable.ArrayBuffer(), mutable.ArrayBuffer())
+//				println(c)
+			}
+		}
+		// append the last c
+		l += c
+		l
+	}
+
+	def parseTrieHit(line: String): TrieHit = {
+		val R = """'TrieHit\(.*\)'""".r
+		val s = R.findFirstIn(line).get
+//		println(s)
+		val split = s.replace("'TrieHit(", "").replace(")'", "").split(",")
+//		println(split.deep)
+		TrieHit(split(0), split(1).toFloat, split(2).toInt, split(3).toInt)
+	}
+
+}
