@@ -1,6 +1,7 @@
 package de.uni_potsdam.hpi.coheel.programs
 
 import java.lang.Iterable
+import java.net.URI
 import java.util.Date
 
 import de.uni_potsdam.hpi.coheel.Params
@@ -15,7 +16,7 @@ import de.uni_potsdam.hpi.coheel.util.Util
 import org.apache.flink.api.common.functions.{Partitioner, RichGroupReduceFunction}
 import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
-import org.apache.flink.core.fs.FileSystem
+import org.apache.flink.core.fs.{Path, FileSystem}
 import org.apache.flink.util.Collector
 import weka.classifiers.Classifier
 import weka.core.SerializationHelper
@@ -38,6 +39,8 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 	val NEIGHBOURS_FILE: Option[String] = None
 //	val NEIGHBOURS_FILE: Option[String] = Some(fullNeighboursPath)
 //	val NEIGHBOURS_FILE: Option[String] = Some(reciprocalNeighboursPath)
+	val f = FileSystem.get(new URI("hdfs://tenemhead2"))
+	println(f.exists(new Path("/home/stefan.bunk/results")))
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val documentStrings = List(4).map { x =>
