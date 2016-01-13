@@ -70,9 +70,9 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 
 		var i = 1
 		while (candidatesRemaining) {
-			log.info(s"Start $i. round of random walk with seeds: ${entities.filter(_.classifierType == NodeTypes.SEED).map(_.shortToString())}")
+			log.info(s"Start $i. round of random walk")
+			log.info(s"Current seeds: ${entities.filter(_.classifierType == NodeTypes.SEED).map(_.shortToString())}")
 			log.info(s"${entities.count(_.classifierType == NodeTypes.CANDIDATE)} candidates remaining") // TODO: Performance
-			log.info(s"Current final alignments: ${finalAlignments.map { a => (a.trieHit, a.candidateEntity) }}")
 			log.info(s"Current final alignments: ${finalAlignments.map(_.shortToString())}")
 			Timer.start("buildGraph")
 			// Each entity may occur only once in the graph. As each classifiable has a candidate entity, which may occur
@@ -141,6 +141,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 	}
 
 	def buildGraph(entities: Seq[ClassifierResultWithNeighbours]): DefaultDirectedWeightedGraph[RandomWalkNode, DefaultWeightedEdge] = {
+		// TODO: Performance
 		val g = new DefaultDirectedWeightedGraph[RandomWalkNode, DefaultWeightedEdge](classOf[DefaultWeightedEdge])
 
 		val entityMap = mutable.Map[String, RandomWalkNode]()
@@ -354,18 +355,21 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 
 	val THETA = Math.pow(10, -8)
 	def randomWalk(m: RealMatrix, s: RealVector, maxIt: Int): RealVector = {
+		// TODO: Pass from previous iteration
 		var p = s
 		var oldP = s
 		val alpha = 0.15
 		var it = 0
 		var diff = 0.0
+		val alphaS = s.mapMultiply(alpha)
+		val alphaM = m.scalarMultiply(1 - alpha)
 		do {
 			oldP = p
-			p = m.scalarMultiply(1 - alpha).preMultiply(p).add(s.mapMultiply(alpha))
+			p = alphaM.preMultiply(p).add(alphaS)
 			it += 1
 			diff = oldP.add(p.mapMultiply(-1)).getNorm
 		} while (it < maxIt && diff > THETA)
-		log.info(s"RandomWalk termininating with diff $diff after $it iterations")
+		log.info(s"RandomWalk terminating with diff $diff after $it iterations")
 		p
 	}
 }
