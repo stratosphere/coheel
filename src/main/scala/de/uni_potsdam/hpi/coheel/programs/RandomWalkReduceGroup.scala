@@ -36,24 +36,35 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		log.info(s"Handling document id: ${entities.head.documentId}")
 
 		log.info("BASIC NEIGHBOURS")
-		// For printing out the neighbours, it suffices to group by candidate entity, as the entity determines the neighbours.
-		entities.groupBy(_.candidateEntity).map { case (entity, classifiables) =>
-			classifiables.find(_.classifierType == NodeTypes.SEED) match {
-				case Some(classifiable) =>
-					classifiable
-				case None =>
-					classifiables.head
-			}
-		}.toVector.foreach { entity =>
+//		// For printing out the neighbours, it suffices to group by candidate entity, as the entity determines the neighbours.
+//		entities.groupBy(_.candidateEntity).map { case (entity, classifiables) =>
+//			classifiables.find(_.classifierType == NodeTypes.SEED) match {
+//				case Some(classifiable) =>
+//					classifiable
+//				case None =>
+//					classifiables.head
+//			}
+//		}.toVector.foreach { entity =>
+//			log.info("--------------------------------------------------------")
+//			log.info(s"Entity: ${entity.candidateEntity} (${entity.classifierType}) from '${entity.trieHit.s}' with ${entity.in.size} in neighbours and ${entity.out.size} out neighbours")
+//			log.info("In-Neighbours")
+//			entity.in.foreach { in =>
+//				log.info(s"I ${in.entity} ${in.prob}")
+//			}
+//			log.info("Out-Neighbours")
+//			entity.out.foreach { out =>
+//				log.info(s"O ${out.entity} ${out.prob}")
+//			}
+//		}
+
+		entities.foreach { entity =>
 			log.info("--------------------------------------------------------")
-			log.info(s"Entity: ${entity.candidateEntity} (${entity.classifierType}) from '${entity.trieHit.s}' with ${entity.in.size} in neighbours and ${entity.out.size} out neighbours")
-			log.info("In-Neighbours")
+			log.info(s"${entity.candidateEntity},${entity.classifierType},'${entity.trieHit}',with ${entity.in.size} in neighbours and ${entity.out.size} out neighbours")
 			entity.in.foreach { in =>
-				log.info(s"I ${in.entity} ${in.prob}")
+				log.info(s"I,${in.entity},${in.prob}")
 			}
-			log.info("Out-Neighbours")
 			entity.out.foreach { out =>
-				log.info(s"O ${out.entity} ${out.prob}")
+				log.info(s"O,${out.entity},${out.prob}")
 			}
 		}
 

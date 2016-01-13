@@ -40,7 +40,7 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 //	val NEIGHBOURS_FILE: Option[String] = Some(reciprocalNeighboursPath)
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
-		val documentStrings = List(4, 6).map { x =>
+		val documentStrings = List(4).map { x =>
 			Source.fromFile(s"src/main/resources/classification-documents/$x", "UTF-8").mkString
 		}
 		val documents = if (runsOffline())
