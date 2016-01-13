@@ -57,16 +57,16 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 //			}
 //		}
 
-		entities.foreach { entity =>
-			log.info("--------------------------------------------------------")
-			log.info(s"${entity.candidateEntity},${entity.classifierType},'${entity.trieHit}',with ${entity.in.size} in neighbours and ${entity.out.size} out neighbours")
-			entity.in.foreach { in =>
-				log.info(s"I,${in.entity},${in.prob}")
-			}
-			entity.out.foreach { out =>
-				log.info(s"O,${out.entity},${out.prob}")
-			}
-		}
+//		entities.foreach { entity =>
+//			log.info("--------------------------------------------------------")
+//			log.info(s"${entity.candidateEntity},${entity.classifierType},'${entity.trieHit}',with ${entity.in.size} in neighbours and ${entity.out.size} out neighbours")
+//			entity.in.foreach { in =>
+//				log.info(s"I,${in.entity},${in.prob}")
+//			}
+//			entity.out.foreach { out =>
+//				log.info(s"O,${out.entity},${out.prob}")
+//			}
+//		}
 
 		// we start with the seeds as the final alignments, they are certain
 		var finalAlignments = entities.filter { entity => entity.classifierType == NodeTypes.SEED }
@@ -82,9 +82,9 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		var i = 1
 		while (candidatesRemaining) {
 			log.info(s"Start $i. round of random walk")
-			log.info(s"Current seeds: ${entities.filter(_.classifierType == NodeTypes.SEED).map(_.shortToString())}")
+//			log.info(s"Current seeds: ${entities.filter(_.classifierType == NodeTypes.SEED).map(_.shortToString())}")
 			log.info(s"${entities.count(_.classifierType == NodeTypes.CANDIDATE)} candidates remaining") // TODO: Performance
-			log.info(s"Current final alignments: ${finalAlignments.map(_.shortToString())}")
+//			log.info(s"Current final alignments: ${finalAlignments.map(_.shortToString())}")
 			Timer.start("buildGraph")
 			// Each entity may occur only once in the graph. As each classifiable has a candidate entity, which may occur
 			// more than once alltogether, we need to remove duplicated candidate entities.
@@ -142,6 +142,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 			} else {
 				log.info(s"Aborting, because remaining seeds ${entities.map(_.shortToString())} not reachable from seeds")
 			}
+			candidatesRemaining = false
 			Timer.logResult(log, "findHighest")
 			i += 1
 		}
@@ -289,7 +290,6 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		g.vertexSet().asScala.foreach { node =>
 			val e = g.addEdge(node, node)
 			if (e == null) {
-				log.error(s"$node apparently links to itself?")
 				val existingEdge = g.getEdge(node, node)
 				g.setEdgeWeight(existingEdge, g.getEdgeWeight(existingEdge) + STALLING_EDGE_WEIGHT)
 			} else {
@@ -344,7 +344,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 			val outEdges = g.outgoingEdgesOf(node)
 			val edgeSum = outEdges.asScala.toList.map(g.getEdgeWeight).sum
 			// edgeSum should always sum up to 1.0 + STALLING_EDGE_WEIGHT
-			assert(Math.abs(edgeSum - (1.0 + STALLING_EDGE_WEIGHT)) < 0.0000000001, {
+			assert(Math.abs(edgeSum - (1.0 + STALLING_EDGE_WEIGHT)) < 0.000001, {
 				val outNeighbours = outEdges.asScala.toList.map { e =>
 					val target = g.getEdgeTarget(e).entity
 					val weight = g.getEdgeWeight(e)

@@ -3,7 +3,9 @@ package de.uni_potsdam.hpi.coheel.graphs
 import java.io.File
 import de.uni_potsdam.hpi.coheel.datastructures.TrieHit
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{Neighbour, NodeTypes, ClassifierResultWithNeighbours}
-import de.uni_potsdam.hpi.coheel.programs.RandomWalkReduceGroup
+import de.uni_potsdam.hpi.coheel.programs.{CoheelLogger, RandomWalkReduceGroup}
+import de.uni_potsdam.hpi.coheel.util.Timer
+import org.apache.flink.util.Collector
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -19,7 +21,13 @@ object StandaloneRandomWalk {
 		println("Done")
 
 		val p = new RandomWalkReduceGroup()
-		p.reduce(l.toIterable.asJava, null)
+		val c = new Collector[(String, TrieHit, String)] {
+			override def collect(record: (String, TrieHit, String)): Unit = {}
+			override def close(): Unit = {}
+		}
+		Timer.start("RW")
+		p.reduce(l.toIterable.asJava, c)
+		Timer.logResult(CoheelLogger.log, "RW")
 	}
 
 	def readOfflineFile(): mutable.ArrayBuffer[ClassifierResultWithNeighbours] = {
