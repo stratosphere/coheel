@@ -10,6 +10,7 @@ import org.apache.commons.collections4.bidimap.DualHashBidiMap
 import org.apache.commons.math3.linear.{ArrayRealVector, OpenMapRealMatrix, RealMatrix, RealVector}
 import org.apache.flink.api.common.functions.RichGroupReduceFunction
 import org.apache.flink.util.Collector
+import org.jblas.DoubleMatrix
 import org.jgrapht.graph.{DefaultDirectedWeightedGraph, DefaultWeightedEdge}
 
 import scala.collection.JavaConverters._
@@ -85,7 +86,8 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 //			log.info(s"Current seeds: ${entities.filter(_.classifierType == NodeTypes.SEED).map(_.shortToString())}")
 			log.info(s"${entities.count(_.classifierType == NodeTypes.CANDIDATE)} candidates remaining") // TODO: Performance
 //			log.info(s"Current final alignments: ${finalAlignments.map(_.shortToString())}")
-			Timer.start("buildGraph")
+
+			Timer.start("deduplication")
 			// Each entity may occur only once in the graph. As each classifiable has a candidate entity, which may occur
 			// more than once alltogether, we need to remove duplicated candidate entities.
 			// If there is a seed among those classifiables with the same candidate entity, we choose the seed, as seeds are relevant
@@ -98,7 +100,9 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 						classifiables.head
 				}
 			}.toSeq
+			log.info(s"Method deduplication took ${Timer.end("deduplication")} ms.")
 
+			Timer.start("buildGraph")
 			val g = buildGraph(deduplicatedEntities)
 			log.info(s"Method buildGraph took ${Timer.end("buildGraph")} ms.")
 
@@ -133,16 +137,15 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 				val resolvedTrieHits = resolvedEntities.map(_.trieHit).toSet
 				log.info(s"Resolved trie hits: $resolvedTrieHits")
 
-				log.info(s"Entities before: ${entities.map(_.shortToString())}")
+//				log.info(s"Entities before: ${entities.map(_.shortToString())}")
 				// again, remove all those candidates from the entities, which have trie hits, which we just resolved
 				entities = entities.filter { entity => entity.classifierType == NodeTypes.SEED || !resolvedTrieHits.contains(entity.trieHit) }
-				log.info(s"Entities after: ${entities.map(_.shortToString())}")
+//				log.info(s"Entities after: ${entities.map(_.shortToString())}")
 
 				candidatesRemaining = anyCandidates(entities)
 			} else {
 				log.info(s"Aborting, because remaining seeds ${entities.map(_.shortToString())} not reachable from seeds")
 			}
-			candidatesRemaining = false
 			Timer.logResult(log, "findHighest")
 			i += 1
 		}
@@ -246,6 +249,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		Timer.start("findUnreachable")
 		// remove all the unreachable nodes
 		val unreachableNodes = g.vertexSet().asScala.filter(!_.visited)
+		log.info(s"Number of unreachable nodes ${unreachableNodes.size}")
 		Timer.logResult(log, "findUnreachable")
 		Timer.start("removeUnreachable")
 		g.removeAllVertices(unreachableNodes.asJava)
@@ -319,25 +323,25 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 	 *         <li>The mapping between entity and index in the matrix
 	 *         <li>A set of all the indices of the candidates
 	 */
-	def buildMatrix(g: DefaultDirectedWeightedGraph[RandomWalkNode, DefaultWeightedEdge]): (RealMatrix, RealVector, BidiMap[String, Int], mutable.Set[Int]) = {
+	def buildMatrix(g: DefaultDirectedWeightedGraph[RandomWalkNode, DefaultWeightedEdge]): (DoubleMatrix, DoubleMatrix, BidiMap[String, Int], mutable.Set[Int]) = {
 		val candidateIndices = mutable.Set[Int]()
 		val size = g.vertexSet().size()
 		val entityNodeIdMapping = new DualHashBidiMap[String, Int]()
-		val m = new OpenMapRealMatrix(size, size)
+		val m = new DoubleMatrix(size, size)
 
 		var currentEntityId = 0
-		val s: RealVector = new ArrayRealVector(size)
+		val s = new DoubleMatrix(size)
 		g.vertexSet().asScala.foreach { node =>
 			entityNodeIdMapping.put(node.entity, currentEntityId)
 			if (node.nodeType == NodeTypes.CANDIDATE)
 				candidateIndices += currentEntityId
 			if (node.nodeType == NodeTypes.SEED)
-				s.setEntry(currentEntityId, 1.0)
+				s.put(currentEntityId, 1.0)
 			currentEntityId += 1
 		}
-		val sum = s.getL1Norm
+		val sum = s.norm1()
 		for (i <- 0 until size)
-			s.setEntry(i, s.getEntry(i) / sum)
+			s.put(i, s.get(i) / sum)
 
 		g.vertexSet().asScala.foreach { node =>
 			val nodeId = entityNodeIdMapping.get(node.entity)
@@ -358,27 +362,26 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 				val outTarget = g.getEdgeTarget(out)
 				val outWeight = g.getEdgeWeight(out)
 				val outId = entityNodeIdMapping.get(outTarget.entity)
-				m.setEntry(nodeId, outId, outWeight / (1.0 + STALLING_EDGE_WEIGHT))
+				m.put(nodeId, outId, outWeight / (1.0 + STALLING_EDGE_WEIGHT))
 			}
 		}
 		(m, s, entityNodeIdMapping, candidateIndices)
 	}
 
 	val THETA = Math.pow(10, -8)
-	def randomWalk(m: RealMatrix, s: RealVector, maxIt: Int): RealVector = {
+	def randomWalk(m: DoubleMatrix, s: DoubleMatrix, maxIt: Int): DoubleMatrix = {
 		// TODO: Pass from previous iteration
-		var p = s
-		var oldP = s
+		var p = s.transpose()
 		val alpha = 0.15
 		var it = 0
 		var diff = 0.0
-		val alphaS = s.mapMultiply(alpha)
-		val alphaM = m.scalarMultiply(1 - alpha)
+		val alphaS = s.mul(alpha)
+		val alphaM = m.mul(1 - alpha)
 		do {
-			oldP = p
-			p = alphaM.preMultiply(p).add(alphaS)
+			val oldP = p
+			p = p.mmul(alphaM).add(alphaS)
 			it += 1
-			diff = oldP.add(p.mapMultiply(-1)).getNorm
+			diff = oldP.sub(p).norm1()
 		} while (it < maxIt && diff > THETA)
 		log.info(s"RandomWalk terminating with diff $diff after $it iterations")
 		p
