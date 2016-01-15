@@ -2,6 +2,8 @@ package de.uni_potsdam.hpi.coheel.programs
 
 import java.lang.Iterable
 
+import breeze.linalg.{DenseMatrix, DenseVector}
+import breeze.numerics.abs
 import de.uni_potsdam.hpi.coheel.datastructures.TrieHit
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{ClassifierResultWithNeighbours, NodeTypes, RandomWalkNode}
 import de.uni_potsdam.hpi.coheel.util.Timer
@@ -41,25 +43,27 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 
 		Timer.logResult(log, "filterUnconnected")
 
-		log.info("BASIC NEIGHBOURS")
-		// For printing out the neighbours, it suffices to group by candidate entity, as the entity determines the neighbours.
-		entities.groupBy(_.candidateEntity).map { case (entity, classifiables) =>
-			classifiables.find(_.classifierType == NodeTypes.SEED) match {
-				case Some(classifiable) =>
-					classifiable
-				case None =>
-					classifiables.head
-			}
-		}.toVector.foreach { entity =>
-			log.info("--------------------------------------------------------")
-			log.info(s"Entity: ${entity.candidateEntity} (${entity.classifierType}) from '${entity.trieHit.s}' with ${entity.in.size} in neighbours and ${entity.out.size} out neighbours")
-			log.info("In-Neighbours")
-			entity.in.foreach { in =>
-				log.info(s"I ${in.entity} ${in.prob}")
-			}
-			log.info("Out-Neighbours")
-			entity.out.foreach { out =>
-				log.info(s"O ${out.entity} ${out.prob}")
+		if (!CoheelProgram.runsOffline()) {
+			log.info("BASIC NEIGHBOURS")
+			// For printing out the neighbours, it suffices to group by candidate entity, as the entity determines the neighbours.
+			entities.groupBy(_.candidateEntity).map { case (entity, classifiables) =>
+				classifiables.find(_.classifierType == NodeTypes.SEED) match {
+					case Some(classifiable) =>
+						classifiable
+					case None =>
+						classifiables.head
+				}
+			}.toVector.foreach { entity =>
+				log.info("--------------------------------------------------------")
+				log.info(s"Entity: ${entity.candidateEntity} (${entity.classifierType}) from '${entity.trieHit}' with ${entity.in.size} in neighbours and ${entity.out.size} out neighbours")
+				log.info("In-Neighbours")
+				entity.in.foreach { in =>
+					log.info(s"I ${in.entity} ${in.prob}")
+				}
+				log.info("Out-Neighbours")
+				entity.out.foreach { out =>
+					log.info(s"O ${out.entity} ${out.prob}")
+				}
 			}
 		}
 
@@ -373,25 +377,25 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 	 *         <li>The mapping between entity and index in the matrix
 	 *         <li>A set of all the indices of the candidates
 	 */
-	def buildMatrix(g: DefaultDirectedWeightedGraph[RandomWalkNode, DefaultWeightedEdge]): (DoubleMatrix, DoubleMatrix, BidiMap[String, Int], mutable.Set[Int]) = {
+	def buildMatrix(g: DefaultDirectedWeightedGraph[RandomWalkNode, DefaultWeightedEdge]): (DenseMatrix[Double], DenseMatrix[Double], BidiMap[String, Int], mutable.Set[Int]) = {
 		val candidateIndices = mutable.Set[Int]()
 		val size = g.vertexSet().size()
 		val entityNodeIdMapping = new DualHashBidiMap[String, Int]()
-		val m = new DoubleMatrix(size, size)
+		val m = new DenseMatrix[Double](size, size)
 
 		var currentEntityId = 0
-		val s = new DoubleMatrix(size)
+		val s = new DenseMatrix[Double](1, size)
 		g.vertexSet().asScala.foreach { node =>
 			entityNodeIdMapping.put(node.entity, currentEntityId)
 			if (node.nodeType == NodeTypes.CANDIDATE)
 				candidateIndices += currentEntityId
 			if (node.nodeType == NodeTypes.SEED)
-				s.put(currentEntityId, 1.0)
+				s(0, currentEntityId) = 1.0
 			currentEntityId += 1
 		}
-		val sum = s.norm1()
+		val sum = s.sum
 		for (i <- 0 until size)
-			s.put(i, s.get(i) / sum)
+			s(0, i) = s(0, i) / sum
 
 		g.vertexSet().asScala.foreach { node =>
 			val nodeId = entityNodeIdMapping.get(node.entity)
@@ -412,26 +416,27 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 				val outTarget = g.getEdgeTarget(out)
 				val outWeight = g.getEdgeWeight(out)
 				val outId = entityNodeIdMapping.get(outTarget.entity)
-				m.put(nodeId, outId, outWeight / (1.0 + STALLING_EDGE_WEIGHT))
+				m(nodeId, outId) = outWeight / (1.0 + STALLING_EDGE_WEIGHT)
 			}
 		}
 		(m, s, entityNodeIdMapping, candidateIndices)
 	}
 
 	val THETA = Math.pow(10, -8)
-	def randomWalk(m: DoubleMatrix, s: DoubleMatrix, maxIt: Int): DoubleMatrix = {
+	def randomWalk(m: DenseMatrix[Double], s: DenseMatrix[Double], maxIt: Int): DenseMatrix[Double] = {
 		// TODO: Pass from previous iteration
-		var p = s.transpose()
+		var p = s
 		val alpha = 0.15
 		var it = 0
 		var diff = 0.0
-		val alphaS = s.mul(alpha)
-		val alphaM = m.mul(1 - alpha)
+		val alphaS = s :* alpha
+		val alphaM: DenseMatrix[Double] = m :* (1 - alpha)
 		do {
 			val oldP = p
-			p = p.mmul(alphaM).add(alphaS)
+			p = p * alphaM
+			p = p + alphaS
 			it += 1
-			diff = oldP.sub(p).norm1()
+			diff = abs(oldP - p).sum
 		} while (it < maxIt && diff > THETA)
 		log.info(s"RandomWalk terminating with diff $diff after $it iterations")
 		p
