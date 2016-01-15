@@ -18,7 +18,6 @@ object StandaloneRandomWalk {
 
 	def main(args: Array[String]): Unit = {
 		val l = readOfflineFile()
-		println("Done")
 
 		val p = new RandomWalkReduceGroup()
 		val c = new Collector[(String, TrieHit, String)] {

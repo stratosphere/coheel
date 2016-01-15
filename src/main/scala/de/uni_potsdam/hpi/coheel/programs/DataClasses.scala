@@ -176,8 +176,8 @@ object DataClasses {
 		 var classifierType: NodeType,
 		 candidateEntity: String,
 		 trieHit: TrieHit,
-		 in: Seq[Neighbour],
-		 out: Seq[Neighbour]) {
+		 var in: Seq[Neighbour],
+		 var out: Seq[Neighbour]) {
 
 		def shortToString(): String = {
 			s"($classifierType, '$candidateEntity', $trieHit)"
