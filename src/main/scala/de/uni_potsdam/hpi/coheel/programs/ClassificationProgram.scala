@@ -39,8 +39,8 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 	val NEIGHBOURS_FILE: Option[String] = None
 //	val NEIGHBOURS_FILE: Option[String] = Some(fullNeighboursPath)
 //	val NEIGHBOURS_FILE: Option[String] = Some(reciprocalNeighboursPath)
-	val f = FileSystem.get(new URI("hdfs://tenemhead2"))
-	println(f.exists(new Path("/home/stefan.bunk/results")))
+//	val f = FileSystem.get(new URI("hdfs://tenemhead2"))
+//	println(f.exists(new Path("/home/stefan.bunk/results")))
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val documentStrings = List(4).map { x =>
