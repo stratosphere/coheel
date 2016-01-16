@@ -90,6 +90,8 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 			log.info("No candidates remaining before first round")
 
 		var i = 1
+		var oldEntityMapping: BidiMap[String, Int] = null
+		var oldResult: DenseMatrix[Double] = null
 		while (candidatesRemaining) {
 			log.info(s"Start $i. round of random walk")
 //			log.info(s"Current seeds: ${entities.filter(_.classifierType == NodeTypes.SEED).map(_.shortToString())}")
@@ -119,13 +121,34 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 			val (m, s, entityNodeMapping, candidateIndices) = buildMatrix(g)
 			log.info(s"Method buildMatrix took ${Timer.end("buildMatrix")} ms.")
 
+			val initial: DenseMatrix[Double] = if (oldEntityMapping != null) {
+				var i = 0
+				val size = s.size
+				val initialP = new DenseMatrix[Double](1, size)
+				while (i < size) {
+					val currentEntity = entityNodeMapping.getKey(i)
+					val oldIndex = oldEntityMapping.get(currentEntity)
+					val oldValue = oldResult(0, oldIndex)
+					initialP(0, i) = oldValue
+					i += 1
+				}
+				normalizeToSum1(initialP)
+				println(s"########################### ${s.size} ${initialP.size} ### ${s.sum} - ${initialP.sum}")
+				initialP
+			} else
+				null
+
+
 			Timer.start("randomWalk")
-			val result = randomWalk(m, s, 100)
+			val result = randomWalk(m, s, 100, initial)
 			log.info(s"Method randomWalk took ${Timer.end("randomWalk")} ms.")
+
+			oldResult = result
+			oldEntityMapping = entityNodeMapping
 
 			Timer.start("findHighest")
 			// find indices of the candidates with their probability
-			val candidateIndexProbs = result.toArray.zipWithIndex.filter { case (d, idx) => candidateIndices.contains(idx) }
+			val candidateIndexProbs = result.toArray.view.zipWithIndex.filter { case (d, idx) => candidateIndices.contains(idx) }
 			// it might be, that candidates are not reachable from the seeds, then we abort here
 			candidatesRemaining = candidateIndexProbs.nonEmpty
 			if (candidatesRemaining) {
@@ -205,7 +228,6 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 	}
 
 	def buildGraph(entities: Seq[ClassifierResultWithNeighbours]): DefaultDirectedWeightedGraph[RandomWalkNode, DefaultWeightedEdge] = {
-		// TODO: Performance
 		val g = new DefaultDirectedWeightedGraph[RandomWalkNode, DefaultWeightedEdge](classOf[DefaultWeightedEdge])
 
 		val entityMap = mutable.Map[String, RandomWalkNode]()
@@ -393,9 +415,8 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 				s(0, currentEntityId) = 1.0
 			currentEntityId += 1
 		}
-		val sum = s.sum
-		for (i <- 0 until size)
-			s(0, i) = s(0, i) / sum
+
+		normalizeToSum1(s)
 
 		g.vertexSet().asScala.foreach { node =>
 			val nodeId = entityNodeIdMapping.get(node.entity)
@@ -422,10 +443,17 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		(m, s, entityNodeIdMapping, candidateIndices)
 	}
 
+	def normalizeToSum1(s: DenseMatrix[Double]): Unit = {
+		val size = s.size
+		val sum = s.sum
+		for (i <- 0 until size)
+			s(0, i) = s(0, i) / sum
+	}
+
 	val THETA = Math.pow(10, -8)
-	def randomWalk(m: DenseMatrix[Double], s: DenseMatrix[Double], maxIt: Int): DenseMatrix[Double] = {
+	def randomWalk(m: DenseMatrix[Double], s: DenseMatrix[Double], maxIt: Int, startP: DenseMatrix[Double] = null): DenseMatrix[Double] = {
 		// TODO: Pass from previous iteration
-		var p = s
+		var p = if (startP != null) startP else s
 		val alpha = 0.15
 		var it = 0
 		var diff = 0.0
