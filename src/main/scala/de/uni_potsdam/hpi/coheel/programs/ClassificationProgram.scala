@@ -67,7 +67,7 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 
 		val preprocessedNeighbours = NEIGHBOURS_FILE match {
 			case Some(file) => loadNeighboursFromHdfs(env, file)
-			case None => buildReciprocalNeighbours(env)
+			case None => buildFullNeighbours(env)
 		}
 
 		val withNeighbours = basicClassifierResults.join(preprocessedNeighbours)
@@ -94,7 +94,7 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 		inputDocuments.filter(_.replication == 0).writeAsTsv(inputDocumentsPath)
 
 		if (NEIGHBOURS_FILE.isEmpty) {
-			preprocessedNeighbours.map(serializeNeighboursToString _).writeAsText(reciprocalNeighboursPath, FileSystem.WriteMode.OVERWRITE)
+			preprocessedNeighbours.map(serializeNeighboursToString _).writeAsText(fullNeighboursPath, FileSystem.WriteMode.OVERWRITE)
 		}
 
 		// Write trie hits for debugging
