@@ -132,7 +132,15 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 			val outSet = out.map(_.entity).toSet
 			val intersection = inSet.intersect(outSet)
 
-			Neighbours(entity, in.filter { x => intersection.contains(x.entity) }, out.filter { x => intersection.contains(x.entity) })
+			val newIn = in.filter { x => intersection.contains(x.entity) }
+			val inSum = newIn.map(_.prob).sum
+			newIn :+ Neighbour(RandomWalkReduceGroup.NULL_NODE, 1.0 - inSum)
+
+			val newOut = out.filter { x => intersection.contains(x.entity) }
+			val outSum = newOut.map(_.prob).sum
+			newOut :+ Neighbour(RandomWalkReduceGroup.NULL_NODE, 1.0 - outSum)
+
+			Neighbours(entity, newIn, newOut)
 		}
 	}
 
@@ -142,11 +150,11 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 			ContextLink(split(0), split(1), split(2).toDouble)
 		}.name("ContextLinks")
 		val outgoingNeighbours = contextLinks.groupBy("from").reduceGroup { grouped =>
-			val asList = grouped.toList
+			val asList = grouped.toBuffer
 			(asList.head.from, asList.map { contextLink => Neighbour(contextLink.to, contextLink.prob) })
 		}.name("Outgoing Neighbours")
 		val incomingNeighbours = contextLinks.groupBy("to").reduceGroup { grouped =>
-			val asList = grouped.toList
+			val asList = grouped.toBuffer
 			(asList.head.to, asList.map { contextLink => Neighbour(contextLink.from, contextLink.prob) })
 		}.name("Incoming Neighbours")
 		val fullNeighbours = incomingNeighbours.join(outgoingNeighbours)
@@ -162,8 +170,8 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 	def loadNeighboursFromHdfs(env: ExecutionEnvironment, neighboursPath: String): DataSet[Neighbours] = {
 		env.readTextFile(neighboursPath).map { neighboursLine =>
 			val Array(entity, inString, outString) = neighboursLine.split('\t')
-			val inNeighbours = inString.split("\0").grouped(2).map { case Array(ent, prob) => Neighbour(ent, prob.toDouble) }.toSeq
-			val outNeighbours = outString.split("\0").grouped(2).map { case Array(ent, prob) => Neighbour(ent, prob.toDouble) }.toSeq
+			val inNeighbours = inString.split("\0").grouped(2).map { case Array(ent, prob) => Neighbour(ent, prob.toDouble) }.toBuffer
+			val outNeighbours = outString.split("\0").grouped(2).map { case Array(ent, prob) => Neighbour(ent, prob.toDouble) }.toBuffer
 			Neighbours(entity, inNeighbours, outNeighbours)
 		}.name("All-Neighbours")
 	}

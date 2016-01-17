@@ -19,6 +19,7 @@ import scala.collection.mutable
 
 object RandomWalkReduceGroup {
 	val STALLING_EDGE_WEIGHT = 0.01
+	val NULL_NODE = "\0"
 }
 
 class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWithNeighbours, (String, TrieHit, String)] {
@@ -332,7 +333,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		val inbetweenEdgeCount   = g.edgeSet().size
 
 		// add 0 node
-		val nullNode = RandomWalkNode("0").withNodeType(NodeTypes.NULL)
+		val nullNode = RandomWalkNode(NULL_NODE).withNodeType(NodeTypes.NULL)
 		g.addVertex(nullNode)
 
 		Timer.start("removeNeighbourSinks")

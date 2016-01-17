@@ -87,7 +87,7 @@ class CoheelClassifier(classifier: Classifier) {
 				print(classifier.classifyInstance(instance))
 				val s = if (instance.numAttributes() == CoheelClassifier.NUMBER_OF_FEATURES) "" else " " + (instance.classValue() == classifier.classifyInstance(instance))
 				println(s)
-				println("O" * 80)
+				println("X" * 80)
 			}
 		}
 		if (positivePredictions.size == 1)

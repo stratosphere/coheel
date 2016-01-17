@@ -157,7 +157,7 @@ object DataClasses {
 
 	case class Neighbour(entity: String, prob: Double)
 
-	case class Neighbours(entity: String, in: Seq[Neighbour], out: Seq[Neighbour])
+	case class Neighbours(entity: String, in: mutable.Buffer[Neighbour], out: mutable.Buffer[Neighbour])
 
 	/**
 	 * All candidates of one document.
