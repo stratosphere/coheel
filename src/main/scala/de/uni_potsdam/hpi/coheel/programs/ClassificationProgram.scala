@@ -33,14 +33,15 @@ class DocumentPartitioner extends Partitioner[Int] {
 }
 class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 
+	import CoheelLogger._
+
 	override def getDescription: String = "CohEEL Classification"
 
 	// Select, which neighbours file to use
-	val NEIGHBOURS_FILE: Option[String] = None
-//	val NEIGHBOURS_FILE: Option[String] = Some(fullNeighboursPath)
-//	val NEIGHBOURS_FILE: Option[String] = Some(reciprocalNeighboursPath)
-//	val f = FileSystem.get(new URI("hdfs://tenemhead2"))
-//	println(f.exists(new Path("/home/stefan.bunk/results")))
+	val NEIGHBOURS_FILE = fullNeighboursPath
+//	val NEIGHBOURS_FILE = reciprocalNeighboursPath
+
+	val neighboursCreationMethod = Map(fullNeighboursPath -> buildFullNeighbours _, reciprocalNeighboursPath -> buildReciprocalNeighbours _)
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
 		val documentStrings = List(4).map { x =>
@@ -64,10 +65,13 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 		val featuresPerGroup = FeatureHelper.buildFeaturesPerGroup(env, classifiables)
 		val basicClassifierResults = featuresPerGroup.reduceGroup(new ClassificationReduceGroup(params)).name("Basic Classifier Results")
 
-
-		val preprocessedNeighbours = NEIGHBOURS_FILE match {
-			case Some(file) => loadNeighboursFromHdfs(env, file)
-			case None => buildFullNeighbours(env)
+		val f = FileSystem.get(new URI("hdfs://tenemhead2"))
+		val preprocessedNeighbours = if (f.exists(new Path(NEIGHBOURS_FILE.replace("hdfs://tenemhead2", "")))) {
+			log.info("Neighbourhood-File exists")
+			loadNeighboursFromHdfs(env, NEIGHBOURS_FILE)
+		} else {
+			log.info("Neighbourhood-File does not exist")
+			neighboursCreationMethod(NEIGHBOURS_FILE)(env)
 		}
 
 		val withNeighbours = basicClassifierResults.join(preprocessedNeighbours)
