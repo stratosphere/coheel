@@ -52,17 +52,17 @@ class RandomWalkTest extends FunSuite {
 		// Turn on double tolerance
 		implicit val doubleEquality = TolerantNumerics.tolerantDoubleEquality(0.001)
 
-		val iteration1 = p.randomWalk(m, s, 1).t
+		val iteration1 = p.randomWalk(m.copy, s, 1).t
 		assert(iteration1(0, 0) === 0.2916)
 		assert(iteration1(1, 0) === 0.1416)
 		assert(iteration1(5, 0) === 0.0)
 
-		val iteration2 = p.randomWalk(m, s, 2).t
+		val iteration2 = p.randomWalk(m.copy, s, 2).t
 		assert(iteration2(0, 0) === 0.2214)
 		assert(iteration2(1, 0) === 0.1316)
 		assert(iteration2(5, 0) === 0.0200)
 
-		val iteration100 = p.randomWalk(m, s, 100).t
+		val iteration100 = p.randomWalk(m.copy, s, 100).t
 		assert(iteration100(0, 0) === 0.1890)
 		assert(iteration100(1, 0) === 0.0577)
 		assert(iteration100(2, 0) === 0.0373)

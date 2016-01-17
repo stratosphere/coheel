@@ -459,10 +459,10 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		var it = 0
 		var diff = 0.0
 		val alphaS = s :* alpha
-		val alphaM: DenseMatrix[Double] = m :* (1 - alpha)
+		m :*= (1 - alpha)
 		do {
 			val oldP = p
-			p = p * alphaM
+			p = p * m
 			p = p + alphaS
 			it += 1
 			diff = abs(oldP - p).sum
