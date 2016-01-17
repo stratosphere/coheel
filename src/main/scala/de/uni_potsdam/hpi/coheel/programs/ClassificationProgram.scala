@@ -38,8 +38,8 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 	override def getDescription: String = "CohEEL Classification"
 
 	// Select, which neighbours file to use
-	val NEIGHBOURS_FILE = fullNeighboursPath
-//	val NEIGHBOURS_FILE = reciprocalNeighboursPath
+//	val NEIGHBOURS_FILE = fullNeighboursPath
+	val NEIGHBOURS_FILE = reciprocalNeighboursPath
 
 	val neighboursCreationMethod = Map(fullNeighboursPath -> buildFullNeighbours _, reciprocalNeighboursPath -> buildReciprocalNeighbours _)
 
@@ -90,16 +90,12 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 				}
 			}
 
-		withNeighbours.groupBy("documentId").reduceGroup(new RandomWalkReduceGroup).name("Random Walk").writeAsTsv(randomWalkResultsPath)
-
 		/*
 		 * OUTPUT
 		 */
 		inputDocuments.filter(_.replication == 0).writeAsTsv(inputDocumentsPath)
 
-		if (NEIGHBOURS_FILE.isEmpty) {
-			preprocessedNeighbours.map(serializeNeighboursToString _).writeAsText(fullNeighboursPath, FileSystem.WriteMode.OVERWRITE)
-		}
+		preprocessedNeighbours.map(serializeNeighboursToString _).writeAsText(NEIGHBOURS_FILE, FileSystem.WriteMode.OVERWRITE)
 
 		// Write trie hits for debugging
 		val trieHitOutput = classifiables.map { trieHit =>
@@ -120,6 +116,8 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 			(res.documentId, res.classifierType, res.candidateEntity, res.trieHit)
 		}.writeAsTsv(classificationPath)
 
+		withNeighbours.groupBy("documentId").reduceGroup(new RandomWalkReduceGroup).name("Random Walk").writeAsTsv(randomWalkResultsPath)
+
 	}
 
 	def serializeNeighboursToString(neighbours: Neighbours): String = {
@@ -138,11 +136,11 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 
 			val newIn = in.filter { x => intersection.contains(x.entity) }
 			val inSum = newIn.map(_.prob).sum
-			newIn :+ Neighbour(RandomWalkReduceGroup.NULL_NODE, 1.0 - inSum)
+			newIn += Neighbour(RandomWalkReduceGroup.NULL_NODE, 1.0 - inSum)
 
 			val newOut = out.filter { x => intersection.contains(x.entity) }
 			val outSum = newOut.map(_.prob).sum
-			newOut :+ Neighbour(RandomWalkReduceGroup.NULL_NODE, 1.0 - outSum)
+			newOut += Neighbour(RandomWalkReduceGroup.NULL_NODE, 1.0 - outSum)
 
 			Neighbours(entity, newIn, newOut)
 		}

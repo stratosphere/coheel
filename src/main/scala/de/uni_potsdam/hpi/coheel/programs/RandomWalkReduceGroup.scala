@@ -5,6 +5,7 @@ import java.lang.Iterable
 import breeze.linalg.{DenseMatrix, DenseVector}
 import breeze.numerics.abs
 import de.uni_potsdam.hpi.coheel.datastructures.TrieHit
+import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{ClassifierResultWithNeighbours, NodeTypes, RandomWalkNode}
 import de.uni_potsdam.hpi.coheel.util.Timer
 import org.apache.commons.collections4.BidiMap
@@ -37,6 +38,10 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		// different trie hit
 		var entities = entitiesIt.asScala.toVector
 
+		val debug = entities.filter(_.candidateEntity == "Holy Roman Emperor").head
+		val sum = debug.out.map(_.prob).sum
+		log.info(s"Outgoing edge sum for `Holy Roman Emperor` is $sum")
+
 		log.info(s"Handling document id: ${entities.head.documentId}")
 
 		Timer.start("filterUnconnected")
@@ -68,6 +73,10 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 			}
 		}
 
+		val debug2 = entities.filter(_.candidateEntity == "Holy Roman Emperor").head
+		val sum2 = debug2.out.map(_.prob).sum
+		log.info(s"Outgoing edge sum for `Holy Roman Emperor` is $sum2")
+
 //		entities.foreach { entity =>
 //			log.info("--------------------------------------------------------")
 //			log.info(s"${entity.candidateEntity},${entity.classifierType},'${entity.trieHit}',with ${entity.in.size} in neighbours and ${entity.out.size} out neighbours")
@@ -96,7 +105,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		while (candidatesRemaining) {
 			log.info(s"Start $i. round of random walk")
 //			log.info(s"Current seeds: ${entities.filter(_.classifierType == NodeTypes.SEED).map(_.shortToString())}")
-			log.info(s"${entities.count(_.classifierType == NodeTypes.CANDIDATE)} candidates remaining") // TODO: Performance
+			log.info(s"${entities.count(_.classifierType == NodeTypes.CANDIDATE)} candidates remaining")
 //			log.info(s"Current final alignments: ${finalAlignments.map(_.shortToString())}")
 
 //			Timer.start("deduplication")
@@ -453,7 +462,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 
 	val THETA = Math.pow(10, -8)
 	def randomWalk(m: DenseMatrix[Double], s: DenseMatrix[Double], maxIt: Int, startP: DenseMatrix[Double] = null): DenseMatrix[Double] = {
-		// TODO: Pass from previous iteration
+		log.info(s"Starting random walk with ${FreeMemory.get(true)} MB of RAM")
 		var p = if (startP != null) startP else s
 		val alpha = 0.15
 		var it = 0
