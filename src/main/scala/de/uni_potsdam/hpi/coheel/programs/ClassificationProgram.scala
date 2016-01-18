@@ -38,8 +38,8 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 	override def getDescription: String = "CohEEL Classification"
 
 	// Select, which neighbours file to use
-//	val NEIGHBOURS_FILE = fullNeighboursPath
-	val NEIGHBOURS_FILE = reciprocalNeighboursPath
+	val NEIGHBOURS_FILE = fullNeighboursPath
+//	val NEIGHBOURS_FILE = reciprocalNeighboursPath
 
 	val neighboursCreationMethod = Map(fullNeighboursPath -> buildFullNeighbours _, reciprocalNeighboursPath -> buildReciprocalNeighbours _)
 

@@ -32,6 +32,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 	}
 
 	override def reduce(entitiesIt: Iterable[ClassifierResultWithNeighbours], out: Collector[(String, TrieHit, String)]): Unit = {
+		log.info(s"Starting RandomWalkReduceGroup with ${FreeMemory.get(true)} MB of RAM")
 		// entities contains only SEEDs and CANDIDATEs
 		// Note: There is an m:n mapping between candidates and trie hits
 		// One trie hit may have many candidate entities (obviously), and also one candidate entity may come from many
@@ -102,6 +103,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		var i = 1
 		var oldEntityMapping: BidiMap[String, Int] = null
 		var oldResult: DenseMatrix[Double] = null
+		log.info(s"Starting loop with ${FreeMemory.get(true)} MB of RAM")
 		while (candidatesRemaining) {
 			log.info(s"Start $i. round of random walk")
 //			log.info(s"Current seeds: ${entities.filter(_.classifierType == NodeTypes.SEED).map(_.shortToString())}")
