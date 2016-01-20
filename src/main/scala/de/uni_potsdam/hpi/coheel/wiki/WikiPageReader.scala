@@ -1,12 +1,48 @@
 package de.uni_potsdam.hpi.coheel.wiki
 
-import java.io.{Reader, StringReader, BufferedReader}
-import javax.xml.stream.{XMLStreamConstants, XMLInputFactory}
-import org.apache.commons.lang3.StringEscapeUtils
-import org.apache.log4j.Logger
+import java.io.{BufferedReader, Reader, StringReader}
+import javax.xml.stream.{XMLInputFactory, XMLStreamConstants}
+
+import de.uni_potsdam.hpi.coheel.programs.CoheelLogger
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
+import de.uni_potsdam.hpi.coheel.util.Timer
+import org.apache.commons.lang3.StringEscapeUtils
+
 import scala.collection.mutable
 
+case class RawWikiPage(pageTitle: String,
+                       ns: Int,
+                       redirect: String,
+                       source: String) {
+
+	import CoheelLogger._
+	lazy val isDisambiguation = {
+		val isDisambiguationFromTitle = pageTitle.contains("(disambiguation)")
+		if (isDisambiguationFromTitle)
+			true
+		else {
+			Timer.start("DISAMBIGUATION CHECK")
+			// in case of performance problems:
+			// disambiguation links are always (as seen so far) at the end of the text
+			// maybe this could be used to not scan the entire text
+			val disambiguationRegex = """(?ui)\{\{disambiguation.*?\}\}""".r
+			source.charAt(1)
+			val matches = disambiguationRegex.findAllIn(source)
+				// check whether the regex sometimes accidentially matches too much text
+				.map { s =>
+				if (s.length > 200)
+					log.warn(s"Disambiguation regex returns long result: $s.")
+				s
+			}
+				.map(_.toLowerCase)
+				.filter { s =>
+					!s.contains("disambiguation needed")
+				}
+			Timer.end("DISAMBIGUATION CHECK")
+			matches.nonEmpty
+		}
+	}
+}
 /**
  * Captures the important aspects of a WikiPage for our use case, while still
  * maintaning connection (via inheritance) to the DBpedia extraction framework.
@@ -22,21 +58,23 @@ import scala.collection.mutable
  *     <li> The text contains a disambiguation template (not all disambiguation pages contain "(disambiguation)" in the
  *          title, e.g. http://en.wikipedia.org/wiki/Alien
  * <strong>Definition list</strong>:<br />
- * A page is seen as a list if it belongs to a category which starts with List.
+ * A page is seen as a list if it's title starts with "List of" or "Lists of".
  * @param pageTitle The title of the page as a string.
  * @param ns The namespace of the wiki page.
  * @param redirect The title of the page this page is redirecting to or null, if it is not a redirect.
  * @param plainText This page's plain text content as array of tokens.
  */
 case class WikiPage(pageTitle: String,
-                    ns: Int, redirect: String,
+                    ns: Int,
+                    redirect: String,
                     plainText: Array[String],
                     links: Array[Link],
-	                isDisambiguation: Boolean,
-	                isList: Boolean) {
+                    isDisambiguation: Boolean) {
 
 	val isRedirect: Boolean = this.redirect != ""
-	var source: String = _
+
+	lazy val isList = pageTitle.startsWith("List of") || pageTitle.startsWith("Lists of")
+
 
 	def isNormalPage: Boolean = {
 		!isDisambiguation && !isRedirect && !isList
@@ -51,35 +89,33 @@ case class FullInfoWikiPage(pageTitle: String,
                     plainText: mutable.ArrayBuffer[String],
                     tags: mutable.ArrayBuffer[String],
                     links: mutable.Map[Int, Link],
-                    isDisambiguation: Boolean,
-                    isList: Boolean)
+                    isDisambiguation: Boolean) {
 
-object WikiPage {
+	lazy val isList = pageTitle.startsWith("List of") || pageTitle.startsWith("Lists of")
+}
+
+object RawWikiPage {
 
 	/**
 	 * Builds a wiki page from the given title and wiki markup source.
 	 */
-	def fromSource(pageTitle:String, source: String): WikiPage = {
-		val wp = WikiPage(pageTitle, 0, "", Array(), Array(), false, false)
-		wp.source = source
-		wp
+	def fromSource(pageTitle: String, source: String): RawWikiPage = {
+		RawWikiPage(pageTitle, 0, "", source)
 	}
 }
 
 class WikiPageReader {
 
-	val log = Logger.getLogger(getClass)
-
 	val factory = XMLInputFactory.newInstance()
-	def xmlToWikiPages(s: String): Iterator[WikiPage] = {
+	def xmlToWikiPages(s: String): Iterator[RawWikiPage] = {
 		val reader = new BufferedReader(new StringReader(s))
 		xmlToWikiPages(reader)
 	}
 
 	private var readCounter = 1
 
-	def xmlToWikiPages(reader: Reader, pageFilter: String => Boolean = _ => true): Iterator[WikiPage] = {
-		new Iterator[WikiPage] {
+	def xmlToWikiPages(reader: Reader, pageFilter: String => Boolean = _ => true): Iterator[RawWikiPage] = {
+		new Iterator[RawWikiPage] {
 			var alreadyRead = false
 			var hasMorePages = true
 
@@ -94,6 +130,7 @@ class WikiPageReader {
 			readNextPage()
 
 			def readNextPage(): Unit = {
+				Timer.start("XML")
 				redirectTitle = ""
 				var foundNextPage = false
 				var pagePassedFilter = true
@@ -118,57 +155,24 @@ class WikiPageReader {
 				hasMorePages = streamReader.hasNext
 				if (!hasMorePages)
 					reader.close()
+				Timer.end("XML")
 			}
 
 			def hasNext = hasMorePages
-			def next(): WikiPage = {
+			def next(): RawWikiPage = {
 				if (!alreadyRead) {
 					alreadyRead = true
 //					log.info(f"Reading $readCounter%4s. wiki file on this node.")
 					readCounter += 1
 				}
 				readNextPage()
-				val isDisambiguation = checkDisambiguation(text, pageTitle)
-				val isList           = checkList(pageTitle)
-				val wikiPage = new WikiPage(
+				RawWikiPage(
 					pageTitle,
 					ns,
 					redirectTitle,
-					Array(),
-					Array(),
-					isDisambiguation,
-					isList
+					text
 				)
-				wikiPage.source = text
-				wikiPage
 			}
 		}
 	}
-
-	def checkDisambiguation(source: String, pageTitle: String): Boolean = {
-		val isDisambiguationFromTitle = pageTitle.contains("(disambiguation)")
-		if (isDisambiguationFromTitle)
-			true
-		else {
-			// in case of performance problems:
-			// disambiguation links are always (as seen so far) at the end of the text
-			// maybe this could be used to not scan the entire text
-			val disambiguationRegex = """(?ui)\{\{disambiguation.*?\}\}""".r
-			val matches = disambiguationRegex.findAllIn(source)
-				// check whether the regex sometimes accidentially matches too much text
-				.map { s =>
-				if (s.length > 200)
-					log.warn(s"Disambiguation regex returns long result: $s.")
-				s
-			}
-				.map(_.toLowerCase)
-				.filter { s =>
-				!s.contains("disambiguation needed")
-			}
-			matches.nonEmpty
-		}
-	}
-
-	def checkList(pageTitle: String): Boolean = pageTitle.startsWith("List of") ||
-		pageTitle.startsWith("Lists of")
 }

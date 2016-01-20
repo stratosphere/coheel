@@ -79,7 +79,7 @@ class WikiPageTraversal(protected val extractor: Extractor) {
 						val sourceStart = sourceString.take(templateBlackList.map(_.length).max)
 						if (sourceString.nonEmpty) {
 							val isBlackListed = templateBlackList.exists(sourceStart.toLowerCase.startsWith)
-							val templatePage = WikiPage.fromSource(extractor.wikiPage.pageTitle, sourceString)
+							val templatePage = RawWikiPage.fromSource(extractor.rawWikiPage.pageTitle, sourceString)
 							val newExtractor = new Extractor(templatePage, extractor.surfaceRepr)
 							nodeStack.push(NodeTraversalItem(newExtractor.rootNode, 0, isBlackListed))
 						}
@@ -139,10 +139,10 @@ class WikiPageTraversal(protected val extractor: Extractor) {
 	}
 
 	def visit(internalLink: WtInternalLink) {
-		val linkOption = extractor.extractPotentialLink(internalLink)
+		val startPos = sb.length + 1
+		val linkOption = extractor.extractPotentialLink(internalLink, startPos)
 		linkOption.foreach { link =>
-			val start = sb.length + 1
-			val range = Range.closedOpen(new Integer(start), new Integer(start + link.surface.length))
+			val range = Range.closedOpen(new Integer(startPos), new Integer(startPos + link.surface.length))
 			linkOffsets.put(range, link)
 			write(link.surface)
 		}

@@ -1,21 +1,17 @@
 package de.uni_potsdam.hpi.coheel
 
-import java.io.{ObjectOutputStream, FileOutputStream, File}
-import java.nio.ByteBuffer
+import java.io.File
 
+import com.typesafe.config.{Config, ConfigFactory}
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
-import de.uni_potsdam.hpi.coheel.io.OutputFiles
+import de.uni_potsdam.hpi.coheel.programs._
 import de.uni_potsdam.hpi.coheel.util.Timer
 import org.apache.commons.io.FileUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.scala._
-import org.apache.flink.client.program.ProgramInvocationException
 import org.apache.flink.configuration.GlobalConfiguration
-import org.apache.log4j.Logger
-import com.typesafe.config.{Config, ConfigFactory}
-import de.uni_potsdam.hpi.coheel.programs._
-import weka.classifiers.meta.SerialVersionAccess
+
 import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
 
@@ -38,16 +34,15 @@ case class Params(configName: String = "local",
 
 object FlinkProgramRunner {
 
-	val log = Logger.getLogger(getClass)
+	import CoheelLogger._
 
 	/**
 	 * Runnable Flink programs.
 	 */
 	val programs = ListMap(
 		"extract-main" -> classOf[WikipediaTrainingProgram]
-		, "entire-text-surfaces" -> classOf[EntireTextSurfacesProgram]
+		, "surface-link-probs" -> classOf[SurfaceLinkProbsProgram]
 		, "training-data" -> classOf[TrainingDataProgram]
-		, "surface-evaluation" -> classOf[SurfaceEvaluationProgram]
 		, "classification" -> classOf[ClassificationProgram]
 	)
 
@@ -88,7 +83,8 @@ object FlinkProgramRunner {
 	def runProgram[T](program: CoheelProgram[T] with ProgramDescription, params: Params): Unit = {
 		log.info(StringUtils.repeat('#', 140))
 		log.info("# " + StringUtils.center(program.getDescription, 136) + " #")
-		log.info("# " + StringUtils.rightPad(s"Job Manager: ${config.getString("job_manager_host")}:${config.getString("job_manager_port")}", 136) + " #")
+		if (!CoheelProgram.runsOffline())
+			log.info("# " + StringUtils.rightPad(s"Job Manager: ${config.getString("job_manager_host")}:${config.getString("job_manager_port")}", 136) + " #")
 		log.info("# " + StringUtils.rightPad(s"Configuration: ${params.configName}", 136) + " #")
 		log.info("# " + StringUtils.rightPad(s"Base Path: ${program.wikipediaDumpFilesPath}", 136) + " #")
 		log.info("# " + StringUtils.rightPad(s"Output Folder: ${config.getString("output_files_dir")}", 136) + " #")

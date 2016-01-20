@@ -35,6 +35,7 @@ object CoheelClassifier {
 		attrs.add(new Attribute("contextRank"))
 		attrs.add(new Attribute("contextDeltaTop"))
 		attrs.add(new Attribute("contextDeltaSucc"))
+//		attrs.add(new Attribute("surfaceLinkProb"))
 		// pos tags
 		attrs.add(new Attribute("NN"))
 		attrs.add(new Attribute("NNP"))
@@ -73,6 +74,7 @@ class CoheelClassifier(classifier: Classifier) {
 			if (classifier.classifyInstance(instance) == CoheelClassifier.POSITIVE_CLASS) {
 				positivePredictions ::= featureLine
 			}
+			// TODO: Temporary
 			if (List(
 				"L-0468265056-00000626-2281324111",
 				"L-0468265056-00000627-4156867526",
@@ -85,7 +87,7 @@ class CoheelClassifier(classifier: Classifier) {
 				print(classifier.classifyInstance(instance))
 				val s = if (instance.numAttributes() == CoheelClassifier.NUMBER_OF_FEATURES) "" else " " + (instance.classValue() == classifier.classifyInstance(instance))
 				println(s)
-				println("O" * 80)
+				println("X" * 80)
 			}
 		}
 		if (positivePredictions.size == 1)

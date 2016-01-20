@@ -14,3 +14,10 @@ ForwardedFields everywhere
 Ask Sebastian about combineGroup
 
 LMs um Kontexte erweitern? Im Sinne von das LM wird um den Kontext der Links auf diese Entitaet erweitert.
+
+
+
+s1 -> x   mit Gewichtung 2/3
+s2 /
+
+s3 -> y   mit Gewichtung 1/3

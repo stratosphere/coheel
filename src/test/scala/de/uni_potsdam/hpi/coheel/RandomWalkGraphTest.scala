@@ -105,7 +105,7 @@ class RandomWalkGraphTest extends FunSuite {
 	val n5Node = RandomWalkNode("n5")
 	val n6Node = RandomWalkNode("n6")
 	val n7Node = RandomWalkNode("n7")
-	val nullNode  = RandomWalkNode("0")
+	val nullNode  = RandomWalkNode(RandomWalkReduceGroup.NULL_NODE)
 
 	test("RandomWalkNodes are only counted once") {
 		val g = new SimpleDirectedWeightedGraph[RandomWalkNode, DefaultWeightedEdge](classOf[DefaultWeightedEdge])

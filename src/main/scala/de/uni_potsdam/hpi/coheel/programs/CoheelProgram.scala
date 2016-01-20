@@ -1,13 +1,11 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import java.net.InetAddress
-
-import de.uni_potsdam.hpi.coheel.{Params, FlinkProgramRunner}
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
-import de.uni_potsdam.hpi.coheel.io.{OutputFiles, IteratorReader, WikiPageInputFormat}
+import de.uni_potsdam.hpi.coheel.io.{IteratorReader, WikiPageInputFormat}
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
-import de.uni_potsdam.hpi.coheel.util.Util
+import de.uni_potsdam.hpi.coheel.util.Timer
 import de.uni_potsdam.hpi.coheel.wiki._
+import de.uni_potsdam.hpi.coheel.{FlinkProgramRunner, Params}
 import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.common.functions.RichFlatMapFunction
 import org.apache.flink.api.common.typeinfo.TypeInformation
@@ -73,7 +71,9 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 			filteredWikiPages.foreach { wikiPage =>
 				Try {
 					val extractor = new Extractor(wikiPage, s => TokenizerHelper.tokenize(s).mkString(" ") )
+					Timer.start("EXTRACTION")
 					extractor.extract()
+					Timer.end("EXTRACTION")
 					fun(extractor)
 				} match {
 					case Success(parsedPage) =>
@@ -88,19 +88,19 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 
 	def readWikiPages: DataSet[WikiPage] = {
 		readRawWikiPages { extractor =>
-			val wikiPage = extractor.wikiPage
+			val rawWikiPage = extractor.rawWikiPage
 			val rawPlainText = extractor.getPlainText
 			val tokens = TokenizerHelper.tokenize(rawPlainText)
 			// TODO: extractor.getLinks.asMapOfRanges().values().asScala.toArray???
-			WikiPage(wikiPage.pageTitle, wikiPage.ns, wikiPage.redirect,
-				tokens, extractor.getLinks.asMapOfRanges().values().asScala.toArray, wikiPage.isDisambiguation, wikiPage.isList)
+			WikiPage(rawWikiPage.pageTitle, rawWikiPage.ns, rawWikiPage.redirect,
+				tokens, extractor.getLinks.asMapOfRanges().values().asScala.toArray, rawWikiPage.isDisambiguation)
 		}
 
 	}
 
 	def readWikiPagesWithFullInfo(pageFilter: String => Boolean): DataSet[FullInfoWikiPage] = {
 		readRawWikiPages({ extractor =>
-			val wikiPage = extractor.wikiPage
+			val wikiPage = extractor.rawWikiPage
 
 			val rawPlainText = extractor.getPlainText
 //			link text offsets tell, where the links start in the raw plain text
@@ -108,15 +108,8 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 			val tokenizerResult = TokenizerHelper.tokenizeWithPositionInfo(rawPlainText, linkTextOffsets)
 
 			FullInfoWikiPage(wikiPage.pageTitle, wikiPage.ns, wikiPage.redirect,
-				tokenizerResult.getTokens, tokenizerResult.getTags, tokenizerResult.getLinkPositions, wikiPage.isDisambiguation, wikiPage.isList)
+				tokenizerResult.getTokens, tokenizerResult.getTags, tokenizerResult.getLinkPositions, wikiPage.isDisambiguation)
 		}, pageFilter)
-	}
-
-
-	def filterNormalPages(wikiPages: DataSet[WikiPage]): DataSet[WikiPage] = {
-		wikiPages.filter { wikiPage =>
-			wikiPage.isNormalPage
-		}.name("Filter-Normal-Pages")
 	}
 
 	def readPlainTexts: DataSet[PlainText] = {
@@ -130,13 +123,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 			}
 		}.name("Parsed Plain-Texts")
 	}
-//	def getScores(): DataSet[(String, Array[String])] = {
-//		environment.readTextFile(scoresPath).name("Scores")
-//		.map { line =>
-//			val values = line.split('\t')
-//			(values(1), values)
-//		}
-//	}
+
 	def readSurfaceLinkProbs(subFile: String = ""): DataSet[(String, Float)] = {
 		environment.readTextFile(surfaceLinkProbsPath + subFile).name("Subset of Surfaces with Probabilities")
 			.flatMap(new RichFlatMapFunction[String, (String, Float)] {
@@ -148,7 +135,6 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 					log.warn(s"SurfaceLinkProbs: Discarding '${split.deep}' because split size not correct")
 					log.warn(line)
 				}
-
 			}
 		}).name("Parsed Surfaces with Probabilities")
 	}
@@ -173,61 +159,6 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 					None
 			}
 		}.name("Surface-Document-Counts")
-	}
-
-
-	def readSurfaces(subFile: String = ""): DataSet[String] = {
-		environment.readTextFile(surfaceDocumentCountsHalfsPath + subFile).name("Subset of Surfaces")
-			.flatMap(new RichFlatMapFunction[String, String] {
-			override def flatMap(line: String, out: Collector[String]): Unit = {
-				val split = line.split('\t')
-				if (split.length == 3)
-					out.collect(split(0))
-				else {
-					log.warn(s"SurfaceProbs: Discarding '${split.deep}' because split size not correct")
-					log.warn(line)
-				}
-			}
-		}).name("Parsed Surfaces")
-	}
-
-	def readSurfaceProbs(threshold: Double = 0.0): DataSet[SurfaceProb] = {
-		environment.readTextFile(surfaceProbsPath).flatMap { line =>
-			val split = line.split('\t')
-			if (split.length > 1) {
-				val tokens = split(0).split(' ')
-				if (tokens.nonEmpty) {
-					val prob = split(2).toDouble
-					if (prob > threshold)
-						Some(SurfaceProb(split(0), split(1), prob))
-					else
-						None
-				}
-				else
-					None
-			}
-			else None
-		}.name("Read surface probs")
-	}
-
-	def readLanguageModels(): DataSet[LanguageModel] = {
-		environment.readTextFile(languageModelsPath).flatMap { line =>
-			val lineSplit = line.split('\t')
-			val pageTitle = lineSplit(0)
-			if (lineSplit.length < 2) {
-				log.warn(s"$pageTitle not long enough: $line")
-				None
-			} else {
-				val model = lineSplit(1).split(' ').flatMap { entrySplit =>
-					val wordSplit = entrySplit.split('\0')
-					if (wordSplit.length == 2)
-						Some(wordSplit(0), wordSplit(1).toInt)
-					else
-						None
-				}.toMap
-				Some(LanguageModel(pageTitle, model))
-			}
-		}.name("Reading language models")
 	}
 
 	def runsOffline(): Boolean = {

@@ -6,13 +6,22 @@ import de.uni_potsdam.hpi.coheel.datastructures.NewTrie
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{EntireTextSurfaceCounts, EntireTextSurfaces, PlainText}
-import org.apache.flink.api.java.aggregation.Aggregations
+import org.apache.flink.api.common.functions.RichFlatMapFunction
 import org.apache.flink.api.scala._
 import org.apache.flink.util.Collector
 
-class EntireTextSurfacesProgram extends CoheelProgram[String] {
+/**
+  * Calculates the surface link probs.
+  * This needs the surface documents file in two halfs under the
+  * `surfaceDocumentCountsHalfsPath` path. This file can be created
+  * with bin/prepare-surface-link-probs-program.sh.
+  */
+class SurfaceLinkProbsProgram extends CoheelProgram[String] {
 
-	val arguments = if (runsOffline()) List("") else List("12345", "678910")
+	import CoheelLogger._
+
+
+	val arguments = if (runsOffline()) List("1") else List("12345", "678910")
 	override def getDescription = "Wikipedia Extraction: Entire Text Surfaces"
 
 	override def buildProgram(env: ExecutionEnvironment, param: String): Unit = {
@@ -22,7 +31,7 @@ class EntireTextSurfacesProgram extends CoheelProgram[String] {
 		val surfaces = readSurfaces(currentFile)
 
 		val trieHits = plainTexts
-			.flatMap(new FindEntireTextSurfacesFlatMap)
+			.flatMap(new RunTrieOverPlainTextFlatMap)
 			.withBroadcastSet(surfaces, SurfacesInTrieFlatMap.BROADCAST_SURFACES)
 			.name("Entire-Text-Surfaces-Along-With-Document")
 
@@ -50,9 +59,25 @@ class EntireTextSurfacesProgram extends CoheelProgram[String] {
 		entireTextSurfaceCounts.writeAsTsv(entireTextSurfacesPath + currentFile)
 		surfaceLinkProbs.writeAsTsv(surfaceLinkProbsPath + currentFile)
 	}
+
+	def readSurfaces(subFile: String = ""): DataSet[String] = {
+		environment.readTextFile(surfaceDocumentCountsHalfsPath + subFile).name("Subset of Surfaces")
+			.flatMap(new RichFlatMapFunction[String, String] {
+				override def flatMap(line: String, out: Collector[String]): Unit = {
+					val split = line.split('\t')
+					if (split.length == 3)
+						out.collect(split(0))
+					else {
+						log.warn(s"SurfaceProbs: Discarding '${split.deep}' because split size not correct")
+						log.warn(line)
+					}
+				}
+			}).name("Parsed Surfaces")
+	}
 }
 
-class FindEntireTextSurfacesFlatMap extends SurfacesInTrieFlatMap[PlainText, EntireTextSurfaces] {
+class RunTrieOverPlainTextFlatMap extends SurfacesInTrieFlatMap[PlainText, EntireTextSurfaces] {
+	import CoheelLogger._
 	var lastChunk = new Date()
 	var i = 0
 	val OUTPUT_EVERY = if (CoheelProgram.runsOffline()) 1000 else 10000
