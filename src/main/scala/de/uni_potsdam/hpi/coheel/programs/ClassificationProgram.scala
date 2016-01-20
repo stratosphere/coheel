@@ -1,5 +1,6 @@
 package de.uni_potsdam.hpi.coheel.programs
 
+import java.io.File
 import java.lang.Iterable
 import java.net.URI
 import java.util.Date
@@ -65,10 +66,16 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 		val featuresPerGroup = FeatureHelper.buildFeaturesPerGroup(env, classifiables)
 		val basicClassifierResults = featuresPerGroup.reduceGroup(new ClassificationReduceGroup(params)).name("Basic Classifier Results")
 
-		val f = FileSystem.get(new URI("hdfs://tenemhead2"))
-		val preprocessedNeighbours = if (f.exists(new Path(NEIGHBOURS_FILE.replace("hdfs://tenemhead2", "")))) {
+		val fileExists = if (runsOffline())
+			new File(NEIGHBOURS_FILE).exists()
+		else {
+			val f = FileSystem.get(new URI("hdfs://tenemhead2"))
+			f.exists(new Path(NEIGHBOURS_FILE.replace("hdfs://tenemhead2", "")))
+		}
+
+		val preprocessedNeighbours = if (fileExists) {
 			log.info("Neighbourhood-File exists")
-			loadNeighboursFromHdfs(env, NEIGHBOURS_FILE)
+			loadNeighboursFromDisk(env, NEIGHBOURS_FILE)
 		} else {
 			log.info("Neighbourhood-File does not exist")
 			neighboursCreationMethod(NEIGHBOURS_FILE)(env)
@@ -95,7 +102,11 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 		 */
 		inputDocuments.filter(_.replication == 0).writeAsTsv(inputDocumentsPath)
 
-		preprocessedNeighbours.map(serializeNeighboursToString _).writeAsText(NEIGHBOURS_FILE, FileSystem.WriteMode.OVERWRITE)
+		if (fileExists) {
+			preprocessedNeighbours.map(serializeNeighboursToString _).writeAsText(NEIGHBOURS_FILE.replace(".wiki", ".wiki2"), FileSystem.WriteMode.OVERWRITE)
+		} else {
+			preprocessedNeighbours.map(serializeNeighboursToString _).writeAsText(NEIGHBOURS_FILE                           , FileSystem.WriteMode.OVERWRITE)
+		}
 
 		// Write trie hits for debugging
 		val trieHitOutput = classifiables.map { trieHit =>
@@ -118,12 +129,6 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 
 		withNeighbours.groupBy("documentId").reduceGroup(new RandomWalkReduceGroup).name("Random Walk").writeAsTsv(randomWalkResultsPath)
 
-	}
-
-	def serializeNeighboursToString(neighbours: Neighbours): String = {
-		val inString = neighbours.in.map { n => s"${n.entity}\0${n.prob}" }.mkString("\0")
-		val outString = neighbours.out.map { n => s"${n.entity}\0${n.prob}" }.mkString("\0")
-		s"${neighbours.entity}\t$inString\t$outString"
 	}
 
 	def buildReciprocalNeighbours(env: ExecutionEnvironment): DataSet[Neighbours] = {
@@ -169,7 +174,13 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 		fullNeighbours
 	}
 
-	def loadNeighboursFromHdfs(env: ExecutionEnvironment, neighboursPath: String): DataSet[Neighbours] = {
+
+	def serializeNeighboursToString(neighbours: Neighbours): String = {
+		val inString = neighbours.in.map { n => s"${n.entity}\0${n.prob}" }.mkString("\0")
+		val outString = neighbours.out.map { n => s"${n.entity}\0${n.prob}" }.mkString("\0")
+		s"${neighbours.entity}\t$inString\t$outString"
+	}
+	def loadNeighboursFromDisk(env: ExecutionEnvironment, neighboursPath: String): DataSet[Neighbours] = {
 		env.readTextFile(neighboursPath).map { neighboursLine =>
 			val Array(entity, inString, outString) = neighboursLine.split('\t')
 			val inNeighbours = inString.split("\0").grouped(2).map { case Array(ent, prob) => Neighbour(ent, prob.toDouble) }.toBuffer

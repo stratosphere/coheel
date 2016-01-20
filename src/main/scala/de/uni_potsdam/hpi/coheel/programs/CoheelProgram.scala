@@ -71,9 +71,9 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 			val filteredWikiPages = wikiPages.filter { page =>
 				page.ns == 0 && page.source.nonEmpty
 			}
-			filteredWikiPages.foreach { wikiPage =>
+			filteredWikiPages.foreach { rawWikiPage =>
 				Try {
-					val extractor = new Extractor(wikiPage, s => TokenizerHelper.tokenize(s).mkString(" ") )
+					val extractor = new Extractor(rawWikiPage, s => TokenizerHelper.tokenize(s).mkString(" ") )
 					Timer.start("EXTRACTION")
 					extractor.extract()
 					Timer.end("EXTRACTION")
@@ -82,7 +82,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 					case Success(parsedPage) =>
 						out.collect(parsedPage)
 					case Failure(e) =>
-						log.error(s"Discarding ${wikiPage.pageTitle} because of ${e.getClass.getSimpleName} (${e.getMessage.replace('\n', ' ')})")
+						log.error(s"Discarding ${rawWikiPage.pageTitle} because of ${e.getClass.getSimpleName} (${e.getMessage.replace('\n', ' ')})")
 //						log.warn(e.getStackTraceString)
 				}
 			}
@@ -94,7 +94,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 			val rawWikiPage = extractor.rawWikiPage
 			val rawPlainText = extractor.getPlainText
 			val tokens = TokenizerHelper.tokenize(rawPlainText)
-			// TODO: extractor.getLinks.asMapOfRanges().values().asScala.toArray???
+			// TODO: extractor.getLinks.asMapOfRanges().values().asScala.toArray?
 			WikiPage(rawWikiPage.pageTitle, rawWikiPage.ns, rawWikiPage.redirect,
 				tokens, extractor.getLinks.asMapOfRanges().values().asScala.toArray, rawWikiPage.isDisambiguation)
 		}

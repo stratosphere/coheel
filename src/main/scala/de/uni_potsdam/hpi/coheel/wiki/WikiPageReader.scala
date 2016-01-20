@@ -70,7 +70,7 @@ case class WikiPage(pageTitle: String,
                     links: Array[Link],
                     isDisambiguation: Boolean) {
 
-	val isRedirect: Boolean = this.redirect != ""
+	val isRedirect: Boolean = this.redirect != RawWikiPage.NO_REDIRECT
 
 	lazy val isList = pageTitle.startsWith("List of") || pageTitle.startsWith("Lists of")
 
@@ -95,6 +95,7 @@ case class FullInfoWikiPage(pageTitle: String,
 
 object RawWikiPage {
 
+	val NO_REDIRECT = ""
 	/**
 	 * Builds a wiki page from the given title and wiki markup source.
 	 */
@@ -130,7 +131,7 @@ class WikiPageReader {
 
 			def readNextPage(): Unit = {
 				Timer.start("XML")
-				redirectTitle = ""
+				redirectTitle = RawWikiPage.NO_REDIRECT
 				var foundNextPage = false
 				var pagePassedFilter = true
 

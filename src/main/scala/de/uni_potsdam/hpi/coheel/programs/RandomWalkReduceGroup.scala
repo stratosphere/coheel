@@ -20,7 +20,7 @@ import scala.collection.mutable
 
 object RandomWalkReduceGroup {
 	val STALLING_EDGE_WEIGHT = 0.01f
-	val NULL_NODE = "\0"
+	val NULL_NODE = "\1"
 }
 
 class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWithNeighbours, (String, TrieHit, String)] {
