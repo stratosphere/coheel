@@ -26,7 +26,6 @@ case class RawWikiPage(pageTitle: String,
 			// disambiguation links are always (as seen so far) at the end of the text
 			// maybe this could be used to not scan the entire text
 			val disambiguationRegex = """(?ui)\{\{disambiguation.*?\}\}""".r
-			source.charAt(1)
 			val matches = disambiguationRegex.findAllIn(source)
 				// check whether the regex sometimes accidentially matches too much text
 				.map { s =>

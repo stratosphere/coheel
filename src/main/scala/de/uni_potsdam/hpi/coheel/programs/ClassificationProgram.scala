@@ -179,7 +179,7 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 	}
 }
 
-class RunTrieOverDocumentsFlatMap(params: Params) extends ReadTrieFromDiskFlatMap[InputDocument, Classifiable[ClassificationInfo]](params) {
+class RunTrieOverDocumentsFlatMap(params: Params) extends ReadTrieFromDiskFlatMap[InputDocument, Classifiable[ClassificationInfo]](new SimultaneousTriesStrategy(params)) {
 	var tokenHitCount: Int = 1
 	import CoheelLogger._
 
