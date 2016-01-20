@@ -74,21 +74,6 @@ class CoheelClassifier(classifier: Classifier) {
 			if (classifier.classifyInstance(instance) == CoheelClassifier.POSITIVE_CLASS) {
 				positivePredictions ::= featureLine
 			}
-			// TODO: Temporary
-			if (List(
-				"L-0468265056-00000626-2281324111",
-				"L-0468265056-00000627-4156867526",
-				"L-0468265056-00000628-1482103611",
-				"L-0468265056-00000629-0312499337"
-			).contains(featureLine.id) || featureLine.id.startsWith("TH-")) {
-				println("Feature Line:")
-				println(featureLine)
-				println("Classification")
-				print(classifier.classifyInstance(instance))
-				val s = if (instance.numAttributes() == CoheelClassifier.NUMBER_OF_FEATURES) "" else " " + (instance.classValue() == classifier.classifyInstance(instance))
-				println(s)
-				println("X" * 80)
-			}
 		}
 		if (positivePredictions.size == 1)
 			positivePredictions.headOption
