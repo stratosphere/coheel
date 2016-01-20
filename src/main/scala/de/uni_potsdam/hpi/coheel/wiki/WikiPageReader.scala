@@ -1,8 +1,10 @@
 package de.uni_potsdam.hpi.coheel.wiki
 
-import java.io.{BufferedReader, Reader, StringReader}
-import javax.xml.stream.{XMLInputFactory, XMLStreamConstants}
-
+import java.io.{Reader, StringReader, BufferedReader}
+import javax.xml.stream.{XMLStreamConstants, XMLInputFactory}
+import edu.umd.cloud9.collection.wikipedia.WikipediaPage
+import org.apache.commons.lang3.StringEscapeUtils
+import org.apache.log4j.Logger
 import de.uni_potsdam.hpi.coheel.programs.CoheelLogger
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import de.uni_potsdam.hpi.coheel.util.Timer
@@ -59,6 +61,7 @@ case class RawWikiPage(pageTitle: String,
  *          title, e.g. http://en.wikipedia.org/wiki/Alien
  * <strong>Definition list</strong>:<br />
  * A page is seen as a list if it's title starts with "List of" or "Lists of".
+ *
  * @param pageTitle The title of the page as a string.
  * @param ns The namespace of the wiki page.
  * @param redirect The title of the page this page is redirecting to or null, if it is not a redirect.
@@ -105,6 +108,8 @@ object RawWikiPage {
 }
 
 class WikiPageReader {
+
+	val log = Logger.getLogger(getClass)
 
 	val factory = XMLInputFactory.newInstance()
 	def xmlToWikiPages(s: String): Iterator[RawWikiPage] = {
@@ -175,4 +180,33 @@ class WikiPageReader {
 			}
 		}
 	}
+}
+object WikiPageReader {
+	/**
+	  * Builds a raw wiki page from Jimmy Lins cloud9 WikipediaPage format
+	  */
+	def cloud9ToRawWikiPage ( cloud9FormatPage: WikipediaPage  ): RawWikiPage = {
+		// get raw data
+		val pageXml = cloud9FormatPage.getRawXML
+		val pageTitle = cloud9FormatPage.getTitle
+		val wikiMarkup = cloud9FormatPage.getWikiMarkup
+		// create WikiPage instance
+		RawWikiPage(
+			pageTitle,
+			getNs( pageXml ),
+			getRedirectTitle( pageXml ),
+			wikiMarkup
+		)
+	}
+
+	def checkList(pageTitle: String): Boolean = pageTitle.startsWith("List of") ||
+		pageTitle.startsWith("Lists of")
+
+	val nsPattern = """<ns\\s*?>(\d+)</ns\\s*?>""".r
+	def getNs(pageXml: String) : Int =
+		nsPattern.findFirstMatchIn( pageXml ).map( _.group(1) ).getOrElse("0").toInt
+
+	val redirectPattern = """<redirect title="(.*?)"""".r
+	def getRedirectTitle(pageXml: String) : String =
+		redirectPattern.findFirstMatchIn( pageXml ).map( _.group(1) ).getOrElse("")
 }

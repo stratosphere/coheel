@@ -75,11 +75,13 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 	private def readRawWikiPages[S : TypeInformation : ClassTag](fun: Extractor => S, pageFilter: String => Boolean = _ => true): DataSet[S] = {
 		wikiInput
 			// TODO should be map instead of flatMap, but not (yet) possible due to xmlToWikiPages signature
-			.flatMap( rawPage  => new WikiPageReader().xmlToWikiPages( new StringReader(rawPage.getRawXML), pageFilter ) )
-			.filter ( wikiPage => wikiPage.ns == 0 && wikiPage.source.nonEmpty )
-			.flatMap( (wikiPage: WikiPage, out: Collector[S]) =>
+			.filter( rawPage => rawPage.isArticle && ! rawPage.isEmpty )
+			.map( WikiPageReader.cloud9ToRawWikiPage( _ ) )
+			//.flatMap( rawPage  => new WikiPageReader().xmlToWikiPages( new StringReader(rawPage.getRawXML), pageFilter ) )
+			//.filter ( wikiPage => wikiPage.ns == 0 && wikiPage.source.nonEmpty )
+			.flatMap( (rawWikiPage: RawWikiPage, out: Collector[S]) =>
 				Try {
-					val extractor = new Extractor(wikiPage, s => TokenizerHelper.tokenize(s).mkString(" ") )
+					val extractor = new Extractor(rawWikiPage, s => TokenizerHelper.tokenize(s).mkString(" ") )
 					Timer.start("EXTRACTION")
 					extractor.extract()
 					Timer.end("EXTRACTION")
@@ -88,7 +90,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 					case Success(parsedPage) =>
 						out.collect(parsedPage)
 					case Failure(e) =>
-						log.error(s"Discarding ${wikiPage.pageTitle} because of ${e.getClass.getSimpleName} (${e.getMessage.replace('\n', ' ')})")
+						log.error(s"Discarding ${rawWikiPage.pageTitle} because of ${e.getClass.getSimpleName} (${e.getMessage.replace('\n', ' ')})")
 //						log.warn(e.getStackTraceString)
 				}
 			)

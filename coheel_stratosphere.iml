@@ -12,6 +12,16 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Maven: org.scala-lang:scala-pickling_2.10:0.9.1" level="project" />
+    <orderEntry type="library" name="Maven: org.jblas:jblas:1.2.4" level="project" />
+    <orderEntry type="library" name="Maven: org.scalanlp:breeze_2.10:0.10" level="project" />
+    <orderEntry type="library" name="Maven: org.scalanlp:breeze-macros_2.10:0.3.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.fommil.netlib:core:1.1.2" level="project" />
+    <orderEntry type="library" name="Maven: net.sourceforge.f2j:arpack_combined_all:0.1" level="project" />
+    <orderEntry type="library" name="Maven: net.sf.opencsv:opencsv:2.3" level="project" />
+    <orderEntry type="library" name="Maven: com.github.rwl:jtransforms:2.4.0" level="project" />
+    <orderEntry type="library" name="Maven: org.spire-math:spire_2.10:0.7.4" level="project" />
+    <orderEntry type="library" name="Maven: org.spire-math:spire-macros_2.10:0.7.4" level="project" />
     <orderEntry type="library" name="Maven: org.apache.flink:flink-scala:0.10.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.flink:flink-core:0.10.0" level="project" />
     <orderEntry type="library" name="Maven: commons-collections:commons-collections:3.2.1" level="project" />
