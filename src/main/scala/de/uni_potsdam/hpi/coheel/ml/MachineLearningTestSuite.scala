@@ -2,6 +2,7 @@ package de.uni_potsdam.hpi.coheel.ml
 
 import java.io.File
 
+import de.uni_potsdam.hpi.coheel.programs.CoheelProgram
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{ClassificationInfo, FeatureLine}
 import de.uni_potsdam.hpi.coheel.util.Timer
 import org.apache.commons.io.FileUtils
@@ -59,8 +60,8 @@ object MachineLearningTestSuite {
 
 	def readTrainingDataAndBuildInstances(): (Instances, Instances) = {
 		print("Reading .. "); Console.flush()
-		val trainSet = r.shuffle(readInstancesInGroups("632a"))
-		val testSet  = r.shuffle(readInstancesInGroups("3786b"))
+		val trainSet = r.shuffle(readInstancesInGroups("632"))
+		val testSet  = r.shuffle(readInstancesInGroups("3786"))
 		println("Done.")
 		println(s"There are ${trainSet.size} instance groups in training and ${testSet.size} in test")
 		println()
@@ -94,8 +95,7 @@ object MachineLearningTestSuite {
 
 		lines.foreach { line =>
 			val split = line.split("\t")
-			// id, surface, candidate entity, source, destination, 16 features, class
-			assert(split.length == 22)
+			assert(split.length == 5 /* id, surface, candidate entity, source, destination */ + CoheelClassifier.NUMBER_OF_FEATURES + 1 /* class */)
 			val id = split.head
 			if (id != lastId && currentGroup.nonEmpty) {
 				groups += currentGroup
