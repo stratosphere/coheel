@@ -14,13 +14,13 @@ object DataClasses {
 	 *      application.
 	 * @param source The page the link is on, e.g. 'Germany'
 	 * @param destination The link's destination, e.g. 'Angela Merkel'
-	 * @param id An auto-incrementing id for a link. Note: This field alone is no key, because ids are generated at each node.
-	 *           Therefore, only (id, source) makes a key. Therefore, see the fullId method, which returns an unique string id.
+	 * @param pos Position of the link in the text. Use for generating a unique id.
+	  *           See the fullId method, which returns an unique string id.
 	 */
 	// Note: In contrast to InternalLink, this class does not contain a Node, because
 	// that should not be part of the interface of this class.
-	case class Link(surface: String, surfaceRepr: String, posTags: Vector[String], source: String, destination: String, id: Int = newId()) {
-		def fullId: String = f"L-${Util.id(source)}-$id%08d-${Util.id(surface)}"
+	case class Link(surface: String, surfaceRepr: String, posTags: Vector[String], source: String, destination: String, pos: Int) {
+		def id: String = f"L-${Util.id(source)}-$pos%08d-${Util.id(surface)}"
 	}
 
 	case class WordInDocument(document: String, word: String, count: Int)
@@ -66,12 +66,12 @@ object DataClasses {
 		def to: String
 		def updateTo(s: String): T
 	}
-	case class ContextLinkResolving(from: String, to: String, prob: Double)  extends ThingToResolve[ContextLinkResolving] {
-		override def updateTo(s: String): ContextLinkResolving = this.copy(to = s)
+	case class ContextLinkCountsResolving(from: String, to: String, count: Int) extends ThingToResolve[ContextLinkCountsResolving] {
+		override def updateTo(s: String): ContextLinkCountsResolving = this.copy(to = s)
 	}
-	case class SurfaceProbResolving(surface: String, destination: String, prob: Double) extends ThingToResolve[SurfaceProbResolving] {
+	case class SurfaceLinkCountsResolving(surface: String, destination: String, count: Int) extends ThingToResolve[SurfaceLinkCountsResolving] {
 		override def to: String = destination
-		override def updateTo(s: String): SurfaceProbResolving = this.copy(destination = s)
+		override def updateTo(s: String): SurfaceLinkCountsResolving = this.copy(destination = s)
 	}
 	case class Redirect(from: String, to: String)
 
@@ -86,22 +86,33 @@ object DataClasses {
 	 * For example, at classification time, we need to keep track of the trie hit information, at training time we need to keep track of the gold standard.
 	 * This abstraction is done with an Info object, see below.
 	 */
-	case class Classifiable[T <: Info](id: String, surfaceRepr: String, context: Array[String], candidateEntity: String = "", surfaceProb: Double = -1.0, contextProb: Double = -1.0, info: T) {
+	case class Classifiable[T <: Info](
+			id: String,
+			surfaceRepr: String,
+			context: Array[String],
+			candidateEntity: String = "",
+			surfaceProb: Double = -1.0,
+			surfaceLinkProb: Double,
+			contextProb: Double = -1.0,
+			info: T) {
 
 		def withCandidateEntityAndSurfaceProb(newCandidateEntity: String, newSurfaceProb: Double): Classifiable[T] = {
-			Classifiable[T](id, surfaceRepr, context, newCandidateEntity, newSurfaceProb, contextProb, info)
+			Classifiable[T](id, surfaceRepr, context, newCandidateEntity, newSurfaceProb, surfaceLinkProb, contextProb, info)
 		}
 
 		def withContextProb(newContextProb: Double): Classifiable[T] = {
-			Classifiable[T](id, surfaceRepr, context, candidateEntity, surfaceProb, newContextProb, info)
+			Classifiable[T](id, surfaceRepr, context, candidateEntity, surfaceProb, surfaceLinkProb, newContextProb, info)
 		}
 	}
+
+	case class LinkDestinations(entity: String, destinations: Seq[String])
 
 
 	/**
 	 * Tracks extra information, both about the model of an instance and about further features, which are not directly linked to second order functions.
 	 */
 	abstract class Info {
+		// Maybe move further features from Info to extra class? It's not really extra info?
 		def furtherFeatures(classifiable: Classifiable[_]): List[Double]
 	}
 
@@ -146,7 +157,7 @@ object DataClasses {
 
 	case class Neighbour(entity: String, prob: Double)
 
-	case class Neighbours(entity: String, out: List[Neighbour], in: List[Neighbour])
+	case class Neighbours(entity: String, in: mutable.Buffer[Neighbour], out: mutable.Buffer[Neighbour])
 
 	/**
 	 * All candidates of one document.
@@ -165,8 +176,8 @@ object DataClasses {
 		 var classifierType: NodeType,
 		 candidateEntity: String,
 		 trieHit: TrieHit,
-		 in: List[Neighbour],
-		 out: List[Neighbour]) {
+		 var in: Seq[Neighbour],
+		 var out: Seq[Neighbour]) {
 
 		def shortToString(): String = {
 			s"($classifierType, '$candidateEntity', $trieHit)"
@@ -174,7 +185,7 @@ object DataClasses {
 	}
 
 	object ClassifierResultWithNeighbours {
-		def apply(documentId: String, classifierType: NodeType, candidateEntity: String, in: List[Neighbour], out: List[Neighbour]): ClassifierResultWithNeighbours =
+		def apply(documentId: String, classifierType: NodeType, candidateEntity: String, in: Seq[Neighbour], out: Seq[Neighbour]): ClassifierResultWithNeighbours =
 			ClassifierResultWithNeighbours(documentId, classifierType, candidateEntity, null, in, out)
 	}
 

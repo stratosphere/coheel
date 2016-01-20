@@ -8,7 +8,6 @@ import org.apache.flink.api.common.functions.{RichFlatMapFunction, BroadcastVari
 import org.apache.flink.configuration.Configuration
 import scala.collection.JavaConverters._
 import java.lang.Iterable
-import org.apache.log4j.Logger
 
 class TrieBroadcastInitializer extends BroadcastVariableInitializer[String, NewTrie] {
 
@@ -35,8 +34,12 @@ class TrieWithProbBroadcastInitializer extends BroadcastVariableInitializer[(Str
 object SurfacesInTrieFlatMap {
 	val BROADCAST_SURFACES = "surfaces"
 }
+
+/**
+  * Abstract base class for flatmaps needing access to the trie, whose values were broadcasted.
+  */
 abstract class SurfacesInTrieFlatMap[I, O] extends RichFlatMapFunction[I, O] {
-	def log = Logger.getLogger(getClass)
+	import CoheelLogger._
 	var trie: NewTrie = _
 
 	override def open(params: Configuration): Unit = {

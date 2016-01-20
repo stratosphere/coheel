@@ -42,7 +42,8 @@ object OutputFiles {
 
 	lazy val classificationPath               = s"${outputPath}classification.wiki"
 	lazy val inputDocumentsPath               = s"${outputPath}input-documents.wiki"
-	lazy val neighboursPath                   = s"${outputPath}neighbours.wiki"
+	lazy val fullNeighboursPath               = s"${outputPath}full-neighbours.wiki"
+	lazy val reciprocalNeighboursPath         = s"${outputPath}reciprocal-neighbours.wiki"
 	lazy val randomWalkResultsPath            = s"${outputPath}random-walk-results.wiki"
 	lazy val rawFeaturesPath                  = s"${outputPath}raw-features.wiki"
 	lazy val trieHitPath                      = s"${outputPath}trie-hits.wiki"

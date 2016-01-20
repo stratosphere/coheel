@@ -55,10 +55,6 @@ object MachineLearningTestSuite {
 
 		println("#" * 10 + " Test classifiers " + "#" * 10)
 		testCoheelClassifiers(train, test, expected)
-
-		// missing values
-		// surface-link-at-all probability?
-		// context < 100 ==>  Missing value
 	}
 
 	def readTrainingDataAndBuildInstances(): (Instances, Instances) = {
@@ -98,8 +94,8 @@ object MachineLearningTestSuite {
 
 		lines.foreach { line =>
 			val split = line.split("\t")
-			// id, surface, candidate entity, source, destination, 15 features, class
-			assert(split.length == 21)
+			// id, surface, candidate entity, source, destination, 16 features, class
+			assert(split.length == 22)
 			val id = split.head
 			if (id != lastId && currentGroup.nonEmpty) {
 				groups += currentGroup

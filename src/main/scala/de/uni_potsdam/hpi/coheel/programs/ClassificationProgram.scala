@@ -1,11 +1,11 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import java.io.File
 import java.lang.Iterable
+import java.net.URI
 import java.util.Date
 
 import de.uni_potsdam.hpi.coheel.Params
-import de.uni_potsdam.hpi.coheel.datastructures.{NewTrie, TrieHit}
+import de.uni_potsdam.hpi.coheel.datastructures.TrieHit
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.io.Sample
@@ -13,20 +13,17 @@ import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier
 import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier.POS_TAG_GROUPS
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import de.uni_potsdam.hpi.coheel.util.Util
-import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
-import org.apache.flink.api.common.functions.{Partitioner, RichFlatMapFunction, RichGroupReduceFunction}
+import org.apache.flink.api.common.functions.{Partitioner, RichGroupReduceFunction}
 import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
+import org.apache.flink.core.fs.{Path, FileSystem}
 import org.apache.flink.util.Collector
-import org.apache.log4j.Logger
 import weka.classifiers.Classifier
-import weka.classifiers.meta.SerialVersionAccess
 import weka.core.SerializationHelper
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.io.Source
-import scala.util.Random
 
 
 class DocumentPartitioner extends Partitioner[Int] {
@@ -36,68 +33,46 @@ class DocumentPartitioner extends Partitioner[Int] {
 }
 class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 
+	import CoheelLogger._
+
 	override def getDescription: String = "CohEEL Classification"
-	def log: Logger = Logger.getLogger(getClass)
+
+	// Select, which neighbours file to use
+	val NEIGHBOURS_FILE = fullNeighboursPath
+//	val NEIGHBOURS_FILE = reciprocalNeighboursPath
+
+	val neighboursCreationMethod = Map(fullNeighboursPath -> buildFullNeighbours _, reciprocalNeighboursPath -> buildReciprocalNeighbours _)
 
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
-		val documents = env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_3).name("Documents")
+		val documentStrings = List(4).map { x =>
+			Source.fromFile(s"src/main/resources/classification-documents/$x", "UTF-8").mkString
+		}
+		val documents = if (runsOffline())
+				env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_3).name("Documents")
+			else
+//				env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_3).name("Documents")
+				env.fromCollection(documentStrings).name("Documents")
 
-		val inputDocuments = documents.flatMap(new RichFlatMapFunction[String, InputDocument] {
-			def log: Logger = Logger.getLogger(getClass)
-
-			var index: Int = -1
-			var random: Random = null
-			val parallelism = params.parallelism
-			log.info(s"Basing distribution on parallelism $parallelism")
-			val halfParallelism = if (CoheelProgram.runsOffline()) 1 else parallelism / 2
-			val firstHalf  = if (runsOffline()) List(0) else List.range(0, halfParallelism)
-			val secondHalf = if (runsOffline()) List(0) else List.range(halfParallelism, parallelism)
-			var isFirstHalf: Boolean = true
-
-			override def open(params: Configuration): Unit = {
-				index = getRuntimeContext.getIndexOfThisSubtask
-				isFirstHalf = firstHalf contains index
-				random = new Random()
-			}
-			override def flatMap(text: String, out: Collector[InputDocument]): Unit = {
-				val tokenizer = TokenizerHelper.tokenizeWithPositionInfo(text, null)
-				val id = Util.id(text)
-				log.info(s"Reading document $id on index $index")
-
-				val tokens = tokenizer.getTokens
-				val tags = tokenizer.getTags
-				if (isFirstHalf) {
-					out.collect(InputDocument(id, 0, index, tokens, tags))
-					if (!CoheelProgram.runsOffline()) {
-						val randomIndex = secondHalf(random.nextInt(halfParallelism))
-						out.collect(InputDocument(id, 1, randomIndex, tokens, tags))
-						log.info(s"Distributing to $index and $randomIndex")
-					}
-				} else {
-					if (!CoheelProgram.runsOffline()) {
-						val randomIndex = firstHalf(random.nextInt(halfParallelism))
-						out.collect(InputDocument(id, 0, randomIndex, tokens, tags))
-						log.info(s"Distributing to $index and $randomIndex")
-					}
-					out.collect(InputDocument(id, 1, index, tokens, tags))
-				}
-			}
-		}).name("Input-Documents")
+		val inputDocuments = documents.flatMap(new InputDocumentDistributorFlatMap(params, runsOffline())).name("Input-Documents")
 
 		val partitionedDocuments = inputDocuments.partitionCustom(new DocumentPartitioner, "index").name("Partitioned-Documents")
 
 		val classifiables = partitionedDocuments
-			.flatMap(new PotentialEntityFinderFlatMap(params))
+			.flatMap(new RunTrieOverDocumentsFlatMap(params))
 			.name("Possible links")
 
 		// fill the classifiables with all feature information
-		val featuresPerGroup = FeatureProgramHelper.buildFeaturesPerGroup(this, classifiables)
+		val featuresPerGroup = FeatureHelper.buildFeaturesPerGroup(env, classifiables)
 		val basicClassifierResults = featuresPerGroup.reduceGroup(new ClassificationReduceGroup(params)).name("Basic Classifier Results")
 
-
-//		val preprocessedNeighbours = env.readCsvFile(neighboursPath, fieldDelimiter = "\t") //loadNeighbours(env)
-		val preprocessedNeighbours = loadNeighbours(env)
-
+		val f = FileSystem.get(new URI("hdfs://tenemhead2"))
+		val preprocessedNeighbours = if (f.exists(new Path(NEIGHBOURS_FILE.replace("hdfs://tenemhead2", "")))) {
+			log.info("Neighbourhood-File exists")
+			loadNeighboursFromHdfs(env, NEIGHBOURS_FILE)
+		} else {
+			log.info("Neighbourhood-File does not exist")
+			neighboursCreationMethod(NEIGHBOURS_FILE)(env)
+		}
 
 		val withNeighbours = basicClassifierResults.join(preprocessedNeighbours)
 			.where("candidateEntity")
@@ -115,14 +90,13 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 				}
 			}
 
-
-		withNeighbours.groupBy("documentId").reduceGroup(new RandomWalkReduceGroup).name("Random Walk").writeAsTsv(randomWalkResultsPath)
-
 		/*
 		 * OUTPUT
 		 */
 		inputDocuments.filter(_.replication == 0).writeAsTsv(inputDocumentsPath)
-		preprocessedNeighbours.writeAsTsv(neighboursPath)
+
+		preprocessedNeighbours.map(serializeNeighboursToString _).writeAsText(NEIGHBOURS_FILE, FileSystem.WriteMode.OVERWRITE)
+
 		// Write trie hits for debugging
 		val trieHitOutput = classifiables.map { trieHit =>
 			(trieHit.id, trieHit.surfaceRepr, trieHit.info.trieHit, trieHit.info.posTags.deep, s">>>${trieHit.context.mkString(" ")}<<<")
@@ -142,74 +116,72 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 			(res.documentId, res.classifierType, res.candidateEntity, res.trieHit)
 		}.writeAsTsv(classificationPath)
 
+		withNeighbours.groupBy("documentId").reduceGroup(new RandomWalkReduceGroup).name("Random Walk").writeAsTsv(randomWalkResultsPath)
+
 	}
 
+	def serializeNeighboursToString(neighbours: Neighbours): String = {
+		val inString = neighbours.in.map { n => s"${n.entity}\0${n.prob}" }.mkString("\0")
+		val outString = neighbours.out.map { n => s"${n.entity}\0${n.prob}" }.mkString("\0")
+		s"${neighbours.entity}\t$inString\t$outString"
+	}
 
-	def loadNeighbours(env: ExecutionEnvironment): DataSet[Neighbours] = {
+	def buildReciprocalNeighbours(env: ExecutionEnvironment): DataSet[Neighbours] = {
+		val fullNeighbours = buildFullNeighbours(env)
+		fullNeighbours.map { neighbours =>
+			import neighbours._
+			val inSet  = in.map(_.entity).toSet
+			val outSet = out.map(_.entity).toSet
+			val intersection = inSet.intersect(outSet)
+
+			val newIn = in.filter { x => intersection.contains(x.entity) }
+			val inSum = newIn.map(_.prob).sum
+			newIn += Neighbour(RandomWalkReduceGroup.NULL_NODE, 1.0 - inSum)
+
+			val newOut = out.filter { x => intersection.contains(x.entity) }
+			val outSum = newOut.map(_.prob).sum
+			newOut += Neighbour(RandomWalkReduceGroup.NULL_NODE, 1.0 - outSum)
+
+			Neighbours(entity, newIn, newOut)
+		}
+	}
+
+	def buildFullNeighbours(env: ExecutionEnvironment): DataSet[Neighbours] = {
 		val contextLinks = env.readTextFile(contextLinkProbsPath).name("ContextLinkProbs-Path").map { line =>
 			val split = line.split('\t')
 			ContextLink(split(0), split(1), split(2).toDouble)
 		}.name("ContextLinks")
 		val outgoingNeighbours = contextLinks.groupBy("from").reduceGroup { grouped =>
-			val asList = grouped.toList
+			val asList = grouped.toBuffer
 			(asList.head.from, asList.map { contextLink => Neighbour(contextLink.to, contextLink.prob) })
 		}.name("Outgoing Neighbours")
 		val incomingNeighbours = contextLinks.groupBy("to").reduceGroup { grouped =>
-			val asList = grouped.toList
+			val asList = grouped.toBuffer
 			(asList.head.to, asList.map { contextLink => Neighbour(contextLink.from, contextLink.prob) })
 		}.name("Incoming Neighbours")
-		val preprocessedNeighbours = outgoingNeighbours.join(incomingNeighbours)
+		val fullNeighbours = incomingNeighbours.join(outgoingNeighbours)
 			.where(0)
 			.equalTo(0)
 			.map { joinResult => joinResult match {
-					case (out, in) => Neighbours(out._1, out._2, in._2)
-				}
+					case (in, out) => Neighbours(in._1, in._2, out._2)
+			}
 		}.name("All-Neighbours")
-		preprocessedNeighbours
+		fullNeighbours
+	}
+
+	def loadNeighboursFromHdfs(env: ExecutionEnvironment, neighboursPath: String): DataSet[Neighbours] = {
+		env.readTextFile(neighboursPath).map { neighboursLine =>
+			val Array(entity, inString, outString) = neighboursLine.split('\t')
+			val inNeighbours = inString.split("\0").grouped(2).map { case Array(ent, prob) => Neighbour(ent, prob.toDouble) }.toBuffer
+			val outNeighbours = outString.split("\0").grouped(2).map { case Array(ent, prob) => Neighbour(ent, prob.toDouble) }.toBuffer
+			Neighbours(entity, inNeighbours, outNeighbours)
+		}.name("All-Neighbours")
 	}
 }
 
-class PotentialEntityFinderFlatMap(params: Params) extends RichFlatMapFunction[InputDocument, Classifiable[ClassificationInfo]] {
+class RunTrieOverDocumentsFlatMap(params: Params) extends ReadTrieFromDiskFlatMap[InputDocument, Classifiable[ClassificationInfo]](params) {
 	var tokenHitCount: Int = 1
-
-	def log = Logger.getLogger(getClass)
-	var trie: NewTrie = _
-	var fileName: String = _
-
-	override def open(conf: Configuration): Unit = {
-		val surfaceLinkProbsFile = if (CoheelProgram.runsOffline()) {
-			new File("output/surface-link-probs.wiki")
-//			new File("cluster-output/678910")
-		} else {
-			if (getRuntimeContext.getIndexOfThisSubtask < params.parallelism / 2)
-				new File(params.config.getString("first_trie_half"))
-			else
-				new File(params.config.getString("second_trie_half"))
-		}
-		assert(surfaceLinkProbsFile.exists())
-		val surfaces = Source.fromFile(surfaceLinkProbsFile, "UTF-8").getLines().flatMap { line =>
-			val split = line.split('\t')
-			if (split.length == 5)
-				Some(split(0), split(3).toFloat)
-			else {
-				log.warn(s"SurfaceLinkProbs: Discarding '${split.deep}' because split size not correct")
-				log.warn(line)
-				None
-			}
-		}
-		log.info(s"On subtask id #${getRuntimeContext.getIndexOfThisSubtask} with file ${surfaceLinkProbsFile.getName}")
-		log.info(s"Building trie with ${FreeMemory.get(true)} MB")
-		val d1 = new Date
-		trie = new NewTrie
-		surfaces.foreach { case (surface, prob) =>
-			// TODO: Determine heuristic for this value
-			if (prob > 0.05) {
-//				println(s"Adding $surface with prob $prob")
-				trie.add(surface, prob)
-			}
-		}
-		log.info(s"Finished trie with ${FreeMemory.get(true)} MB in ${(new Date().getTime - d1.getTime) / 1000} s")
-	}
+	import CoheelLogger._
 
 	override def flatMap(document: InputDocument, out: Collector[Classifiable[ClassificationInfo]]): Unit = {
 		trie.findAllInWithTrieHit(document.tokens).foreach { trieHit =>
@@ -224,24 +196,20 @@ class PotentialEntityFinderFlatMap(params: Params) extends RichFlatMapFunction[I
 				// TH for trie hit
 				if (containsNoun) {
 					val id = s"TH-${document.id}-${document.replication}-$tokenHitCount"
-					out.collect(Classifiable(id, trieHit.s, context.toArray, info = ClassificationInfo(document.id, trieHit, POS_TAG_GROUPS.map { group => if (group.exists(tags.contains(_))) 1.0 else 0.0 })))
+					out.collect(Classifiable(id, trieHit.s, context.toArray, surfaceLinkProb = trieHit.prob, info = ClassificationInfo(document.id, trieHit, POS_TAG_GROUPS.map { group => if (group.exists(tags.contains(_))) 1.0 else 0.0 })))
 					tokenHitCount += 1
 				}
 				else {
-					log.warn(s"Removing $trieHit in >>${context.mkString(" ")}<< because it contains no noun")
+					log.warn(s"Removing because no noun: $trieHit in >>${context.slice(20, 30).mkString(" ")}<<")
 				}
 			}
 		}
-	}
-
-	override def close(): Unit = {
-		trie = null
 	}
 }
 
 class ClassificationReduceGroup(params: Params) extends RichGroupReduceFunction[Classifiable[ClassificationInfo], ClassifierResult] {
 
-	def log = Logger.getLogger(getClass)
+	import CoheelLogger._
 	var seedClassifier: CoheelClassifier = null
 	var candidateClassifier: CoheelClassifier = null
 
@@ -274,7 +242,7 @@ class ClassificationReduceGroup(params: Params) extends RichGroupReduceFunction[
 		val trieHit = allCandidates.head.info.trieHit
 
 		val features = new mutable.ArrayBuffer[FeatureLine[ClassificationInfo]](allCandidates.size)
-		FeatureProgramHelper.applyCoheelFunctions(allCandidates) { featureLine =>
+		FeatureHelper.applyCoheelFunctions(allCandidates) { featureLine =>
 			features.append(featureLine)
 		}
 		var seedsFound = 0

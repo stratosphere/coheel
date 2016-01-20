@@ -41,8 +41,8 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 	/**
 	 * Builds two plans:
 	 * <ul>
-	 *   <li> the plan who counts how often one document links to another
-	 *   <li> the plan who counts how often a link occurs under a certain surface
+	 *   <li> the plan which counts how often one document links to another
+	 *   <li> the plan which counts how often a link occurs under a certain surface
 	 */
 	def buildLinkPlans(wikiPages: DataSet[WikiPage]): Unit = {
 		val normalPages = wikiPages.filter { !_.isDisambiguation }
@@ -50,11 +50,11 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 		val normalPageLinks = linksFrom(normalPages)
 		val allPageLinks    = linksFrom(wikiPages)
 
-		val groupedByLinkText = allPageLinks
+		val groupedBySurface = allPageLinks
 			.groupBy { link => link.surfaceRepr }
 
 		// counts in how many documents a surface occurs
-		val surfaceDocumentCounts = groupedByLinkText
+		val surfaceDocumentCounts = groupedBySurface
 			.reduceGroup { linksWithSameText =>
 				var surfaceRepr: String = null
 				// Count each link on one source page only once, i.e. if a surface occurs twice on a page
@@ -71,54 +71,33 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 				(surfaceRepr, list.minBy(_.surface).surface, count)
 			}
 
-		// count how often a surface occurs
-		val surfaceCounts = groupedByLinkText
-			.reduceGroup { group =>
-				val links = group.toList
-				SurfaceCounts(links.head.surfaceRepr, links.size)
+		val surfaceDestinationCountsUnresolved = groupedBySurface
+			.reduceGroup { (groupIt, out: Collector[SurfaceLinkCountsResolving]) =>
+				val group = groupIt.toList
+				val surface = group.head.surfaceRepr
+				group
+					.groupBy(_.destination)
+					.foreach { case (destination, destGroup) =>
+						out.collect(SurfaceLinkCountsResolving(surface, destination, destGroup.size))
+					}
 			}
-		val surfaceCountHistogram = surfaceCounts.map { surfaceCount => (surfaceCount.count, 1) }.groupBy(0).sum(1)
 
-		// count how often a surface occurs with a certain destination
-		val surfaceLinkCounts = allPageLinks
-			.map { link => SurfaceLinkCounts(link.surfaceRepr, link.destination, 1) }
-			.groupBy(0, 1)
-			.sum(2).name("Surface-LinkTo-Counts")
-		// join them together and calculate the probabilities
-		val surfaceProbsUnresolved = surfaceCounts.join(surfaceLinkCounts)
-			.where { _.surfaceRepr }
-			.equalTo { _.surface }
-			.map { joinResult => joinResult match {
-				case (surfaceCount, surfaceLinkCount) =>
-					SurfaceProbResolving(surfaceCount.surfaceRepr, surfaceLinkCount.destination,
-					 surfaceLinkCount.count / surfaceCount.count.toDouble)
+		val contextLinkCountsUnresolved = normalPageLinks
+			.groupBy("source")
+			.reduceGroup { (linksIt, out: Collector[ContextLinkCountsResolving]) =>
+				val links = linksIt.toSeq
+				val from = links.head.source
+				links
+					.groupBy(_.destination)
+					.foreach { case (destination, destGroup) =>
+						out.collect(ContextLinkCountsResolving(from, destination, destGroup.size))
+					}
 			}
-		}
-
-		// calculate context link counts only for non-disambiguation pages
-		val linkCounts = normalPageLinks
-			.map { link => LinkCounts(link.source, 1) }
-			.groupBy(0)
-			.sum(1)
-		val contextLinkCounts = normalPageLinks
-			.map { link => ContextLinkCounts(link.source, link.destination, 1) }
-			.groupBy(0, 1)
-			.sum(2)
-		val contextLinksUnresolved = linkCounts.join(contextLinkCounts)
-			.where     { _.source }
-			.equalTo { _.source }
-			.map { joinResult => joinResult match {
-				case (linkCount, surfaceLinkCount) =>
-				ContextLinkResolving(linkCount.source, surfaceLinkCount.destination, surfaceLinkCount.count.toDouble / linkCount.count)
-			}
-		}
 
 		// save redirects (to - from)
 		val redirects = wikiPages
 			.filter { wikiPage => wikiPage.isRedirect }
 			.map { wikiPage => Redirect(wikiPage.pageTitle, wikiPage.redirect) }
-
-
 
 		def iterate[T <: ThingToResolve[T] : TypeInformation : ClassTag](ds: DataSet[T]): DataSet[T] = {
 			val resolvedRedirects = ds.leftOuterJoin(redirects)
@@ -135,32 +114,34 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 			resolvedRedirects
 		}
 
-		val contextLinks = contextLinksUnresolved.iterate(3)(iterate)
-			.groupBy("from", "to")
-			.reduce { (cl1, cl2) =>
-				cl1.copy(prob = cl1.prob + cl2.prob)
+		val contextLinks = contextLinkCountsUnresolved.iterate(3)(iterate)
+			.groupBy("from")
+			.reduceGroup { (fromLinksIt, out: Collector[(String, String, Double)]) =>
+				val fromLinks = fromLinksIt.toSeq
+				val from = fromLinks.head.from
+				val allCount = fromLinks.map(_.count).sum
+				fromLinks.groupBy(_.to).foreach { case (to, toGroup) =>
+					out.collect((from, to, toGroup.map(_.count).sum.toDouble / allCount))
+				}
 			}
-			.map { cl => (cl.from, cl.to, cl.prob) }
 			.name("Final-Resolved-Context-Links")
 
-		val surfaceProbs = surfaceProbsUnresolved.iterate(3)(iterate)
-			.groupBy("surface", "destination")
-			.reduce { (sp1, sp2) =>
-				sp1.copy(prob = sp1.prob + sp2.prob)
+		val surfaceProbs = surfaceDestinationCountsUnresolved.iterate(3)(iterate)
+			.groupBy("surface")
+			.reduceGroup { (groupIt, out: Collector[(String, String, Double)]) =>
+				val surfaceGroup = groupIt.toSeq
+				val surface = surfaceGroup.head.surface
+				val size = surfaceGroup.map(_.count).sum
+				surfaceGroup.groupBy(_.destination)
+					.foreach { case (destination, destinationGroup) =>
+						out.collect((surface, destination, destinationGroup.map(_.count).sum.toDouble / size))
+					}
 			}
-			.name("Final-Resolved-Surface-Probs")
 
 		contextLinks.writeAsTsv(contextLinkProbsPath)
 		surfaceProbs.writeAsTsv(surfaceProbsPath)
 
-
-
-
-
-		allPageLinks.map { link => (link.fullId, link.surfaceRepr, link.surface, link.source, link.destination) }.writeAsTsv(allLinksPath)
-		surfaceCountHistogram.writeAsTsv(surfaceCountHistogramPath)
-		surfaceProbsUnresolved.writeAsTsv(surfaceProbsPath)
-		contextLinksUnresolved.writeAsTsv(contextLinkProbsPath)
+		allPageLinks.map { link => (link.id, link.surfaceRepr, link.surface, link.source, link.destination) }.writeAsTsv(allLinksPath)
 		redirects.writeAsTsv(redirectPath)
 		surfaceDocumentCounts.writeAsTsv(surfaceDocumentCountsPath)
 	}
