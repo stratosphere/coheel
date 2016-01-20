@@ -5,24 +5,20 @@ import java.net.InetAddress
 
 import de.uni_potsdam.hpi.coheel.{Params, FlinkProgramRunner}
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
-import de.uni_potsdam.hpi.coheel.io.{IteratorReader, WikiPageInputFormat}
+import de.uni_potsdam.hpi.coheel.io.{RawWikiPageInputFormat, IteratorReader, WikiPageInputFormat}
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import de.uni_potsdam.hpi.coheel.util.Timer
 import de.uni_potsdam.hpi.coheel.wiki._
-import edu.umd.cloud9.collection.wikipedia.WikipediaPageInputFormat
 import de.uni_potsdam.hpi.coheel.{FlinkProgramRunner, Params}
 import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.common.functions.RichFlatMapFunction
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.scala._
-import org.apache.flink.api.scala.hadoop.mapred.HadoopInputFormat
 import org.apache.flink.core.fs.Path
 import org.apache.flink.core.fs.local.LocalFileSystem
 import org.apache.flink.util.Collector
-import org.apache.hadoop.io.{LongWritable, Text}
-import org.apache.hadoop.mapred.InputFormat
+import org.apache.hadoop.io.LongWritable
 import org.apache.log4j.Logger
-import edu.umd.cloud9.collection.wikipedia.WikipediaPage
 
 import scala.collection.JavaConverters._
 import scala.reflect.ClassTag
@@ -69,16 +65,17 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 		buildProgram(env, param)
 	}
 
-	private lazy val wikiInput: DataSet[WikipediaPage] = environment
-			.readHadoopFile( new WikipediaPageInputFormat, classOf[LongWritable], classOf[WikipediaPage], wikipediaDumpFilesPath )
-			.map(_._2)
+
+	private lazy val rawWikiInput: DataSet[RawWikiPage] = environment
+		.readHadoopFile( new RawWikiPageInputFormat, classOf[LongWritable], classOf[RawWikiPage], wikipediaDumpFilesPath )
+		.map(_._2)
 	private def readRawWikiPages[S : TypeInformation : ClassTag](fun: Extractor => S, pageFilter: String => Boolean = _ => true): DataSet[S] = {
-		wikiInput
-			// TODO should be map instead of flatMap, but not (yet) possible due to xmlToWikiPages signature
-			.filter( rawPage => rawPage.isArticle && ! rawPage.isEmpty )
-			.map( WikiPageReader.cloud9ToRawWikiPage( _ ) )
-			//.flatMap( rawPage  => new WikiPageReader().xmlToWikiPages( new StringReader(rawPage.getRawXML), pageFilter ) )
-			//.filter ( wikiPage => wikiPage.ns == 0 && wikiPage.source.nonEmpty )
+		rawWikiInput
+			.filter ( rawWikiPage =>
+					rawWikiPage.ns == 0 &&
+					rawWikiPage.source.nonEmpty &&
+					pageFilter.apply( rawWikiPage.pageTitle )
+			)
 			.flatMap( (rawWikiPage: RawWikiPage, out: Collector[S]) =>
 				Try {
 					val extractor = new Extractor(rawWikiPage, s => TokenizerHelper.tokenize(s).mkString(" ") )

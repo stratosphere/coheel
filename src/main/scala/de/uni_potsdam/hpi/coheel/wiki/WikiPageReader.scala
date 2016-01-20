@@ -2,8 +2,6 @@ package de.uni_potsdam.hpi.coheel.wiki
 
 import java.io.{Reader, StringReader, BufferedReader}
 import javax.xml.stream.{XMLStreamConstants, XMLInputFactory}
-import edu.umd.cloud9.collection.wikipedia.WikipediaPage
-import org.apache.commons.lang3.StringEscapeUtils
 import org.apache.log4j.Logger
 import de.uni_potsdam.hpi.coheel.programs.CoheelLogger
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
@@ -108,7 +106,6 @@ object RawWikiPage {
 }
 
 class WikiPageReader {
-
 	val log = Logger.getLogger(getClass)
 
 	val factory = XMLInputFactory.newInstance()
@@ -180,33 +177,4 @@ class WikiPageReader {
 			}
 		}
 	}
-}
-object WikiPageReader {
-	/**
-	  * Builds a raw wiki page from Jimmy Lins cloud9 WikipediaPage format
-	  */
-	def cloud9ToRawWikiPage ( cloud9FormatPage: WikipediaPage  ): RawWikiPage = {
-		// get raw data
-		val pageXml = cloud9FormatPage.getRawXML
-		val pageTitle = cloud9FormatPage.getTitle
-		val wikiMarkup = cloud9FormatPage.getWikiMarkup
-		// create WikiPage instance
-		RawWikiPage(
-			pageTitle,
-			getNs( pageXml ),
-			getRedirectTitle( pageXml ),
-			wikiMarkup
-		)
-	}
-
-	def checkList(pageTitle: String): Boolean = pageTitle.startsWith("List of") ||
-		pageTitle.startsWith("Lists of")
-
-	val nsPattern = """<ns\\s*?>(\d+)</ns\\s*?>""".r
-	def getNs(pageXml: String) : Int =
-		nsPattern.findFirstMatchIn( pageXml ).map( _.group(1) ).getOrElse("0").toInt
-
-	val redirectPattern = """<redirect title="(.*?)"""".r
-	def getRedirectTitle(pageXml: String) : String =
-		redirectPattern.findFirstMatchIn( pageXml ).map( _.group(1) ).getOrElse("")
 }
