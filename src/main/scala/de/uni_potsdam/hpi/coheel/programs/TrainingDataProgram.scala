@@ -107,32 +107,44 @@ class TrainingDataGroupReduce extends RichGroupReduceFunction[Classifiable[Train
 				linkDestinationsPerEntity(allCandidates.head.info.source)
 			else
 				null
+
+		var filterOut = false
+		val featureLines = new mutable.ArrayBuffer[FeatureLine[TrainInfo]](allCandidates.size)
 		FeatureHelper.applyCoheelFunctions(allCandidates) { featureLine =>
-			// What's missing: How to know all the links (entities) of the source entity, to filter
-			// the bad candidates out here
-			// The filtering must be done here, after the second order functions have been run
-
+			featureLines += featureLine
 			import featureLine._
-			def stringInfo = List(id, surfaceRepr, candidateEntity) ::: featureLine.info.modelInfo
-			val output = s"${stringInfo.mkString("\t")}\t${featureLine.features.mkString("\t")}"
-
-			// Filter out feature lines with a candidate entity, which is also a link in the source.
-			// Taking care, that not all links are filtered out (not the original), i.e. only do this for trie hits
 			if (id.startsWith("TH-")) {
-				// This classifiable/feature line came from a trie hit, we might want to remove it from the
-				// training data set:
-				// Remove the trie hit, if the candidate entity is linked from the current article.
-				// Reasoning: Say, an article contains Angela Merkel as a link. Later, it is referred to as
-				// the "merkel" with no link. It would be wrong to learn, that this should not be linked, because
-				// it is probably only not linked, because it was already linked in the article.
-				if (!linkDestinations.contains(featureLine.candidateEntity))
+				filterOut ^= linkDestinations.contains(candidateEntity)
+			}
+		}
+		if (!filterOut) {
+			featureLines.foreach { featureLine =>
+				// What's missing: How to know all the links (entities) of the source entity, to filter
+				// the bad candidates out here
+				// The filtering must be done here, after the second order functions have been run
+
+				import featureLine._
+				def stringInfo = List(id, surfaceRepr, candidateEntity) ::: featureLine.info.modelInfo
+				val output = s"${stringInfo.mkString("\t")}\t${featureLine.features.mkString("\t")}"
+
+				// Filter out feature lines with a candidate entity, which is also a link in the source.
+				// Taking care, that not all links are filtered out (not the original), i.e. only do this for trie hits
+				if (id.startsWith("TH-")) {
+					// This classifiable/feature line came from a trie hit, we might want to remove it from the
+					// training data set:
+					// Remove the trie hit, if the candidate entity is linked from the current article.
+					// Reasoning: Say, an article contains Angela Merkel as a link. Later, it is referred to as
+					// the "merkel" with no link. It would be wrong to learn, that this should not be linked, because
+					// it is probably only not linked, because it was already linked in the article.
+					if (!linkDestinations.contains(featureLine.candidateEntity))
+						out.collect(output)
+					else {
+						log.info(s"Do not output surface `${featureLine.surfaceRepr}` with candidate '${featureLine.candidateEntity}' from ${featureLine.info.modelInfo}")
+					}
+				} else {
+					// we have a link, just output it
 					out.collect(output)
-				else {
-					log.info(s"Do not output surface `${featureLine.surfaceRepr}` with candidate '${featureLine.candidateEntity}' from ${featureLine.info.modelInfo}")
 				}
-			} else {
-				// we have a link, just output it
-				out.collect(output)
 			}
 		}
 	}
