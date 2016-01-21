@@ -55,7 +55,8 @@ class TrainingDataProgram extends CoheelProgram[TrieSelectionStrategy] with Seri
 			.name("Links and possible links")
 
 		classifiables.map { c =>
-			(c.id, c.surfaceRepr, c.surfaceLinkProb, c.info.source, c.info.destination, c.info.posTags.deep, c.context.deep)
+			val posTags = c.info.posTags
+			(c.id, c.surfaceRepr, c.surfaceLinkProb, c.info.source, c.info.destination, s"PosTags(${posTags.mkString(", ")})", c.context.deep)
 		}.writeAsTsv(trainingDataClassifiablesPath +  s"-$SAMPLE_NUMBER-$trieFileName.wiki")
 
 		// Fill classifiables with candidates, surface probs and context probs
