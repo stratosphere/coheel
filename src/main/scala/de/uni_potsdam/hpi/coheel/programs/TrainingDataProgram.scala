@@ -159,6 +159,7 @@ class LinksAsTrainingDataFlatMap(trieSelector: TrieSelectionStrategy) extends Re
 	override def flatMap(wikiPage: FullInfoWikiPage, out: Collector[Classifiable[TrainInfo]]): Unit = {
 		val linksWithPositions = wikiPage.links
 
+
 		trie.findAllInWithTrieHit(wikiPage.plainText).foreach { trieHit =>
 			// TODO: Do not output trie hits from links: This needs testing.
 			if (!linksWithPositions.contains(trieHit.startIndex)) {

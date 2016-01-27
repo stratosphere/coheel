@@ -149,14 +149,6 @@ object MachineLearningTestSuite {
 						}
 					}
 
-					// ids of all links
-					val expectedIds = expected.map( _._1)
-					// only those seed classifications, which belong to links
-					val seedAtExpectedSurface = actualSeed.filter { act => expectedIds.contains( act._1 ) }
-					val precisionExpected = if (seedAtExpectedSurface.nonEmpty) expected.intersect(seedAtExpectedSurface).size.toDouble / seedAtExpectedSurface.size else -1.0
-					val recallExpected = expected.intersect(seedAtExpectedSurface).size.toDouble / expected.size
-					val f1Expected = 2 * precisionExpected * recallExpected / (precisionExpected + recallExpected)
-
 					val precisionCand = if (actualCand.nonEmpty) expected.intersect(actualCand).size.toDouble / actualCand.size else -1.0
 					val recallCand = expected.intersect(actualCand).size.toDouble / expected.size
 					val f1Cand = 2 * precisionCand * recallCand / (precisionCand + recallCand)
@@ -164,6 +156,14 @@ object MachineLearningTestSuite {
 					val precisionSeed = if (actualSeed.nonEmpty) expected.intersect(actualSeed).size.toDouble / actualSeed.size else -1.0
 					val recallSeed = expected.intersect(actualSeed).size.toDouble / expected.size
 					val f1Seed = 2 * precisionSeed * recallSeed / (precisionSeed + recallSeed)
+
+					// ids of all links
+					val expectedIds = expected.map( _._1)
+					// only those seed classifications, which belong to links
+					val seedAtExpectedSurface = actualSeed.filter { act => expectedIds.contains( act._1 ) }
+					val precisionExpected = if (seedAtExpectedSurface.nonEmpty) expected.intersect(seedAtExpectedSurface).size.toDouble / seedAtExpectedSurface.size else -1.0
+					val recallExpected = expected.intersect(seedAtExpectedSurface).size.toDouble / expected.size
+					val f1Expected = 2 * precisionExpected * recallExpected / (precisionExpected + recallExpected)
 
 					// how many seed/candidate classifications are actually links
 					val precisionSeedsActualLinks = seedAtExpectedSurface.size.toDouble / actualSeed.size
