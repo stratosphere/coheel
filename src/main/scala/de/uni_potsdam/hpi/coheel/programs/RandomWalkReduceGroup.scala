@@ -12,7 +12,6 @@ import org.apache.commons.collections4.BidiMap
 import org.apache.commons.collections4.bidimap.DualHashBidiMap
 import org.apache.flink.api.common.functions.RichGroupReduceFunction
 import org.apache.flink.util.Collector
-import org.jblas.DoubleMatrix
 import org.jgrapht.graph.{DefaultDirectedWeightedGraph, DefaultWeightedEdge}
 
 import scala.collection.JavaConverters._
@@ -39,55 +38,13 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		// different trie hit
 		var entities = entitiesIt.asScala.toVector
 
-		val debug = entities.filter(_.candidateEntity == "Holy Roman Emperor").head
-		val sum = debug.out.map(_.prob).sum
-		log.info(s"Outgoing edge sum for `Holy Roman Emperor` is $sum")
-
 		log.info(s"Handling document id: ${entities.head.documentId}")
 
 		Timer.start("filterUnconnected")
 		entities = filterUnconnected(entities)
-
 		Timer.logResult(log, "filterUnconnected")
 
-		if (!CoheelProgram.runsOffline()) {
-			log.info("BASIC NEIGHBOURS")
-			// For printing out the neighbours, it suffices to group by candidate entity, as the entity determines the neighbours.
-			entities.groupBy(_.candidateEntity).map { case (entity, classifiables) =>
-				classifiables.find(_.classifierType == NodeTypes.SEED) match {
-					case Some(classifiable) =>
-						classifiable
-					case None =>
-						classifiables.head
-				}
-			}.toVector.foreach { entity =>
-				log.info("--------------------------------------------------------")
-				log.info(s"Entity: ${entity.candidateEntity} (${entity.classifierType}) from '${entity.trieHit}' with ${entity.in.size} in neighbours and ${entity.out.size} out neighbours")
-				log.info("In-Neighbours")
-				entity.in.foreach { in =>
-					log.info(s"I ${in.entity} ${in.prob}")
-				}
-				log.info("Out-Neighbours")
-				entity.out.foreach { out =>
-					log.info(s"O ${out.entity} ${out.prob}")
-				}
-			}
-		}
-
-		val debug2 = entities.filter(_.candidateEntity == "Holy Roman Emperor").head
-		val sum2 = debug2.out.map(_.prob).sum
-		log.info(s"Outgoing edge sum for `Holy Roman Emperor` is $sum2")
-
-//		entities.foreach { entity =>
-//			log.info("--------------------------------------------------------")
-//			log.info(s"${entity.candidateEntity},${entity.classifierType},'${entity.trieHit}',with ${entity.in.size} in neighbours and ${entity.out.size} out neighbours")
-//			entity.in.foreach { in =>
-//				log.info(s"I,${in.entity},${in.prob}")
-//			}
-//			entity.out.foreach { out =>
-//				log.info(s"O,${out.entity},${out.prob}")
-//			}
-//		}
+		logRemainingEntities(entities)
 
 		// we start with the seeds as the final alignments, they are certain
 		var finalAlignments = entities.filter { entity => entity.classifierType == NodeTypes.SEED }
@@ -106,11 +63,8 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		log.info(s"Starting loop with ${FreeMemory.get(true)} MB of RAM")
 		while (candidatesRemaining) {
 			log.info(s"Start $i. round of random walk")
-//			log.info(s"Current seeds: ${entities.filter(_.classifierType == NodeTypes.SEED).map(_.shortToString())}")
 			log.info(s"${entities.count(_.classifierType == NodeTypes.CANDIDATE)} candidates remaining")
-//			log.info(s"Current final alignments: ${finalAlignments.map(_.shortToString())}")
 
-//			Timer.start("deduplication")
 			// Each entity may occur only once in the graph. As each classifiable has a candidate entity, which may occur
 			// more than once alltogether, we need to remove duplicated candidate entities.
 			// If there is a seed among those classifiables with the same candidate entity, we choose the seed, as seeds are relevant
@@ -123,7 +77,6 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 						classifiables.head
 				}
 			}.toSeq
-//			log.info(s"Method deduplication took ${Timer.end("deduplication")} ms.")
 
 			Timer.start("buildGraph")
 			val g = buildGraph(deduplicatedEntities)
@@ -133,23 +86,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 			val (m, s, entityNodeMapping, candidateIndices) = buildMatrix(g)
 			log.info(s"Method buildMatrix took ${Timer.end("buildMatrix")} ms.")
 
-			val initial: DenseMatrix[Float] = if (oldEntityMapping != null) {
-				var i = 0
-				val size = s.size
-				val initialP = new DenseMatrix[Float](1, size)
-				while (i < size) {
-					val currentEntity = entityNodeMapping.getKey(i)
-					val oldIndex = oldEntityMapping.get(currentEntity)
-					val oldValue = oldResult(0, oldIndex)
-					initialP(0, i) = oldValue
-					i += 1
-				}
-				normalizeToSum1(initialP)
-				println(s"########################### ${s.size} ${initialP.size} ### ${s.sum} - ${initialP.sum}")
-				initialP
-			} else
-				null
-
+			val initial = buildInitialVector(oldEntityMapping, oldResult, entityNodeMapping)
 
 			Timer.start("randomWalk")
 			val result = randomWalk(m, s, 100, initial)
@@ -195,6 +132,51 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		}
 
 		finalAlignments.map { a => (a.documentId, a.trieHit, a.candidateEntity) }.foreach(out.collect)
+	}
+
+	def buildInitialVector(oldEntityMapping: BidiMap[String, Int], oldResult: DenseMatrix[Float], entityNodeMapping: BidiMap[String, Int]): DenseMatrix[Float] = {
+		val initial: DenseMatrix[Float] = if (oldEntityMapping != null) {
+			var i = 0
+			val size = entityNodeMapping.size
+			val initialP = new DenseMatrix[Float](1, size)
+			while (i < size) {
+				val currentEntity = entityNodeMapping.getKey(i)
+				val oldIndex = oldEntityMapping.get(currentEntity)
+				val oldValue = oldResult(0, oldIndex)
+				initialP(0, i) = oldValue
+				i += 1
+			}
+			normalizeToSum1(initialP)
+			initialP
+		} else
+			null
+		initial
+	}
+
+	def logRemainingEntities(entities: Vector[ClassifierResultWithNeighbours]): Unit = {
+		if (!CoheelProgram.runsOffline()) {
+			log.info("BASIC NEIGHBOURS")
+			// For printing out the neighbours, it suffices to group by candidate entity, as the entity determines the neighbours.
+			entities.groupBy(_.candidateEntity).map { case (entity, classifiables) =>
+				classifiables.find(_.classifierType == NodeTypes.SEED) match {
+					case Some(classifiable) =>
+						classifiable
+					case None =>
+						classifiables.head
+				}
+			}.toVector.foreach { entity =>
+				log.info("--------------------------------------------------------")
+				log.info(s"Entity: ${entity.candidateEntity} (${entity.classifierType}) from '${entity.trieHit}' with ${entity.in.size} in neighbours and ${entity.out.size} out neighbours")
+				log.info("In-Neighbours")
+				entity.in.foreach { in =>
+					log.info(s"I ${in.entity} ${in.prob}")
+				}
+				log.info("Out-Neighbours")
+				entity.out.foreach { out =>
+					log.info(s"O ${out.entity} ${out.prob}")
+				}
+			}
+		}
 	}
 
 	def filterUnconnected(entities: Vector[ClassifierResultWithNeighbours]): Vector[ClassifierResultWithNeighbours] = {
@@ -405,6 +387,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 
 	/**
 	 * Builds a random walk matrix from a given graph.
+	 *
 	 * @return Returns a four tuple of:
 	 *         <li>The random walk matrix with each row normalized to 1.0.
 	 *         <li>The vector of seed entries with sum 1. If there is a seed at index 2 and 4, and there are 5 entities, this is: [0, 0, 0.5, 0, 0.5]
