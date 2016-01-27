@@ -207,7 +207,7 @@ class RunTrieOverDocumentsFlatMap(params: Params) extends ReadTrieFromDiskFlatMa
 				val containsNoun = tags.exists { t => t.startsWith("N")}
 				// TH for trie hit
 				if (containsNoun) {
-					val id = s"TH-${document.id}-${document.replication}-$tokenHitCount"
+					val id = s"${FeatureHelper.TRIE_HIT_MARKER}-${document.id}-${document.replication}-$tokenHitCount"
 					out.collect(Classifiable(id, trieHit.s, context.toArray, surfaceLinkProb = trieHit.prob, info = ClassificationInfo(document.id, trieHit, POS_TAG_GROUPS.map { group => if (group.exists(tags.contains(_))) 1.0 else 0.0 })))
 					tokenHitCount += 1
 				}

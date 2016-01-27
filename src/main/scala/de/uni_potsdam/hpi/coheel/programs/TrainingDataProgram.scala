@@ -47,7 +47,7 @@ class TrainingDataProgram extends CoheelProgram[TrieSelectionStrategy] with Seri
 		val linkDestinationsPerEntity = wikiPages.map { wp =>
 			LinkDestinations(wp.pageTitle, wp.links.values.map { l =>
 				l.destination
-			}.toSeq)
+			}.toSet)
 		}
 
 		val classifiables = wikiPages
@@ -71,10 +71,10 @@ class TrainingDataProgram extends CoheelProgram[TrieSelectionStrategy] with Seri
 	}
 }
 
-class LinkDestinationsInitializer extends BroadcastVariableInitializer[LinkDestinations, mutable.Map[String, Seq[String]]] {
+class LinkDestinationsInitializer extends BroadcastVariableInitializer[LinkDestinations, mutable.Map[String, Set[String]]] {
 
-	override def initializeBroadcastVariable(destinations: Iterable[LinkDestinations]): mutable.Map[String, Seq[String]] = {
-		val destinationsMap = mutable.Map[String, Seq[String]]()
+	override def initializeBroadcastVariable(destinations: Iterable[LinkDestinations]): mutable.Map[String, Set[String]] = {
+		val destinationsMap = mutable.Map[String, Set[String]]()
 		destinations.asScala.foreach { dest =>
 			destinationsMap += dest.entity -> dest.destinations
 		}
@@ -182,7 +182,7 @@ class LinksAsTrainingDataFlatMap(trieSelector: TrieSelectionStrategy) extends Re
 					val tags = wikiPage.tags.slice(trieHit.startIndex, trieHit.startIndex + trieHit.length).toArray
 					out.collect(Classifiable[TrainInfo](
 						// TH for trie hit
-						s"TH-${Util.id(wikiPage.pageTitle)}-$trieHitCount",
+						s"${FeatureHelper.TRIE_HIT_MARKER}-${Util.id(wikiPage.pageTitle)}-$trieHitCount",
 						trieHit.s,
 						context.toArray,
 						surfaceLinkProb = trieHit.prob,
