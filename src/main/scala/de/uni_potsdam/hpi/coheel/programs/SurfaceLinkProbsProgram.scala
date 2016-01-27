@@ -12,6 +12,7 @@ import org.apache.flink.util.Collector
 
 /**
   * Calculates the surface link probs.
+  *
   * This needs the surface documents file in two halfs under the
   * `surfaceDocumentCountsHalfsPath` path. This file can be created
   * with bin/prepare-surface-link-probs-program.sh.

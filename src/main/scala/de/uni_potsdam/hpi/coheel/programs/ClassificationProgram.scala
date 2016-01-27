@@ -32,6 +32,14 @@ class DocumentPartitioner extends Partitioner[Int] {
 		index
 	}
 }
+
+/**
+  * Finds entities in texts.
+  *
+  * IMPORTANT NOTE: For Flink, this requires taskmanager.numberOfTaskSlots
+  * to be set to 1. See http://apache-flink-user-mailing-list-archive.2336050.n4.nabble.com/Distribute-DataSet-to-subset-of-nodes-td2814.html,
+  * if you need more details.
+  */
 class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 
 	import CoheelLogger._

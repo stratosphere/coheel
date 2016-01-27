@@ -18,6 +18,15 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 
+/**
+  * Creates the training data from wikipedia.
+  *
+  * This needs the trie files in two halfs under the
+  * in the configuration specified paths.
+  * bin/prepare-tries.sh can be used to help with downloading
+  * the files from hdfs and create two parts, which can then
+  * be uploaded manually to the nodes.
+  */
 class TrainingDataProgram extends CoheelProgram[TrieSelectionStrategy] with Serializable {
 
 	val SAMPLE_FRACTION = if (runsOffline()) 100 else 5000
@@ -230,7 +239,6 @@ class LinksAsTrainingDataFlatMap(trieSelector: TrieSelectionStrategy) extends Re
 				nrLinksFiltered += 1
 			}
 		}
-
 	}
 
 	override def close(): Unit = {
