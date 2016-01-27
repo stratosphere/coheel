@@ -96,6 +96,7 @@ object FlinkProgramRunner {
 				ExecutionEnvironment.createLocalEnvironment(1)
 			}
 			else {
+				log.info("# " + StringUtils.rightPad(s"Job Manager: ${config.getString("job_manager_host")}:${config.getString("job_manager_port")}", 136) + " #")
 				val classPath = System.getProperty("java.class.path")
 				val dependencies = "target/coheel_stratosphere-0.1-SNAPSHOT.jar" :: classPath.split(':').filter(p => p.contains(".m2/")).toList
 				ExecutionEnvironment.createRemoteEnvironment(config.getString("job_manager_host"), config.getInt("job_manager_port"), params.parallelism, dependencies: _*)

@@ -38,6 +38,11 @@
 			<artifactId>flink-test-utils</artifactId>
 			<version>0.10.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.flink</groupId>
+			<artifactId>flink-hadoop-compatibility</artifactId>
+			<version>0.10.0</version>
+		</dependency>
 		<!-- POS tagging -->
 		<dependency>
 			<groupId>edu.stanford.nlp</groupId>
@@ -279,8 +284,8 @@
 							<id>ProgramRunner</id>
 							<mainClass>de.uni_potsdam.hpi.coheel.FlinkProgramRunner</mainClass>
 							<jvmArgs>
-								<jvmArg>-Xms7g</jvmArg>
-								<jvmArg>-Xmx7g</jvmArg>
+								<jvmArg>-Xms4g</jvmArg>
+								<jvmArg>-Xmx4g</jvmArg>
 							</jvmArgs>
 						</launcher>
 						<launcher>

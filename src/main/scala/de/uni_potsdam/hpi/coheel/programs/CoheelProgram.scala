@@ -1,7 +1,11 @@
 package de.uni_potsdam.hpi.coheel.programs
 
+import java.io.{Reader, StringReader}
+import java.net.InetAddress
+
+import de.uni_potsdam.hpi.coheel.{Params, FlinkProgramRunner}
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
-import de.uni_potsdam.hpi.coheel.io.{IteratorReader, WikiPageInputFormat}
+import de.uni_potsdam.hpi.coheel.io.{RawWikiPageInputFormat, IteratorReader, WikiPageInputFormat}
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import de.uni_potsdam.hpi.coheel.util.Timer
 import de.uni_potsdam.hpi.coheel.wiki._
@@ -13,6 +17,7 @@ import org.apache.flink.api.scala._
 import org.apache.flink.core.fs.Path
 import org.apache.flink.core.fs.local.LocalFileSystem
 import org.apache.flink.util.Collector
+import org.apache.hadoop.io.LongWritable
 import org.apache.log4j.Logger
 
 import scala.collection.JavaConverters._
@@ -63,15 +68,18 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 		buildProgram(env, param)
 	}
 
-	private lazy val wikiInput = environment.readFile(new WikiPageInputFormat, wikipediaDumpFilesPath)
+
+	private lazy val rawWikiInput: DataSet[RawWikiPage] = environment
+		.readHadoopFile( new RawWikiPageInputFormat, classOf[LongWritable], classOf[RawWikiPage], wikipediaDumpFilesPath )
+		.map(_._2)
 	private def readRawWikiPages[S : TypeInformation : ClassTag](fun: Extractor => S, pageFilter: String => Boolean = _ => true): DataSet[S] = {
-		wikiInput.mapPartition { (linesIt: Iterator[String], out: Collector[S]) =>
-			val reader = new IteratorReader(List("<foo>").iterator ++ linesIt ++ List("</foo>").iterator)
-			val wikiPages = new WikiPageReader().xmlToWikiPages(reader, pageFilter)
-			val filteredWikiPages = wikiPages.filter { page =>
-				page.ns == 0 && page.source.nonEmpty
-			}
-			filteredWikiPages.foreach { rawWikiPage =>
+		rawWikiInput
+			.filter ( rawWikiPage =>
+					rawWikiPage.ns == 0 &&
+					rawWikiPage.source.nonEmpty &&
+					pageFilter.apply( rawWikiPage.pageTitle )
+			)
+			.flatMap( (rawWikiPage: RawWikiPage, out: Collector[S]) =>
 				Try {
 					val extractor = new Extractor(rawWikiPage, s => TokenizerHelper.tokenize(s).mkString(" ") )
 					Timer.start("EXTRACTION")
@@ -85,8 +93,8 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 						log.error(s"Discarding ${rawWikiPage.pageTitle} because of ${e.getClass.getSimpleName} (${e.getMessage.replace('\n', ' ')})")
 //						log.warn(e.getStackTraceString)
 				}
-			}
-		}.name("Raw-Wiki-Pages")
+			)
+			.name("Raw-Wiki-Pages")
 	}
 
 	def readWikiPages: DataSet[WikiPage] = {

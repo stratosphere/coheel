@@ -1,8 +1,8 @@
 package de.uni_potsdam.hpi.coheel.wiki
 
-import java.io.{BufferedReader, Reader, StringReader}
-import javax.xml.stream.{XMLInputFactory, XMLStreamConstants}
-
+import java.io.{Reader, StringReader, BufferedReader}
+import javax.xml.stream.{XMLStreamConstants, XMLInputFactory}
+import org.apache.log4j.Logger
 import de.uni_potsdam.hpi.coheel.programs.CoheelLogger
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import de.uni_potsdam.hpi.coheel.util.Timer
@@ -58,6 +58,7 @@ case class RawWikiPage(pageTitle: String,
  *          title, e.g. http://en.wikipedia.org/wiki/Alien
  * <strong>Definition list</strong>:<br />
  * A page is seen as a list if it's title starts with "List of" or "Lists of".
+ *
  * @param pageTitle The title of the page as a string.
  * @param ns The namespace of the wiki page.
  * @param redirect The title of the page this page is redirecting to or null, if it is not a redirect.
@@ -105,6 +106,7 @@ object RawWikiPage {
 }
 
 class WikiPageReader {
+	val log = Logger.getLogger(getClass)
 
 	val factory = XMLInputFactory.newInstance()
 	def xmlToWikiPages(s: String): Iterator[RawWikiPage] = {
