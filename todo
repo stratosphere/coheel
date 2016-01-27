@@ -1,9 +1,9 @@
-		// TODO: Ratio trie hits to links
-		// TODO: Overlapping trie hits filter out
-		// TODO: Check the wrongly classified seed links
-		// TODO: Random Walk in window
-		// TODO: RW for 100 documents
-		// TODO: Setup config guide (commands to run the programs on the cluster)
+Ratio trie hits to links
+// TODO: Overlapping trie hits filter out
+// TODO: Check the wrongly classified seed links
+// TODO: Random Walk in window
+// TODO: RW for 100 documents
+// TODO: Setup config guide (commands to run the programs on the cluster)
 
 
 Test if with constant set helps for the training data program

@@ -167,11 +167,14 @@ class LinksAsTrainingDataFlatMap(trieSelector: TrieSelectionStrategy) extends Re
 	var trieHitCount: Int = 1
 	var nrLinks = 0
 	var nrLinksFiltered = 0
+	var outputtedTrieHits = 0
+	var outputtedLinks = 0
 	import CoheelLogger._
 
 	override def flatMap(wikiPage: FullInfoWikiPage, out: Collector[Classifiable[TrainInfo]]): Unit = {
-		val linksWithPositions = wikiPage.links
+		assert(wikiPage.tags.size == wikiPage.plainText.size)
 
+		val linksWithPositions = wikiPage.links
 
 		trie.findAllInWithTrieHit(wikiPage.plainText).foreach { trieHit =>
 			// TODO: Do not output trie hits from links: This needs testing.
@@ -180,6 +183,7 @@ class LinksAsTrainingDataFlatMap(trieSelector: TrieSelectionStrategy) extends Re
 
 				contextOption.foreach { context =>
 					val tags = wikiPage.tags.slice(trieHit.startIndex, trieHit.startIndex + trieHit.length).toArray
+					outputtedTrieHits += 1
 					out.collect(Classifiable[TrainInfo](
 						// TH for trie hit
 						s"${FeatureHelper.TRIE_HIT_MARKER}-${Util.id(wikiPage.pageTitle)}-$trieHitCount",
@@ -194,7 +198,6 @@ class LinksAsTrainingDataFlatMap(trieSelector: TrieSelectionStrategy) extends Re
 			}
 		}
 
-		assert(wikiPage.tags.size == wikiPage.plainText.size)
 		linksWithPositions.foreach { case (index, link) =>
 			// In theory, the index of the link should be in the set of indices proposed by the trie:
 			//    assert(hitPoints.contains(index))
@@ -214,6 +217,7 @@ class LinksAsTrainingDataFlatMap(trieSelector: TrieSelectionStrategy) extends Re
 			nrLinks += 1
 			if (containsResult.asEntry) {
 				contextOption.foreach { context =>
+					outputtedLinks += 1
 					out.collect(
 						Classifiable[TrainInfo](
 							link.id,
@@ -226,9 +230,11 @@ class LinksAsTrainingDataFlatMap(trieSelector: TrieSelectionStrategy) extends Re
 				nrLinksFiltered += 1
 			}
 		}
+
 	}
 
 	override def close(): Unit = {
+		log.info(s"LinksAsTrainingDataFlatMap summary: # Links/(# Links + # TrieHits) = ${outputtedLinks.toDouble / (outputtedLinks + outputtedTrieHits)}")
 		log.info(s"LinksAsTrainingDataFlatMap summary: # Links filtered/# Links: $nrLinksFiltered/$nrLinks = ${nrLinksFiltered.toDouble * 100 / nrLinks} %")
 	}
 }
