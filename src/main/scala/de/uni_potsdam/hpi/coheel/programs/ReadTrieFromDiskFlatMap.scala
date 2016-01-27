@@ -6,28 +6,53 @@ import java.util.Date
 import de.uni_potsdam.hpi.coheel.Params
 import de.uni_potsdam.hpi.coheel.datastructures.NewTrie
 import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
-import org.apache.flink.api.common.functions.RichFlatMapFunction
+import org.apache.flink.api.common.functions.{RuntimeContext, RichFlatMapFunction}
 import org.apache.flink.configuration.Configuration
 
 import scala.io.Source
 
+
+abstract class TrieSelectionStrategy {
+	// shortcut method for when no runtime context is needed
+	def getTrieFile: File = getTrieFile(null)
+	def getTrieFile(runtimeContext: RuntimeContext): File = {
+		new File(getFileName(runtimeContext))
+	}
+
+	protected def getFileName(runtimeContext: RuntimeContext): String
+}
+
+class OneTrieEverywhereStrategy(fileName: String) extends TrieSelectionStrategy with Serializable {
+	override def toString = s"Trie: $fileName"
+	def getFileName(runtimeContext: RuntimeContext): String = fileName
+}
+
+/**
+  * Loads different tries in different nodes,
+  * one half one nodes with even subtask-index and the other half on odd subtasks.
+  */
+class SimultaneousTriesStrategy(params: Params) extends TrieSelectionStrategy with Serializable {
+	def getFileName(runtimeContext: RuntimeContext): String = {
+		if (CoheelProgram.runsOffline()) {
+			"output/surface-link-probs.wiki"
+		} else {
+			if (runtimeContext.getIndexOfThisSubtask < params.parallelism / 2)
+				params.config.getString("first_trie_half")
+			else
+				params.config.getString("second_trie_half")
+		}
+	}
+}
+
 /**
   * Abstract base class for flatmaps which need to build the trie based on data on the disk
   */
-abstract class ReadTrieFromDiskFlatMap[IN, OUT](params: Params) extends RichFlatMapFunction[IN, OUT] {
+abstract class ReadTrieFromDiskFlatMap[IN, OUT](trieSelector: TrieSelectionStrategy) extends RichFlatMapFunction[IN, OUT] {
 	import CoheelLogger._
 	var trie: NewTrie = _
 
 	override def open(conf: Configuration): Unit = {
-		val surfaceLinkProbsFile = if (CoheelProgram.runsOffline()) {
-			new File("output/surface-link-probs.wiki")
-			//			new File("cluster-output/678910")
-		} else {
-			if (getRuntimeContext.getIndexOfThisSubtask < params.parallelism / 2)
-				new File(params.config.getString("first_trie_half"))
-			else
-				new File(params.config.getString("second_trie_half"))
-		}
+		val surfaceLinkProbsFile = trieSelector.getTrieFile(getRuntimeContext)
 		val surfaces = Source.fromFile(surfaceLinkProbsFile, "UTF-8").getLines().flatMap { line =>
 			val split = line.split('\t')
 			if (split.length == 5)

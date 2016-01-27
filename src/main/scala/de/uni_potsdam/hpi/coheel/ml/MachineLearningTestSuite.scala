@@ -2,6 +2,7 @@ package de.uni_potsdam.hpi.coheel.ml
 
 import java.io.File
 
+import de.uni_potsdam.hpi.coheel.programs.CoheelProgram
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{ClassificationInfo, FeatureLine}
 import de.uni_potsdam.hpi.coheel.util.Timer
 import org.apache.commons.io.FileUtils
@@ -59,8 +60,8 @@ object MachineLearningTestSuite {
 
 	def readTrainingDataAndBuildInstances(): (Instances, Instances) = {
 		print("Reading .. "); Console.flush()
-		val trainSet = r.shuffle(readInstancesInGroups("632a"))
-		val testSet  = r.shuffle(readInstancesInGroups("3786b"))
+		val trainSet = r.shuffle(readInstancesInGroups("632"))
+		val testSet  = r.shuffle(readInstancesInGroups("3786"))
 		println("Done.")
 		println(s"There are ${trainSet.size} instance groups in training and ${testSet.size} in test")
 		println()
@@ -94,8 +95,7 @@ object MachineLearningTestSuite {
 
 		lines.foreach { line =>
 			val split = line.split("\t")
-			// id, surface, candidate entity, source, destination, 16 features, class
-			assert(split.length == 22)
+			assert(split.length == 5 /* id, surface, candidate entity, source, destination */ + CoheelClassifier.NUMBER_OF_FEATURES + 1 /* class */)
 			val id = split.head
 			if (id != lastId && currentGroup.nonEmpty) {
 				groups += currentGroup
@@ -149,17 +149,34 @@ object MachineLearningTestSuite {
 						}
 					}
 
-					val precisionCand = if (actualCand.size != 0) expected.intersect(actualCand).size.toDouble / actualCand.size else -1.0
+					val precisionCand = if (actualCand.nonEmpty) expected.intersect(actualCand).size.toDouble / actualCand.size else -1.0
 					val recallCand = expected.intersect(actualCand).size.toDouble / expected.size
 					val f1Cand = 2 * precisionCand * recallCand / (precisionCand + recallCand)
 
-					val precisionSeed = if (actualSeed.size != 0) expected.intersect(actualSeed).size.toDouble / actualSeed.size else -1.0
+					val precisionSeed = if (actualSeed.nonEmpty) expected.intersect(actualSeed).size.toDouble / actualSeed.size else -1.0
 					val recallSeed = expected.intersect(actualSeed).size.toDouble / expected.size
 					val f1Seed = 2 * precisionSeed * recallSeed / (precisionSeed + recallSeed)
+
+					// ids of all links
+					val expectedIds = expected.map( _._1)
+					// only those seed classifications, which belong to links
+					val seedAtExpectedSurface = actualSeed.filter { act => expectedIds.contains( act._1 ) }
+					val precisionExpected = if (seedAtExpectedSurface.nonEmpty) expected.intersect(seedAtExpectedSurface).size.toDouble / seedAtExpectedSurface.size else -1.0
+					val recallExpected = expected.intersect(seedAtExpectedSurface).size.toDouble / expected.size
+					val f1Expected = 2 * precisionExpected * recallExpected / (precisionExpected + recallExpected)
+
+					// how many seed/candidate classifications are actually links
+					val precisionSeedsActualLinks = seedAtExpectedSurface.size.toDouble / actualSeed.size
+					val precisionCandidatesActualLinks = actualCand.count { act => expectedIds.contains(act._1) }.toDouble / actualCand.size
+					val recallSeedsActualLinks = actualSeed.map(_._1).intersect(expectedIds).size.toDouble / expected.size
+					val recallCandidatesActualLinks = actualCand.map(_._1).intersect(expectedIds).size.toDouble / expected.size
 
 					println(s"      Classification Time: ${msToMin(classificationTime.toInt)} min")
 					println(f"      P: $precisionCand%.3f, R: $recallCand%.3f, F1: $f1Cand%.3f (CANDIDATE)")
 					println(f"      P: $precisionSeed%.3f, R: $recallSeed%.3f, F1: $f1Seed%.3f (SEED)")
+					println(f"      P: $precisionExpected%.3f, R: $recallExpected%.3f, F1: $f1Expected%.3f (LINKS ONLY, SEED)")
+					println(f"      Actual Links Precision: $precisionSeedsActualLinks%.3f (SEED), $precisionCandidatesActualLinks%.3f (CANDIDATE)")
+					println(f"      Actual Links Recall: $recallSeedsActualLinks%.3f (SEED), $recallCandidatesActualLinks%.3f (CANDIDATE)")
 					val fileName = s"model$i.model"
 					SerializationHelper.write(fileName, classifier)
 					println(s"      Written to disk as $fileName")

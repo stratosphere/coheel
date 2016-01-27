@@ -11,7 +11,7 @@ import weka.core.DenseInstance
 
 object CoheelClassifier {
 
-	val NUMBER_OF_FEATURES = 15 // excluding class attribute
+	val NUMBER_OF_FEATURES = 16 // excluding class attribute
 	val POSITIVE_CLASS = 1.0
 
 	val POS_TAG_GROUPS = Array(
@@ -35,7 +35,7 @@ object CoheelClassifier {
 		attrs.add(new Attribute("contextRank"))
 		attrs.add(new Attribute("contextDeltaTop"))
 		attrs.add(new Attribute("contextDeltaSucc"))
-//		attrs.add(new Attribute("surfaceLinkProb"))
+		attrs.add(new Attribute("surfaceLinkProb"))
 		// pos tags
 		attrs.add(new Attribute("NN"))
 		attrs.add(new Attribute("NNP"))
@@ -73,21 +73,6 @@ class CoheelClassifier(classifier: Classifier) {
 			instance.setDataset(instances)
 			if (classifier.classifyInstance(instance) == CoheelClassifier.POSITIVE_CLASS) {
 				positivePredictions ::= featureLine
-			}
-			// TODO: Temporary
-			if (List(
-				"L-0468265056-00000626-2281324111",
-				"L-0468265056-00000627-4156867526",
-				"L-0468265056-00000628-1482103611",
-				"L-0468265056-00000629-0312499337"
-			).contains(featureLine.id) || featureLine.id.startsWith("TH-")) {
-				println("Feature Line:")
-				println(featureLine)
-				println("Classification")
-				print(classifier.classifyInstance(instance))
-				val s = if (instance.numAttributes() == CoheelClassifier.NUMBER_OF_FEATURES) "" else " " + (instance.classValue() == classifier.classifyInstance(instance))
-				println(s)
-				println("X" * 80)
 			}
 		}
 		if (positivePredictions.size == 1)

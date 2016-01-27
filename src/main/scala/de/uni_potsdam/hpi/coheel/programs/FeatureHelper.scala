@@ -14,6 +14,9 @@ import scala.reflect.ClassTag
  */
 object FeatureHelper {
 
+	val TRIE_HIT_MARKER = "TH"
+	val LINK_MARKER = "L"
+
 	import CoheelLogger._
 
 	def applyCoheelFunctions[T <: Info](allCandidates: Seq[Classifiable[T]])(featureLineIteratorFunction: FeatureLine[T] => Unit): Unit = {
@@ -31,8 +34,8 @@ object FeatureHelper {
 			import classifiable._
 			val features = List(
 				surfaceProb, surfaceRank(i), surfaceDeltaTops(i), surfaceDeltaSuccs(i),
-				contextProb, contextRank(i), contextDeltaTops(i), contextDeltaSuccs(i)
-//				surfaceLinkProb
+				contextProb, contextRank(i), contextDeltaTops(i), contextDeltaSuccs(i),
+				surfaceLinkProb
 			) ::: classifiable.info.furtherFeatures(classifiable)
 			featureLineIteratorFunction(FeatureLine[T](id, surfaceRepr, candidateEntity, classifiable.info, features))
 		}

@@ -52,16 +52,19 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 	var environment: ExecutionEnvironment = null
 	var params: Params = null
 
-	val arguments: Seq[T]
+	def arguments: Seq[T]
 
 	def buildProgram(env: ExecutionEnvironment, param: T): Unit
 
-	def makeProgram(env: ExecutionEnvironment, params: Params): Unit = {
-		makeProgram(env, params, null.asInstanceOf[T])
-	}
-	def makeProgram(env: ExecutionEnvironment, params: Params, param: T): Unit = {
-		environment = env
+	def initParams(params: Params): Unit = {
 		this.params = params
+	}
+
+	def makeProgram(env: ExecutionEnvironment): Unit = {
+		makeProgram(env, null.asInstanceOf[T])
+	}
+	def makeProgram(env: ExecutionEnvironment, param: T): Unit = {
+		environment = env
 		buildProgram(env, param)
 	}
 
@@ -99,7 +102,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 			val rawWikiPage = extractor.rawWikiPage
 			val rawPlainText = extractor.getPlainText
 			val tokens = TokenizerHelper.tokenize(rawPlainText)
-			// TODO: extractor.getLinks.asMapOfRanges().values().asScala.toArray???
+			// TODO: extractor.getLinks.asMapOfRanges().values().asScala.toArray?
 			WikiPage(rawWikiPage.pageTitle, rawWikiPage.ns, rawWikiPage.redirect,
 				tokens, extractor.getLinks.asMapOfRanges().values().asScala.toArray, rawWikiPage.isDisambiguation)
 		}

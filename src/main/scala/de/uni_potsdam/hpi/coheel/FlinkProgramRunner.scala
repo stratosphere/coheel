@@ -106,10 +106,11 @@ object FlinkProgramRunner {
 			log.info(StringUtils.repeat('#', 140))
 
 			log.info("Starting ..")
+			program.initParams(params)
 			program.arguments.foreach { argument =>
 				if (argument != null)
 					log.info(s"Current parameter: $argument")
-				program.makeProgram(env, params, argument)
+				program.makeProgram(env, argument)
 				FileUtils.writeStringToFile(new File("plans/PLAN"), env.getExecutionPlan())
 				val paramsString = if (argument == null) "" else s" current-param = $argument"
 				FileUtils.write(new File("PLAN"), env.getExecutionPlan())
