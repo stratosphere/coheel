@@ -7,6 +7,12 @@ Programs can be run via the `bin/run` script.
 All programs need a `--configuration` parameter, which identifies a file under `src/main/resources`.
 This file configures required properties, such as job manager, hdfs, path to certain files etc.
 
+### Spread Wikipedia data dump to HDFS
+
+``` sh
+bin/spread-wikidump.sh
+```
+
 ### Run preprocessing and classification scripts
 
 ``` sh
