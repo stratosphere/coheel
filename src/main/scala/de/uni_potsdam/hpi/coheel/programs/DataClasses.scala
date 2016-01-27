@@ -124,9 +124,11 @@ object DataClasses {
 		override def furtherFeatures(classifiable: Classifiable[_]): List[Double] = {
 			posTags.toList ::: List(if (destination == classifiable.candidateEntity) 1.0 else 0.0)
 		}
+		override def toString: String = s"TrainInfo($source, $destination)"
 	}
 	case class ClassificationInfo(documentId: String, trieHit: TrieHit, posTags: Array[Double]) extends Info {
 		override def furtherFeatures(classifiable: Classifiable[_]): List[Double] = posTags.toList
+		override def toString: String = s"ClassificationInfo($documentId, $trieHit)"
 	}
 
 	object ClassificationType extends Enumeration {
@@ -141,7 +143,11 @@ object DataClasses {
 	 * Keeps track of the features of an instance, and it's accompanying real-world information.
 	 * FeatureLine's are passed to the classifier, model can be used to identify which element was classified.
 	 */
-	case class FeatureLine[T <: Info](id: String, surfaceRepr: String, candidateEntity: String, info: T, features: Seq[Double])
+	case class FeatureLine[T <: Info](id: String, surfaceRepr: String, candidateEntity: String, info: T, features: Seq[Double]) {
+		override def toString: String = {
+			List(id, surfaceRepr, candidateEntity, info.toString).mkString("\t")
+		}
+	}
 
 	// Classification
 	/**
