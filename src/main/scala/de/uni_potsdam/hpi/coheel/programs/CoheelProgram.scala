@@ -5,7 +5,7 @@ import java.net.InetAddress
 
 import de.uni_potsdam.hpi.coheel.{Params, FlinkProgramRunner}
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
-import de.uni_potsdam.hpi.coheel.io.{RawWikiPageInputFormat, IteratorReader, WikiPageInputFormat}
+import de.uni_potsdam.hpi.coheel.io.{RawWikiPageInputFormat}
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import de.uni_potsdam.hpi.coheel.util.Timer
 import de.uni_potsdam.hpi.coheel.wiki._
