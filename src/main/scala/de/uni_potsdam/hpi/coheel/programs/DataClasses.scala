@@ -1,5 +1,7 @@
 package de.uni_potsdam.hpi.coheel.programs
 
+import java.io.Serializable
+
 import de.uni_potsdam.hpi.coheel.datastructures.TrieHit
 import de.uni_potsdam.hpi.coheel.util.Util
 import scala.collection.mutable
@@ -8,6 +10,7 @@ object DataClasses {
 
 	/**
 	 * Represents a link in a Wikipedia article.
+	 *
 	 * @param surface The link's text, e.g. 'Merkel'
 	 * @param surfaceRepr The representation of the surface as needed for the application. In contrast to <code>surface</code>,
 	 *      which contains the raw link text, this representation can be stemmed, tokenized, or what's necessary for the
@@ -108,6 +111,13 @@ object DataClasses {
 		}
 	}
 
+	trait TrainingDataStrategy
+	object TrainingDataStrategies {
+		object REMOVE_CANDIDATE_ONLY extends TrainingDataStrategy with Serializable { override def toString: String = "REMOVE_CANDIDATE_ONLY" }
+		object REMOVE_ENTIRE_GROUP extends TrainingDataStrategy with Serializable { override def toString: String = "REMOVE_ENTIRE_GROUP" }
+	}
+
+
 	case class LinkDestinations(entity: String, destinations: Set[String])
 
 
@@ -124,9 +134,11 @@ object DataClasses {
 		override def furtherFeatures(classifiable: Classifiable[_]): List[Double] = {
 			posTags.toList ::: List(if (destination == classifiable.candidateEntity) 1.0 else 0.0)
 		}
+		override def toString: String = s"TrainInfo($source, $destination)"
 	}
 	case class ClassificationInfo(documentId: String, trieHit: TrieHit, posTags: Array[Double]) extends Info {
 		override def furtherFeatures(classifiable: Classifiable[_]): List[Double] = posTags.toList
+		override def toString: String = s"ClassificationInfo($documentId, $trieHit)"
 	}
 
 	object ClassificationType extends Enumeration {
@@ -141,12 +153,17 @@ object DataClasses {
 	 * Keeps track of the features of an instance, and it's accompanying real-world information.
 	 * FeatureLine's are passed to the classifier, model can be used to identify which element was classified.
 	 */
-	case class FeatureLine[T <: Info](id: String, surfaceRepr: String, candidateEntity: String, info: T, features: Seq[Double])
+	case class FeatureLine[T <: Info](id: String, surfaceRepr: String, candidateEntity: String, info: T, features: Seq[Double]) {
+		override def toString: String = {
+			List(id, surfaceRepr, candidateEntity, info.toString).mkString("\t")
+		}
+	}
 
 	// Classification
 	/**
 	 * Input Documents are used to represent the input to the classification. If the same document needs to be
 	 * distributed to multiple nodes, then we have several input documents.
+	 *
 	 * @param id Unique id of the document
 	 * @param replication Tells the replication number of this document. If we need to distribute the input text to
 	 *                    two different machines, we will create two InputDocuments. The first will have the replication
@@ -192,12 +209,6 @@ object DataClasses {
 			ClassifierResultWithNeighbours(documentId, classifierType, candidateEntity, null, in, out)
 	}
 
-	var currentId = 0
-	def newId(): Int = {
-		currentId += 1
-		currentId
-	}
-
 	// My take at manually building enums
 	// Using Scala enums (1) is ugly, (2) actually did not workout because of serialization issues; apparently enums are not simple enums in Scala
 	trait NodeType
@@ -207,7 +218,6 @@ object DataClasses {
 		object NEIGHBOUR extends NodeType { override def toString: String = "NEIGHBOUR" }
 		object NULL extends NodeType { override def toString: String = "NULL" }
 	}
-
 
 	case class RandomWalkNode(entity: String) {
 

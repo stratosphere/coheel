@@ -1,8 +1,9 @@
 package de.uni_potsdam.hpi.coheel.ml
 
-import java.io.File
+import java.io.{FileWriter, File}
 
-import de.uni_potsdam.hpi.coheel.programs.CoheelProgram
+import de.uni_potsdam.hpi.coheel.debugging.FreeMemory
+import de.uni_potsdam.hpi.coheel.programs.{CoheelLogger, CoheelProgram}
 import de.uni_potsdam.hpi.coheel.programs.DataClasses.{ClassificationInfo, FeatureLine}
 import de.uni_potsdam.hpi.coheel.util.Timer
 import org.apache.commons.io.FileUtils
@@ -38,6 +39,8 @@ class CoheelInstance(weight: Double, val attValues: Array[Double], val info: Tra
 }
 
 object MachineLearningTestSuite {
+
+	import CoheelLogger._
 
 	val r = new Random(21011991)
 
@@ -108,12 +111,17 @@ object MachineLearningTestSuite {
 	}
 
 	def testCoheelClassifiers(train: Instances, test: Instances, expected: Set[(String, String)]): Unit = {
+		// ids of all links
+		val expectedIds = expected.map( _._1)
+
 		var i = 1
 		classifiers.foreach { case (name, classifier) =>
 			println(new java.util.Date)
+			log.info(s"Starting training with ${FreeMemory.get(true)} MB of RAM")
 			val runtimeTry = Try(Timer.timeFunction {
 				classifier.buildClassifier(train)
 			})
+			log.info(s"Finished training with ${FreeMemory.get(true)} MB of RAM")
 			runtimeTry match {
 				case Failure(e) => println(s"    $name failed with ${e.getMessage}")
 				case Success(trainingTime) =>
@@ -129,6 +137,7 @@ object MachineLearningTestSuite {
 					val seedClassifier = new CoheelClassifier(classifier)
 					val candidateClassifier = new CoheelClassifier(classifier)
 
+					val fw = new FileWriter(s"no-link-seeds-$i.txt", true)
 					val classificationTime = Timer.timeFunction {
 						instancesGroup.values.foreach { group =>
 							val featureLines = group.map { instance =>
@@ -145,9 +154,15 @@ object MachineLearningTestSuite {
 							seedClassifier.classifyResultsWithSeedLogic(featureLines).foreach { seed =>
 								// collect a result if there is one
 								actualSeed.add((seed.id, seed.candidateEntity))
+								if (!expectedIds.contains(seed.id)) {
+									fw.write(s"$seed\n")
+								}
 							}
 						}
 					}
+					fw.close()
+
+					log.info(s"Finished prediction with ${FreeMemory.get(true)} MB of RAM")
 
 					val precisionCand = if (actualCand.nonEmpty) expected.intersect(actualCand).size.toDouble / actualCand.size else -1.0
 					val recallCand = expected.intersect(actualCand).size.toDouble / expected.size
@@ -157,16 +172,16 @@ object MachineLearningTestSuite {
 					val recallSeed = expected.intersect(actualSeed).size.toDouble / expected.size
 					val f1Seed = 2 * precisionSeed * recallSeed / (precisionSeed + recallSeed)
 
-					// ids of all links
-					val expectedIds = expected.map( _._1)
 					// only those seed classifications, which belong to links
-					val seedAtExpectedSurface = actualSeed.filter { act => expectedIds.contains( act._1 ) }
-					val precisionExpected = if (seedAtExpectedSurface.nonEmpty) expected.intersect(seedAtExpectedSurface).size.toDouble / seedAtExpectedSurface.size else -1.0
-					val recallExpected = expected.intersect(seedAtExpectedSurface).size.toDouble / expected.size
+					val (seedsAtLinks, seedsAtTrieHits) = actualSeed.partition { act => expectedIds.contains(act._1) }
+
+
+					val precisionExpected = if (seedsAtLinks.nonEmpty) expected.intersect(seedsAtLinks).size.toDouble / seedsAtLinks.size else -1.0
+					val recallExpected = expected.intersect(seedsAtLinks).size.toDouble / expected.size
 					val f1Expected = 2 * precisionExpected * recallExpected / (precisionExpected + recallExpected)
 
 					// how many seed/candidate classifications are actually links
-					val precisionSeedsActualLinks = seedAtExpectedSurface.size.toDouble / actualSeed.size
+					val precisionSeedsActualLinks = seedsAtLinks.size.toDouble / actualSeed.size
 					val precisionCandidatesActualLinks = actualCand.count { act => expectedIds.contains(act._1) }.toDouble / actualCand.size
 					val recallSeedsActualLinks = actualSeed.map(_._1).intersect(expectedIds).size.toDouble / expected.size
 					val recallCandidatesActualLinks = actualCand.map(_._1).intersect(expectedIds).size.toDouble / expected.size
