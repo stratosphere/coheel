@@ -2,13 +2,12 @@ package de.uni_potsdam.hpi.coheel.programs
 
 import java.lang.Iterable
 
-import de.uni_potsdam.hpi.coheel.Params
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
 import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier.POS_TAG_GROUPS
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import de.uni_potsdam.hpi.coheel.util.Util
 import de.uni_potsdam.hpi.coheel.wiki.FullInfoWikiPage
-import org.apache.flink.api.common.functions.{RuntimeContext, BroadcastVariableInitializer, RichGroupReduceFunction}
+import org.apache.flink.api.common.functions.{BroadcastVariableInitializer, RichGroupReduceFunction}
 import org.apache.flink.api.scala.{ExecutionEnvironment, _}
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.core.fs.FileSystem
@@ -72,7 +71,7 @@ class TrainingDataProgram extends CoheelProgram[TrieSelectionStrategy] with Seri
 		val featuresPerGroup = FeatureHelper.buildFeaturesPerGroup(env, classifiables)
 
 		val trainingData = featuresPerGroup
-			.reduceGroup(new TrainingDataGroupReduce(TrainingDataStrategies.REMOVE_ENTIRE_GROUP))
+			.reduceGroup(new TrainingDataGroupReduce(TrainingDataStrategies.REMOVE_CANDIDATE_ONLY))
 			.withBroadcastSet(linkDestinationsPerEntity, TrainingDataGroupReduce.BROADCAST_LINK_DESTINATIONS_PER_ENTITY)
 			.name("Training Data")
 
@@ -185,8 +184,12 @@ class LinksAsTrainingDataFlatMap(trieSelector: TrieSelectionStrategy) extends Re
 
 		val linksWithPositions = wikiPage.links
 
-		trie.findAllInWithTrieHit(wikiPage.plainText).foreach { trieHit =>
-			// TODO: Do not output trie hits from links: This needs testing.
+		val trieHits = trie.findAllInWithTrieHit(wikiPage.plainText).toList
+		trieHits.groupBy { th =>
+			th.startIndex
+		}.map { ths =>
+			ths._2.maxBy { th => th.length }
+		}.foreach { trieHit =>
 			if (!linksWithPositions.contains(trieHit.startIndex)) {
 				val contextOption = Util.extractContext(wikiPage.plainText, trieHit.startIndex)
 
