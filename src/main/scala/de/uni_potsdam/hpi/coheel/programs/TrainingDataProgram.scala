@@ -63,7 +63,7 @@ class TrainingDataProgram extends CoheelProgram[TrieSelectionStrategy] with Seri
 		val featuresPerGroup = FeatureHelper.buildFeaturesPerGroup(env, classifiables)
 
 		val trainingData = featuresPerGroup
-			.reduceGroup(new TrainingDataGroupReduce)
+			.reduceGroup(new TrainingDataGroupReduce(TrainingDataStrategies.REMOVE_ENTIRE_GROUP))
 			.withBroadcastSet(linkDestinationsPerEntity, TrainingDataGroupReduce.BROADCAST_LINK_DESTINATIONS_PER_ENTITY)
 			.name("Training Data")
 
@@ -85,9 +85,24 @@ class LinkDestinationsInitializer extends BroadcastVariableInitializer[LinkDesti
 object TrainingDataGroupReduce {
 	val BROADCAST_LINK_DESTINATIONS_PER_ENTITY = "linkDestinationsPerEntity"
 }
-class TrainingDataGroupReduce extends RichGroupReduceFunction[Classifiable[TrainInfo], String] {
+
+
+/**
+  * This creates the training data from the given grouped classifiables by applying
+  * the second order functions.
+  *
+  * It also decides, which classifiables shoud be output at all.
+  */
+
+trait TrainingDataStrategy
+object TrainingDataStrategies {
+	object REMOVE_CANDIDATE_ONLY extends TrainingDataStrategy { override def toString: String = "REMOVE_CANDIDATE_ONLY" }
+	object REMOVE_ENTIRE_GROUP extends TrainingDataStrategy { override def toString: String = "REMOVE_ENTIRE_GROUP" }
+}
+
+class TrainingDataGroupReduce(trainingDataStrategy: TrainingDataStrategy) extends RichGroupReduceFunction[Classifiable[TrainInfo], String] {
 	import CoheelLogger._
-	var linkDestinationsPerEntity: mutable.Map[String, Seq[String]] = _
+	var linkDestinationsPerEntity: mutable.Map[String, Set[String]] = _
 	override def open(params: Configuration): Unit = {
 		linkDestinationsPerEntity = getRuntimeContext.getBroadcastVariableWithInitializer(
 			TrainingDataGroupReduce.BROADCAST_LINK_DESTINATIONS_PER_ENTITY,
@@ -103,33 +118,31 @@ class TrainingDataGroupReduce extends RichGroupReduceFunction[Classifiable[Train
 		// get all the link destinations from the source entitity of this classifiable
 		// remember, all classifiables come from the same link/trie hit, hence it is ok to
 		// only access the head
-		val linkDestinations = if (allCandidates.head.id.startsWith("TH-"))
+		val linkDestinations = if (allCandidates.head.isTrieHit)
 				linkDestinationsPerEntity(allCandidates.head.info.source)
 			else
-				null
+				Set[String]()
 
-		var filterOut = false
+		// This variable is necessary for the REMOVE_ENTIRE_GROUP training strategy
+		// It tracks, whether at least one candidate is linked from the current page
+		var containsCandidateFromLinks = false
 		val featureLines = new mutable.ArrayBuffer[FeatureLine[TrainInfo]](allCandidates.size)
 		FeatureHelper.applyCoheelFunctions(allCandidates) { featureLine =>
 			featureLines += featureLine
-			import featureLine._
-			if (id.startsWith("TH-")) {
-				filterOut ^= linkDestinations.contains(candidateEntity)
+			if (linkDestinations.nonEmpty && !containsCandidateFromLinks) {
+				containsCandidateFromLinks = linkDestinations.contains(featureLine.candidateEntity)
 			}
 		}
-		if (!filterOut) {
+		if ((trainingDataStrategy == TrainingDataStrategies.REMOVE_CANDIDATE_ONLY) ||
+			(trainingDataStrategy == TrainingDataStrategies.REMOVE_ENTIRE_GROUP && !containsCandidateFromLinks)) {
 			featureLines.foreach { featureLine =>
-				// What's missing: How to know all the links (entities) of the source entity, to filter
-				// the bad candidates out here
-				// The filtering must be done here, after the second order functions have been run
-
 				import featureLine._
 				def stringInfo = List(id, surfaceRepr, candidateEntity) ::: featureLine.info.modelInfo
 				val output = s"${stringInfo.mkString("\t")}\t${featureLine.features.mkString("\t")}"
 
 				// Filter out feature lines with a candidate entity, which is also a link in the source.
 				// Taking care, that not all links are filtered out (not the original), i.e. only do this for trie hits
-				if (id.startsWith("TH-")) {
+				if (id.startsWith(s"${FeatureHelper.TRIE_HIT_MARKER}-")) {
 					// This classifiable/feature line came from a trie hit, we might want to remove it from the
 					// training data set:
 					// Remove the trie hit, if the candidate entity is linked from the current article.
