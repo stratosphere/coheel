@@ -14,6 +14,9 @@ import scala.reflect.ClassTag
  */
 object FeatureHelper {
 
+	val TRIE_HIT_MARKER = "TH"
+	val LINK_MARKER = "L"
+
 	import CoheelLogger._
 
 	def applyCoheelFunctions[T <: Info](allCandidates: Seq[Classifiable[T]])(featureLineIteratorFunction: FeatureLine[T] => Unit): Unit = {

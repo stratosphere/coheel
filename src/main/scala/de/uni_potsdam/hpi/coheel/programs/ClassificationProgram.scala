@@ -32,6 +32,14 @@ class DocumentPartitioner extends Partitioner[Int] {
 		index
 	}
 }
+
+/**
+  * Finds entities in texts.
+  *
+  * IMPORTANT NOTE: For Flink, this requires taskmanager.numberOfTaskSlots
+  * to be set to 1. See http://apache-flink-user-mailing-list-archive.2336050.n4.nabble.com/Distribute-DataSet-to-subset-of-nodes-td2814.html,
+  * if you need more details.
+  */
 class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 
 	import CoheelLogger._
@@ -207,7 +215,7 @@ class RunTrieOverDocumentsFlatMap(params: Params) extends ReadTrieFromDiskFlatMa
 				val containsNoun = tags.exists { t => t.startsWith("N")}
 				// TH for trie hit
 				if (containsNoun) {
-					val id = s"TH-${document.id}-${document.replication}-$tokenHitCount"
+					val id = s"${FeatureHelper.TRIE_HIT_MARKER}-${document.id}-${document.replication}-$tokenHitCount"
 					out.collect(Classifiable(id, trieHit.s, context.toArray, surfaceLinkProb = trieHit.prob, info = ClassificationInfo(document.id, trieHit, POS_TAG_GROUPS.map { group => if (group.exists(tags.contains(_))) 1.0 else 0.0 })))
 					tokenHitCount += 1
 				}

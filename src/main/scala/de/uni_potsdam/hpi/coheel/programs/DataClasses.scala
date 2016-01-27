@@ -20,7 +20,7 @@ object DataClasses {
 	// Note: In contrast to InternalLink, this class does not contain a Node, because
 	// that should not be part of the interface of this class.
 	case class Link(surface: String, surfaceRepr: String, posTags: Vector[String], source: String, destination: String, pos: Int) {
-		def id: String = f"L-${Util.id(source)}-$pos%08d-${Util.id(surface)}"
+		def id: String = f"${FeatureHelper.LINK_MARKER}-${Util.id(source)}-$pos%08d-${Util.id(surface)}"
 	}
 
 	case class WordInDocument(document: String, word: String, count: Int)
@@ -96,6 +96,9 @@ object DataClasses {
 			contextProb: Double = -1.0,
 			info: T) {
 
+		def isTrieHit: Boolean = id.startsWith(FeatureHelper.TRIE_HIT_MARKER)
+		def isLink: Boolean = id.startsWith(FeatureHelper.LINK_MARKER)
+
 		def withCandidateEntityAndSurfaceProb(newCandidateEntity: String, newSurfaceProb: Double): Classifiable[T] = {
 			Classifiable[T](id, surfaceRepr, context, newCandidateEntity, newSurfaceProb, surfaceLinkProb, contextProb, info)
 		}
@@ -105,7 +108,7 @@ object DataClasses {
 		}
 	}
 
-	case class LinkDestinations(entity: String, destinations: Seq[String])
+	case class LinkDestinations(entity: String, destinations: Set[String])
 
 
 	/**
