@@ -102,11 +102,6 @@ object TrainingDataGroupReduce {
   * It also decides, which classifiables shoud be output at all.
   */
 
-trait TrainingDataStrategy
-object TrainingDataStrategies {
-	object REMOVE_CANDIDATE_ONLY extends TrainingDataStrategy { override def toString: String = "REMOVE_CANDIDATE_ONLY" }
-	object REMOVE_ENTIRE_GROUP extends TrainingDataStrategy { override def toString: String = "REMOVE_ENTIRE_GROUP" }
-}
 
 class TrainingDataGroupReduce(trainingDataStrategy: TrainingDataStrategy) extends RichGroupReduceFunction[Classifiable[TrainInfo], String] {
 	import CoheelLogger._

@@ -1,7 +1,7 @@
 package de.uni_potsdam.hpi.coheel
 
-import de.uni_potsdam.hpi.coheel.programs.DataClasses.{Classifiable, TrainInfo}
-import de.uni_potsdam.hpi.coheel.programs.{FeatureHelper, TrainingDataStrategies, TrainingDataGroupReduce}
+import de.uni_potsdam.hpi.coheel.programs.DataClasses.{TrainingDataStrategies, Classifiable, TrainInfo}
+import de.uni_potsdam.hpi.coheel.programs.{FeatureHelper, TrainingDataGroupReduce}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
