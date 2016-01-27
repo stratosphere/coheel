@@ -61,6 +61,14 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		var oldEntityMapping: BidiMap[String, Int] = null
 		var oldResult: DenseMatrix[Float] = null
 		log.info(s"Starting loop with ${FreeMemory.get(true)} MB of RAM")
+
+		//
+		// TODO:
+		// First run the classification with the new model on the cluster
+		// Then check the time spent in random walk
+		// Then we can implement some kind of sliding window here, which leads to smaller
+		// random walks.
+		//
 		while (candidatesRemaining) {
 			log.info(s"Start $i. round of random walk")
 			log.info(s"${entities.count(_.classifierType == NodeTypes.CANDIDATE)} candidates remaining")
