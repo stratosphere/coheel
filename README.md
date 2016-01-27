@@ -73,7 +73,7 @@ source bin/load-aws-config.sh
 
 Run a CohEEL program as usual (see Execution section) by choosing the `cluster_aws` setup
 ``` sh
-bin/run --configuration cluster_aws --program [...] --parallelism 20 coheel_message "CohEEL job finished!"
+bin/run --configuration cluster_aws --program [...] --parallelism 20 ; coheel_message "CohEEL job finished!"
 ```
 The `coheel_message` method sends an [AWS SNS notification](https://aws.amazon.com/sns/) w/ some details after the program was terminated.
 
