@@ -26,7 +26,6 @@ case class RawWikiPage(pageTitle: String,
 			// disambiguation links are always (as seen so far) at the end of the text
 			// maybe this could be used to not scan the entire text
 			val disambiguationRegex = """(?ui)\{\{disambiguation.*?\}\}""".r
-			source.charAt(1)
 			val matches = disambiguationRegex.findAllIn(source)
 				// check whether the regex sometimes accidentially matches too much text
 				.map { s =>
@@ -71,7 +70,7 @@ case class WikiPage(pageTitle: String,
                     links: Array[Link],
                     isDisambiguation: Boolean) {
 
-	val isRedirect: Boolean = this.redirect != ""
+	val isRedirect: Boolean = this.redirect != RawWikiPage.NO_REDIRECT
 
 	lazy val isList = pageTitle.startsWith("List of") || pageTitle.startsWith("Lists of")
 
@@ -96,6 +95,7 @@ case class FullInfoWikiPage(pageTitle: String,
 
 object RawWikiPage {
 
+	val NO_REDIRECT = ""
 	/**
 	 * Builds a wiki page from the given title and wiki markup source.
 	 */
@@ -131,7 +131,7 @@ class WikiPageReader {
 
 			def readNextPage(): Unit = {
 				Timer.start("XML")
-				redirectTitle = ""
+				redirectTitle = RawWikiPage.NO_REDIRECT
 				var foundNextPage = false
 				var pagePassedFilter = true
 

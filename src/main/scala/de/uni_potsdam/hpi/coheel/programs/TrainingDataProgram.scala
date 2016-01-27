@@ -8,7 +8,7 @@ import de.uni_potsdam.hpi.coheel.ml.CoheelClassifier.POS_TAG_GROUPS
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import de.uni_potsdam.hpi.coheel.util.Util
 import de.uni_potsdam.hpi.coheel.wiki.FullInfoWikiPage
-import org.apache.flink.api.common.functions.{BroadcastVariableInitializer, RichGroupReduceFunction}
+import org.apache.flink.api.common.functions.{RuntimeContext, BroadcastVariableInitializer, RichGroupReduceFunction}
 import org.apache.flink.api.scala.{ExecutionEnvironment, _}
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.core.fs.FileSystem
@@ -18,22 +18,31 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 
-class TrainingDataProgram extends NoParamCoheelProgram with Serializable {
+class TrainingDataProgram extends CoheelProgram[TrieSelectionStrategy] with Serializable {
 
 	val SAMPLE_FRACTION = if (runsOffline()) 100 else 5000
+//	val SAMPLE_NUMBER = if (runsOffline()) 0 else 632
 	val SAMPLE_NUMBER = if (runsOffline()) 0 else 3786
 
 	override def getDescription = "Wikipedia Extraction: Build training data"
 
+	def arguments = if (runsOffline())
+			List(new OneTrieEverywhereStrategy("output/surface-link-probs.wiki"))
+		else List(
+			new OneTrieEverywhereStrategy(params.config.getString("first_trie_half")),
+			new OneTrieEverywhereStrategy(params.config.getString("second_trie_half"))
+	)
 
-	override def buildProgram(env: ExecutionEnvironment): Unit = {
+	override def buildProgram(env: ExecutionEnvironment, trieSelector: TrieSelectionStrategy): Unit = {
+		val trieFileName = trieSelector.getTrieFile.getName
+
 		val wikiPages = readWikiPagesWithFullInfo { pageTitle =>
 			Math.abs(pageTitle.hashCode) % SAMPLE_FRACTION == SAMPLE_NUMBER
 		}
 
 		wikiPages
 			.map { wikiPage => wikiPage.pageTitle }
-			.writeAsText(trainingDataPagesPath + s"-$SAMPLE_NUMBER.wiki", FileSystem.WriteMode.OVERWRITE)
+			.writeAsText(trainingDataPagesPath + s"-$SAMPLE_NUMBER-$trieFileName.wiki", FileSystem.WriteMode.OVERWRITE)
 
 		val linkDestinationsPerEntity = wikiPages.map { wp =>
 			LinkDestinations(wp.pageTitle, wp.links.values.map { l =>
@@ -42,12 +51,13 @@ class TrainingDataProgram extends NoParamCoheelProgram with Serializable {
 		}
 
 		val classifiables = wikiPages
-			.flatMap(new LinksAsTrainingDataFlatMap(params))
+			.flatMap(new LinksAsTrainingDataFlatMap(trieSelector))
 			.name("Links and possible links")
 
 		classifiables.map { c =>
-			(c.id, c.surfaceRepr, c.info, c.info.posTags.deep, c.context.deep)
-		}.writeAsTsv(trainingDataClassifiablesPath +  s"-$SAMPLE_NUMBER.wiki")
+			val posTags = c.info.posTags
+			(c.id, c.surfaceRepr, c.surfaceLinkProb, c.info.source, c.info.destination, s"PosTags(${posTags.mkString(", ")})", c.context.deep)
+		}.writeAsTsv(trainingDataClassifiablesPath +  s"-$SAMPLE_NUMBER-$trieFileName.wiki")
 
 		// Fill classifiables with candidates, surface probs and context probs
 		val featuresPerGroup = FeatureHelper.buildFeaturesPerGroup(env, classifiables)
@@ -57,7 +67,7 @@ class TrainingDataProgram extends NoParamCoheelProgram with Serializable {
 			.withBroadcastSet(linkDestinationsPerEntity, TrainingDataGroupReduce.BROADCAST_LINK_DESTINATIONS_PER_ENTITY)
 			.name("Training Data")
 
-		trainingData.writeAsText(trainingDataPath + s"-$SAMPLE_NUMBER.wiki", FileSystem.WriteMode.OVERWRITE)
+		trainingData.writeAsText(trainingDataPath + s"-$SAMPLE_NUMBER-$trieFileName.wiki", FileSystem.WriteMode.OVERWRITE)
 	}
 }
 
@@ -97,38 +107,50 @@ class TrainingDataGroupReduce extends RichGroupReduceFunction[Classifiable[Train
 				linkDestinationsPerEntity(allCandidates.head.info.source)
 			else
 				null
+
+		var filterOut = false
+		val featureLines = new mutable.ArrayBuffer[FeatureLine[TrainInfo]](allCandidates.size)
 		FeatureHelper.applyCoheelFunctions(allCandidates) { featureLine =>
-			// What's missing: How to know all the links (entities) of the source entity, to filter
-			// the bad candidates out here
-			// The filtering must be done here, after the second order functions have been run
-
+			featureLines += featureLine
 			import featureLine._
-			def stringInfo = List(id, surfaceRepr, candidateEntity) ::: featureLine.info.modelInfo
-			val output = s"${stringInfo.mkString("\t")}\t${featureLine.features.mkString("\t")}"
-
-			// Filter out feature lines with a candidate entity, which is also a link in the source.
-			// Taking care, that not all links are filtered out (not the original), i.e. only do this for trie hits
 			if (id.startsWith("TH-")) {
-				// This classifiable/feature line came from a trie hit, we might want to remove it from the
-				// training data set:
-				// Remove the trie hit, if the candidate entity is linked from the current article.
-				// Reasoning: Say, an article contains Angela Merkel as a link. Later, it is referred to as
-				// the "merkel" with no link. It would be wrong to learn, that this should not be linked, because
-				// it is probably only not linked, because it was already linked in the article.
-				if (!linkDestinations.contains(featureLine.candidateEntity))
+				filterOut ^= linkDestinations.contains(candidateEntity)
+			}
+		}
+		if (!filterOut) {
+			featureLines.foreach { featureLine =>
+				// What's missing: How to know all the links (entities) of the source entity, to filter
+				// the bad candidates out here
+				// The filtering must be done here, after the second order functions have been run
+
+				import featureLine._
+				def stringInfo = List(id, surfaceRepr, candidateEntity) ::: featureLine.info.modelInfo
+				val output = s"${stringInfo.mkString("\t")}\t${featureLine.features.mkString("\t")}"
+
+				// Filter out feature lines with a candidate entity, which is also a link in the source.
+				// Taking care, that not all links are filtered out (not the original), i.e. only do this for trie hits
+				if (id.startsWith("TH-")) {
+					// This classifiable/feature line came from a trie hit, we might want to remove it from the
+					// training data set:
+					// Remove the trie hit, if the candidate entity is linked from the current article.
+					// Reasoning: Say, an article contains Angela Merkel as a link. Later, it is referred to as
+					// the "merkel" with no link. It would be wrong to learn, that this should not be linked, because
+					// it is probably only not linked, because it was already linked in the article.
+					if (!linkDestinations.contains(featureLine.candidateEntity))
+						out.collect(output)
+					else {
+						log.info(s"Do not output surface `${featureLine.surfaceRepr}` with candidate '${featureLine.candidateEntity}' from ${featureLine.info.modelInfo}")
+					}
+				} else {
+					// we have a link, just output it
 					out.collect(output)
-				else {
-					log.info(s"Do not output surface `${featureLine.surfaceRepr}` with candidate '${featureLine.candidateEntity}' from ${featureLine.info.modelInfo}")
 				}
-			} else {
-				// we have a link, just output it
-				out.collect(output)
 			}
 		}
 	}
 }
 
-class LinksAsTrainingDataFlatMap(params: Params) extends ReadTrieFromDiskFlatMap[FullInfoWikiPage, Classifiable[TrainInfo]](params) {
+class LinksAsTrainingDataFlatMap(trieSelector: TrieSelectionStrategy) extends ReadTrieFromDiskFlatMap[FullInfoWikiPage, Classifiable[TrainInfo]](trieSelector) {
 	var trieHitCount: Int = 1
 	var nrLinks = 0
 	var nrLinksFiltered = 0
@@ -168,8 +190,9 @@ class LinksAsTrainingDataFlatMap(params: Params) extends ReadTrieFromDiskFlatMap
 			// This tokenization is sometimes different, see the following example:
 			//    println(TokenizerHelper.tokenize("Robert V.").mkString(" "))            --> robert v.
 			//    println(TokenizerHelper.tokenize("Robert V. The Legacy").mkString(" ")) --> robert v the legaci (dot missing)
-			// TODO: This could be solved by taking the link tokenization directly from the plain text, however, this would
-			//       require quite a bit of rewriting.
+			//
+			// This could be solved by taking the link tokenization directly from the plain text, however, this would
+			// require quite a bit of rewriting.
 
 			val contextOption = Util.extractContext(wikiPage.plainText, index)
 
