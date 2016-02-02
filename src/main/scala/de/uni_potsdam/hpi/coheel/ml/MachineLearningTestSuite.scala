@@ -115,7 +115,7 @@ object MachineLearningTestSuite {
 		val expectedIds = expected.map( _._1)
 
 		var i = 1
-		classifiers.foreach { case (name, classifier) =>
+		classifiers.par.foreach { case (name, classifier) =>
 			println(new java.util.Date)
 			log.info(s"Starting training with ${FreeMemory.get(true)} MB of RAM")
 			val runtimeTry = Try(Timer.timeFunction {
