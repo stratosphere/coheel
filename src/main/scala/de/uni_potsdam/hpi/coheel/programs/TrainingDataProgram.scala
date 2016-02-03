@@ -183,8 +183,7 @@ class LinksAsTrainingDataFlatMap(trieSelector: TrieSelectionStrategy) extends Re
 			th.startIndex
 		}.map { ths =>
 			ths._2.maxBy { th => th.length }
-		}
-		trieHits.foreach { trieHit =>
+		}.foreach { trieHit =>
 			if (!linksWithPositions.contains(trieHit.startIndex)) {
 				val contextOption = Util.extractContext(wikiPage.plainText, trieHit.startIndex)
 
