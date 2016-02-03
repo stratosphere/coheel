@@ -115,7 +115,7 @@ object MachineLearningTestSuite {
 		val expectedIds = expected.map( _._1)
 
 		var i = 1
-		classifiers.par.foreach { case (name, classifier) =>
+		classifiers.foreach { case (name, classifier) =>
 			println(new java.util.Date)
 			log.info(s"Starting training with ${FreeMemory.get(true)} MB of RAM")
 			val runtimeTry = Try(Timer.timeFunction {
@@ -221,7 +221,7 @@ object MachineLearningTestSuite {
 //			new Logistic,
 //			() => new FastRandomForest,
 //			() => new J48
-			() => new RandomForest
+			() => { val r = new RandomForest; r.setNumExecutionSlots(10); r }
 //			new SimpleLogistic,
 //			simpleLogistic,
 //			new MultilayerPerceptron,
