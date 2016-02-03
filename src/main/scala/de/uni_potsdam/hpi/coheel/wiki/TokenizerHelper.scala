@@ -18,7 +18,9 @@ import scala.collection.mutable
  */
 object TokenizerHelper {
 
+	// TODO: stemming default false
 	val STEMMING_DEFAULT = true
+	val TOKENIZER_SETTINGS = "normalizeParentheses=false,normalizeOtherBrackets=false,untokenizable=noneKeep"
 
 	// shut off the annoying intialization messages
 	RedwoodConfiguration.empty().capture(System.err).apply()
@@ -53,6 +55,7 @@ object TokenizerHelper {
 		// for each token
 		val tokenizer = new KeepLinkTokenizer(positionInfo, tagger)
 
+		// TODO: POS on unstemmed words
 		val rawTokens = tokenStream(text, STEMMING_DEFAULT)
 		rawTokens.foreach(tokenizer.processSentence)
 		tokenizer
@@ -64,7 +67,7 @@ object TokenizerHelper {
 		val stemmer = new PorterStemmer()
 
 		val prep = new DocumentPreprocessor(textReader)
-		val tokenizer = PTBTokenizerFactory.newCoreLabelTokenizerFactory("normalizeParentheses=false,normalizeOtherBrackets=false,untokenizable=noneKeep")
+		val tokenizer = PTBTokenizerFactory.newCoreLabelTokenizerFactory(TOKENIZER_SETTINGS)
 		prep.setTokenizerFactory(tokenizer)
 		val sentences = prep.iterator().asScala
 		val stemmedSentences = sentences.map { sent =>

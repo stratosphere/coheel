@@ -2,6 +2,7 @@ package de.uni_potsdam.hpi.coheel.util
 
 import java.io.StringReader
 
+import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
 import edu.stanford.nlp.ling
 import edu.stanford.nlp.ling.{CoreLabel, Word, TaggedWord, HasWord}
 import edu.stanford.nlp.process.DocumentPreprocessor
@@ -40,7 +41,7 @@ object StanfordPos {
 		val textReader = new StringReader(text)
 
 		val prep = new DocumentPreprocessor(textReader)
-		val tokenizer = PTBTokenizerFactory.newCoreLabelTokenizerFactory("normalizeParentheses=false,normalizeOtherBrackets=false,untokenizable=noneKeep")
+		val tokenizer = PTBTokenizerFactory.newCoreLabelTokenizerFactory(TokenizerHelper.TOKENIZER_SETTINGS)
 		prep.setTokenizerFactory(tokenizer)
 		val sentences = prep.iterator().asScala
 //		val sentences = tokenizer.getTokenizer(textReader).
