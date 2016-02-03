@@ -167,7 +167,6 @@ class TrainingDataGroupReduce(trainingDataStrategy: TrainingDataStrategy) extend
 }
 
 class LinksAsTrainingDataFlatMap(trieSelector: TrieSelectionStrategy) extends ReadTrieFromDiskFlatMap[FullInfoWikiPage, Classifiable[TrainInfo]](trieSelector) {
-	var trieHitCount: Int = 1
 	var nrLinks = 0
 	var nrLinksFiltered = 0
 	var outputtedTrieHits = 0
@@ -194,12 +193,11 @@ class LinksAsTrainingDataFlatMap(trieSelector: TrieSelectionStrategy) extends Re
 					outputtedTrieHits += 1
 					out.collect(Classifiable[TrainInfo](
 						// TH for trie hit
-						s"${FeatureHelper.TRIE_HIT_MARKER}-${Util.id(wikiPage.pageTitle)}-$trieHitCount",
+						s"${FeatureHelper.TRIE_HIT_MARKER}-${Util.id(wikiPage.pageTitle)}-${trieHit.startIndex}-${trieHit.length}",
 						trieHit.s,
 						context.toArray,
 						surfaceLinkProb = trieHit.prob,
 						info = TrainInfo(wikiPage.pageTitle, destination = "", POS_TAG_GROUPS.map { group => if (group.exists(tags.contains(_))) 1.0 else 0.0 })))
-					trieHitCount += 1
 				}
 			} else {
 				log.info(s"Ignoring trie hit $trieHit because it stems from link ${linksWithPositions(trieHit.startIndex)}")
