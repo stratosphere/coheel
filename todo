@@ -3,7 +3,17 @@ Overlapping trie hits filter out
 // TODO: Check the wrongly classified seed links
 // TODO: Random Walk in window
 // TODO: RW for 100 documents
-Setup config guide (commands to run the programs on the cluster)
+
+// TODO
+size of candidates/seeds compared to
+
+language models stemmen
+rest nicht
+todo gefühl für laufzeit der classification
+
+
+splitten dokumente:
+erst flatmap
 
 
 Test if with constant set helps for the training data program

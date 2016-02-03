@@ -239,8 +239,8 @@ class LinksAsTrainingDataFlatMap(trieSelector: TrieSelectionStrategy) extends Re
 	}
 
 	override def close(): Unit = {
-		log.info(s"LinksAsTrainingDataFlatMap summary: # Links/(# Links + # TrieHits) = ${outputtedLinks.toDouble / (outputtedLinks + outputtedTrieHits)}")
-		log.info(s"LinksAsTrainingDataFlatMap summary: # Links filtered/# Links: $nrLinksFiltered/$nrLinks = ${nrLinksFiltered.toDouble * 100 / nrLinks} %")
+		log.info(s"LinksAsTrainingDataFlatMap summary: # Links/(# Links + # TrieHits) = ${outputtedLinks.toDouble * 100 / (outputtedLinks + outputtedTrieHits)} %")
+		log.info(s"LinksAsTrainingDataFlatMap summary: # Links filtered/# Links       = $nrLinksFiltered/$nrLinks = ${nrLinksFiltered.toDouble * 100 / nrLinks} %")
 	}
 }
 
