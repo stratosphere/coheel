@@ -58,11 +58,23 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 		}
 		val documents = if (runsOffline())
 				env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_3).name("Documents")
-			else
-//				env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_3).name("Documents")
-				env.fromCollection(documentStrings).name("Documents")
+			else {
+//				env.fromCollection(documentStrings).name("Documents")
+				env.readTextFile(newYorkTimesDataPath).flatMap { l =>
+					val split = l.split('\t')
+					val text = split(4).replace("\n", " ")
 
-		val inputDocuments = documents.flatMap(new InputDocumentDistributorFlatMap(params, runsOffline())).name("Input-Documents")
+					val words = text.split(' ')
+					if (words.length > 60)
+						Option(words.slice(0, 60).mkString(" "))
+					else
+						None
+				}
+			}
+
+		val inputDocuments = documents
+			.first(10)
+			.flatMap(new InputDocumentDistributorFlatMap(params, runsOffline())).name("Input-Documents")
 
 		val partitionedDocuments = inputDocuments.partitionCustom(new DocumentPartitioner, "index").name("Partitioned-Documents")
 

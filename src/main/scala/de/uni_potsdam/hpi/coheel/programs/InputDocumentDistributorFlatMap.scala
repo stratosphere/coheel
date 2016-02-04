@@ -35,7 +35,8 @@ class InputDocumentDistributorFlatMap(params: Params, runsOffline: Boolean) exte
 		log.info(s"Reading document $id on index $index")
 
 		val tokensStemmed = tokenizerResult.tokensStemmed
-		val tokensUnstemmed = tokenizerResult.tokensUnstemmed
+		// TODO: Temporarily changed to work on old data
+		val tokensUnstemmed = tokenizerResult.tokensStemmed
 		val tags = tokenizerResult.tags
 
 		if (isFirstHalf) {

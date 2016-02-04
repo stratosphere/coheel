@@ -70,7 +70,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 
 
 	private lazy val rawWikiInput: DataSet[RawWikiPage] = environment
-		.readHadoopFile( new RawWikiPageInputFormat, classOf[LongWritable], classOf[RawWikiPage], wikipediaDumpFilesPath )
+		.readHadoopFile(new RawWikiPageInputFormat, classOf[LongWritable], classOf[RawWikiPage], wikipediaDumpFilesPath)
 		.map(_._2)
 	private def readRawWikiPages[S : TypeInformation : ClassTag](fun: Extractor => S, pageFilter: String => Boolean = _ => true): DataSet[S] = {
 		rawWikiInput
