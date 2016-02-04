@@ -97,7 +97,7 @@ class TriePerformanceTest extends FunSuite {
 		val surfacesFile = new File(classLoader.getResource("surfaces").getFile)
 		val lines = Source.fromFile(surfacesFile).getLines().take(nrLines)
 		lines.flatMap { line =>
-			val tokens = TokenizerHelper.tokenize(line).mkString(" ")
+			val tokens = TokenizerHelper.tokenize(line, false).mkString(" ")
 			if (tokens.isEmpty)
 				None
 			else

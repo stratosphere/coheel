@@ -30,26 +30,28 @@ class InputDocumentDistributorFlatMap(params: Params, runsOffline: Boolean) exte
 		random = new Random()
 	}
 	override def flatMap(text: String, out: Collector[InputDocument]): Unit = {
-		val tokenizer = TokenizerHelper.tokenizeWithPositionInfo(text, null)
+		val tokenizerResult = TokenizerHelper.tokenizeWithStemmedAndUnstemmed(text)
 		val id = Util.id(text)
 		log.info(s"Reading document $id on index $index")
 
-		val tokens = tokenizer.getTokens
-		val tags = tokenizer.getTags
+		val tokensStemmed = tokenizerResult.tokensStemmed
+		val tokensUnstemmed = tokenizerResult.tokensUnstemmed
+		val tags = tokenizerResult.tags
+
 		if (isFirstHalf) {
-			out.collect(InputDocument(id, 0, index, tokens, tags))
+			out.collect(InputDocument(id, 0, index, tokensStemmed, tokensUnstemmed, tags))
 			if (!CoheelProgram.runsOffline()) {
 				val randomIndex = secondHalf(random.nextInt(halfParallelism))
-				out.collect(InputDocument(id, 1, randomIndex, tokens, tags))
+				out.collect(InputDocument(id, 1, randomIndex, tokensStemmed, tokensUnstemmed, tags))
 				log.info(s"Distributing to $index and $randomIndex")
 			}
 		} else {
 			if (!CoheelProgram.runsOffline()) {
 				val randomIndex = firstHalf(random.nextInt(halfParallelism))
-				out.collect(InputDocument(id, 0, randomIndex, tokens, tags))
+				out.collect(InputDocument(id, 0, randomIndex, tokensStemmed, tokensUnstemmed, tags))
 				log.info(s"Distributing to $index and $randomIndex")
 			}
-			out.collect(InputDocument(id, 1, index, tokens, tags))
+			out.collect(InputDocument(id, 1, index, tokensStemmed, tokensUnstemmed, tags))
 		}
 	}
 }

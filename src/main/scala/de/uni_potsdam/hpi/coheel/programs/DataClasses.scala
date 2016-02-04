@@ -169,10 +169,16 @@ object DataClasses {
 	 *                    two different machines, we will create two InputDocuments. The first will have the replication
 	 *                    number 0, the second the replication number 1.
 	 * @param index Where to distribute this document to. This number must be between 0 and number of nodes - 1
-	 * @param tokens The tokens in this document.
+	 * @param tokensStemmed The tokens in this document (stemmed).
+	 * @param tokensUnstemmed The tokens in this document (unstemmed).
 	 * @param tags The corresponding tags. This Seq has the same length as the tokens Seq.
 	 */
-	case class InputDocument(id: String, replication: Int, index: Int, tokens: mutable.ArrayBuffer[String], tags: mutable.ArrayBuffer[String])
+	case class InputDocument(
+		id: String, replication: Int,
+		index: Int,
+		tokensStemmed: mutable.ArrayBuffer[String],
+		tokensUnstemmed: mutable.ArrayBuffer[String],
+		tags: mutable.ArrayBuffer[String])
 	case class SurfaceProb(surface: String, destination: String, prob: Double)
 
 	case class Neighbour(entity: String, prob: Double)

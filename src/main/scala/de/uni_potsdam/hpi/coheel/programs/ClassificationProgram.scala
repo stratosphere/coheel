@@ -204,8 +204,8 @@ class RunTrieOverDocumentsFlatMap(params: Params) extends ReadTrieFromDiskFlatMa
 	import CoheelLogger._
 
 	override def flatMap(document: InputDocument, out: Collector[Classifiable[ClassificationInfo]]): Unit = {
-		trie.findAllInWithTrieHit(document.tokens).foreach { trieHit =>
-			val contextOption = Util.extractContext(document.tokens, trieHit.startIndex)
+		trie.findAllInWithTrieHit(document.tokensUnstemmed).foreach { trieHit =>
+			val contextOption = Util.extractContext(document.tokensStemmed, trieHit.startIndex)
 
 			if (contextOption.isEmpty)
 				log.error(s"Could not create context for ${document.id}.")

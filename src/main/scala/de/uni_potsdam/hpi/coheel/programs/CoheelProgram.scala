@@ -81,7 +81,7 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 			}
 			.flatMap { (rawWikiPage: RawWikiPage, out: Collector[S]) =>
 				Try {
-					val extractor = new Extractor(rawWikiPage, s => TokenizerHelper.tokenize(s).mkString(" "))
+					val extractor = new Extractor(rawWikiPage, s => TokenizerHelper.tokenize(s, false).mkString(" "))
 					Timer.start("EXTRACTION")
 					extractor.extract()
 					Timer.end("EXTRACTION")
@@ -96,28 +96,28 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 			.name("Raw-Wiki-Pages")
 	}
 
-	def readWikiPages: DataSet[WikiPage] = {
+	def readWikiPagesStemmed: DataSet[WikiPage] = {
 		readRawWikiPages { extractor =>
 			val rawWikiPage = extractor.rawWikiPage
 			val rawPlainText = extractor.getPlainText
-			val tokens = TokenizerHelper.tokenize(rawPlainText)
+			val tokens = TokenizerHelper.tokenize(rawPlainText, true)
 			WikiPage(rawWikiPage.pageTitle, rawWikiPage.ns, rawWikiPage.redirect,
 				tokens, extractor.getLinks.asMapOfRanges().values().asScala.toArray, rawWikiPage.isDisambiguation)
 		}
 
 	}
 
-	def readWikiPagesWithFullInfo(pageFilter: String => Boolean): DataSet[FullInfoWikiPage] = {
+	def readWikiPagesWithFullInfoUnstemmed(pageFilter: String => Boolean): DataSet[FullInfoWikiPage] = {
 		readRawWikiPages({ extractor =>
 			val wikiPage = extractor.rawWikiPage
 
 			val rawPlainText = extractor.getPlainText
 //			link text offsets tell, where the links start in the raw plain text
 			val linkTextOffsets = extractor.getLinks
-			val tokenizerResult = TokenizerHelper.tokenizeWithPositionInfo(rawPlainText, linkTextOffsets)
+			val tokenizerResult = TokenizerHelper.tokenizeWithPositionInfo(rawPlainText, linkTextOffsets, false)
 
 			FullInfoWikiPage(wikiPage.pageTitle, wikiPage.ns, wikiPage.redirect,
-				tokenizerResult.getTokens, tokenizerResult.getTags, tokenizerResult.getLinkPositions, wikiPage.isDisambiguation)
+				tokenizerResult.tokens, tokenizerResult.tags, tokenizerResult.translatedLinks, wikiPage.isDisambiguation)
 		}, pageFilter)
 	}
 

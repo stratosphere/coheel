@@ -30,7 +30,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 	 * @param env Flink execution environment.
 	 */
 	override def buildProgram(env: ExecutionEnvironment): Unit = {
-		val wikiPages = readWikiPages
+		val wikiPages = readWikiPagesStemmed
 		buildLinkPlans(wikiPages)
 		buildLanguageModelPlan(wikiPages)
 		wikiPages.map { wikiPage =>

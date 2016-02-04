@@ -44,7 +44,7 @@ class TrainingDataProgram extends CoheelProgram[TrieSelectionStrategy] with Seri
 	override def buildProgram(env: ExecutionEnvironment, trieSelector: TrieSelectionStrategy): Unit = {
 		val trieFileName = trieSelector.getTrieFile.getName
 
-		val wikiPages = readWikiPagesWithFullInfo { pageTitle =>
+		val wikiPages = readWikiPagesWithFullInfoUnstemmed { pageTitle =>
 			Math.abs(pageTitle.hashCode) % SAMPLE_FRACTION == SAMPLE_NUMBER
 		}
 
