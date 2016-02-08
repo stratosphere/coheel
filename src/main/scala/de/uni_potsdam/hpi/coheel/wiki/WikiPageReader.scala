@@ -67,7 +67,8 @@ case class RawWikiPage(pageTitle: String,
 case class WikiPage(pageTitle: String,
                     ns: Int,
                     redirect: String,
-                    plainText: Array[String],
+                    plainTextStemmed: Array[String],
+                    plainTextUnstemmed: Array[String],
                     links: Array[Link],
                     isDisambiguation: Boolean) {
 

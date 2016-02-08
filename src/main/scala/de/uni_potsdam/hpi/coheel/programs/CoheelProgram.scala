@@ -100,9 +100,9 @@ abstract class CoheelProgram[T]() extends ProgramDescription {
 		readRawWikiPages { extractor =>
 			val rawWikiPage = extractor.rawWikiPage
 			val rawPlainText = extractor.getPlainText
-			val tokens = TokenizerHelper.tokenize(rawPlainText, true)
+			val tokens = TokenizerHelper.tokenizeWithStemmedAndUnstemmed(rawPlainText)
 			WikiPage(rawWikiPage.pageTitle, rawWikiPage.ns, rawWikiPage.redirect,
-				tokens, extractor.getLinks.asMapOfRanges().values().asScala.toArray, rawWikiPage.isDisambiguation)
+				tokens.tokensStemmed.toArray, tokens.tokensUnstemmed.toArray, extractor.getLinks.asMapOfRanges().values().asScala.toArray, rawWikiPage.isDisambiguation)
 		}
 
 	}

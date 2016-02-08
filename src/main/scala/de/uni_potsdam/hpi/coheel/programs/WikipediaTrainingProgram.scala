@@ -157,10 +157,10 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 	 */
 	def buildLanguageModelPlan(wikiPages: DataSet[WikiPage]): DataSet[DataClasses.LanguageModel] = {
 		val plainTexts = wikiPages.map { wikiPage =>
-			val plainText =  if (wikiPage.plainText.isEmpty)
+			val plainText =  if (wikiPage.plainTextUnstemmed.isEmpty)
 				" "
 			else
-				wikiPage.plainText.mkString(" ")
+				wikiPage.plainTextUnstemmed.mkString(" ")
 
 			val links = if (wikiPage.links.isEmpty)
 				CoheelProgram.LINK_SPLITTER
@@ -171,7 +171,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 		}.name("Plain Texts with Links: Title-Text-Links")
 
 		val languageModels = wikiPages.map { wikiPage =>
-			val groupedWords = wikiPage.plainText
+			val groupedWords = wikiPage.plainTextStemmed
 				.groupBy(identity)
 			val model = groupedWords.mapValues { v => v.length }
 			LanguageModel(wikiPage.pageTitle, model)
