@@ -50,7 +50,7 @@ object FlinkProgramRunner {
 		head("CohEEL", "0.0.1")
 		opt[String]('c', "configuration") required() action { (x, c) =>
 			c.copy(configName = x) } text "specifies the configuration file to use, either 'local', 'cluster_tenem' or 'cluster_aws'" validate { x =>
-			if (List("local", "cluster_tenem", "cluster_aws").contains(x)) success
+			if (List("local", "cluster_tenem", "cluster_tenem_unstemmed", "cluster_aws").contains(x)) success
 			else failure("configuration unknown") }
 		opt[String]('p', "program") required() action { (x, c) =>
 			c.copy(programName = x) } text "specifies the program to run" validate { x =>
