@@ -30,7 +30,7 @@ class InputDocumentDistributorFlatMap(params: Params, runsOffline: Boolean) exte
 		random = new Random()
 	}
 	override def flatMap(text: String, out: Collector[InputDocument]): Unit = {
-		val tokenizerResult = TokenizerHelper.tokenizeWithStemmedAndUnstemmed(text)
+		val tokenizerResult = TokenizerHelper.tokenizeWithStemmedAndUnstemmedAndTags(text)
 		val id = Util.id(text)
 		log.info(s"Reading document $id on index $index")
 

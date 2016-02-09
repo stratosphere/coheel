@@ -48,7 +48,26 @@ object TokenizerHelper {
 		tokens.toArray
 	}
 
-	def tokenizeWithStemmedAndUnstemmed(text: String): TokenizerResultStemmedAndUnstemmed = {
+	def tokenizeWithStemmedAndUnstemmed(text: String): (mutable.ArrayBuffer[String], mutable.ArrayBuffer[String]) = {
+		val tokensUnstemmed = mutable.ArrayBuffer[String]()
+		val rawTokens = tokenStream(text).map { sent =>
+			sent.foreach { token =>
+				tokensUnstemmed += token.word()
+			}
+			sent
+		}
+
+		val stemmed = rawTokens.map(stemSentence)
+
+		val tokensStemmed = mutable.ArrayBuffer[String]()
+		stemmed.flatMap { it => it }.foreach { word =>
+			tokensStemmed += word.word()
+		}
+
+		(tokensStemmed, tokensUnstemmed)
+	}
+
+	def tokenizeWithStemmedAndUnstemmedAndTags(text: String): TokenizerResultStemmedAndUnstemmed = {
 		val tokensUnstemmed = mutable.ArrayBuffer[String]()
 		val rawTokens = tokenStream(text).map { sent =>
 			sent.foreach { token =>
