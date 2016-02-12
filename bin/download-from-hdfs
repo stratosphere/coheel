@@ -13,5 +13,6 @@ echo "Downloaded."
 find ./$2.wiki -type f -exec cat {} + | LC_ALL=C sort > ./$2.wiki.tmp
 echo "Sorted."
 rm -r ./$2.wiki
-mv ./$2.wiki.tmp ./cluster-output/$2.wiki
+mkdir -p ./cluster-output/$1
+mv ./$2.wiki.tmp ./cluster-output/$1/$2.wiki
 echo "Done."
