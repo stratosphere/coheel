@@ -107,7 +107,7 @@ object DataClasses {
 		}
 
 		def withContextProb(newContextProb: Double): Classifiable[T] = {
-			Classifiable[T](id, surfaceRepr, context, candidateEntity, surfaceProb, surfaceLinkProb, newContextProb, info)
+			Classifiable[T](id, surfaceRepr, Array[String](), candidateEntity, surfaceProb, surfaceLinkProb, newContextProb, info)
 		}
 	}
 
