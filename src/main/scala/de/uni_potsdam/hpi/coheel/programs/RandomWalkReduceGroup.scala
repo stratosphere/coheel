@@ -97,7 +97,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 			val initial = buildInitialVector(oldEntityMapping, oldResult, entityNodeMapping)
 
 			Timer.start("randomWalk")
-			val result = randomWalk(m, s, 100, initial)
+			val result = randomWalk(m, s, 6, initial)
 			log.info(s"Method randomWalk took ${Timer.end("randomWalk")} ms.")
 
 			oldResult = result
