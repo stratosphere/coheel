@@ -192,10 +192,10 @@ object DataClasses {
 
 	/**
 	 * @param documentId Document this classification came from.
-	 * @param classifierType Either "seed" or "candidate"
+	 * @param classificationType Either "seed" or "candidate"
 	 * @param candidateEntity Candidate entity to link
 	 */
-	case class ClassifierResult(documentId: String, classifierType: NodeType, candidateEntity: String, trieHit: TrieHit)
+	case class ClassifierResult(documentId: String, classificationType: NodeType, candidateEntity: String, trieHit: TrieHit)
 
 	case class ClassifierResultWithNeighbours(
 		 documentId: String,

@@ -1,8 +1,6 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import java.io.File
 import java.lang.Iterable
-import java.net.URI
 import java.util.Date
 
 import de.uni_potsdam.hpi.coheel.Params
@@ -17,14 +15,12 @@ import de.uni_potsdam.hpi.coheel.util.Util
 import org.apache.flink.api.common.functions.{Partitioner, RichGroupReduceFunction}
 import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
-import org.apache.flink.core.fs.{Path, FileSystem}
 import org.apache.flink.util.Collector
 import weka.classifiers.Classifier
 import weka.core.SerializationHelper
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
-import scala.io.Source
 
 
 class DocumentPartitioner extends Partitioner[Int] {
@@ -40,26 +36,16 @@ class DocumentPartitioner extends Partitioner[Int] {
   * to be set to 1. See http://apache-flink-user-mailing-list-archive.2336050.n4.nabble.com/Distribute-DataSet-to-subset-of-nodes-td2814.html,
   * if you need more details.
   */
-class ClassificationProgram extends NoParamCoheelProgram with Serializable {
-
-	import CoheelLogger._
+class ClassificationProgram extends CoheelProgram[Int] with Serializable {
 
 	override def getDescription: String = "CohEEL Classification"
 
-	// Select, which neighbours file to use
-	val NEIGHBOURS_FILE = fullNeighboursPath
-//	val NEIGHBOURS_FILE = reciprocalNeighboursPath
+	def arguments = List(10, 100, 1000, 10000)
 
-	val neighboursCreationMethod = Map(fullNeighboursPath -> buildFullNeighbours _, reciprocalNeighboursPath -> buildReciprocalNeighbours _)
-
-	override def buildProgram(env: ExecutionEnvironment): Unit = {
-		val documentStrings = List(4).map { x =>
-			Source.fromFile(s"src/main/resources/classification-documents/$x", "UTF-8").mkString
-		}
+	override def buildProgram(env: ExecutionEnvironment, nrDocuments: Int): Unit = {
 		val documents = if (runsOffline())
 				env.fromElements(Sample.ANGELA_MERKEL_SAMPLE_TEXT_3).name("Documents")
 			else {
-//				env.fromCollection(documentStrings).name("Documents")
 				env.readTextFile(newYorkTimesDataPath).flatMap { l =>
 					val split = l.split('\t')
 					val text = split(4).replace("\n", " ")
@@ -73,7 +59,7 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 			}
 
 		val inputDocuments = documents
-			.first(100)
+			.first(nrDocuments)
 			.flatMap(new InputDocumentDistributorFlatMap(params, runsOffline())).name("Input-Documents")
 
 		val partitionedDocuments = inputDocuments.partitionCustom(new DocumentPartitioner, "index").name("Partitioned-Documents")
@@ -86,52 +72,17 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 		val featuresPerGroup = FeatureHelper.buildFeaturesPerGroup(env, classifiables)
 		val basicClassifierResults = featuresPerGroup.reduceGroup(new ClassificationReduceGroup(params)).name("Basic Classifier Results")
 
-		val fileExists = if (runsOffline())
-			new File(NEIGHBOURS_FILE).exists()
-		else {
-			val f = FileSystem.get(new URI("hdfs://tenemhead2"))
-			f.exists(new Path(NEIGHBOURS_FILE.replace("hdfs://tenemhead2", "")))
-		}
-
-		val preprocessedNeighbours = if (fileExists) {
-			log.info("Neighbourhood-File exists")
-			loadNeighboursFromDisk(env, NEIGHBOURS_FILE)
-		} else {
-			log.info("Neighbourhood-File does not exist")
-			neighboursCreationMethod(NEIGHBOURS_FILE)(env)
-		}
-
-		val withNeighbours = basicClassifierResults.join(preprocessedNeighbours)
-			.where("candidateEntity")
-			.equalTo("entity")
-			.name("Join With Neighbours")
-			.map { joinResult => joinResult match {
-					case (classifierResult, neighbours) =>
-						ClassifierResultWithNeighbours(
-							classifierResult.documentId,
-							classifierResult.classifierType,
-							classifierResult.candidateEntity,
-							classifierResult.trieHit,
-							neighbours.in,
-							neighbours.out)
-				}
-			}
-
 		/*
 		 * OUTPUT
 		 */
-		inputDocuments.filter(_.replication == 0).name("Input Documents").writeAsTsv(inputDocumentsPath)
-
-		if (!fileExists) {
-			preprocessedNeighbours.map(serializeNeighboursToString _).name("Serialized Neighbours").writeAsText(NEIGHBOURS_FILE, FileSystem.WriteMode.OVERWRITE)
-		}
+		inputDocuments.filter(_.replication == 0).name("Input Documents").writeAsTsv(inputDocumentsPath.replace(".wiki", s".$nrDocuments.wiki"))
 
 		// Write trie hits for debugging
 		val trieHitOutput = classifiables.map { trieHit =>
 			val posTags = trieHit.info.posTags
 			(trieHit.id, trieHit.surfaceRepr, trieHit.info.trieHit, s"PosTags(${posTags.mkString(", ")})", s">>>${trieHit.context.mkString(" ")}<<<")
 		}.name("Trie-Hits")
-		trieHitOutput.writeAsTsv(trieHitPath)
+		trieHitOutput.writeAsTsv(trieHitPath.replace(".wiki", s".$nrDocuments.wiki"))
 
 		// Write raw features for debugging
 		featuresPerGroup.reduceGroup { (classifiablesIt, out: Collector[(TrieHit, String, Double, Double)]) =>
@@ -139,14 +90,12 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 				import classifiable._
 				out.collect((info.trieHit, candidateEntity, surfaceProb, contextProb))
 			}
-		}.name("Raw-Features").writeAsTsv(rawFeaturesPath)
+		}.name("Raw-Features").writeAsTsv(rawFeaturesPath.replace(".wiki", s".$nrDocuments.wiki"))
 
 		// Write candidate classifier results for debugging
 		basicClassifierResults.map { res =>
-			(res.documentId, res.classifierType, res.candidateEntity, res.trieHit)
-		}.name("Classifier-Results").writeAsTsv(classificationPath)
-
-		withNeighbours.groupBy("documentId").reduceGroup(new RandomWalkReduceGroup).name("Random Walk").writeAsTsv(randomWalkResultsPath)
+			(res.documentId, res.classificationType, res.candidateEntity, res.trieHit)
+		}.name("Classifier-Results").writeAsTsv(classificationPath.replace(".wiki", s".$nrDocuments.wiki"))
 
 	}
 
