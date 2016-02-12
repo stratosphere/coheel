@@ -120,19 +120,17 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 		/*
 		 * OUTPUT
 		 */
-		inputDocuments.filter(_.replication == 0).writeAsTsv(inputDocumentsPath)
+		inputDocuments.filter(_.replication == 0).name("Input Documents").writeAsTsv(inputDocumentsPath)
 
-		if (fileExists) {
-			preprocessedNeighbours.map(serializeNeighboursToString _).writeAsText(NEIGHBOURS_FILE.replace(".wiki", ".wiki2"), FileSystem.WriteMode.OVERWRITE)
-		} else {
-			preprocessedNeighbours.map(serializeNeighboursToString _).writeAsText(NEIGHBOURS_FILE                           , FileSystem.WriteMode.OVERWRITE)
+		if (!fileExists) {
+			preprocessedNeighbours.map(serializeNeighboursToString _).name("Serialized Neighbours").writeAsText(NEIGHBOURS_FILE, FileSystem.WriteMode.OVERWRITE)
 		}
 
 		// Write trie hits for debugging
 		val trieHitOutput = classifiables.map { trieHit =>
 			val posTags = trieHit.info.posTags
 			(trieHit.id, trieHit.surfaceRepr, trieHit.info.trieHit, s"PosTags(${posTags.mkString(", ")})", s">>>${trieHit.context.mkString(" ")}<<<")
-		}
+		}.name("Trie-Hits")
 		trieHitOutput.writeAsTsv(trieHitPath)
 
 		// Write raw features for debugging
@@ -141,12 +139,12 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 				import classifiable._
 				out.collect((info.trieHit, candidateEntity, surfaceProb, contextProb))
 			}
-		}.writeAsTsv(rawFeaturesPath)
+		}.name("Raw-Features").writeAsTsv(rawFeaturesPath)
 
 		// Write candidate classifier results for debugging
 		basicClassifierResults.map { res =>
 			(res.documentId, res.classifierType, res.candidateEntity, res.trieHit)
-		}.writeAsTsv(classificationPath)
+		}.name("Classifier-Results").writeAsTsv(classificationPath)
 
 		withNeighbours.groupBy("documentId").reduceGroup(new RandomWalkReduceGroup).name("Random Walk").writeAsTsv(randomWalkResultsPath)
 
