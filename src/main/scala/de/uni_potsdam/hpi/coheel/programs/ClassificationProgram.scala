@@ -73,7 +73,7 @@ class ClassificationProgram extends NoParamCoheelProgram with Serializable {
 			}
 
 		val inputDocuments = documents
-			.first(10)
+			.first(100)
 			.flatMap(new InputDocumentDistributorFlatMap(params, runsOffline())).name("Input-Documents")
 
 		val partitionedDocuments = inputDocuments.partitionCustom(new DocumentPartitioner, "index").name("Partitioned-Documents")
