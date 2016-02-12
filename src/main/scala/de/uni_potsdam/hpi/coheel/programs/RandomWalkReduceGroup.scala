@@ -394,6 +394,14 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		g
 	}
 
+	var data = new Array[Float](0)
+	def clearArray(a: Array[Float]): Unit = {
+		var i = 0
+		while (i < a.length) {
+			a(i) = 0
+			i += 1
+		}
+	}
 	/**
 	 * Builds a random walk matrix from a given graph.
 	 *
@@ -404,11 +412,20 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 	 *         <li>A set of all the indices of the candidates
 	 */
 	def buildMatrix(g: DefaultDirectedWeightedGraph[RandomWalkNode, DefaultWeightedEdge]): (DenseMatrix[Float], DenseMatrix[Float], BidiMap[String, Int], mutable.Set[Int]) = {
-		log.info(s"Starting buildMatrix with ${FreeMemory.get(true)} MB of RAM")
+		FreeMemory.logMemory(log, "starting buildMatrix")
 		val candidateIndices = mutable.Set[Int]()
 		val size = g.vertexSet().size()
 		val entityNodeIdMapping = new DualHashBidiMap[String, Int]()
-		val m = new DenseMatrix[Float](size, size) // THIS TAKES VERY LONG TIME (99% of time spent in this method)
+
+		if (data.length < size * size) {
+			data = new Array[Float](size * size)
+			log.info("Reinitializing data")
+		} else {
+			clearArray(data)
+		}
+		Timer.start("initializingMatrix")
+		val m = new DenseMatrix[Float](size, size, data)
+		Timer.logResult(log, "initializingMatrix")
 
 		var currentEntityId = 0
 		val s = new DenseMatrix[Float](1, size)
