@@ -407,7 +407,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		val candidateIndices = mutable.Set[Int]()
 		val size = g.vertexSet().size()
 		val entityNodeIdMapping = new DualHashBidiMap[String, Int]()
-		val m = new DenseMatrix[Float](size, size)
+		val m = new DenseMatrix[Float](size, size) // THIS TAKES VERY LONG TIME (99% of time spent in this method)
 
 		var currentEntityId = 0
 		val s = new DenseMatrix[Float](1, size)
