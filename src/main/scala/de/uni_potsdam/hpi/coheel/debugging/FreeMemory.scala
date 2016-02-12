@@ -1,5 +1,7 @@
 package de.uni_potsdam.hpi.coheel.debugging
 
+import org.apache.log4j.Logger
+
 object FreeMemory {
 
 	val ON = false
@@ -16,5 +18,12 @@ object FreeMemory {
 
 		val actualMem = maxMem - (totalMem - freeMem)
 		actualMem.toLong
+	}
+
+	def logMemory(log: Logger, name: String): Unit = {
+		if (!ON)
+			return 0
+
+		log.info(s"At $name with ${FreeMemory.get(true)} MB of RAM")
 	}
 }
