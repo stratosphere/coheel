@@ -156,7 +156,8 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 	 * Builds the plan who creates the language model for a given entity.
 	 */
 	def buildLanguageModelPlan(wikiPages: DataSet[WikiPage]): DataSet[DataClasses.LanguageModel] = {
-		val plainTexts = wikiPages.map { wikiPage =>
+		val normalPages = wikiPages.filter { wikiPage => wikiPage.isNormalPage }
+		val plainTexts = normalPages.map { wikiPage =>
 			val plainText =  if (wikiPage.plainTextUnstemmed.isEmpty)
 				" "
 			else
@@ -170,7 +171,7 @@ class WikipediaTrainingProgram extends NoParamCoheelProgram with Serializable {
 			(wikiPage.pageTitle, plainText, links)
 		}.name("Plain Texts with Links: Title-Text-Links")
 
-		val languageModels = wikiPages.map { wikiPage =>
+		val languageModels = normalPages.map { wikiPage =>
 			val groupedWords = wikiPage.plainTextStemmed
 				.groupBy(identity)
 			val model = groupedWords.mapValues { v => v.length }
