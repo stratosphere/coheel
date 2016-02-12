@@ -2,6 +2,7 @@ package de.uni_potsdam.hpi.coheel.programs
 
 import de.uni_potsdam.hpi.coheel.ml.SecondOrderFeatures
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
+import org.apache.flink.api.common.operators.base.JoinOperatorBase
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.scala._
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
@@ -45,7 +46,7 @@ object FeatureHelper {
 		val surfaceProbs = readSurfaceProbs(env)
 		val languageModels = readLanguageModels(env)
 
-		val classifiablesWithCandidates: DataSet[DataClasses.Classifiable[T]] = classifiables.join(surfaceProbs)
+		val classifiablesWithCandidates: DataSet[DataClasses.Classifiable[T]] = classifiables.join(surfaceProbs, JoinOperatorBase.JoinHint.BROADCAST_HASH_SECOND)
 			.where("surfaceRepr")
 			.equalTo("surface")
 			.name("Join: Classifiable With Surface Probs")
@@ -60,7 +61,7 @@ object FeatureHelper {
 //			(c.id, c.surfaceRepr, c.candidateEntity, c.surfaceProb, c.info, c.context.deep)
 //		} .writeAsTsv(debug1Path)
 
-		val baseScores = classifiablesWithCandidates.join(languageModels)
+		val baseScores = classifiablesWithCandidates.join(languageModels, JoinOperatorBase.JoinHint.BROADCAST_HASH_SECOND)
 			.where("candidateEntity")
 			.equalTo("pageTitle")
 			.name("Join: Link Candidates with LMs")
