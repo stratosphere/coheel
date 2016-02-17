@@ -21,7 +21,7 @@ class RandomWalkProgram extends CoheelProgram[Int] with Serializable {
 
 	val neighboursCreationMethod = Map(fullNeighboursPath -> buildFullNeighbours _, reciprocalNeighboursPath -> buildReciprocalNeighbours _)
 
-	def arguments = List(10, 100, 1000, 10000)
+	def arguments = List(10, 100, 1001, 10000)
 
 	override def buildProgram(env: ExecutionEnvironment, nrDocuments: Int): Unit = {
 		val basicClassifierResults = env.readTextFile(classificationPath.replace(".wiki", s".$nrDocuments.wiki")).map { line =>
@@ -33,7 +33,7 @@ class RandomWalkProgram extends CoheelProgram[Int] with Serializable {
 			else
 				throw new RuntimeException(s"Unknown classification type ${split(1)}")
 			val trieHit = {
-				val trieHitSplit = split(3).substring(0, split(3).length - 1).replace("TrieHit(", "").split(", ")
+				val trieHitSplit = split(3).substring(0, split(3).length - 1).replace("TrieHit(", "").split(",")
 				TrieHit(trieHitSplit(0), trieHitSplit(1).toFloat, trieHitSplit(2).toInt, trieHitSplit(3).toInt)
 			}
 			ClassifierResult(split(0), classificationType, split(1), trieHit)
