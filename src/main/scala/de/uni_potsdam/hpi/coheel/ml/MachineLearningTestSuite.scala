@@ -221,7 +221,7 @@ object MachineLearningTestSuite {
 //			new Logistic,
 //			() => new FastRandomForest,
 //			() => new J48
-			() => { val r = new RandomForest; r.setNumExecutionSlots(10); r }
+			() => { val r = new RandomForest; r.setNumExecutionSlots(4); r }
 //			new SimpleLogistic,
 //			simpleLogistic,
 //			new MultilayerPerceptron,

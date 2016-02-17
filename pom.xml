@@ -300,8 +300,8 @@
 							<id>MachineLearningTestSuite</id>
 							<mainClass>de.uni_potsdam.hpi.coheel.ml.MachineLearningTestSuite</mainClass>
 							<jvmArgs>
-								<jvmArg>-Xms10g</jvmArg>
-								<jvmArg>-Xmx10g</jvmArg>
+								<jvmArg>-Xms50g</jvmArg>
+								<jvmArg>-Xmx50g</jvmArg>
 								<!--
 								<jvmArg>-verbosegc</jvmArg>
 								-->
