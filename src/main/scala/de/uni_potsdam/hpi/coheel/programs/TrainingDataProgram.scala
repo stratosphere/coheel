@@ -179,11 +179,11 @@ class LinksAsTrainingDataFlatMap(trieSelector: TrieSelectionStrategy) extends Re
 		val linksWithPositions = wikiPage.links
 
 		val trieHits = trie.findAllInWithTrieHit(wikiPage.plainText).toList
-		trieHits.groupBy { th =>
+		trieHits/*.groupBy { th =>
 			th.startIndex
 		}.map { ths =>
 			ths._2.maxBy { th => th.length }
-		}.foreach { trieHit =>
+		}*/.foreach { trieHit =>
 			if (!linksWithPositions.contains(trieHit.startIndex)) {
 				val contextOption = Util.extractContext(wikiPage.plainText, trieHit.startIndex)
 
