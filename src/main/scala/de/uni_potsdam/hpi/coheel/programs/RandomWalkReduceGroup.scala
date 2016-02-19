@@ -36,16 +36,18 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		// Note: There is an m:n mapping between candidates and trie hits
 		// One trie hit may have many candidate entities (obviously), and also one candidate entity may come from many
 		// different trie hit
-		var entities = entitiesIt.asScala.toVector
-		val sizeBeforePruning = entities.size
+		val entitiesUnfiltered = entitiesIt.asScala.toVector
+		val docId = entitiesUnfiltered.head.documentId
+		val sizeBeforePruning = entitiesUnfiltered.size
 
-		entities = filterUnconnected(entities)
+		var entities = filterUnconnected(entitiesUnfiltered)
 
-		val docId = entities.head.documentId
 		log.info(s"Handling document $docId, entities before pruning: $sizeBeforePruning, entities after pruning: ${entities.size}")
 		Timer.start("Document")
 
-//		logRemainingEntities(entities)
+		if (entities.isEmpty) {
+			logEntities(entitiesUnfiltered)
+		}
 
 		// we start with the seeds as the final alignments, they are certain
 		var finalAlignments = entities.filter { entity => entity.classifierType == NodeTypes.SEED }
@@ -159,7 +161,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		initial
 	}
 
-	def logRemainingEntities(entities: Vector[ClassifierResultWithNeighbours]): Unit = {
+	def logEntities(entities: Vector[ClassifierResultWithNeighbours]): Unit = {
 		if (!CoheelProgram.runsOffline()) {
 			log.info("BASIC NEIGHBOURS")
 			// For printing out the neighbours, it suffices to group by candidate entity, as the entity determines the neighbours.
