@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.ProgramDescription
 import org.apache.flink.api.scala._
 import org.apache.flink.configuration.GlobalConfiguration
+import org.apache.flink.runtime.client.JobExecutionException
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
@@ -116,13 +117,18 @@ object FlinkProgramRunner {
 				val paramsString = if (argument == null) "" else s" current-param = $argument"
 				FileUtils.write(new File("PLAN"), env.getExecutionPlan())
 				env.getConfig.disableSysoutLogging()
-				val result = env.execute(s"${program.getDescription} (configuration = ${params.configName}$paramsString)")
-				val accResults = result.getAllAccumulatorResults.asScala
-				accResults.foreach { case (acc, obj) =>
-					println(acc)
+				try {
+					val result = env.execute(s"${program.getDescription} (configuration = ${params.configName}$paramsString)")
+					val accResults = result.getAllAccumulatorResults.asScala
+					accResults.foreach { case (acc, obj) =>
+						println(acc)
+					}
+					log.info(s"Net runtime: ${result.getNetRuntime / 1000} s")
+					Timer.printAll()
+				} catch {
+					case e: JobExecutionException =>
+						log.error(e.getMessage)
 				}
-				log.info(s"Net runtime: ${result.getNetRuntime / 1000} s")
-				Timer.printAll()
 			}
 		}
 		println(s"Took ${runtime / 1000} s.")
