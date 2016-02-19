@@ -40,7 +40,7 @@ object OutputFiles {
 	lazy val surfaceEvaluationPerSubsetPath   = s"${outputPath}surface-evaluation-per-subset.wiki"
 	lazy val surfaceEvaluationPath            = s"${outputPath}surface-evaluation.wiki"
 
-	lazy val newYorkTimesDataPath             = s"hdfs://tenemhead2/home/stefan.bunk/nyt/nyt.2007.tsv"
+	lazy val newYorkTimesDataPath             = s"hdfs://tenemhead2/home/stefan.bunk/nyt"
 	lazy val classificationPath               = s"${outputPath}classification.wiki"
 	lazy val inputDocumentsPath               = s"${outputPath}input-documents.wiki"
 	lazy val fullNeighboursPath               = s"${outputPath}full-neighbours.wiki"

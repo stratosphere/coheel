@@ -40,7 +40,7 @@ class ClassificationProgram extends CoheelProgram[Int] with Serializable {
 
 	override def getDescription: String = "CohEEL Classification"
 
-	def arguments = List(10, 100, 1000, 10000)
+	def arguments = List(100000, 100001)
 
 	override def buildProgram(env: ExecutionEnvironment, nrDocuments: Int): Unit = {
 		val documents = if (runsOffline())
