@@ -21,7 +21,7 @@ class RandomWalkProgram extends CoheelProgram[Int] with Serializable {
 
 	val neighboursCreationMethod = Map(fullNeighboursPath -> buildFullNeighbours _, reciprocalNeighboursPath -> buildReciprocalNeighbours _)
 
-	def arguments = List(10, 100, 1001, 10000)
+	def arguments = List(10, 100)
 
 	override def buildProgram(env: ExecutionEnvironment, nrDocuments: Int): Unit = {
 		val basicClassifierResults = env.readTextFile(classificationPath.replace(".wiki", s".$nrDocuments.wiki")).map { line =>

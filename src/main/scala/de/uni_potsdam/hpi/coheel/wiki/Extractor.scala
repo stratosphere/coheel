@@ -37,7 +37,7 @@ class Extractor(val rawWikiPage: RawWikiPage, val surfaceRepr: String => String)
 	 * Returns a map from a plain text position to a link occuring at that position.
 	 */
 	def getLinks: TreeRangeMap[Integer, Link] = {
-		wikiTraversal.getLinkOffsets /* TODO: ++ extractAlternativeNames() */
+		wikiTraversal.getLinkOffsets /* ++ extractAlternativeNames() */
 	}
 
 //	/**
@@ -66,7 +66,7 @@ class Extractor(val rawWikiPage: RawWikiPage, val surfaceRepr: String => String)
 //		nodeIterator(paragraph) {
 //			case bold: WtBold =>
 //				val text = getText(bold).trim
-//				if (text.nonEmpty) // TODO: Check why texts can be empty
+//				if (text.nonEmpty) // NOTE: Check why texts can be empty
 //					boldWords = boldWords.enqueue(text)
 //			case _ =>
 //		}

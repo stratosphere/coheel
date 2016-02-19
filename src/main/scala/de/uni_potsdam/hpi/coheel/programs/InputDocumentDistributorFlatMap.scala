@@ -10,7 +10,7 @@ import org.apache.flink.util.Collector
 
 import scala.util.Random
 
-class InputDocumentDistributorFlatMap(params: Params, runsOffline: Boolean) extends RichFlatMapFunction[String, InputDocument] {
+class InputDocumentDistributorFlatMap(params: Params, nrDocuments: Int, runsOffline: Boolean) extends RichFlatMapFunction[String, InputDocument] {
 
 	import CoheelLogger._
 
@@ -30,7 +30,7 @@ class InputDocumentDistributorFlatMap(params: Params, runsOffline: Boolean) exte
 	}
 	override def flatMap(text: String, out: Collector[InputDocument]): Unit = {
 		val tokenizerResult = TokenizerHelper.tokenizeWithStemmedAndUnstemmedAndTags(text)
-		val id = Util.id(text)
+		val id = s"$nrDocuments-${Util.id(text)}"
 		log.info(s"Reading document $id on index $index")
 
 		val tokensStemmed = tokenizerResult.tokensStemmed

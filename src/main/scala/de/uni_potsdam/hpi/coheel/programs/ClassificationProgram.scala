@@ -40,7 +40,7 @@ class ClassificationProgram extends CoheelProgram[Int] with Serializable {
 
 	override def getDescription: String = "CohEEL Classification"
 
-	def arguments = List(100000, 100001)
+	def arguments = List(10, 100)
 
 	override def buildProgram(env: ExecutionEnvironment, nrDocuments: Int): Unit = {
 		val documents = if (runsOffline())
@@ -60,7 +60,7 @@ class ClassificationProgram extends CoheelProgram[Int] with Serializable {
 
 		val inputDocuments = documents
 			.first(nrDocuments)
-			.flatMap(new InputDocumentDistributorFlatMap(params, runsOffline())).name("Input-Documents")
+			.flatMap(new InputDocumentDistributorFlatMap(params, nrDocuments, runsOffline())).name("Input-Documents")
 
 		val partitionedDocuments = inputDocuments.partitionCustom(new DocumentPartitioner, "index").name("Partitioned-Documents")
 
@@ -90,7 +90,7 @@ class ClassificationProgram extends CoheelProgram[Int] with Serializable {
 				import classifiable._
 				out.collect((info.trieHit, candidateEntity, surfaceProb, contextProb))
 			}
-		}.name("Raw-Features").writeAsTsv(rawFeaturesPath.replace(".wiki", s".$nrDocuments.wiki"))
+		}.name("Raw-Features").writeAsTsv(rawFeaturesPath)
 
 		// Write candidate classifier results for debugging
 		basicClassifierResults.map { res =>
@@ -212,11 +212,11 @@ class ClassificationReduceGroup(params: Params) extends RichGroupReduceFunction[
 		// TODO: Remove assert if performance problem
 		// Assertion: All candidates should come from the same trie hit
 		// assert(allCandidates.groupBy { th => (th.info.trieHit.startIndex, th.info.trieHit.length) }.size == 1)
-		if (allCandidates.groupBy { th => (th.info.trieHit.startIndex, th.info.trieHit.length) }.size != 1) {
-			log.error("More than one trie hit for feature line reducer")
-			log.error("{}", allCandidates)
-			log.error("{}", allCandidates.groupBy { th => (th.info.trieHit.startIndex, th.info.trieHit.length) })
-		}
+//		if (allCandidates.groupBy { th => (th.info.trieHit.startIndex, th.info.trieHit.length) }.size != 1) {
+//			log.error("More than one trie hit for feature line reducer")
+//			log.error("{}", allCandidates)
+//			log.error("{}", allCandidates.groupBy { th => (th.info.trieHit.startIndex, th.info.trieHit.length) })
+//		}
 
 		val trieHit = allCandidates.head.info.trieHit
 
