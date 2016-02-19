@@ -24,6 +24,6 @@ object FreeMemory {
 		if (!ON)
 			return
 
-		log.info(s"At $name with ${FreeMemory.get(true)} MB of RAM")
+		log.trace(s"At '$name' with ${FreeMemory.get(true)} MB of RAM")
 	}
 }

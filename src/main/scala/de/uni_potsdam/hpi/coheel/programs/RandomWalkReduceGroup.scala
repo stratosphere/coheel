@@ -31,20 +31,21 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 	}
 
 	override def reduce(entitiesIt: Iterable[ClassifierResultWithNeighbours], out: Collector[(String, TrieHit, String)]): Unit = {
-		log.info(s"Starting RandomWalkReduceGroup with ${FreeMemory.get(true)} MB of RAM")
+		FreeMemory.logMemory(log, "starting RandomWalkReduceGroup")
 		// entities contains only SEEDs and CANDIDATEs
 		// Note: There is an m:n mapping between candidates and trie hits
 		// One trie hit may have many candidate entities (obviously), and also one candidate entity may come from many
 		// different trie hit
 		var entities = entitiesIt.asScala.toVector
+		val sizeBeforePruning = entities.size
 
-		log.info(s"Handling document id: ${entities.head.documentId}")
-
-		Timer.start("filterUnconnected")
 		entities = filterUnconnected(entities)
-		Timer.logResult(log, "filterUnconnected")
 
-		logRemainingEntities(entities)
+		val docId = entities.head.documentId
+		log.info(s"Handling document $docId, entities before pruning: $sizeBeforePruning, entities after pruning: ${entities.size}")
+		Timer.start("Document")
+
+//		logRemainingEntities(entities)
 
 		// we start with the seeds as the final alignments, they are certain
 		var finalAlignments = entities.filter { entity => entity.classifierType == NodeTypes.SEED }
@@ -57,21 +58,17 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		if (!candidatesRemaining)
 			log.info("No candidates remaining before first round")
 
-		var i = 1
+		var i = 0
 		var oldEntityMapping: BidiMap[String, Int] = null
 		var oldResult: DenseMatrix[Float] = null
-		log.info(s"Starting loop with ${FreeMemory.get(true)} MB of RAM")
+		FreeMemory.logMemory(log, "starting random walk loop")
 
-		//
-		// TODO:
-		// First run the classification with the new model on the cluster
-		// Then check the time spent in random walk
-		// Then we can implement some kind of sliding window here, which leads to smaller
-		// random walks.
-		//
+		var initialRandomWalkMatrixSize = -1
+		var lastRandomWalkMatrixSize = -1
+		var averageMatrixSize = 0
 		while (candidatesRemaining) {
-			log.info(s"Start $i. round of random walk")
-			log.info(s"${entities.count(_.classifierType == NodeTypes.CANDIDATE)} candidates remaining")
+			i += 1
+			log.trace(s"$i. round: ${entities.count(_.classifierType == NodeTypes.CANDIDATE)} candidates remaining")
 
 			// Each entity may occur only once in the graph. As each classifiable has a candidate entity, which may occur
 			// more than once alltogether, we need to remove duplicated candidate entities.
@@ -88,22 +85,25 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 
 			Timer.start("buildGraph")
 			val g = buildGraph(deduplicatedEntities)
-			log.info(s"Method buildGraph took ${Timer.end("buildGraph")} ms.")
+			Timer.logResult(log, "buildGraph")
 
 			Timer.start("buildMatrix")
 			val (m, s, entityNodeMapping, candidateIndices) = buildMatrix(g)
-			log.info(s"Method buildMatrix took ${Timer.end("buildMatrix")} ms.")
+			if (initialRandomWalkMatrixSize == -1)
+				initialRandomWalkMatrixSize = m.cols
+			lastRandomWalkMatrixSize = m.cols
+			averageMatrixSize += m.cols
+			Timer.logResult(log, "buildMatrix")
 
 			val initial = buildInitialVector(oldEntityMapping, oldResult, entityNodeMapping)
 
 			Timer.start("randomWalk")
 			val result = randomWalk(m, s, 6, initial)
-			log.info(s"Method randomWalk took ${Timer.end("randomWalk")} ms.")
+			Timer.logResult(log, "randomWalk")
 
 			oldResult = result
 			oldEntityMapping = entityNodeMapping
 
-			Timer.start("findHighest")
 			// find indices of the candidates with their probability
 			val candidateIndexProbs = result.toArray.view.zipWithIndex.filter { case (d, idx) => candidateIndices.contains(idx) }
 			// it might be, that candidates are not reachable from the seeds, then we abort here
@@ -127,19 +127,16 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 				val resolvedTrieHits = resolvedEntities.map(_.trieHit).toSet
 //				log.info(s"Resolved trie hits: $resolvedTrieHits")
 
-//				log.info(s"Entities before: ${entities.map(_.shortToString())}")
 				// again, remove all those candidates from the entities, which have trie hits, which we just resolved
 				entities = entities.filter { entity => entity.classifierType == NodeTypes.SEED || !resolvedTrieHits.contains(entity.trieHit) }
-//				log.info(s"Entities after: ${entities.map(_.shortToString())}")
 
 				candidatesRemaining = anyCandidates(entities)
-			} else {
-				log.info(s"Aborting, because remaining seeds ${entities.map(_.shortToString())} not reachable from seeds")
 			}
-//			Timer.logResult(log, "findHighest")
-			i += 1
 		}
 
+		val time = Timer.end("Document")
+		log.info(s"Finished document $docId with $i random walks in ${time / 1000} s, " +
+			s"matrix size - initial: $initialRandomWalkMatrixSize, last: $lastRandomWalkMatrixSize, average: ${averageMatrixSize / i}")
 		finalAlignments.map { a => (a.documentId, a.trieHit, a.candidateEntity) }.foreach(out.collect)
 	}
 
@@ -254,7 +251,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		}
 //		Timer.logResult(log, "addCandidates")
 
-		Timer.start("addNeighbours")
+//		Timer.start("addNeighbours")
 		// Now also add the neighbours, hopefully also connecting existing seeds and neighbours
 		entities.foreach { candidate =>
 			val currentNode = entityMap.get(candidate.candidateEntity).get
@@ -296,13 +293,12 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 				}
 			}
 		}
-		Timer.logResult(log, "addNeighbours")
+//		Timer.logResult(log, "addNeighbours")
 
 		val unprunedVertexCount = g.vertexSet().size()
 		val unprunedEdgeCount   = g.edgeSet().size
 
 
-//		Timer.start("connectedComponents")
 		// run connected components/connectivity algorithm starting from the seeds
 		// unreachable nodes can then be removed
 		while (connectedQueue.nonEmpty) {
@@ -320,16 +316,13 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 				}
 			}
 		}
-//		Timer.logResult(log, "connectedComponents")
 
 //		Timer.start("findUnreachable")
 		// remove all the unreachable nodes
 		val unreachableNodes = g.vertexSet().asScala.filter(!_.visited)
 //		log.info(s"Number of unreachable nodes ${unreachableNodes.size}")
 //		Timer.logResult(log, "findUnreachable")
-		Timer.start("removeUnreachable")
 		g.removeAllVertices(unreachableNodes.asJava)
-		Timer.logResult(log, "removeUnreachable")
 
 		val inbetweenVertexCount = g.vertexSet().size()
 		val inbetweenEdgeCount   = g.edgeSet().size
@@ -338,7 +331,6 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		val nullNode = RandomWalkNode(NULL_NODE).withNodeType(NodeTypes.NULL)
 		g.addVertex(nullNode)
 
-		Timer.start("removeNeighbourSinks")
 		// remove all neighbour sinks, and create corresponding links to the null node
 		val neighbourSinks = g.vertexSet().asScala.filter { n => n.isSink && n.nodeType == NodeTypes.NEIGHBOUR }
 		neighbourSinks.foreach { node =>
@@ -356,9 +348,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 			}
 		}
 		g.removeAllVertices(neighbourSinks.asJava)
-		Timer.logResult(log, "removeNeighbourSinks")
 
-		Timer.start("fillNeighbours")
 		// for neighbour nodes, we do not necessarily have all the outgoing nodes
 		// therefore, we need to use the remaining weight by directing it to the null node
 		g.vertexSet().asScala.filter(_.nodeType == NodeTypes.NEIGHBOUR).foreach { node =>
@@ -366,9 +356,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 			val e = g.addEdge(node, nullNode)
 			g.setEdgeWeight(e, 1.0 - edgeSum)
 		}
-		Timer.logResult(log, "fillNeighbours")
 
-		Timer.start("addStallingEdges")
 		// add stalling edges
 		g.vertexSet().asScala.foreach { node =>
 			val e = g.addEdge(node, node)
@@ -386,11 +374,10 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 				}
 			}
 		}
-		Timer.logResult(log, "addStallingEdges")
 
 		val prunedVertexCount = g.vertexSet().size()
 		val prunedEdgeCount   = g.edgeSet().size()
-		log.info(s"Unpruned: ($unprunedVertexCount, $unprunedEdgeCount), In-between: ($inbetweenVertexCount, $inbetweenEdgeCount), Pruned: ($prunedVertexCount, $prunedEdgeCount)")
+		log.trace(s"Unpruned: ($unprunedVertexCount, $unprunedEdgeCount), In-between: ($inbetweenVertexCount, $inbetweenEdgeCount), Pruned: ($prunedVertexCount, $prunedEdgeCount)")
 		g
 	}
 
@@ -418,14 +405,12 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 		val entityNodeIdMapping = new DualHashBidiMap[String, Int]()
 
 		if (data.length < size * size) {
+			log.trace(s"Reinitializing data array from ${data.length} to $size")
 			data = new Array[Float](size * size)
-			log.info("Reinitializing data")
 		} else {
 			clearArray(data)
 		}
-		Timer.start("initializingMatrix")
 		val m = new DenseMatrix[Float](size, size, data)
-		Timer.logResult(log, "initializingMatrix")
 
 		var currentEntityId = 0
 		val s = new DenseMatrix[Float](1, size)
@@ -463,6 +448,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 			}
 		}
 		FreeMemory.logMemory(log, "ending buildMatrix")
+
 		(m, s, entityNodeIdMapping, candidateIndices)
 	}
 
@@ -489,7 +475,7 @@ class RandomWalkReduceGroup extends RichGroupReduceFunction[ClassifierResultWith
 			it += 1
 			diff = abs(oldP - p).sum
 		} while (it < maxIt && diff > THETA)
-		log.info(s"RandomWalk terminating with diff $diff after $it iterations")
+		log.trace(s"RandomWalk terminating after $it iterations")
 		p
 	}
 }

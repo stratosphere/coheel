@@ -44,7 +44,7 @@ object Timer {
 	}
 
 	def logResult(log: Logger, name: String): Unit = {
-		log.info(s"Method $name took ${Timer.end(name)} ms.")
+		log.trace(s"Method $name took ${Timer.end(name)} ms.")
 	}
 
 	def time(): Long = {
