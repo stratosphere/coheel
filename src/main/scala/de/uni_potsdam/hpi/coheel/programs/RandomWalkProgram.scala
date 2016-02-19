@@ -80,7 +80,7 @@ class RandomWalkProgram extends CoheelProgram[Int] with Serializable {
 		// Write candidate classifier results for debugging
 		basicClassifierResults.map { res =>
 			(res.documentId, res.classificationType, res.candidateEntity, res.trieHit)
-		}.name("Classifier-Results").writeAsTsv(classificationPath.replace(".wiki", "2.wiki"))
+		}.name("Classifier-Results").writeAsTsv(classificationPath.replace(".wiki", s".$nrDocuments.wiki").replace(".wiki", ".2.wiki"))
 
 		withNeighbours.groupBy("documentId").reduceGroup(new RandomWalkReduceGroup).name("Random Walk").writeAsTsv(randomWalkResultsPath.replace(".wiki", s".$nrDocuments.wiki"))
 
