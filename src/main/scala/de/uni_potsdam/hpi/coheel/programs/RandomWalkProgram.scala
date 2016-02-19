@@ -36,7 +36,7 @@ class RandomWalkProgram extends CoheelProgram[Int] with Serializable {
 				val trieHitSplit = split(3).substring(0, split(3).length - 1).replace("TrieHit(", "").split(",")
 				TrieHit(trieHitSplit(0), trieHitSplit(1).toFloat, trieHitSplit(2).toInt, trieHitSplit(3).toInt)
 			}
-			ClassifierResult(split(0), classificationType, split(1), trieHit)
+			ClassifierResult(split(0), classificationType, split(2), trieHit)
 		}
 
 		val fileExists = if (runsOffline())
