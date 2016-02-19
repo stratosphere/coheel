@@ -214,8 +214,8 @@ class ClassificationReduceGroup(params: Params) extends RichGroupReduceFunction[
 		// assert(allCandidates.groupBy { th => (th.info.trieHit.startIndex, th.info.trieHit.length) }.size == 1)
 		if (allCandidates.groupBy { th => (th.info.trieHit.startIndex, th.info.trieHit.length) }.size != 1) {
 			log.error("More than one trie hit for feature line reducer")
-			log.error(allCandidates)
-			log.error(allCandidates.groupBy { th => (th.info.trieHit.startIndex, th.info.trieHit.length) })
+			log.error("{}", allCandidates)
+			log.error("{}", allCandidates.groupBy { th => (th.info.trieHit.startIndex, th.info.trieHit.length) })
 		}
 
 		val trieHit = allCandidates.head.info.trieHit

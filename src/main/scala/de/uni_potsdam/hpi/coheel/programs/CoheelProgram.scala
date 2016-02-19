@@ -1,11 +1,7 @@
 package de.uni_potsdam.hpi.coheel.programs
 
-import java.io.{Reader, StringReader}
-import java.net.InetAddress
-
-import de.uni_potsdam.hpi.coheel.{Params, FlinkProgramRunner}
 import de.uni_potsdam.hpi.coheel.io.OutputFiles._
-import de.uni_potsdam.hpi.coheel.io.{RawWikiPageInputFormat}
+import de.uni_potsdam.hpi.coheel.io.RawWikiPageInputFormat
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import de.uni_potsdam.hpi.coheel.util.Timer
 import de.uni_potsdam.hpi.coheel.wiki._
@@ -18,14 +14,14 @@ import org.apache.flink.core.fs.Path
 import org.apache.flink.core.fs.local.LocalFileSystem
 import org.apache.flink.util.Collector
 import org.apache.hadoop.io.LongWritable
-import org.apache.log4j.Logger
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.JavaConverters._
 import scala.reflect.ClassTag
 import scala.util.{Failure, Success, Try}
 
 object CoheelLogger {
-	val log: Logger = Logger.getLogger(getClass)
+	val log: Logger = LoggerFactory.getLogger(getClass)
 }
 object CoheelProgram {
 	def runsOffline(): Boolean = {

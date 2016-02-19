@@ -1,6 +1,6 @@
 package de.uni_potsdam.hpi.coheel.debugging
 
-import org.apache.log4j.Logger
+import org.slf4j.Logger
 
 object FreeMemory {
 
@@ -22,7 +22,7 @@ object FreeMemory {
 
 	def logMemory(log: Logger, name: String): Unit = {
 		if (!ON)
-			return 0
+			return
 
 		log.info(s"At $name with ${FreeMemory.get(true)} MB of RAM")
 	}

@@ -7,13 +7,12 @@ import de.uni_potsdam.hpi.coheel.wiki.TokenizerHelper
 import org.apache.flink.api.common.functions.RichFlatMapFunction
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.util.Collector
-import org.apache.log4j.Logger
 
 import scala.util.Random
 
 class InputDocumentDistributorFlatMap(params: Params, runsOffline: Boolean) extends RichFlatMapFunction[String, InputDocument] {
 
-	def log: Logger = Logger.getLogger(getClass)
+	import CoheelLogger._
 
 	var index: Int = -1
 	var random: Random = null

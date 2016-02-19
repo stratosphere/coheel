@@ -2,7 +2,6 @@ package de.uni_potsdam.hpi.coheel.wiki
 
 import java.io.{Reader, StringReader, BufferedReader}
 import javax.xml.stream.{XMLStreamConstants, XMLInputFactory}
-import org.apache.log4j.Logger
 import de.uni_potsdam.hpi.coheel.programs.CoheelLogger
 import de.uni_potsdam.hpi.coheel.programs.DataClasses._
 import de.uni_potsdam.hpi.coheel.util.Timer
@@ -62,7 +61,8 @@ case class RawWikiPage(pageTitle: String,
  * @param pageTitle The title of the page as a string.
  * @param ns The namespace of the wiki page.
  * @param redirect The title of the page this page is redirecting to or null, if it is not a redirect.
- * @param plainText This page's plain text content as array of tokens.
+ * @param plainTextStemmed This page's plain text content as array of tokens (stemmed).
+ * @param plainTextUnstemmed This page's plain text content as array of tokens (unstemmed).
  */
 case class WikiPage(pageTitle: String,
                     ns: Int,
@@ -107,8 +107,6 @@ object RawWikiPage {
 }
 
 class WikiPageReader {
-	val log = Logger.getLogger(getClass)
-
 	val factory = XMLInputFactory.newInstance()
 	def xmlToWikiPages(s: String): Iterator[RawWikiPage] = {
 		val reader = new BufferedReader(new StringReader(s))
